@@ -31,6 +31,8 @@ export interface Product {
   storage?: string;
   screenSize?: string;
   bundleData?: any[];
+  variations?: any[];
+  productAttributes?: any[];
 }
 
 export const MOCK_PRODUCTS: Product[] = [

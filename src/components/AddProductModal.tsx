@@ -43,8 +43,10 @@ export default function AddProductModal({ isOpen, onClose }: AddProductModalProp
   
   const [bundleItems, setBundleItems] = useState<{name: string, price: string}[]>([]);
 
-  const [colors, setColors] = useState<string[]>([]);
-  const [sizes, setSizes] = useState<string[]>([]);
+  // Advanced Variations State
+  const [selectedAttributes, setSelectedAttributes] = useState<{name: string, values: string[]}[]>([]);
+  const [variations, setVariations] = useState<any[]>([]);
+
   const [localFiles, setLocalFiles] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
 
@@ -124,8 +126,8 @@ export default function AddProductModal({ isOpen, onClose }: AddProductModalProp
         body: JSON.stringify({
           ...formData,
           images: finalImageUrl,
-          colors,
-          sizes,
+          productAttributes: selectedAttributes,
+          variations: variations,
           bundleData: formData.type === 'BUNDLE' ? JSON.stringify(bundleItems) : null,
         }),
       });
@@ -146,8 +148,8 @@ export default function AddProductModal({ isOpen, onClose }: AddProductModalProp
         images: "", externalImageUrl: "", ram: "", storage: "", screenSize: "" 
       });
       setBundleItems([]);
-      setColors([]);
-      setSizes([]);
+      setSelectedAttributes([]);
+      setVariations([]);
     } catch (error: any) {
       alert(error.message || "حدث خطأ أثناء حفظ المنتج");
     } finally {
@@ -499,49 +501,151 @@ export default function AddProductModal({ isOpen, onClose }: AddProductModalProp
               />
             </div>
 
-            <div className="grid grid-cols-1 gap-12 pt-10 border-t border-border/50">
-               <div className="space-y-8">
-                  <h4 className="text-sm font-black text-[#021D24] uppercase tracking-widest border-b pb-4">متغيرات المنتج المتاحة (من الإدارة)</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                    {availableAttributes.map((attr) => (
-                      <div key={attr.id} className="space-y-4">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-foreground/40 px-1 block">{attr.name}</label>
-                        <div className="flex flex-wrap gap-3">
-                          {attr.options?.map((opt: any) => {
-                            const isSelected = attr.name.includes("لون") || attr.name.toLowerCase().includes("color")
-                              ? colors.includes(opt.value)
-                              : sizes.includes(opt.value);
-                            
-                            return (
-                              <button 
-                                key={opt.id} 
-                                onClick={() => {
-                                  if (attr.name.includes("لون") || attr.name.toLowerCase().includes("color")) {
-                                    setColors(prev => prev.includes(opt.value) ? prev.filter(x => x !== opt.value) : [...prev, opt.value]);
-                                  } else {
-                                    setSizes(prev => prev.includes(opt.value) ? prev.filter(x => x !== opt.value) : [...prev, opt.value]);
+            {/* Advanced Variations Manager */}
+            {formData.type === "VARIABLE" && (
+              <div className="space-y-10 pt-10 border-t border-border/50">
+                <div className="flex items-center justify-between">
+                   <h3 className="text-xl font-black text-[#021D24]">إدارة متغيرات المنتج</h3>
+                   <div className="flex gap-4">
+                      <button 
+                        onClick={() => {
+                          // Cartesian product of attributes
+                          const generateCombinations = (attrs: any[]) => {
+                            if (attrs.length === 0) return [];
+                            let results: any[] = [{}];
+                            for (const attr of attrs) {
+                              const newResults: any[] = [];
+                              for (const result of results) {
+                                for (const val of attr.values) {
+                                  newResults.push({ ...result, [attr.name]: val });
+                                }
+                              }
+                              results = newResults;
+                            }
+                            return results;
+                          };
+                          
+                          const combos = generateCombinations(selectedAttributes);
+                          setVariations(combos.map(c => ({
+                            combination: c,
+                            price: formData.price,
+                            stock: "10",
+                            sku: `${formData.sku || 'PROD'}-${Object.values(c).join('-').toUpperCase()}`
+                          })));
+                        }}
+                        className="btn-secondary px-6 py-2 text-[10px]"
+                      >
+                        توليد كل التشكيلات الممكنة
+                      </button>
+                   </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                  {availableAttributes.map((attr) => (
+                    <div key={attr.id} className="p-6 bg-gray-50 rounded-[2rem] border-2 border-gray-100 space-y-4">
+                      <label className="text-[10px] font-black uppercase tracking-widest text-foreground/40 px-1 block">{attr.name}</label>
+                      <div className="flex flex-wrap gap-2">
+                        {attr.options?.map((opt: any) => {
+                          const currentAttr = selectedAttributes.find(a => a.name === attr.name);
+                          const isSelected = currentAttr?.values.includes(opt.value);
+                          
+                          return (
+                            <button 
+                              key={opt.id} 
+                              onClick={() => {
+                                setSelectedAttributes(prev => {
+                                  const existing = prev.find(a => a.name === attr.name);
+                                  if (existing) {
+                                    if (existing.values.includes(opt.value)) {
+                                      const newValues = existing.values.filter(v => v !== opt.value);
+                                      if (newValues.length === 0) return prev.filter(a => a.name !== attr.name);
+                                      return prev.map(a => a.name === attr.name ? { ...a, values: newValues } : a);
+                                    }
+                                    return prev.map(a => a.name === attr.name ? { ...a, values: [...a.values, opt.value] } : a);
                                   }
+                                  return [...prev, { name: attr.name, values: [opt.value] }];
+                                });
+                              }}
+                              className={cn(
+                                "px-4 py-2 border-2 rounded-xl text-[9px] font-black transition-all",
+                                isSelected ? "bg-[#021D24] border-[#021D24] text-white" : "bg-white border-transparent text-gray-400 hover:border-gray-200"
+                              )}
+                            >
+                              {opt.value}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Variations List */}
+                {variations.length > 0 && (
+                  <div className="space-y-4">
+                    <p className="text-[10px] font-black text-[#1089A4] uppercase tracking-[0.2em]">قائمة التشكيلات المولدة ({variations.length})</p>
+                    <div className="grid grid-cols-1 gap-4">
+                      {variations.map((v, idx) => (
+                        <div key={idx} className="bg-white p-6 rounded-3xl border-2 border-gray-100 flex flex-wrap items-center gap-6 shadow-sm">
+                           <div className="flex-1 min-w-[200px]">
+                              <div className="flex gap-2">
+                                {Object.entries(v.combination).map(([name, val]: any) => (
+                                  <span key={name} className="px-3 py-1 bg-gray-100 rounded-lg text-[9px] font-black text-gray-500">{name}: {val}</span>
+                                ))}
+                              </div>
+                           </div>
+                           <div className="w-32">
+                              <label className="text-[9px] font-black text-gray-400 block mb-1">السعر</label>
+                              <input 
+                                type="number" 
+                                value={v.price} 
+                                onChange={e => {
+                                  const newV = [...variations];
+                                  newV[idx].price = e.target.value;
+                                  setVariations(newV);
                                 }}
-                                className={cn(
-                                  "px-5 py-3 border-2 rounded-[1.25rem] text-[10px] font-black uppercase tracking-widest transition-all",
-                                  isSelected ? "border-primary text-primary bg-primary/5 shadow-lg" : "border-border text-foreground/40 hover:bg-muted"
-                                )}
-                              >
-                                {opt.value}
-                              </button>
-                            );
-                          })}
+                                className="w-full bg-gray-50 border-none rounded-xl px-4 py-2 text-xs font-bold" 
+                              />
+                           </div>
+                           <div className="w-24">
+                              <label className="text-[9px] font-black text-gray-400 block mb-1">المخزون</label>
+                              <input 
+                                type="number" 
+                                value={v.stock} 
+                                onChange={e => {
+                                  const newV = [...variations];
+                                  newV[idx].stock = e.target.value;
+                                  setVariations(newV);
+                                }}
+                                className="w-full bg-gray-50 border-none rounded-xl px-4 py-2 text-xs font-bold" 
+                              />
+                           </div>
+                           <div className="w-40">
+                              <label className="text-[9px] font-black text-gray-400 block mb-1">SKU</label>
+                              <input 
+                                type="text" 
+                                value={v.sku} 
+                                onChange={e => {
+                                  const newV = [...variations];
+                                  newV[idx].sku = e.target.value;
+                                  setVariations(newV);
+                                }}
+                                className="w-full bg-gray-50 border-none rounded-xl px-4 py-2 text-[10px] font-mono" 
+                              />
+                           </div>
+                           <button 
+                            onClick={() => setVariations(variations.filter((_, i) => i !== idx))}
+                            className="w-10 h-10 rounded-xl bg-red-50 text-red-400 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all"
+                           >
+                              <span className="material-symbols-rounded text-sm">delete</span>
+                           </button>
                         </div>
-                      </div>
-                    ))}
-                    {availableAttributes.length === 0 && (
-                      <div className="col-span-full py-10 text-center bg-gray-50 rounded-3xl border-2 border-dashed border-gray-200">
-                        <p className="text-xs font-bold text-gray-400">لا توجد متغيرات إضافية حالياً</p>
-                      </div>
-                    )}
+                      ))}
+                    </div>
                   </div>
-               </div>
-            </div>
+                )}
+              </div>
+            )}
           </div>
 
           <div className="px-12 py-10 border-t border-border bg-stone-50/50 flex items-center justify-end gap-6 flex-shrink-0">

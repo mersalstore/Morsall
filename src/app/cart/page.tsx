@@ -55,28 +55,34 @@ export default function CartPage() {
 
               {/* Items */}
               <div className="bg-white rounded-lg border border-gray-200 shadow-sm divide-y">
-                {cart.map(item => (
-                  <div key={item.id} className="p-4 flex items-start gap-4 hover:bg-gray-50 transition-colors">
+                {cart.map((item, idx) => (
+                  <div key={`${item.id}-${idx}`} className="p-4 flex items-start gap-4 hover:bg-gray-50 transition-colors">
                     <div className="relative w-24 h-24 rounded border overflow-hidden flex-shrink-0 bg-gray-100">
                       {item.image && <Image src={item.image} alt={item.title} fill className="object-cover" />}
                     </div>
                     <div className="flex-grow min-w-0">
                       <p className="text-xs text-[#1089A4] font-bold mb-1">{item.vendor}</p>
                       <p className="font-black text-[#021D24] leading-snug mb-1">{item.title}</p>
-                      {item.size  && <p className="text-xs text-gray-400">المقاس: {item.size}</p>}
-                      {item.color && <p className="text-xs text-gray-400">اللون: {item.color}</p>}
+                      
+                      {/* Variations Display */}
+                      {item.selectedOptions && Object.entries(item.selectedOptions).map(([name, val]) => (
+                        <p key={name} className="text-[10px] text-gray-400 font-bold">
+                          {name}: <span className="text-[#021D24]">{val}</span>
+                        </p>
+                      ))}
+                      
                       <p className="text-lg font-black text-[#B12704] mt-1">{item.price.toLocaleString()} ج.س</p>
                       <div className="flex items-center gap-4 mt-2">
-                        <button onClick={() => removeItem(item.id)} className="text-xs text-[#1089A4] hover:underline font-bold flex items-center gap-1">
+                        <button onClick={() => removeItem(item.id, item.variationId)} className="text-xs text-[#1089A4] hover:underline font-bold flex items-center gap-1">
                           <span className="material-symbols-rounded text-sm">delete</span>
                           حذف
                         </button>
                       </div>
                     </div>
                     <div className="flex items-center gap-2 flex-shrink-0">
-                      <button onClick={() => updateQty(item.id, -1)} className="w-8 h-8 border border-gray-300 rounded text-lg font-bold hover:bg-gray-100 transition-colors flex items-center justify-center">−</button>
+                      <button onClick={() => updateQty(item.id, -1, item.variationId)} className="w-8 h-8 border border-gray-300 rounded text-lg font-bold hover:bg-gray-100 transition-colors flex items-center justify-center">−</button>
                       <span className="w-8 text-center font-black text-sm">{item.quantity}</span>
-                      <button onClick={() => updateQty(item.id, 1)}  className="w-8 h-8 border border-gray-300 rounded text-lg font-bold hover:bg-gray-100 transition-colors flex items-center justify-center">+</button>
+                      <button onClick={() => updateQty(item.id, 1, item.variationId)}  className="w-8 h-8 border border-gray-300 rounded text-lg font-bold hover:bg-gray-100 transition-colors flex items-center justify-center">+</button>
                     </div>
                   </div>
                 ))}

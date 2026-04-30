@@ -55,6 +55,11 @@ export default function VendorStoreSettings() {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    if (file.size > 2 * 1024 * 1024) {
+      alert("حجم الملف كبير جداً، يرجى اختيار صورة أقل من 2 ميجابايت");
+      return;
+    }
+
     setLoading(true);
     const formDataUpload = new FormData();
     formDataUpload.append("file", file);
@@ -87,7 +92,7 @@ export default function VendorStoreSettings() {
       const result = await res.json();
       if (!res.ok) throw new Error(result.error || "فشل حفظ الإعدادات");
       
-      alert("تم حفظ إعدادات المتجر بنجاح!");
+      alert("تم حفظ إعدادات النشر بنجاح!");
       setFormData(prev => ({ ...prev, slug: result.slug }));
     } catch (error: any) {
       alert(error.message);
@@ -106,7 +111,7 @@ export default function VendorStoreSettings() {
     <div className="max-w-5xl mx-auto space-y-12">
       <div className="flex items-center justify-between">
         <div className="space-y-1">
-          <h2 className="text-3xl font-black text-[#021D24]">تخصيص المتجر</h2>
+          <h2 className="text-3xl font-black text-[#021D24]">إعدادات النشر</h2>
           <p className="text-gray-400 font-bold">تحكم في هوية متجرك البصرية وروابط التواصل.</p>
         </div>
         <button 
@@ -199,9 +204,10 @@ export default function VendorStoreSettings() {
                     const generatedSlug = name
                       .toLowerCase()
                       .trim()
-                      .replace(/[^\u0600-\u06FFa-z0-9\s-]/g, "") // Keep Arabic letters, English letters, numbers, spaces, and hyphens
-                      .replace(/\s+/g, "-") // Replace spaces with hyphens
-                      .replace(/-+/g, "-"); // Consolidate multiple hyphens
+                      .replace(/[^\u0600-\u06FFa-z0-9\s-]/g, "")
+                      .replace(/\s+/g, "-")
+                      .replace(/-+/g, "-")
+                      .replace(/^-+|-+$/g, "");
                     
                     setFormData({ 
                       ...formData, 
@@ -221,12 +227,13 @@ export default function VendorStoreSettings() {
                     value={formData.slug}
                     onChange={e => {
                       let val = e.target.value;
-                      // Remove full URL if pasted
                       val = val.replace(/^(https?:\/\/)?(www\.)?morsall\.com\/store\//, "");
                       val = val.replace(/^(https?:\/\/)?(www\.)?morsall\.net\/store\//, "");
-                      val = val.replace(/[^\u0600-\u06FFa-z0-9\s-]/g, "")
+                      val = val.toLowerCase()
+                        .replace(/[^\u0600-\u06FFa-z0-9\s-]/g, "")
                         .replace(/\s+/g, "-")
-                        .replace(/-+/g, "-");
+                        .replace(/-+/g, "-")
+                        .replace(/^-+|-+$/g, "");
                       
                       setFormData({ ...formData, slug: val });
                     }}
@@ -303,7 +310,7 @@ export default function VendorStoreSettings() {
 
           {/* Social Media Card */}
           <div className="bg-white p-8 rounded-3xl border shadow-sm space-y-6">
-            <h3 className="text-xs font-black uppercase tracking-widest text-[#1089A4]">روابط التواصل</h3>
+            <h3 className="text-xs font-black uppercase tracking-widest text-[#1089A4]">بيانات النشر</h3>
             <div className="space-y-4">
               <div className="space-y-1">
                 <div className="flex items-center bg-gray-50 rounded-xl border border-transparent focus-within:border-[#1089A4] focus-within:bg-white transition-all overflow-hidden px-3">

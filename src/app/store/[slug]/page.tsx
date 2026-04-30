@@ -21,7 +21,9 @@ export default async function VendorStorePage({ params }: { params: Promise<{ sl
 
   if (!vendor) notFound();
 
+  const isSuspended = vendor.status === 'SUSPENDED';
   const isExpired = vendor.subscriptionEndsAt ? new Date(vendor.subscriptionEndsAt) < new Date() : false;
+  const isClosed = isSuspended || isExpired;
   
   // Custom Styles from Vendor
   const primaryColor = vendor.primaryColor || "#0F1629";
@@ -136,13 +138,13 @@ export default async function VendorStorePage({ params }: { params: Promise<{ sl
                   </div>
                </div>
 
-               {isExpired ? (
+               {isClosed ? (
                  <div className="bg-red-50 rounded-[3rem] p-20 text-center border-4 border-white shadow-2xl">
                     <div className="w-24 h-24 bg-white text-red-500 rounded-full flex items-center justify-center mx-auto mb-8 shadow-xl">
                       <span className="material-symbols-rounded text-5xl">lock_clock</span>
                     </div>
                     <h3 className="text-2xl font-black text-red-900 mb-4">هذا المتجر مغلق مؤقتاً</h3>
-                    <p className="text-red-900/60 font-bold max-w-md mx-auto leading-relaxed">نعتذر لعدم تمكنك من التسوق حالياً، المتجر في انتظار تجديد الاشتراك السنوي.</p>
+                    <p className="text-red-900/60 font-bold max-w-md mx-auto leading-relaxed">نعتذر لعدم تمكنك من التسوق حالياً، المتجر في انتظار مراجعة الإدارة أو تجديد الاشتراك.</p>
                  </div>
                ) : (
                  <>

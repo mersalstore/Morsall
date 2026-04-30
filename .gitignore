@@ -36,6 +36,24 @@ yarn-error.log*
 # vercel
 .vercel
 
+# Archives and backups
+*.zip
+*.tar.gz
+*.tar
+*.rar
+
+# Deployment leftovers
+hostinger_env.txt
+staging_deploy/
+morsal_*.zip
+morsall_*.zip
+morsall_*.tar
+morsall_*.tar.gz
+ready_to_deploy.zip
+site.tar.gz
+fix-permissions.js
+src/components/evn
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
@@ -46,3 +64,5 @@ next-env.d.ts
 client_secret_*.json
 *.db
 *.db-journal
+
+.vercel

@@ -71,34 +71,61 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "الاسم والسعر مطلوبان بشكل صحيح" }, { status: 400 });
     }
 
-    const product = await prisma.product.create({
-      data: {
-        title,
-        description: description || "",
-        shortDescription: shortDescription || null,
-        price: numericPrice,
-        stock: numericStock,
-        images: Array.isArray(images) ? images.join(",") : images || "",
-        sizes: Array.isArray(sizes) ? sizes.join(",") : sizes || "",
-        colors: Array.isArray(colors) ? colors.join(",") : colors || "",
-        brand: brand || null,
-        range: range || null,
-        type: type || "SIMPLE",
-        sku: sku || null,
-        weight: numericWeight,
-        length: numericLength,
-        width: numericWidth,
-        height: numericHeight,
-        discountPrice: numericDiscountPrice,
-        discountType: discountType || null,
-        ram: ram || null,
-        storage: storage || null,
-        screenSize: screenSize || null,
-        bundleData: bundleData || null,
-        vendorId: vendor.id,
-        categoryId: categoryId || null,
-        status: "PENDING"
-      } as any
+    const product = await prisma.$transaction(async (tx) => {
+      const p = await tx.product.create({
+        data: {
+          title,
+          description: description || "",
+          shortDescription: shortDescription || null,
+          price: numericPrice,
+          stock: numericStock,
+          images: Array.isArray(images) ? images.join(",") : images || "",
+          brand: brand || null,
+          range: range || null,
+          type: type || "SIMPLE",
+          sku: sku || null,
+          weight: numericWeight,
+          length: numericLength,
+          width: numericWidth,
+          height: numericHeight,
+          discountPrice: numericDiscountPrice,
+          discountType: discountType || null,
+          ram: ram || null,
+          storage: storage || null,
+          screenSize: screenSize || null,
+          bundleData: bundleData || null,
+          vendorId: vendor.id,
+          categoryId: categoryId || null,
+          status: "PENDING"
+        }
+      });
+
+      // Handle specific attributes if provided
+      if (body.productAttributes && Array.isArray(body.productAttributes)) {
+        await tx.productAttribute.createMany({
+          data: body.productAttributes.map((attr: any) => ({
+            productId: p.id,
+            name: attr.name,
+            values: attr.values
+          }))
+        });
+      }
+
+      // Handle variations if provided
+      if (body.variations && Array.isArray(body.variations)) {
+        await tx.productVariation.createMany({
+          data: body.variations.map((v: any) => ({
+            productId: p.id,
+            sku: v.sku || null,
+            price: v.price ? parseFloat(v.price) : null,
+            stock: parseInt(v.stock) || 0,
+            combination: JSON.stringify(v.combination),
+            image: v.image || null
+          }))
+        });
+      }
+
+      return p;
     });
 
     return NextResponse.json(product);

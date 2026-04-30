@@ -28,6 +28,7 @@ export async function POST(req: Request) {
       street,
       notes,
       paymentMethod = "COD",
+      paymentScreenshot,
       items,
       subtotal,
       shippingCost,
@@ -37,6 +38,12 @@ export async function POST(req: Request) {
     if (!phone || !city || !street) {
       return NextResponse.json(
         { error: "الهاتف والمدينة والعنوان مطلوبة" },
+        { status: 400 }
+      );
+    }
+    if (paymentMethod === "BANK_TRANSFER" && !paymentScreenshot) {
+      return NextResponse.json(
+        { error: "يرجى رفع صورة إيصال التحويل لإتمام الطلب" },
         { status: 400 }
       );
     }
@@ -130,6 +137,7 @@ export async function POST(req: Request) {
         street: street.trim(),
         notes: notes || null,
         paymentMethod,
+        paymentScreenshot: paymentScreenshot || null,
         totalAmount,
         shippingCost: shippingCost || 0,
         status: "PENDING_APPROVAL",

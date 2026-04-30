@@ -24,6 +24,8 @@ export async function GET(
             name: true 
           }
         },
+        variations: true,
+        attributes: true,
       },
     });
 
@@ -71,6 +73,11 @@ export async function GET(
         }
       })(),
       type: p.type || "SIMPLE",
+      variations: p.variations?.map((v: any) => ({
+        ...v,
+        combination: JSON.parse(v.combination)
+      })) || [],
+      productAttributes: p.attributes || []
     };
 
     return NextResponse.json(mappedProduct);

@@ -12,13 +12,15 @@ export interface CartItem {
   image: string;
   size?: string;
   color?: string;
+  variationId?: string;
+  selectedOptions?: Record<string, string>;
 }
 
 interface CartContextType {
   cart: CartItem[];
   addItem: (item: CartItem) => void;
-  removeItem: (id: string) => void;
-  updateQty: (id: string, delta: number) => void;
+  removeItem: (id: string, variationId?: string) => void;
+  updateQty: (id: string, delta: number, variationId?: string) => void;
   clearCart: () => void;
   cartCount: number;
   subtotal: number;
@@ -53,21 +55,31 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const addItem = (item: CartItem) => {
     setCart(prev => {
-      const existing = prev.find(i => i.id === item.id);
+      // Find item with same ID AND same variationId (if any)
+      const existing = prev.find(i => 
+        i.id === item.id && 
+        i.variationId === item.variationId &&
+        JSON.stringify(i.selectedOptions) === JSON.stringify(item.selectedOptions)
+      );
+      
       if (existing) {
-        return prev.map(i => i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i);
+        return prev.map(i => 
+          (i.id === item.id && i.variationId === item.variationId && JSON.stringify(i.selectedOptions) === JSON.stringify(item.selectedOptions))
+            ? { ...i, quantity: i.quantity + item.quantity } 
+            : i
+        );
       }
       return [...prev, item];
     });
   };
 
-  const removeItem = (id: string) => {
-    setCart(prev => prev.filter(i => i.id !== id));
+  const removeItem = (id: string, variationId?: string) => {
+    setCart(prev => prev.filter(i => !(i.id === id && i.variationId === variationId)));
   };
 
-  const updateQty = (id: string, delta: number) => {
+  const updateQty = (id: string, delta: number, variationId?: string) => {
     setCart(prev => prev.map(i => 
-      i.id === id ? { ...i, quantity: Math.max(1, i.quantity + delta) } : i
+      (i.id === id && i.variationId === variationId) ? { ...i, quantity: Math.max(1, i.quantity + delta) } : i
     ));
   };
 

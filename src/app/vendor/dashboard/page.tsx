@@ -112,7 +112,7 @@ export default function VendorDashboard() {
             
             <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest my-6 px-3">الإعدادات</p>
             <NavItem active={activeTab === "finance"} onClick={() => setActiveTab("finance")} icon="account_balance" label="المالية" />
-            <NavItem active={activeTab === "settings"} onClick={() => setActiveTab("settings")} icon="settings" label="إعدادات المتجر" />
+            <NavItem active={activeTab === "settings"} onClick={() => setActiveTab("settings")} icon="settings" label="إعدادات النشر" />
           </nav>
         </div>
 

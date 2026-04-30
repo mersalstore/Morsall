@@ -10,18 +10,49 @@ export default function PurchaseBox({ product }: { product: Product }) {
   const [quantity, setQuantity] = useState(1);
   const [customerCity, setCustomerCity] = useState<City>("الخرطوم");
   const { addItem } = useCart();
+  
+  // Variation Logic
+  const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
+  
+  const currentVariation = product.variations?.find(v => {
+    return Object.entries(v.combination).every(([name, value]) => selectedOptions[name] === value);
+  });
+
+  const displayPrice = currentVariation?.price || (product.discount 
+    ? Math.floor(product.price * (1 - product.discount / 100)) 
+    : product.price);
 
   const shippingFee = calculateShipping(customerCity, [product.vendorLocation]);
-  const discountedPrice = product.discount 
-    ? Math.floor(product.price * (1 - product.discount / 100)) 
-    : product.price;
+
+  const handleAddToCart = () => {
+    // If it's a variable product, ensure all options are selected
+    if (product.type === "VARIABLE" && product.productAttributes?.length) {
+      const allSelected = product.productAttributes.every(attr => selectedOptions[attr.name]);
+      if (!allSelected) {
+        alert("يرجى اختيار جميع المواصفات (المقاس، اللون، إلخ) قبل الإضافة");
+        return;
+      }
+    }
+
+    addItem({ 
+      id: product.id, 
+      title: product.title, 
+      price: displayPrice, 
+      quantity, 
+      vendor: product.vendor, 
+      image: currentVariation?.image || product.image,
+      variationId: currentVariation?.id,
+      selectedOptions: selectedOptions
+    });
+    alert("تمت الإضافة إلى العربة");
+  };
 
   return (
     <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-xl space-y-8 sticky top-44">
       {/* Price & Primary Status */}
       <div className="space-y-4">
         <div className="flex items-baseline gap-2">
-          <span className="text-4xl font-black text-[#CB2E26]">{discountedPrice.toLocaleString()}</span>
+          <span className="text-4xl font-black text-[#CB2E26]">{displayPrice.toLocaleString()}</span>
           <span className="text-xs font-black text-gray-400 uppercase tracking-widest">ج.س</span>
         </div>
         
@@ -30,9 +61,34 @@ export default function PurchaseBox({ product }: { product: Product }) {
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
             <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
           </span>
-          <span className="text-sm font-black text-green-600">متوفّر — اطلب الآن</span>
+          <span className="text-sm font-black text-green-600">
+            {currentVariation ? (currentVariation.stock > 0 ? "متوفّر — اطلب الآن" : "نفد المخزون") : "متوفّر — اطلب الآن"}
+          </span>
         </div>
       </div>
+
+      {/* Attributes Selection */}
+      {product.type === "VARIABLE" && product.productAttributes?.map((attr: any) => (
+        <div key={attr.id} className="space-y-3">
+           <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{attr.name}</label>
+           <div className="flex flex-wrap gap-2">
+              {attr.values.map((val: string) => (
+                <button
+                  key={val}
+                  onClick={() => setSelectedOptions(prev => ({ ...prev, [attr.name]: val }))}
+                  className={cn(
+                    "px-4 py-2 border-2 rounded-xl text-xs font-black transition-all",
+                    selectedOptions[attr.name] === val 
+                      ? "border-[#1089A4] bg-[#1089A4]/5 text-[#1089A4]" 
+                      : "border-gray-100 text-gray-400 hover:border-gray-200"
+                  )}
+                >
+                  {val}
+                </button>
+              ))}
+           </div>
+        </div>
+      ))}
 
       {/* Trust & Policy Bridge */}
       <div className="space-y-4 py-6 border-y border-gray-50">
@@ -93,7 +149,7 @@ export default function PurchaseBox({ product }: { product: Product }) {
 
         <div className="space-y-3">
           <button 
-            onClick={() => addItem({ id: product.id, title: product.title, price: discountedPrice, quantity, vendor: product.vendor, image: product.image })}
+            onClick={handleAddToCart}
             className="w-full h-16 bg-[#F29124] text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-xl shadow-orange-500/10 hover:bg-orange-500 transition-all flex items-center justify-center gap-4"
           >
             إضافة إلى العربة <span className="material-symbols-rounded">shopping_cart</span>

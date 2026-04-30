@@ -103,7 +103,12 @@ export async function PATCH(req: Request) {
     const { id, action } = await req.json();
     if (!id || !action) return NextResponse.json({ error: "Missing ID or Action" }, { status: 400 });
 
-    const status = action === 'APPROVE' ? 'APPROVED' : 'REJECTED';
+    let status;
+    if (action === 'APPROVE') status = 'APPROVED';
+    else if (action === 'REJECT') status = 'REJECTED';
+    else if (action === 'SUSPEND') status = 'SUSPENDED';
+    else if (action === 'ACTIVATE') status = 'APPROVED';
+    else return NextResponse.json({ error: "Invalid Action" }, { status: 400 });
 
     const updatedVendor = await prisma.vendor.update({
       where: { id },

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useCart } from "@/lib/CartContext";
@@ -22,22 +22,83 @@ export default function CheckoutPage() {
     street:   "",
     notes:    "",
     paymentMethod: "COD",
+    paymentScreenshot: "",
   });
+  const [settings, setSettings]   = useState<any>(null);
   const [submitted, setSubmitted] = useState(false);
   const [orderId, setOrderId]     = useState<string | null>(null);
   const [loading, setLoading]     = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [error, setError]         = useState<string | null>(null);
 
   const shippingCost = 5000;
   const total        = subtotal + shippingCost;
 
+  useEffect(() => {
+    // Fetch Settings
+    fetch("/api/settings")
+      .then(res => res.json())
+      .then(data => setSettings(data))
+      .catch(err => console.error("Settings fetch error:", err));
+
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("morsall_saved_address");
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          setForm(prev => ({
+            ...prev,
+            phone: parsed.phone || prev.phone,
+            city: parsed.city || prev.city,
+            district: parsed.district || prev.district,
+            street: parsed.street || prev.street,
+          }));
+        } catch (e) {}
+      }
+    }
+  }, []);
+
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) {
     setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  }
+
+  async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    setError(null);
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setForm(prev => ({ ...prev, paymentScreenshot: data.url }));
+      } else {
+        setError(data.error || "فشل رفع الصورة");
+      }
+    } catch (err) {
+      setError("خطأ في الاتصال أثناء رفع الصورة");
+    } finally {
+      setUploading(false);
+    }
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+
+    if (form.paymentMethod === "BANK_TRANSFER" && !form.paymentScreenshot) {
+      setError("يرجى رفع صورة إيصال التحويل لإكمال الطلب");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -53,15 +114,18 @@ export default function CheckoutPage() {
           street:        form.street,
           notes:         form.notes,
           paymentMethod: form.paymentMethod,
+          paymentScreenshot: form.paymentScreenshot,
           subtotal,
           shippingCost,
           items: cart.map(item => ({
             productId: item.id,
+            variationId: item.variationId || null,
             vendorId:  item.vendorId || "unknown",
             quantity:  item.quantity,
             price:     item.price,
             size:      item.size  || null,
             color:     item.color || null,
+            selectedOptions: item.selectedOptions || null,
           })),
         }),
       });
@@ -72,6 +136,16 @@ export default function CheckoutPage() {
         setError(data.error || "حدث خطأ — حاول تاني");
         setLoading(false);
         return;
+      }
+
+      // Save address for future
+      if (typeof window !== "undefined") {
+        localStorage.setItem("morsall_saved_address", JSON.stringify({
+          phone: form.phone,
+          city: form.city,
+          district: form.district,
+          street: form.street,
+        }));
       }
 
       clearCart?.();
@@ -219,11 +293,11 @@ export default function CheckoutPage() {
                 <span className="w-6 h-6 bg-[#1089A4] text-white rounded text-xs flex items-center justify-center font-black">٣</span>
                 طريقة الدفع
               </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
                 {[
-                  { value: "COD",           icon: "payments",        label: "دفع عند الاستلام",  sub: "ادفع لما المندوب يوصلك" },
-                  { value: "BANK_TRANSFER", icon: "account_balance", label: "تحويل بنكي",        sub: "حوّل المبلغ وارفع الإيصال" },
-                ].map(m => (
+                  { value: "COD",           icon: "payments",        label: "دفع عند الاستلام",  sub: "ادفع لما المندوب يوصلك", disabled: settings?.codEnabled === false },
+                  { value: "BANK_TRANSFER", icon: "account_balance", label: "تحويل بنكي",        sub: "حوّل المبلغ وارفع الإيصال", disabled: settings?.bankTransferEnabled === false },
+                ].filter(m => !m.disabled).map(m => (
                   <label key={m.value}
                     className={`flex items-center gap-3 p-4 rounded-lg border-2 cursor-pointer transition-all ${form.paymentMethod === m.value ? "border-[#1089A4] bg-[#1089A4]/5" : "border-gray-200 hover:border-gray-300"}`}>
                     <input type="radio" name="paymentMethod" value={m.value} checked={form.paymentMethod === m.value} onChange={handleChange} className="hidden" />
@@ -240,6 +314,70 @@ export default function CheckoutPage() {
                   </label>
                 ))}
               </div>
+
+              {/* Bank Transfer Details */}
+              {form.paymentMethod === "BANK_TRANSFER" && settings && (
+                <div className="bg-[#F3F4F6] rounded-xl p-5 border border-gray-200 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 bg-[#1089A4]/10 text-[#1089A4] rounded-full flex items-center justify-center flex-shrink-0">
+                      <span className="material-symbols-rounded text-lg">info</span>
+                    </div>
+                    <div>
+                      <p className="text-sm font-black text-[#021D24]">بيانات التحويل البنكي</p>
+                      <p className="text-xs text-gray-500">يرجى تحويل مبلغ <strong className="text-[#1089A4]">{total.toLocaleString()} ج.س</strong> إلى الحساب التالي:</p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="bg-white p-3 rounded-lg border border-gray-100 shadow-sm">
+                      <p className="text-[10px] font-bold text-gray-400 uppercase">اسم البنك</p>
+                      <p className="font-black text-sm text-[#021D24]">{settings.bankName || "بنك الخرطوم"}</p>
+                    </div>
+                    <div className="bg-white p-3 rounded-lg border border-gray-100 shadow-sm">
+                      <p className="text-[10px] font-bold text-gray-400 uppercase">اسم الحساب</p>
+                      <p className="font-black text-sm text-[#021D24]">{settings.bankAccountName || "شركة مرسال للتجارة"}</p>
+                    </div>
+                    <div className="bg-white p-3 rounded-lg border border-gray-100 shadow-sm sm:col-span-2 flex justify-between items-center">
+                      <div>
+                        <p className="text-[10px] font-bold text-gray-400 uppercase">رقم الحساب / IBAN</p>
+                        <p className="font-black text-lg text-[#1089A4] tracking-wider">{settings.bankAccountNumber || "XXXX-XXXX-XXXX"}</p>
+                      </div>
+                      <button type="button" onClick={() => navigator.clipboard.writeText(settings.bankAccountNumber)} 
+                        className="w-10 h-10 bg-gray-100 text-gray-500 rounded-lg flex items-center justify-center hover:bg-gray-200 transition-colors">
+                        <span className="material-symbols-rounded text-lg">content_copy</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="pt-2">
+                    <p className="text-xs font-black text-[#021D24] mb-3 flex items-center gap-2">
+                      <span className="material-symbols-rounded text-base text-[#F29124]">upload_file</span>
+                      ارفع صورة إيصال التحويل (سكرين شوت)
+                    </p>
+                    <label className={`relative flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-xl cursor-pointer transition-all ${form.paymentScreenshot ? "border-green-400 bg-green-50" : "border-gray-300 bg-white hover:border-[#1089A4] hover:bg-gray-50"}`}>
+                      {uploading ? (
+                        <div className="flex flex-col items-center">
+                          <span className="w-8 h-8 border-3 border-[#1089A4] border-t-transparent rounded-full animate-spin mb-2" />
+                          <p className="text-xs font-bold text-[#1089A4]">جاري الرفع...</p>
+                        </div>
+                      ) : form.paymentScreenshot ? (
+                        <div className="flex flex-col items-center">
+                          <span className="material-symbols-rounded text-3xl text-green-500 mb-1">check_circle</span>
+                          <p className="text-xs font-bold text-green-600">تم رفع الإيصال بنجاح</p>
+                          <button type="button" onClick={(e) => { e.preventDefault(); setForm(p => ({...p, paymentScreenshot: ""})) }} className="text-[10px] text-red-500 font-bold mt-1 underline">تغيير الصورة</button>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center">
+                          <span className="material-symbols-rounded text-3xl text-gray-300 mb-2">add_a_photo</span>
+                          <p className="text-xs font-bold text-gray-500">اضغط هنا لرفع الإيصال</p>
+                          <p className="text-[10px] text-gray-400 mt-1">PNG, JPG (حد أقصى 5MB)</p>
+                        </div>
+                      )}
+                      <input type="file" className="hidden" accept="image/*" onChange={handleFileUpload} disabled={uploading} />
+                    </label>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Submit */}
@@ -278,6 +416,11 @@ export default function CheckoutPage() {
                     </div>
                     <div className="flex-grow min-w-0">
                       <p className="font-bold text-[#021D24] truncate text-xs">{item.title}</p>
+                      {item.selectedOptions && Object.entries(item.selectedOptions).map(([name, val]) => (
+                        <p key={name} className="text-[10px] text-gray-400">
+                          {name}: <span className="text-[#021D24]">{val}</span>
+                        </p>
+                      ))}
                       <p className="text-gray-400 text-xs">× {item.quantity}</p>
                     </div>
                     <span className="font-black text-[#1089A4] text-xs flex-shrink-0">

@@ -160,6 +160,30 @@ model Product {
   category      Category?   @relation(fields: [categoryId], references: [id])
   vendor        Vendor      @relation(fields: [vendorId], references: [id])
   reviews       Review[]
+  variations    ProductVariation[]
+  attributes    ProductAttribute[]
+}
+
+model ProductAttribute {
+  id        String   @id @default(cuid())
+  productId String
+  name      String   // e.g. "Color", "Size"
+  values    String[] // e.g. ["Red", "Blue"]
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+model ProductVariation {
+  id             String      @id @default(cuid())
+  productId      String
+  sku            String?
+  price          Float?      // If null, uses parent price
+  stock          Int         @default(0)
+  combination    String      // JSON string of selected options e.g. {"Color": "Red", "Size": "XL"}
+  image          String?     // Specific image for this variation
+  product        Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  orderItems     OrderItem[]
 }
 
 model Attribute {
@@ -227,6 +251,8 @@ model OrderItem {
   priceAtTime Float
   size        String?
   color       String?
+  variationId String?
+  variation   ProductVariation? @relation(fields: [variationId], references: [id])
   vendor      Vendor  @relation(fields: [vendorId], references: [id])
   product     Product @relation(fields: [productId], references: [id])
   order       Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
@@ -256,6 +282,35 @@ model Settings {
   bankName           String  @default("")
   bankAccountNumber  String  @default("")
   bankAccountName    String  @default("")
+  
+  // Site Customization
+  logo               String? // شعار الموقع
+  primaryColor       String  @default("#1089A4")
+  secondaryColor     String  @default("#F29124")
+  
+  // Contact Info
+  contactEmail       String?
+  contactPhone       String?
+  whatsappNumber     String?
+  facebookUrl        String?
+  instagramUrl       String?
+  
+  // SEO & Head
+  siteTitle          String  @default("مرسال - تسوق بذكاء")
+  siteDescription    String  @default("أكبر منصة تسوق في السودان")
+}
+
+model SiteBanner {
+  id          String   @id @default(cuid())
+  title       String?
+  subtitle    String?
+  imageUrl    String
+  link        String?
+  type        String   @default("HOME_HERO") // HOME_HERO | PROMO_TOP | PROMO_BOTTOM | CATEGORY
+  targetId    String?  // If it's for a specific category
+  isActive    Boolean  @default(true)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
 }
 
 // ── New Models ──────────────────────────────────────────

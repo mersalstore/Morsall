@@ -11,13 +11,13 @@ import Link from "next/link";
 type TabId =
   | "overview" | "approvals" | "users" | "vendors"
   | "categories" | "employees" | "orders" | "payments"
-  | "delivery" | "shipping" | "finance" | "settings" | "inventory" | "drivers" | "subscriptions" | "attributes";
+  | "delivery" | "shipping" | "finance" | "settings" | "inventory" | "drivers" | "subscriptions" | "attributes" | "globalSettings";
 
 const NAV_ITEMS: { id: TabId; icon: string; label: string }[] = [
   { id: "overview",    icon: "dashboard_customize",  label: "التحكم" },
   { id: "approvals",   icon: "verified",              label: "الموافقات" },
   { id: "orders",      icon: "shopping_bag",          label: "الطلبات" },
-  { id: "users",       icon: "person_search",         label: "المستخدمون" },
+  { id: "users",       icon: "person_search",         label: "العملاء" },
   { id: "vendors",     icon: "storefront",            label: "الموردون" },
   { id: "categories",  icon: "category",              label: "الأقسام" },
   { id: "attributes",  icon: "tune",                  label: "المنتجات المتغيرة" },
@@ -29,7 +29,8 @@ const NAV_ITEMS: { id: TabId; icon: string; label: string }[] = [
   { id: "delivery",    icon: "local_shipping",        label: "مناطق التوصيل" },
   { id: "shipping",    icon: "settings_input_antenna",label: "شركة الشحن" },
   { id: "finance",     icon: "account_balance",       label: "المالية" },
-  { id: "settings",    icon: "security",              label: "الإعدادات" },
+  { id: "settings",    icon: "security",              label: "إعدادات النشر" },
+  { id: "globalSettings", icon: "settings_suggest",        label: "الإعدادات العامة" },
 ];
 
 const ORDER_STATUSES: Record<string, { label: string; cls: string }> = {
@@ -296,6 +297,49 @@ export default function AdminDashboard() {
   const [newPlan, setNewPlan] = useState({ name: "", price: "", durationDays: "30", isTrial: false });
   const [attributes, setAttributes] = useState<any[]>([]);
   const [newAttribute, setNewAttribute] = useState({ name: "", options: "" });
+  const [banners, setBanners] = useState<any[]>([]);
+  const [bannerModal, setBannerModal] = useState<any>(null); // { type: 'HOME_HERO' | 'CATEGORY', targetId?: string }
+
+  const handleSaveGlobalSettings = async () => {
+    setActionLoading("global");
+    try {
+      const res = await fetch("/api/admin/settings", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(sysSettings)
+      });
+      if (res.ok) alert("تم حفظ الإعدادات العامة بنجاح!");
+      else alert("فشل حفظ الإعدادات");
+    } catch (err) {
+      alert("خطأ في الاتصال");
+    }
+    setActionLoading(null);
+  };
+
+  const handleSaveBanner = async (imageUrl: string, type: string, targetId?: string) => {
+    setActionLoading("banner");
+    try {
+      const res = await fetch("/api/admin/banners", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ imageUrl, type, targetId, isActive: true })
+      });
+      if (res.ok) {
+        const nb = await res.json();
+        setBanners(prev => [...prev, nb]);
+        setBannerModal(null);
+      }
+    } catch (err) {}
+    setActionLoading(null);
+  };
+
+  const handleDeleteBanner = async (id: string) => {
+    if (!confirm("هل أنت متأكد من حذف هذا البانر؟")) return;
+    try {
+      const res = await fetch(`/api/admin/banners?id=${id}`, { method: "DELETE" });
+      if (res.ok) setBanners(prev => prev.filter(b => b.id !== id));
+    } catch (err) {}
+  };
 
   // Vendor Modal States
   const [vendorModal, setVendorModal] = useState<null | "add">(null);
@@ -460,6 +504,18 @@ export default function AdminDashboard() {
           setAdmins(d.admins);
         }
       }
+      if (activeTab === "globalSettings") {
+        const r = await fetch("/api/admin/settings");
+        if (r.ok) {
+          const d = await r.json();
+          setSysSettings(d.settings);
+        }
+        const br = await fetch("/api/admin/banners");
+        if (br.ok) {
+          const bd = await br.json();
+          setBanners(bd);
+        }
+      }
       if (activeTab === "subscriptions") {
         const r = await fetch("/api/admin/subscriptions/plans");
         if (r.ok) setSubscriptionPlans(await r.json());
@@ -612,22 +668,26 @@ export default function AdminDashboard() {
     e.target.value = '';
   };
 
-  const handleVendorAction = async (id: string, status: string) => {
+  const handleVendorAction = async (id: string, action: string) => {
     setActionLoading(id);
     try {
-      const res = await fetch(`/api/admin/vendors/${id}`, { 
+      const res = await fetch("/api/admin/vendors", { 
         method: "PATCH", 
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status }) 
+        body: JSON.stringify({ id, action }) 
       });
       
+      const result = await res.json();
       if (res.ok) {
+        setAllVendors(prev => prev.map(v => v.id === id ? { ...v, status: action === 'APPROVE' || action === 'ACTIVATE' ? 'APPROVED' : (action === 'SUSPEND' ? 'SUSPENDED' : v.status) } : v));
         setPendingVendors(prev => prev.filter(v => v.id !== id));
-        setAllVendors(prev => prev.map(v => v.id === id ? { ...v, status } : v));
-        fetchStats();
+        alert("تم تحديث حالة المورد بنجاح");
+      } else {
+        alert(result.error || "فشل تحديث الحالة");
       }
     } catch (err) {
       console.error("Vendor Action Error:", err);
+      alert("خطأ في الاتصال بالسيرفر");
     } finally {
       setActionLoading(null);
     }
@@ -1802,8 +1862,13 @@ export default function AdminDashboard() {
                       <div className="flex gap-2 mt-4">
                         <button 
                           disabled={actionLoading === store.id}
-                          onClick={() => handleVendorAction(store.id, store.status === "APPROVED" ? "SUSPENDED" : "APPROVED")}
-                          className="flex-1 py-2 text-xs font-bold rounded-lg border border-gray-200 hover:bg-red-50 hover:text-red-500 hover:border-red-200 transition-colors disabled:opacity-50">
+                          onClick={() => handleVendorAction(store.id, store.status === "APPROVED" ? "SUSPEND" : "ACTIVATE")}
+                          className={cn(
+                            "flex-1 py-2 text-xs font-bold rounded-lg border transition-colors disabled:opacity-50",
+                            store.status === "APPROVED" 
+                              ? "border-red-100 text-red-500 hover:bg-red-50" 
+                              : "border-green-100 text-green-600 hover:bg-green-50"
+                          )}>
                           {actionLoading === store.id ? "..." : (store.status === "APPROVED" ? "إيقاف" : "تفعيل")}
                         </button>
                         <button 
@@ -2364,6 +2429,115 @@ export default function AdminDashboard() {
                       </div>
                     ))}
                   </div>
+                </div>
+              </motion.div>
+            )}
+
+            {/* ── 15. GLOBAL SETTINGS (Site Customization) ── */}
+            {activeTab === "globalSettings" && (
+              <motion.div key="globalSettings" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  
+                  {/* Site Identity */}
+                  <div className="lg:col-span-2 space-y-6">
+                    <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm space-y-4">
+                      <h3 className="font-black text-[#021D24] text-lg flex items-center gap-2">
+                        <span className="material-symbols-rounded text-[#1089A4]">language</span>
+                        هوية الموقع
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-1">
+                          <label className="text-xs font-bold text-gray-400 uppercase">عنوان الموقع</label>
+                          <input type="text" value={sysSettings?.siteTitle || ""} onChange={e => setSysSettings({...sysSettings, siteTitle: e.target.value})} className="input-mersal" />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-xs font-bold text-gray-400 uppercase">وصف الموقع (SEO)</label>
+                          <input type="text" value={sysSettings?.siteDescription || ""} onChange={e => setSysSettings({...sysSettings, siteDescription: e.target.value})} className="input-mersal" />
+                        </div>
+                        <div className="md:col-span-2 space-y-1">
+                          <label className="text-xs font-bold text-gray-400 uppercase">شعار الموقع (Logo)</label>
+                          <div className="flex items-center gap-4">
+                            <div className="w-16 h-16 rounded-xl bg-gray-50 border flex items-center justify-center overflow-hidden">
+                              {sysSettings?.logo ? <Image src={sysSettings.logo} alt="Logo" width={64} height={64} className="object-contain" /> : <span className="material-symbols-rounded text-gray-200">image</span>}
+                            </div>
+                            <label className="flex-1">
+                              <div className="btn-secondary py-2 text-xs cursor-pointer text-center">تغيير الشعار</div>
+                              <input type="file" className="hidden" onChange={async (e) => {
+                                const file = e.target.files?.[0];
+                                if (!file) return;
+                                const fd = new FormData(); fd.append("file", file);
+                                const res = await fetch("/api/upload", { method: "POST", body: fd });
+                                const data = await res.json();
+                                if (res.ok) setSysSettings({...sysSettings, logo: data.url});
+                              }} />
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Banners Management */}
+                    <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                      <div className="p-4 border-b flex items-center justify-between">
+                        <h3 className="font-black text-[#021D24] flex items-center gap-2">
+                          <span className="material-symbols-rounded text-[#F29124]">gallery_thumbnail</span>
+                          إدارة البانرات والصور (First Images)
+                        </h3>
+                        <button onClick={() => setBannerModal({ type: "HOME_HERO" })} className="text-xs font-black text-[#1089A4] hover:underline">إضافة بانر جديد +</button>
+                      </div>
+                      <div className="p-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {banners.map((b: any) => (
+                            <div key={b.id} className="group relative rounded-xl overflow-hidden border border-gray-100 aspect-[21/9] bg-gray-50">
+                              <Image src={b.imageUrl} alt="" fill className="object-cover" />
+                              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
+                                <button onClick={() => handleDeleteBanner(b.id)} className="w-10 h-10 bg-red-500 text-white rounded-full flex items-center justify-center hover:scale-110 transition-transform shadow-lg">
+                                  <span className="material-symbols-rounded">delete</span>
+                                </button>
+                                <div className="bg-white/90 px-3 py-1 rounded-full text-[10px] font-black">{b.type}</div>
+                              </div>
+                            </div>
+                          ))}
+                          {banners.length === 0 && (
+                            <div className="col-span-full py-12 text-center text-gray-400 font-bold border-2 border-dashed border-gray-100 rounded-2xl">
+                              لا توجد بانرات مضافة حالياً. الموقع سيظهر فارغاً!
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Colors & Contact */}
+                  <div className="space-y-6">
+                    <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm space-y-4">
+                      <h3 className="font-black text-[#021D24] text-lg">الألوان والسمات</h3>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-bold text-gray-500">اللون الأساسي</span>
+                          <input type="color" value={sysSettings?.primaryColor || "#1089A4"} onChange={e => setSysSettings({...sysSettings, primaryColor: e.target.value})} className="w-10 h-10 rounded cursor-pointer" />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-bold text-gray-500">اللون الفرعي</span>
+                          <input type="color" value={sysSettings?.secondaryColor || "#F29124"} onChange={e => setSysSettings({...sysSettings, secondaryColor: e.target.value})} className="w-10 h-10 rounded cursor-pointer" />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm space-y-4">
+                      <h3 className="font-black text-[#021D24] text-lg">معلومات التواصل</h3>
+                      <div className="space-y-3">
+                        <input type="text" placeholder="رقم واتساب" value={sysSettings?.whatsappNumber || ""} onChange={e => setSysSettings({...sysSettings, whatsappNumber: e.target.value})} className="input-mersal" />
+                        <input type="text" placeholder="فيسبوك" value={sysSettings?.facebookUrl || ""} onChange={e => setSysSettings({...sysSettings, facebookUrl: e.target.value})} className="input-mersal" />
+                        <input type="text" placeholder="إنستغرام" value={sysSettings?.instagramUrl || ""} onChange={e => setSysSettings({...sysSettings, instagramUrl: e.target.value})} className="input-mersal" />
+                      </div>
+                    </div>
+
+                    <button onClick={handleSaveGlobalSettings} disabled={actionLoading === "global"} className="btn-primary w-full py-4 font-black shadow-xl shadow-[#1089A4]/20">
+                      {actionLoading === "global" ? "جاري الحفظ..." : "حفظ كل التغييرات"}
+                    </button>
+                  </div>
+
                 </div>
               </motion.div>
             )}
@@ -2971,6 +3145,60 @@ export default function AdminDashboard() {
               </div>
             )}
           </AnimatePresence>
+
+          {/* ── Admin Add Banner Modal ── */}
+          {bannerModal && (
+            <div className="fixed inset-0 z-[650] flex items-center justify-center p-4">
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="absolute inset-0 bg-[#021D24]/80 backdrop-blur-md" onClick={() => setBannerModal(null)} />
+              <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="relative bg-white rounded-3xl shadow-2xl w-full max-w-md z-10 overflow-hidden border border-white/20">
+                <div className="bg-[#1089A4] p-6 text-white text-center">
+                  <span className="material-symbols-rounded text-4xl mb-2">add_photo_alternate</span>
+                  <h3 className="font-black text-xl">إضافة بانر جديد</h3>
+                  <p className="text-white/60 text-xs mt-1">سيتم عرض هذا البانر في {bannerModal.type === 'HOME_HERO' ? 'الرئيسية' : 'قسم خاص'}</p>
+                </div>
+                <div className="p-8 space-y-6">
+                  <div className="space-y-4">
+                    <label className="group relative flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-gray-200 rounded-2xl cursor-pointer hover:border-[#1089A4] hover:bg-gray-50 transition-all overflow-hidden">
+                      {actionLoading === "uploading_banner" ? (
+                         <span className="w-8 h-8 border-3 border-[#1089A4] border-t-transparent rounded-full animate-spin" />
+                      ) : bannerModal.imageUrl ? (
+                         <Image src={bannerModal.imageUrl} alt="" fill className="object-cover" />
+                      ) : (
+                        <>
+                          <span className="material-symbols-rounded text-4xl text-gray-200 mb-2">cloud_upload</span>
+                          <span className="text-xs font-bold text-gray-400">اختر صورة البانر</span>
+                        </>
+                      )}
+                      <input type="file" className="hidden" onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        setActionLoading("uploading_banner");
+                        const fd = new FormData(); fd.append("file", file);
+                        const res = await fetch("/api/upload", { method: "POST", body: fd });
+                        const data = await res.json();
+                        if (res.ok) setBannerModal({...bannerModal, imageUrl: data.url});
+                        setActionLoading(null);
+                      }} />
+                    </label>
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">رابط التوجيه (اختياري)</label>
+                      <input type="text" placeholder="https://..." value={bannerModal.link || ""} onChange={e => setBannerModal({...bannerModal, link: e.target.value})} className="input-mersal" dir="ltr" />
+                    </div>
+                  </div>
+                  <div className="flex gap-3">
+                     <button onClick={() => setBannerModal(null)} className="flex-1 py-3 text-sm font-black text-gray-400 border border-gray-100 rounded-xl hover:bg-gray-50 transition">إلغاء</button>
+                     <button 
+                      disabled={!bannerModal.imageUrl || actionLoading === "banner"} 
+                      onClick={() => handleSaveBanner(bannerModal.imageUrl, bannerModal.type, bannerModal.targetId)}
+                      className="flex-[2] py-3 text-sm font-black text-white bg-[#F29124] rounded-xl shadow-lg shadow-[#F29124]/20 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
+                     >
+                        {actionLoading === "banner" ? "جاري الحفظ..." : "نشر البانر الآن"}
+                     </button>
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+          )}
         </div>
       </main>
 

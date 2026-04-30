@@ -50,19 +50,47 @@ const SLIDES = [
 export default function HeroSection() {
   const [active, setActive] = useState(0);
   const [transitioning, setTransitioning] = useState(false);
+  const [dynamicBanners, setDynamicBanners] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetch("/api/admin/banners")
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data) && data.length > 0) {
+          setDynamicBanners(data);
+        }
+      })
+      .catch(err => console.error("Banner fetch error:", err));
+  }, []);
+
+  const currentSlides = dynamicBanners.length > 0 
+    ? dynamicBanners.map(b => ({
+        bg: "from-[#0C3547] to-[#021D24]", // Default theme colors
+        tag: b.subtitle || "مرسال السودان",
+        title: b.title || "تسوق الآن",
+        subtitle: "",
+        desc: "اكتشف أفضل العروض والمنتجات من أكبر المتاجر في السودان.",
+        cta: "استكشف المنتجات",
+        ctaHref: b.link || "/shop",
+        sub: "عن مرسال",
+        subHref: "/faq",
+        img: b.imageUrl,
+        badge: "جديد",
+      }))
+    : SLIDES;
 
   // Auto-slide
   useEffect(() => {
-    const t = setInterval(() => changeSlide((active + 1) % SLIDES.length), 5000);
+    const t = setInterval(() => changeSlide((active + 1) % currentSlides.length), 5000);
     return () => clearInterval(t);
-  }, [active]);
+  }, [active, currentSlides.length]);
 
   const changeSlide = (idx: number) => {
     setTransitioning(true);
     setTimeout(() => { setActive(idx); setTransitioning(false); }, 250);
   };
 
-  const s = SLIDES[active];
+  const s = currentSlides[active];
 
   return (
     <section className="w-full pt-[96px]" dir="rtl">
@@ -119,7 +147,7 @@ export default function HeroSection() {
 
         {/* Slide indicators */}
         <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex gap-2">
-          {SLIDES.map((_, i) => (
+          {currentSlides.map((_, i) => (
             <button
               key={i}
               onClick={() => changeSlide(i)}
@@ -130,13 +158,13 @@ export default function HeroSection() {
 
         {/* Arrow Navigation */}
         <button
-          onClick={() => changeSlide((active - 1 + SLIDES.length) % SLIDES.length)}
+          onClick={() => changeSlide((active - 1 + currentSlides.length) % currentSlides.length)}
           className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/30 hover:bg-black/50 text-white rounded-full border border-white/20 flex items-center justify-center transition-all"
         >
           <span className="material-symbols-rounded">chevron_right</span>
         </button>
         <button
-          onClick={() => changeSlide((active + 1) % SLIDES.length)}
+          onClick={() => changeSlide((active + 1) % currentSlides.length)}
           className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/30 hover:bg-black/50 text-white rounded-full border border-white/20 flex items-center justify-center transition-all"
         >
           <span className="material-symbols-rounded">chevron_left</span>
