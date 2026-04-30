@@ -75,10 +75,14 @@ export const authOptions: NextAuthOptions = {
       }
       
       // 2. SOVEREIGN MASTER OVERRIDE: Authorized Super Admins
-      const masterAdmins = ["zomatube2012@gmail.com", "Blackhatsd.sd@gmail.com"];
+      // 2. SOVEREIGN MASTER OVERRIDE: Authorized Super Admins
+      const masterAdmins = ["zomatube2012@gmail.com", "Blackhatsd.sd@gmail.com", "hazem@morsall.com"];
+      console.log("DEBUG: Login attempt from:", token.email);
+      
       if (token.email && masterAdmins.includes(token.email)) {
         token.role = "ADMIN";
-        token.isOnboarded = true; // Skip onboarding for master admins
+        token.isOnboarded = true;
+        console.log("DEBUG: Admin access GRANTED for:", token.email);
       }
 
       // 3. DYNAMIC DATA REFRESH (Runs on sign-in AND when update() is called)

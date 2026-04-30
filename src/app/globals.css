@@ -1,5 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Tajawal:wght@300;400;500;700;800;900&display=swap');
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 :root {
   /* ── Brand Colors (مرسال - MERSAL) ───────────────────────── */
@@ -54,22 +56,6 @@
   --glass-border: rgba(255,255,255,0.3);
 }
 
-@theme inline {
-  --color-primary: var(--primary);
-  --color-primary-light: var(--primary-light);
-  --color-primary-dark: var(--primary-dark);
-  --color-accent: var(--accent);
-  --color-secondary: var(--secondary);
-  --color-secondary-light: var(--secondary-light);
-  --color-muted: var(--surface);
-  --color-muted-dark: var(--surface-2);
-  --color-border: var(--border);
-  --color-success: var(--success);
-  --color-warning: var(--warning);
-  --color-error: var(--error);
-  --color-info: var(--info);
-  --color-header: var(--header-bg);
-}
 
 /* ── Base Reset ───────────────────────────────────────── */
 @layer base {
