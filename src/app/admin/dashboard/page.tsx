@@ -11,7 +11,10 @@ import Link from "next/link";
 type TabId =
   | "overview" | "approvals" | "users" | "vendors"
   | "categories" | "employees" | "orders" | "payments"
-  | "delivery" | "shipping" | "finance" | "settings" | "inventory" | "drivers" | "subscriptions" | "attributes" | "globalSettings";
+  | "delivery" | "shipping" | "finance" | "settings" | "inventory" | "drivers" | "subscriptions" | "attributes" | "globalSettings" | "appearance";
+
+import AdminSidebar from "@/components/AdminSidebar";
+import AppearanceSettings from "@/components/AppearanceSettings";
 
 const NAV_ITEMS: { id: TabId; icon: string; label: string }[] = [
   { id: "overview",    icon: "dashboard_customize",  label: "التحكم" },
@@ -31,6 +34,7 @@ const NAV_ITEMS: { id: TabId; icon: string; label: string }[] = [
   { id: "finance",     icon: "account_balance",       label: "المالية" },
   { id: "settings",    icon: "security",              label: "إعدادات النشر" },
   { id: "globalSettings", icon: "settings_suggest",        label: "الإعدادات العامة" },
+  { id: "appearance",  icon: "palette",                label: "المظهر والصور" },
 ];
 
 const ORDER_STATUSES: Record<string, { label: string; cls: string }> = {
@@ -1407,47 +1411,11 @@ export default function AdminDashboard() {
       )}
 
       {/* ── Sidebar ── */}
-      <aside className="hidden lg:flex w-72 bg-[#021D24] text-white flex-col pt-28 shadow-2xl z-20 overflow-y-auto">
-        <div className="px-6 mb-8 flex flex-col items-center gap-4 text-center">
-          <div className="relative w-48 h-16 mb-2">
-            <Image src="/logo-navbar-final.png" alt="Logo" fill className="object-contain" />
-          </div>
-          <div>
-            <span className="font-black text-2xl text-[#1089A4] tracking-tight block">مرسال</span>
-            <span className="text-[10px] text-white/30 uppercase tracking-widest">لوحة التحكم</span>
-          </div>
-        </div>
-
-        <nav className="flex-grow px-4 space-y-1">
-          {filteredNavItems.map(item => (
-            <button
-              key={item.id}
-              onClick={() => setActiveTab(item.id)}
-              className={cn(
-                "w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-xs transition-all",
-                activeTab === item.id
-                  ? "bg-[#1089A4] text-white shadow-lg"
-                  : "text-white/40 hover:bg-white/5 hover:text-white/80"
-              )}
-            >
-              <span className="material-symbols-rounded text-lg">{item.icon}</span>
-              {item.label}
-            </button>
-          ))}
-        </nav>
-
-        <div className="p-5">
-          <div className="bg-white/5 p-3 rounded-xl flex items-center gap-3 border border-white/10">
-            <div className="w-9 h-9 rounded-lg bg-[#1089A4] flex items-center justify-center font-bold text-sm">
-              {session?.user?.name?.[0]}
-            </div>
-            <div>
-              <p className="text-xs font-bold">{session?.user?.name}</p>
-              <p className="text-[9px] text-[#F29124] uppercase font-black">{ROLES[userRole] || userRole}</p>
-            </div>
-          </div>
-        </div>
-      </aside>
+      <AdminSidebar 
+        activeTab={activeTab} 
+        setActiveTab={setActiveTab} 
+        userRole={userRole} 
+      />
 
       {/* ── Main ── */}
       <main className="flex-grow flex flex-col overflow-y-auto">
@@ -2541,6 +2509,13 @@ export default function AdminDashboard() {
                 </div>
               </motion.div>
             )}
+            
+            {/* ── 15. APPEARANCE ── */}
+            {activeTab === "appearance" && (
+              <motion.div key="appearance" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                <AppearanceSettings />
+              </motion.div>
+            )}
 
             {/* ── 13. INVENTORY ── */}
             {activeTab === "inventory" && (
@@ -2557,9 +2532,16 @@ export default function AdminDashboard() {
                          <span className="material-symbols-rounded text-sm">barcode_scanner</span>
                          قراءة باركود
                        </button>
-                       <label className="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg font-bold flex items-center gap-1.5 hover:bg-gray-50 cursor-pointer">
+                       <button 
+                         onClick={() => handleExportExcel()}
+                         className="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg font-bold flex items-center gap-1.5 hover:bg-gray-50"
+                       >
+                         <span className="material-symbols-rounded text-sm">download</span>
+                         تصدير إكسل
+                       </button>
+                       <label className="bg-[#F29124] text-white px-4 py-2 rounded-lg font-black flex items-center gap-1.5 hover:bg-[#d98120] cursor-pointer shadow-sm">
                           <span className="material-symbols-rounded text-sm">upload_file</span>
-                          استيراد/تصدير
+                          استيراد إكسل
                           <input type="file" accept=".xlsx, .xls" className="hidden" onChange={handleImportExcel} disabled={actionLoading === "import_excel"} />
                        </label>
                     </div>

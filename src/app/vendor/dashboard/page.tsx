@@ -11,6 +11,7 @@ import VendorStoreSettings from "@/components/VendorStoreSettings";
 import StoreAnalytics from "@/components/StoreAnalytics";
 import VendorCoupons from "@/components/VendorCoupons";
 import VendorReviews from "@/components/VendorReviews";
+import VendorSidebar from "@/components/VendorSidebar";
 
 export default function VendorDashboard() {
   const router = useRouter();
@@ -26,6 +27,7 @@ export default function VendorDashboard() {
   const [productStatusFilter, setProductStatusFilter] = useState("all");
   const [orderSearch, setOrderSearch] = useState("");
   const [orderStatusFilter, setOrderStatusFilter] = useState("all");
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchData() {
@@ -59,6 +61,40 @@ export default function VendorDashboard() {
     }
   };
 
+  const handleExportExcel = async () => {
+    try {
+      const { exportToExcel } = await import("@/lib/excel");
+      const exportData = products.map((p: any) => ({
+        "معرف المنتج (ID)": p.id,
+        "اسم المنتج": p.title,
+        "السعر": p.price,
+        "المخزون": p.stock,
+        "الحالة": p.status === "APPROVED" ? "نشط" : "قيد المراجعة",
+        "القسم": p.category?.name || "—",
+        "SKU": p.sku || "—",
+        "الوصف": p.shortDescription || "—"
+      }));
+      exportToExcel(exportData, `مخزون_${statsData?.storeName || "متجري"}`);
+    } catch (err) {
+      alert("حدث خطأ أثناء التصدير");
+    }
+  };
+
+  const handleImportExcel = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setActionLoading("import");
+    try {
+      const { importFromExcel } = await import("@/lib/excel");
+      const data = await importFromExcel(file);
+      // Logic to save data to backend would go here
+      alert(`تم استيراد ${data.length} منتج بنجاح (معاينة فقط حالياً)`);
+    } catch (err) {
+      alert("حدث خطأ أثناء الاستيراد");
+    }
+    setActionLoading(null);
+  };
+
   const filteredProducts = products.filter(p => {
     const matchesSearch = p.title.toLowerCase().includes(productSearch.toLowerCase()) || 
                          p.sku?.toLowerCase().includes(productSearch.toLowerCase());
@@ -82,55 +118,11 @@ export default function VendorDashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50/50 flex font-sans pt-20">
-      {/* Sidebar - Original Mersal Look */}
-      <aside className="w-72 bg-white border-l border-border fixed right-0 top-20 bottom-0 z-20 flex flex-col overflow-y-auto">
-        <div className="p-6">
-          <div className="flex items-center gap-3 mb-8">
-            <div className="relative w-10 h-10 rounded-xl overflow-hidden bg-gray-50 p-1.5 border">
-               <Image src="/logo.png" alt="Logo" fill className="object-contain" />
-            </div>
-            <div>
-              <p className="font-black text-[#021D24] text-lg leading-none">مرسال</p>
-              <p className="text-[10px] font-bold text-gray-400 mt-1 uppercase tracking-widest">لوحة التاجر</p>
-            </div>
-          </div>
-
-          <nav className="space-y-1">
-            <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest mb-4 px-3">الرئيسية</p>
-            <NavItem active={activeTab === "overview"} onClick={() => setActiveTab("overview")} icon="dashboard" label="لوحة التحكم" />
-            <NavItem active={activeTab === "analytics"} onClick={() => setActiveTab("analytics")} icon="monitoring" label="التحليلات" />
-            
-            <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest my-6 px-3">إدارة المتجر</p>
-            <NavItem active={activeTab === "products"} onClick={() => setActiveTab("products")} icon="inventory_2" label="المنتجات" />
-            <NavItem active={activeTab === "orders"} onClick={() => setActiveTab("orders")} icon="shopping_basket" label="الطلبات" />
-            <NavItem active={activeTab === "coupons"} onClick={() => setActiveTab("coupons")} icon="sell" label="الكوبونات" />
-            
-            <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest my-6 px-3">التواصل</p>
-            <NavItem active={activeTab === "reviews"} onClick={() => setActiveTab("reviews")} icon="rate_review" label="التقييمات" />
-            <NavItem active={activeTab === "promotion"} onClick={() => setActiveTab("promotion")} icon="campaign" label="الترويج" />
-            
-            <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest my-6 px-3">الإعدادات</p>
-            <NavItem active={activeTab === "finance"} onClick={() => setActiveTab("finance")} icon="account_balance" label="المالية" />
-            <NavItem active={activeTab === "settings"} onClick={() => setActiveTab("settings")} icon="settings" label="إعدادات النشر" />
-          </nav>
-        </div>
-
-        <div className="mt-auto p-6 border-t">
-           <a href={`/store/${statsData?.slug}`} target="_blank" className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors group">
-              <div className="w-10 h-10 bg-[#1089A4]/10 text-[#1089A4] rounded-lg flex items-center justify-center">
-                 <span className="material-symbols-rounded">storefront</span>
-              </div>
-              <div>
-                 <p className="text-xs font-black text-[#021D24]">زيارة متجرك</p>
-                 <p className="text-[10px] font-bold text-gray-400">عرض الواجهة العامة</p>
-              </div>
-           </a>
-        </div>
-      </aside>
+    <div className="min-h-screen bg-[#F8FAFC] flex font-sans pt-16">
+      <VendorSidebar activeTab={activeTab} setActiveTab={setActiveTab} slug={statsData?.slug} />
 
       {/* Main Content */}
-      <main className="flex-grow mr-72 p-10">
+      <main className="flex-grow p-10">
         <div className="max-w-7xl mx-auto space-y-12">
           
           <header className="flex items-center justify-between">
@@ -212,8 +204,19 @@ export default function VendorDashboard() {
                     <p className="text-sm text-gray-400 font-bold mt-1">عرض وتعديل مخزون متجرك</p>
                   </div>
                   <div className="flex gap-3">
-                     <button className="bg-white border border-border px-6 py-2.5 rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-50 transition-colors">تصدير Excel</button>
-                     <button onClick={() => setIsModalOpen(true)} className="bg-[#1089A4] text-white px-6 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-[#1089A4]/20 hover:scale-105 transition-all">أضف منتج جديد</button>
+                     <button onClick={handleExportExcel} className="bg-white border border-border px-6 py-2.5 rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-50 transition-colors flex items-center gap-2">
+                        <span className="material-symbols-rounded text-sm">download</span>
+                        تصدير Excel
+                     </button>
+                     <label className="bg-[#F29124] text-white px-6 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-[#F29124]/20 hover:scale-105 transition-all cursor-pointer flex items-center gap-2">
+                        <span className="material-symbols-rounded text-sm">upload_file</span>
+                        استيراد Excel
+                        <input type="file" className="hidden" accept=".xlsx,.xls" onChange={handleImportExcel} disabled={actionLoading === "import"} />
+                     </label>
+                     <button onClick={() => setIsModalOpen(true)} className="bg-[#1089A4] text-white px-6 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-[#1089A4]/20 hover:scale-105 transition-all flex items-center gap-2">
+                        <span className="material-symbols-rounded text-sm">add</span>
+                        أضف منتج جديد
+                     </button>
                   </div>
                </div>
 
