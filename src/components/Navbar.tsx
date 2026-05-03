@@ -35,6 +35,16 @@ export default function Navbar() {
   const pathname = usePathname();
   const isAdmin = (session?.user as any)?.role === "ADMIN";
   const isAuthenticated = status === "authenticated";
+  const [siteSettings, setSiteSettings] = useState<any>(null);
+
+  useEffect(() => {
+    fetch("/api/admin/settings/appearance")
+      .then(res => res.json())
+      .then(data => {
+        if (data.settings) setSiteSettings(data.settings);
+      })
+      .catch(err => console.error("Settings fetch error:", err));
+  }, []);
 
   if (pathname?.startsWith("/admin") || pathname?.startsWith("/vendor")) {
     return null;
@@ -123,8 +133,8 @@ export default function Navbar() {
               className="relative w-[150px] h-12 lg:w-[180px] lg:h-16"
             >
               <Image 
-                src="/logo-navbar-final.png" 
-                alt="مرسال - MERSAL" 
+                src={siteSettings?.logo || "/logo-navbar-final.png"} 
+                alt={siteSettings?.siteTitle || "مرسال - MERSAL"} 
                 fill 
                 className="object-contain" 
                 priority 

@@ -53,11 +53,11 @@ export default function HeroSection() {
   const [dynamicBanners, setDynamicBanners] = useState<any[]>([]);
 
   useEffect(() => {
-    fetch("/api/admin/banners")
+    fetch("/api/admin/settings/appearance")
       .then(res => res.json())
       .then(data => {
-        if (Array.isArray(data) && data.length > 0) {
-          setDynamicBanners(data);
+        if (Array.isArray(data.banners) && data.banners.length > 0) {
+          setDynamicBanners(data.banners);
         }
       })
       .catch(err => console.error("Banner fetch error:", err));
