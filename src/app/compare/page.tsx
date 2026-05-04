@@ -1,18 +1,56 @@
 "use client"
 
 import { useWishlist } from "@/lib/WishlistContext";
-import { getProductById } from "@/lib/mockData/products";
 import Image from "next/image";
 import Link from "next/link";
 import { useCart } from "@/lib/CartContext";
+import { useEffect, useState } from "react";
 
 export default function ComparePage() {
   const { compareList, toggleCompare } = useWishlist();
-  const products = compareList.map(id => getProductById(id));
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const { addItem } = useCart();
 
-  // All unique spec keys across compared products
-  const allSpecs = Array.from(new Set(products.flatMap(p => Object.keys(p.specs))));
+  useEffect(() => {
+    if (compareList.length > 0) {
+      setLoading(true);
+      fetch(`/api/products?ids=${compareList.join(',')}`)
+        .then(res => res.json())
+        .then(data => {
+          // format products to match the needed structure
+          const formatted = data.map((p: any) => ({
+            id: p.id,
+            title: p.title,
+            price: p.price,
+            vendor: p.vendor?.storeName || "متجر",
+            image: p.images?.split(",")[0] || "https://images.unsplash.com/photo-1546435770-a3e426bf472b",
+            category: p.category?.name || "عام",
+            rating: 4.5,
+            specs: {
+              "SKU": p.sku || "N/A",
+              "المخزون": p.stock > 0 ? "متوفر" : "نفذت الكمية",
+              "الوصف": p.shortDescription || p.description || "لا يوجد وصف"
+            }
+          }));
+          setProducts(formatted);
+          setLoading(false);
+        })
+        .catch(err => {
+          console.error(err);
+          setLoading(false);
+        });
+    } else {
+      setProducts([]);
+      setLoading(false);
+    }
+  }, [compareList]);
+
+  const allSpecs = Array.from(new Set(products.flatMap(p => Object.keys(p.specs || {}))));
+
+  if (loading) {
+    return <div className="min-h-screen pt-44 flex justify-center"><div className="w-10 h-10 border-4 border-[#1089A4] border-t-transparent rounded-full animate-spin" /></div>;
+  }
 
   if (compareList.length === 0) {
     return (

@@ -6,6 +6,7 @@ export async function GET(req: Request) {
   const sort = searchParams.get("sort") || "new";
   const category = searchParams.get("category");
   const search = searchParams.get("search");
+  const ids = searchParams.get("ids");
 
   try {
     let orderBy: any = { createdAt: "desc" };
@@ -16,6 +17,12 @@ export async function GET(req: Request) {
     const where: any = { status: "APPROVED" };
     if (category) where.categoryId = category;
     if (search) where.title = { contains: search, mode: "insensitive" };
+    if (ids) {
+      const idArray = ids.split(',').map(id => id.trim()).filter(Boolean);
+      if (idArray.length > 0) {
+        where.id = { in: idArray };
+      }
+    }
 
     const products = await prisma.product.findMany({
       where,

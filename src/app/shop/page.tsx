@@ -3,6 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import ShopFilters from "@/components/ShopFilters";
 import ProductCard from "@/components/ProductCard";
+import ShopClientControls from "@/components/ShopClientControls";
 
 export default async function ShopPage(props: {
   searchParams: Promise<{ q?: string; category?: string; sort?: string }>;
@@ -71,25 +72,12 @@ export default async function ShopPage(props: {
         {/* Main content */}
         <main className="lg:col-span-10 space-y-3">
 
-          {/* Toolbar */}
-          <div className="bg-white rounded-lg border border-gray-200 p-3 flex items-center justify-between gap-4">
-            <p className="text-sm text-gray-600">
-              {query ? (
-                <><strong className="text-[#021D24]">{products.length}</strong> نتيجة لـ "<strong>{query}</strong>"</>
-              ) : (
-                <><strong className="text-[#021D24]">{products.length}</strong> منتج متوفر</>
-              )}
-            </p>
-            <div className="flex items-center gap-2">
-              <label className="text-xs font-bold text-gray-400">ترتيب حسب:</label>
-              <select className="border border-gray-300 rounded px-2 py-1 text-xs font-bold outline-none focus:border-[#1089A4] bg-white">
-                <option value="">الأكثر مبيعاً</option>
-                <option value="new">الأحدث</option>
-                <option value="price_asc">السعر: الأقل أولاً</option>
-                <option value="price_desc">السعر: الأعلى أولاً</option>
-              </select>
-            </div>
-          </div>
+          {/* Toolbar & Mobile Filters */}
+          <ShopClientControls 
+            resultCount={products.length} 
+            query={query || ""} 
+            initialSort={sort || ""}
+          />
 
           {/* Delivery notice */}
           <div className="bg-[#FFF8F0] border border-[#F29124]/30 rounded-lg p-3 flex items-center gap-2 text-sm text-[#021D24] font-bold">
