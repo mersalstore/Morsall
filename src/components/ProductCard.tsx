@@ -50,116 +50,114 @@ export default function ProductCard({ id, title, price, image, vendor, vendorLoc
   };
 
   return (
-    <div className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-md hover:border-[#1089A4]/30 transition-all group flex flex-col h-full relative">
+    <div className="bg-white/80 backdrop-blur-xl border border-gray-100/50 rounded-[2rem] overflow-hidden hover:shadow-[0_20px_50px_rgba(16,137,164,0.15)] hover:border-[#1089A4]/40 transition-all duration-500 group flex flex-col h-full relative">
 
-      {/* Badges & Actions Overlay */}
-      <div className="absolute top-2 right-2 z-10 flex flex-col gap-1">
+      {/* Badges Overlay */}
+      <div className="absolute top-4 right-4 z-10 flex flex-col gap-2">
         {discount && (
-          <span className="bg-red-600 text-white text-[10px] font-black px-1.5 py-0.5 rounded shadow-sm">
+          <span className="bg-gradient-to-r from-red-600 to-red-500 text-white text-[10px] font-black px-3 py-1 rounded-xl shadow-lg shadow-red-500/30 uppercase tracking-widest">
             -{discount}%
           </span>
         )}
         {badge && (
-          <span className="bg-[#021D24] text-white text-[10px] font-black px-1.5 py-0.5 rounded shadow-sm">
+          <span className="bg-[#021D24] text-white text-[10px] font-black px-3 py-1 rounded-xl shadow-lg shadow-[#021D24]/30 uppercase tracking-[0.2em]">
             {badge}
           </span>
         )}
       </div>
 
       {/* Quick Actions (Left) */}
-      <div className="absolute top-2 left-2 z-10 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+      <div className="absolute top-4 left-4 z-10 flex flex-col gap-3 opacity-0 group-hover:opacity-100 translate-x-[-10px] group-hover:translate-x-0 transition-all duration-500">
         <button
           onClick={(e) => { e.preventDefault(); toggleFavorite(id); }}
-          className="w-8 h-8 bg-white/90 backdrop-blur rounded-full flex items-center justify-center shadow-md hover:scale-110 transition-transform"
+          className="w-10 h-10 bg-white shadow-xl rounded-2xl flex items-center justify-center hover:bg-[#F29124] hover:text-white transition-all transform active:scale-90"
           title="أضف للمفضلة"
         >
-          <span className={`material-symbols-rounded text-base ${isInFavorites(id) ? "text-red-500 fill-1" : "text-gray-400"}`}>
-            {isInFavorites(id) ? "favorite" : "favorite"}
+          <span className={`material-symbols-rounded text-xl ${isInFavorites(id) ? "text-red-500 fill-1" : "text-gray-400 group-hover/btn:text-white"}`}>
+            favorite
           </span>
         </button>
         <button
           onClick={(e) => { e.preventDefault(); toggleCompare(id); }}
-          className="w-8 h-8 bg-white/90 backdrop-blur rounded-full flex items-center justify-center shadow-md hover:scale-110 transition-transform"
+          className="w-10 h-10 bg-white shadow-xl rounded-2xl flex items-center justify-center hover:bg-[#1089A4] hover:text-white transition-all transform active:scale-90"
           title="مقارنة المنتج"
         >
-          <span className={`material-symbols-rounded text-base ${isInCompare(id) ? "text-[#1089A4] font-bold" : "text-gray-400"}`}>
+          <span className={`material-symbols-rounded text-xl ${isInCompare(id) ? "text-[#1089A4] font-bold" : "text-gray-400"}`}>
             compare_arrows
           </span>
         </button>
       </div>
 
       {/* Image Container */}
-      <Link href={`/product/${id}`} className="relative aspect-square block overflow-hidden bg-gray-50 border-b border-gray-100">
+      <Link href={`/product/${id}`} className="relative aspect-[4/5] block overflow-hidden bg-gradient-to-b from-gray-50/50 to-white">
         <Image
           src={image}
           alt={title}
           fill
-          className="object-contain p-4 group-hover:scale-110 transition-transform duration-700"
+          className="object-contain p-6 group-hover:scale-110 transition-transform duration-1000 ease-out"
         />
+        <div className="absolute inset-0 bg-gradient-to-t from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
       </Link>
 
       {/* Product Content */}
-      <div className="p-3 flex flex-col flex-grow text-right">
-        <Link href={`/product/${id}`} className="block mb-1">
-          <p className="text-xs font-black text-[#021D24] leading-snug line-clamp-2 min-h-[2.5em] hover:text-[#1089A4] transition-colors">
-            {title}
-          </p>
-        </Link>
+      <div className="p-6 flex flex-col flex-grow text-right">
+        <div className="mb-4">
+           {/* Vendor Line */}
+           <div className="flex items-center gap-2 mb-2">
+             <span className="w-1.5 h-1.5 rounded-full bg-[#F29124]" />
+             <span className="text-[10px] text-[#1089A4] font-black uppercase tracking-widest hover:underline cursor-pointer">{vendor}</span>
+           </div>
 
-        {/* Vendor Line */}
-        <div className="flex items-center gap-1 mb-1">
-          <span className="text-[9px] text-gray-400 font-bold uppercase tracking-tighter">يباع بواسطة: </span>
-          <span className="text-[10px] text-[#1089A4] font-black hover:underline cursor-pointer truncate">{vendor}</span>
+           <Link href={`/product/${id}`} className="block">
+             <h3 className="text-sm font-black text-[#021D24] leading-relaxed line-clamp-2 min-h-[2.8em] group-hover:text-[#1089A4] transition-colors">
+               {title}
+             </h3>
+           </Link>
         </div>
-
-        {vendorLocation && (
-          <div className="flex items-center gap-0.5 text-gray-400 mb-2">
-            <span className="material-symbols-rounded text-[10px]">location_on</span>
-            <span className="text-[10px] font-bold">{vendorLocation}</span>
-          </div>
-        )}
 
         <div className="mt-auto">
           <Stars rating={4 + Math.random() * 0.9} count={Math.floor(50 + Math.random() * 300)} />
 
-          {/* Pricing Tier */}
-          <div className="mt-3 flex flex-col">
-            <div className="flex items-baseline gap-1.5">
-              <span className="text-xl font-black text-[#CB2E26]">{discountedPrice.toLocaleString()}</span>
-              <span className="text-[10px] text-gray-400 font-bold">ج.س</span>
-              {discount && (
-                <span className="text-[11px] text-gray-400 line-through decoration-red-400/30">{price.toLocaleString()}</span>
-              )}
+          <div className="mt-6 flex flex-col gap-4">
+            <div className="flex items-end justify-between">
+               <div className="flex flex-col">
+                  {discount && (
+                    <span className="text-[11px] text-gray-400 line-through mb-1 opacity-50">{price.toLocaleString()} ج.س</span>
+                  )}
+                  <div className="flex items-baseline gap-1.5">
+                    <span className="text-2xl font-black text-[#021D24] tracking-tighter">{discountedPrice.toLocaleString()}</span>
+                    <span className="text-[10px] text-[#1089A4] font-black uppercase tracking-widest">ج.س</span>
+                  </div>
+               </div>
+               
+               <div className="flex items-center gap-1.5 text-green-600 bg-green-50/50 px-3 py-1.5 rounded-xl border border-green-100/50">
+                 <span className="material-symbols-rounded text-base animate-pulse">local_shipping</span>
+                 <span className="text-[9px] font-black uppercase tracking-tighter">شحن سريع</span>
+               </div>
             </div>
             
-            <div className="flex items-center justify-between mt-3">
-              <div className="flex items-center gap-0.5 text-green-600">
-                <span className="material-symbols-rounded text-[14px]">local_shipping</span>
-                <span className="text-[9px] font-black uppercase">شحن سريع</span>
-              </div>
-              
-              {/* Counter Style Add to Cart */}
-              <button
-                onClick={handleAdd}
-                className={`flex items-center justify-center h-10 px-4 rounded-xl font-black text-[11px] transition-all duration-300 shadow-sm grow ml-2 ${
-                  added
-                    ? "bg-green-600 text-white scale-95"
-                    : "bg-[#1089A4] hover:bg-[#0E7A92] text-white hover:shadow-lg hover:-translate-y-0.5"
-                }`}
-              >
-                {added ? (
-                  <span className="flex items-center gap-1 animate-in zoom-in">
-                    <span className="material-symbols-rounded text-sm">check_circle</span>
-                    تمت الإضافة
-                  </span>
-                ) : (
-                  <span className="flex items-center gap-2">
-                    <span className="material-symbols-rounded text-sm font-bold">shopping_basket</span>
-                    أضف للسلة
-                  </span>
-                )}
-              </button>
-            </div>
+            <button
+              onClick={handleAdd}
+              className={`relative overflow-hidden group/btn flex items-center justify-center h-14 rounded-2xl font-black text-xs transition-all duration-500 shadow-xl ${
+                added
+                  ? "bg-green-600 text-white shadow-green-500/20"
+                  : "bg-[#021D24] text-white shadow-gray-200/50 hover:bg-[#1089A4] hover:shadow-[#1089A4]/30 hover:scale-[1.02]"
+              }`}
+            >
+              {added ? (
+                <span className="flex items-center gap-2 animate-in zoom-in duration-300">
+                  <span className="material-symbols-rounded text-xl">verified</span>
+                  تمت الإضافة للسلة
+                </span>
+              ) : (
+                <span className="flex items-center gap-3 transition-transform duration-500 group-hover/btn:translate-x-[-4px]">
+                  <span className="material-symbols-rounded text-xl">shopping_cart_checkout</span>
+                  أضف للسلة الآن
+                </span>
+              )}
+              {/* Shine effect on hover */}
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover/btn:translate-x-[100%] transition-transform duration-1000" />
+            </button>
           </div>
         </div>
       </div>

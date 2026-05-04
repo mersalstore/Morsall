@@ -98,50 +98,54 @@ export default function AdminSidebar({ activeTab, setActiveTab, userRole, isOpen
       )}
 
       <aside className={cn(
-        "fixed inset-y-0 right-0 w-72 bg-[#0F1629] text-white flex flex-col h-screen shadow-2xl z-[60] overflow-y-auto custom-scrollbar transition-transform duration-300 lg:translate-x-0 lg:sticky lg:top-0 lg:flex",
+        "fixed inset-y-0 right-0 w-80 bg-gradient-to-b from-[#021D24] via-[#021D24] to-[#011419] text-white flex flex-col h-screen shadow-[0_0_50px_rgba(0,0,0,0.5)] z-[60] overflow-y-auto custom-scrollbar transition-transform duration-500 lg:translate-x-0 lg:sticky lg:top-0 lg:flex border-l border-white/5",
         isOpen ? "translate-x-0" : "translate-x-full"
       )} dir="rtl">
       {/* Logo Section */}
-      <div className="p-8 border-b border-white/5">
-        <div className="relative w-full h-12 mb-2">
+      <div className="p-10 border-b border-white/5 bg-white/5 backdrop-blur-sm relative overflow-hidden group">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-[#1089A4]/10 blur-[60px] rounded-full -translate-y-1/2 translate-x-1/2 group-hover:bg-[#1089A4]/20 transition-all duration-1000" />
+        <div className="relative w-full h-14 mb-4 transform group-hover:scale-105 transition-transform duration-500">
           <Image 
             src="/logo-navbar-final.png" 
             alt="Mersall Logo" 
             fill 
-            className="object-contain filter brightness-110" 
+            className="object-contain filter drop-shadow-[0_0_8px_rgba(16,137,164,0.3)]" 
           />
         </div>
-        <div className="text-center mt-4">
-          <span className="text-white/40 text-[10px] font-black uppercase tracking-[0.3em]">Mersall Logistics</span>
+        <div className="text-center">
+          <p className="text-[#1089A4] text-[10px] font-black uppercase tracking-[0.4em] mb-1">Mersall Platform</p>
+          <div className="h-0.5 w-12 bg-gradient-to-r from-transparent via-[#F29124] to-transparent mx-auto opacity-50" />
         </div>
       </div>
 
       {/* Nav Section */}
-      <div className="flex-grow py-6 px-4 space-y-8">
+      <div className="flex-grow py-8 px-6 space-y-10">
         {groups.map(group => (
-          <div key={group} className="space-y-2">
-            <h4 className="px-4 text-[10px] font-black text-[#1089A4] uppercase tracking-widest opacity-80">{group}</h4>
-            <div className="space-y-1">
+          <div key={group} className="space-y-3">
+            <h4 className="px-5 text-[9px] font-black text-white/20 uppercase tracking-[0.3em]">{group}</h4>
+            <div className="space-y-1.5">
               {allowedItems.filter(i => i.group === group).map(item => (
                 <button
                   key={item.id}
                   onClick={() => setActiveTab(item.id)}
                   className={cn(
-                    "w-full flex items-center gap-3 px-4 py-2.5 rounded-xl font-bold text-sm transition-all relative group",
+                    "w-full flex items-center gap-4 px-5 py-3.5 rounded-2xl font-bold text-sm transition-all relative group",
                     activeTab === item.id
-                      ? "bg-[#1089A4] text-white shadow-lg shadow-[#1089A4]/20"
-                      : "text-white/50 hover:bg-white/5 hover:text-white/80"
+                      ? "bg-gradient-to-l from-[#1089A4] to-[#0D6E84] text-white shadow-xl shadow-[#1089A4]/10 border border-white/10"
+                      : "text-white/40 hover:bg-white/5 hover:text-white/80"
                   )}
                 >
                   <item.icon size={18} className={cn(
-                    "transition-colors",
-                    activeTab === item.id ? "text-white" : "text-[#1089A4]/60 group-hover:text-[#1089A4]"
+                    "transition-all duration-300",
+                    activeTab === item.id 
+                      ? "text-white scale-110 drop-shadow-[0_0_5px_rgba(255,255,255,0.5)]" 
+                      : "text-[#1089A4]/40 group-hover:text-[#1089A4] group-hover:rotate-6"
                   )} />
-                  {item.label}
+                  <span className="flex-grow text-right">{item.label}</span>
                   {activeTab === item.id && (
                     <motion.div 
                       layoutId="active-pill"
-                      className="absolute right-0 w-1 h-5 bg-[#F29124] rounded-l-full"
+                      className="absolute right-0 w-1.5 h-6 bg-[#F29124] rounded-l-full shadow-[0_0_15px_#F29124]"
                     />
                   )}
                 </button>
@@ -152,21 +156,24 @@ export default function AdminSidebar({ activeTab, setActiveTab, userRole, isOpen
       </div>
 
       {/* Profile Section */}
-      <div className="p-6 border-t border-white/5 bg-black/20">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#1089A4] to-[#0F1629] flex items-center justify-center font-black text-lg border border-white/10 shadow-xl">
+      <div className="p-8 border-t border-white/5 bg-black/40 backdrop-blur-md">
+        <div className="flex items-center gap-4 mb-6 group cursor-pointer">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#1089A4] to-[#021D24] flex items-center justify-center font-black text-xl border border-white/20 shadow-2xl group-hover:rotate-3 transition-transform">
             {session?.user?.name?.[0] || "A"}
           </div>
-          <div className="flex-grow">
-            <p className="text-xs font-black truncate">{session?.user?.name || "Admin"}</p>
-            <p className="text-[10px] text-[#F29124] font-black uppercase">{ROLES[userRole] || userRole}</p>
+          <div className="flex-grow min-w-0">
+            <p className="text-xs font-black truncate text-white/90">{session?.user?.name || "Admin"}</p>
+            <div className="flex items-center gap-1.5 mt-0.5">
+               <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse shadow-[0_0_8px_#22c55e]" />
+               <p className="text-[9px] text-[#F29124] font-black uppercase tracking-widest">{ROLES[userRole] || userRole}</p>
+            </div>
           </div>
         </div>
         <button 
           onClick={() => signOut()}
-          className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-red-500/10 text-red-500 text-xs font-black hover:bg-red-500 hover:text-white transition-all border border-red-500/20"
+          className="group w-full flex items-center justify-center gap-3 py-3.5 rounded-2xl bg-white/5 text-white/60 text-xs font-black hover:bg-red-500 hover:text-white transition-all duration-300 border border-white/5 hover:border-red-500/50"
         >
-          <LogOut size={14} />
+          <LogOut size={16} className="group-hover:-translate-x-1 transition-transform" />
           تسجيل الخروج
         </button>
       </div>

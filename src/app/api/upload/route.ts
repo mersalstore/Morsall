@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { writeFile, mkdir } from "fs/promises";
+import { join } from "path";
+import { existsSync } from "fs";
 
 export async function POST(req: Request) {
   try {
@@ -22,16 +25,29 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "لم يتم رفع أي ملف" }, { status: 400 });
     }
 
-    // Serverless workaround: Use Base64 (Data URL) for storage on Vercel
-    // Note: In a production app, use Vercel Blob or Cloudinary.
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
-    
-    const base64 = buffer.toString("base64");
-    const mimeType = file.type || "image/jpeg";
-    const dataUrl = `data:${mimeType};base64,${base64}`;
 
-    return NextResponse.json({ url: dataUrl });
+    // Save to public/uploads
+    const uploadDir = join(process.cwd(), "public", "uploads");
+    
+    // Ensure directory exists
+    if (!existsSync(uploadDir)) {
+      await mkdir(uploadDir, { recursive: true });
+    }
+
+    // Generate unique filename
+    const timestamp = Date.now();
+    const cleanFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, "_");
+    const uniqueName = `${timestamp}-${cleanFileName}`;
+    const filePath = join(uploadDir, uniqueName);
+
+    await writeFile(filePath, buffer);
+
+    // Return the relative URL
+    const fileUrl = `/uploads/${uniqueName}`;
+
+    return NextResponse.json({ url: fileUrl });
 
   } catch (error: any) {
     console.error("Upload API Error:", error);
