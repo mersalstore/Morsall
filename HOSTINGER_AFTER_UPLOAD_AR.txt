@@ -1,0 +1,13 @@
+خطوتين وبس بعد رفع وفك الزيب في مجلد المشروع على السيرفر:
+
+(1) الملف اللي اسمه hostinger.env.example — انسخه وسمّيه .env واكتب فيه DATABASE_URL و NEXTAUTH_URL و NEXTAUTH_SECRET بتاعتك.
+
+(2) من SSH أو Terminal بتاع Hostinger، من نفس مجلد المشروع:
+
+    chmod +x hostinger-tamam.sh && ./hostinger-tamam.sh
+
+بعدين شغّل الموقع:
+
+    npm run start:hostinger
+
+في لوحة Hostinger خلّي Node إصدار 20 أو أعلى (مش 18).

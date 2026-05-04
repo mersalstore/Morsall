@@ -18,7 +18,7 @@ export async function POST(req: Request) {
       where: { email: (session as any).user.email },
       data: {
         name: name !== undefined ? name : undefined,
-        age: age !== undefined ? parseInt(age) : undefined,
+        age: (age && !isNaN(parseInt(age))) ? parseInt(age) : undefined,
         interests: interests !== undefined ? (Array.isArray(interests) ? interests.join(',') : interests) : undefined,
         phone: phone !== undefined ? phone : undefined,
         isOnboarded: isOnboarded !== undefined ? isOnboarded : undefined,

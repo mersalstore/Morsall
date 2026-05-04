@@ -36,6 +36,8 @@ interface SidebarProps {
   activeTab: TabId;
   setActiveTab: (tab: TabId) => void;
   userRole: string;
+  isOpen?: boolean;
+  onClose?: () => void;
 }
 
 const NAV_ITEMS: { id: TabId; icon: any; label: string; group?: string }[] = [
@@ -76,7 +78,7 @@ const ROLES: Record<string, string> = {
   ADMIN: "مدير النظام",
 };
 
-export default function AdminSidebar({ activeTab, setActiveTab, userRole }: SidebarProps) {
+export default function AdminSidebar({ activeTab, setActiveTab, userRole, isOpen, onClose }: SidebarProps) {
   const { data: session } = useSession();
   
   const allowedItems = NAV_ITEMS.filter(item => 
@@ -86,7 +88,19 @@ export default function AdminSidebar({ activeTab, setActiveTab, userRole }: Side
   const groups = Array.from(new Set(allowedItems.map(i => i.group)));
 
   return (
-    <aside className="hidden lg:flex w-72 bg-[#0F1629] text-white flex-col h-screen sticky top-0 shadow-2xl z-50 overflow-y-auto custom-scrollbar">
+    <>
+      {/* Overlay for mobile */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[55] lg:hidden"
+          onClick={onClose}
+        />
+      )}
+
+      <aside className={cn(
+        "fixed inset-y-0 right-0 w-72 bg-[#0F1629] text-white flex flex-col h-screen shadow-2xl z-[60] overflow-y-auto custom-scrollbar transition-transform duration-300 lg:translate-x-0 lg:sticky lg:top-0 lg:flex",
+        isOpen ? "translate-x-0" : "translate-x-full"
+      )} dir="rtl">
       {/* Logo Section */}
       <div className="p-8 border-b border-white/5">
         <div className="relative w-full h-12 mb-2">
@@ -157,5 +171,6 @@ export default function AdminSidebar({ activeTab, setActiveTab, userRole }: Side
         </button>
       </div>
     </aside>
+  </>
   );
 }

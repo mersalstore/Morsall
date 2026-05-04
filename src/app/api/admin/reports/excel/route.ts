@@ -4,7 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import * as XLSX from 'xlsx';
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
     const session = await getServerSession(authOptions);
     if (!(session as any)?.user?.email || (session as any).user.role !== 'ADMIN') {
@@ -28,21 +28,30 @@ export async function GET() {
     // Flatten data for Excel
     const reportData = orders.map(order => ({
       'رقم الطلب': order.id,
-      'العميل': order.customer.name || order.customer.email,
+      'العميل': order.customer?.name || order.customer?.email || "—",
       'الهاتف': order.phone,
       'المدينة': order.city,
       'المبلغ الإجمالي': order.totalAmount,
       'تاريخ الطلب': order.createdAt.toLocaleDateString('ar-EG'),
       'حالة الطلب': order.status,
-      // Aggregating vendors involved
-      'المتاجر': Array.from(new Set(order.items.map((item: any) => item.vendor.storeName))).join(', ')
+      'المتاجر': Array.from(new Set(order.items.map((item: any) => item.vendor?.storeName))).join(', ')
     }));
 
-    // Generate Excel
+    const format = new URL(req.url).searchParams.get("format");
     const worksheet = XLSX.utils.json_to_sheet(reportData);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Sales Report");
     
+    if (format === "csv") {
+      const csv = XLSX.utils.sheet_to_csv(worksheet);
+      return new Response(csv, {
+        headers: {
+          'Content-Type': 'text/csv; charset=utf-8',
+          'Content-Disposition': 'attachment; filename="Mersal_Sales.csv"'
+        }
+      });
+    }
+
     const buffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
 
     return new Response(buffer, {

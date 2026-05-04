@@ -39,29 +39,30 @@ node server-hostinger.js
 تأكد من أن هذه المتغيرات موجودة في Hostinger Control Panel:
 
 ```env
-POSTGRES_PRISMA_URL=postgresql://...
-POSTGRES_URL_NON_POOLING=postgresql://...
-DATABASE_URL=postgresql://...
-NEXTAUTH_URL=https://morsall.com
-NEXTAUTH_SECRET=MersalEliteSecret2026
-GOOGLE_CLIENT_ID=949180865508-uc3av4gfh0he5u7dqub8es9g9crgrduu.apps.googleusercontent.com
-GOOGLE_CLIENT_SECRET=<your-secret>
+DATABASE_URL=postgresql://USER:PASS@HOST:5432/DATABASE?sslmode=require
+# اختياري لو عندك رابط pooled منفصل (Neon وهكذا):
+POSTGRES_PRISMA_URL=
+POSTGRES_URL_NON_POOLING=
+NEXTAUTH_URL=https://your-domain.com
+NEXTAUTH_SECRET=ضع_هنا_نصًا_طويلًا_عشوائيًا_سريًّا
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
 PRISMA_CLIENT_ENGINE_TYPE=binary
 NODE_ENV=production
 ```
 
+**ملاحظة:** لو حطّيت `DATABASE_URL` بس، السيرفر بيكمّل `POSTGRES_*` لوحده. ما تحطش أسرارك في ملف Git.
+
 ### الخطوة 4: البناء والنشر
 ```bash
-# 1. بناء المشروع
+# 1. بناء المشروع (بعدها يشتغل تلقائيًا نسخ .next/static → _next/static)
 npm run build
 
-# 2. نسخ الـ Static Assets إلى _next (مهم جداً!)
-if exist _next (rmdir /s /q _next)
-mkdir _next
-xcopy /e /i /y .next\static _next\static
+# على السيرفر: دفع الجداول مرة واحدة قبل أو بعد البناء حسب خطتك، مع متغيرات البيئة مضبوطة:
+npx prisma db push
 
-# 3. رفع الملفات على Hostinger
-# استخدم FTP أو Git (إذا كان Hostinger مفعّل Git)
+# 2. رفع الملفات على Hostinger
+# استخدم FTP أو Git — رفع مجلد _next/static ضروري مع .next وباقي المشروع
 ```
 
 ### الخطوة 5: تفعيل Node.js على Hostinger
@@ -118,21 +119,13 @@ cp -r .next/static/* _next/static/
 ## 🎯 الخطوات السريعة
 
 ```bash
-# 1. Build
+# Build (بيولّد .next وبعدين postbuild بينسخ لـ _next/static تلقائيًا)
 npm run build
 
-# 2. Prepare static assets
-rm -rf _next
-mkdir -p _next/static
-cp -r .next/static/* _next/static/
+# على السيرفر مع DATABASE_URL ظاهر في البيئة:
+npx prisma db push
 
-# 3. Deploy
-git add .
-git commit -m "Hostinger deployment fix"
-git push origin main
-
-# 4. Check Hostinger logs
-# Go to Hostinger Control Panel > Logs
+# Deploy: ارفع الملفات أو git push ثم افتح Logs في لوحة Hostinger
 ```
 
 ## 📞 الدعم

@@ -1,19 +1,46 @@
 const { createServer } = require('http');
 const { parse } = require('url');
-const next = require('next');
-// Last Deploy: 2026-04-30 23:45
 const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '.env') });
+const next = require('next');
 
-// Environment variables
-process.env.POSTGRES_PRISMA_URL = "postgresql://neondb_owner:npg_jSskB54dWQti@ep-super-meadow-a4q1l2hn-pooler.us-east-1.aws.neon.tech/neondb?channel_binding=require&connect_timeout=15&sslmode=require";
-process.env.POSTGRES_URL_NON_POOLING = "postgresql://neondb_owner:npg_jSskB54dWQti@ep-super-meadow-a4q1l2hn.us-east-1.aws.neon.tech/neondb?channel_binding=require&sslmode=require";
-process.env.DATABASE_URL = "postgresql://neondb_owner:npg_jSskB54dWQti@ep-super-meadow-a4q1l2hn-pooler.us-east-1.aws.neon.tech/neondb?channel_binding=require&connect_timeout=15&sslmode=require";
-process.env.NEXTAUTH_URL = "https://morsall.com";
-process.env.NEXTAUTH_SECRET = "MersalEliteSecret2026";
-process.env.GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || "949180865508-uc3av4gfh0he5u7dqub8es9g9crgrduu.apps.googleusercontent.com";
-process.env.GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET || ""; // REMOVED FOR GITHUB SECURITY
-process.env.PRISMA_CLIENT_ENGINE_TYPE = "binary";
-process.env.NODE_ENV = "production";
+function bootstrapEnv() {
+  process.env.NODE_ENV = process.env.NODE_ENV || "production";
+  process.env.PRISMA_CLIENT_ENGINE_TYPE =
+    process.env.PRISMA_CLIENT_ENGINE_TYPE || "binary";
+
+  const pool = (process.env.POSTGRES_PRISMA_URL || process.env.DATABASE_URL || "").trim();
+  const direct = (
+    process.env.POSTGRES_URL_NON_POOLING ||
+    process.env.DIRECT_URL ||
+    pool
+  ).trim();
+
+  if (!pool) {
+    console.error(
+      "Missing database URL. Set DATABASE_URL or POSTGRES_PRISMA_URL (Hostinger env). Optional: POSTGRES_URL_NON_POOLING."
+    );
+    process.exit(1);
+  }
+  process.env.POSTGRES_PRISMA_URL = pool;
+  process.env.POSTGRES_URL_NON_POOLING = direct;
+  if (!process.env.DATABASE_URL) process.env.DATABASE_URL = pool;
+
+  if (
+    !process.env.NEXTAUTH_URL?.trim() ||
+    !process.env.NEXTAUTH_SECRET?.trim()
+  ) {
+    console.error(
+      "Set NEXTAUTH_URL and NEXTAUTH_SECRET in Hostinger (or VPS .env)."
+    );
+    process.exit(1);
+  }
+
+  process.env.GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || "";
+  process.env.GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET || "";
+}
+
+bootstrapEnv();
 
 const dev = false;
 const hostname = '0.0.0.0';

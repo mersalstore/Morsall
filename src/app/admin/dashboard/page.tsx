@@ -62,9 +62,14 @@ const ROLE_PERMISSIONS: Record<string, TabId[]> = {
   INVENTORY: ["inventory", "categories", "vendors", "attributes"],
 };
 
+import Barcode from "react-barcode";
+
 // ── Shipping Label Component ───────────────────────────
 function ShippingLabel({ order, onClose }: { order: any; onClose: () => void }) {
   const handlePrint = () => window.print();
+
+  // Generate secure payload (for scanning validation later)
+  const barcodePayload = `MOR-${order.id?.slice(-8).toUpperCase()}`;
 
   return (
     <div className="fixed inset-0 z-[999] bg-black/80 flex flex-col items-center justify-center p-4 print:bg-white print:p-0 print:block" onClick={onClose}>
@@ -171,21 +176,21 @@ function ShippingLabel({ order, onClose }: { order: any; onClose: () => void }) 
                   </span>
                 ))}
              </div>
-             {order.notes && (
-               <div className="mt-2 pt-1 border-t-2 border-dashed border-black/20">
-                  <span className="text-[9px] text-gray-400 font-bold italic">ملاحظات: </span>
-                  <p className="text-[10px] font-bold leading-tight">{order.notes}</p>
-               </div>
-             )}
           </div>
 
           {/* UID Footer - Pinned strictly to bottom of 150mm */}
-          <div className="mt-auto border-t-4 border-black pt-2 bg-white pb-1">
-             <div className="font-mono text-center mb-1 font-black text-xl tracking-widest" dir="ltr">
-                * {order.id?.slice(-8).toUpperCase()} *
+          <div className="mt-auto border-t-4 border-black pt-2 bg-white pb-1 flex flex-col items-center">
+             <div className="mb-2">
+                <Barcode 
+                  value={barcodePayload} 
+                  width={1.5} 
+                  height={50} 
+                  fontSize={10}
+                  margin={0}
+                />
              </div>
              <p className="text-[10px] tracking-[0.4em] font-black uppercase text-center">M E R S A L L   L O G I S T I C S</p>
-             <div className="flex justify-between items-center px-4 mt-1 border-t border-black/5 pt-1">
+             <div className="flex justify-between items-center w-full px-4 mt-1 border-t border-black/5 pt-1">
                 <span className="text-[8px] font-bold text-gray-400">Printed via Mersal Hub</span>
                 <span className="text-[8px] font-black uppercase">Standard v2.0</span>
              </div>
@@ -244,6 +249,7 @@ export default function AdminDashboard() {
   const userRole = ((session?.user as any)?.role || "CUSTOMER").toUpperCase();
 
   const [activeTab, setActiveTab] = useState<TabId>("overview");
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   // تصحيح التبويب الافتراضي بناءً على الدور
   useEffect(() => {
@@ -587,55 +593,86 @@ export default function AdminDashboard() {
     }
   };
 
+  const [importPreview, setImportPreview] = useState<{ data: any[], errors: any[] } | null>(null);
+
   const handleImportExcel = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     setActionLoading("import_excel");
     try {
       const { importFromExcel } = await import("@/lib/excel");
+      const { validateProductRow } = await import("@/lib/validation");
       const data = await importFromExcel(file);
       
-      const formattedData = data.map((row: any) => ({
-        id: row["معرف المنتج (ID)"],
-        title: row["اسم المنتج"],
-        price: row["السعر الحالي (ج.س)"],
-        stock: row["الكمية المتوفرة (Stock)"],
-        status: row["الحالة"],
-        images: row["روابط الصور (فواصل ,)"],
-        brand: row["العلامة التجارية"],
-        range: row["النطاق / الحالة"],
-        type: row["نوع المنتج"] || "SIMPLE",
-        sku: row["رمز المنتج (SKU)"],
-        shortDescription: row["وصف مصغر"],
-        weight: row["الوزن"],
-        length: row["الطول"],
-        width: row["العرض"],
-        height: row["الارتفاع"],
-        ram: row["الرام"],
-        storage: row["التخزين"],
-        screenSize: row["الشاشة"],
-        bundleData: row["بيانات العرض"]
-        })).filter((p: any) => !!p.id);
+      const formattedData: any[] = [];
+      const allErrors: any[] = [];
 
-        if (formattedData.length > 0) {
-          const res = await fetch("/api/admin/inventory", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ products: formattedData })
-          });
-          if (res.ok) {
-            alert("تم تحديث المخزون بنجاح!");
-            fetchData();
-          } else {
-            alert("حدث خطأ أثناء التحديث من الخادم.");
-          }
+      data.forEach((row: any, index: number) => {
+        const product = {
+          id: row["معرف المنتج (ID)"],
+          title: row["اسم المنتج"],
+          price: row["السعر الحالي (ج.س)"],
+          stock: row["الكمية المتوفرة (Stock)"],
+          status: row["الحالة"],
+          images: row["روابط الصور (فواصل ,)"],
+          brand: row["العلامة التجارية"],
+          range: row["النطاق / الحالة"],
+          type: row["نوع المنتج"] || "SIMPLE",
+          sku: row["رمز المنتج (SKU)"],
+          shortDescription: row["وصف مصغر"],
+          weight: row["الوزن"],
+          length: row["الطول"],
+          width: row["العرض"],
+          height: row["الارتفاع"],
+          ram: row["الرام"],
+          storage: row["التخزين"],
+          screenSize: row["الشاشة"],
+          bundleData: row["بيانات العرض"]
+        };
+
+        const errors = validateProductRow(product, index);
+        if (errors.length > 0) {
+          allErrors.push(...errors);
         }
-        setActionLoading(null);
+        formattedData.push(product);
+      });
+
+      setImportPreview({ data: formattedData, errors: allErrors });
+      setActionLoading(null);
     } catch (err) {
       alert("فشل قراءة ومسح الملف.");
       setActionLoading(null);
     }
     e.target.value = '';
+  };
+
+  const confirmImport = async () => {
+    if (!importPreview) return;
+    if (importPreview.errors.length > 0) {
+      if (!confirm(`يوجد ${importPreview.errors.length} أخطاء في البيانات. هل تريد الاستمرار وتجاهل الصفوف الخاطئة؟`)) return;
+    }
+
+    const validData = importPreview.data.filter((_, idx) => 
+      !importPreview.errors.some(e => e.row === idx + 1)
+    );
+
+    if (validData.length === 0) return alert("لا توجد بيانات صالحة للاستيراد");
+
+    setActionLoading("import_confirm");
+    const res = await fetch("/api/admin/inventory", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ products: validData })
+    });
+
+    if (res.ok) {
+      alert("تم تحديث المخزون بنجاح!");
+      setImportPreview(null);
+      fetchData();
+    } else {
+      alert("حدث خطأ أثناء التحديث.");
+    }
+    setActionLoading(null);
   };
 
   const handleExportOrdersExcel = async () => {
@@ -663,7 +700,31 @@ export default function AdminDashboard() {
     if (!file) return;
     setActionLoading("import_orders");
     try {
-      alert("تم استيراد تحديثات الطلبات بنجاح.");
+      const { importFromExcel } = await import("@/lib/excel");
+      const data = await importFromExcel(file);
+      
+      const updates = data.map((row: any) => ({
+        id: row["معرف الطلب"] || row["ID"] || row["رقم الطرد"]?.replace("#100", ""),
+        status: row["الحالة الجديدة"] || row["الحالة"],
+        trackingNumber: row["رقم التتبع"]
+      })).filter((u: any) => !!u.id && !!u.status);
+
+      if (updates.length > 0) {
+        const res = await fetch("/api/admin/orders/bulk-update", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ updates })
+        });
+        if (res.ok) {
+          alert(`تم تحديث ${updates.length} طلب بنجاح.`);
+          fetchData();
+        } else {
+          const err = await res.json();
+          alert(err.error || "حدث خطأ أثناء التحديث.");
+        }
+      } else {
+        alert("لم يتم العثور على بيانات صالحة للتحديث في الملف.");
+      }
       setActionLoading(null);
     } catch (err) {
       alert("فشل قراءة الملف.");
@@ -1410,11 +1471,107 @@ export default function AdminDashboard() {
         </div>
       )}
 
+      {/* ── DryRun / Import Preview Modal ── */}
+      {importPreview && (
+        <div className="fixed inset-0 z-[600] flex items-center justify-center p-4" dir="rtl">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-md" onClick={() => setImportPreview(null)} />
+          <div className="relative bg-white rounded-[2rem] shadow-2xl w-full max-w-5xl z-10 max-h-[85vh] overflow-hidden flex flex-col border border-white/20">
+            {/* Header */}
+            <div className="bg-[#021D24] text-white p-8 flex items-center justify-between shrink-0">
+              <div>
+                <h3 className="text-2xl font-black mb-1">معاينة استيراد البيانات (Dry-run)</h3>
+                <p className="text-white/40 text-xs font-bold uppercase tracking-widest">
+                  تم فحص {importPreview.data.length} صفاً - وجد {importPreview.errors.length} تنبيهات
+                </p>
+              </div>
+              <button onClick={() => setImportPreview(null)} className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center hover:bg-white/20 transition-all">
+                <span className="material-symbols-rounded">close</span>
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="flex-grow overflow-y-auto p-8 space-y-8">
+              {importPreview.errors.length > 0 && (
+                <div className="bg-red-50 border border-red-100 rounded-2xl p-6 space-y-3">
+                  <h4 className="font-black text-red-600 flex items-center gap-2 text-sm">
+                    <span className="material-symbols-rounded">error</span>
+                    تنبيهات جودة البيانات
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {importPreview.errors.slice(0, 10).map((err, i) => (
+                      <div key={i} className="flex items-center gap-3 bg-white p-3 rounded-xl border border-red-50 text-[11px] font-bold">
+                        <span className="w-6 h-6 bg-red-100 text-red-500 rounded-lg flex items-center justify-center shrink-0">#{err.row}</span>
+                        <span className="text-gray-400">{err.field}:</span>
+                        <span className="text-red-600">{err.message}</span>
+                      </div>
+                    ))}
+                    {importPreview.errors.length > 10 && <p className="text-xs text-red-400 font-bold px-2">+ {importPreview.errors.length - 10} أخطاء أخرى...</p>}
+                  </div>
+                </div>
+              )}
+
+              <div className="overflow-hidden border rounded-2xl">
+                <table className="w-full text-right text-xs">
+                  <thead className="bg-gray-50 border-b text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                    <tr>
+                      <th className="px-6 py-4">المنتج</th>
+                      <th className="px-6 py-4">السعر</th>
+                      <th className="px-6 py-4">المخزون</th>
+                      <th className="px-6 py-4">SKU</th>
+                      <th className="px-6 py-4">الحالة</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {importPreview.data.slice(0, 50).map((p, i) => {
+                      const hasError = importPreview.errors.some(e => e.row === i + 1);
+                      return (
+                        <tr key={i} className={cn("hover:bg-gray-50 transition-colors", hasError ? "bg-red-50/30" : "")}>
+                          <td className="px-6 py-4 font-bold text-[#021D24]">{p.title || "—"}</td>
+                          <td className="px-6 py-4 font-black text-[#1089A4]">{p.price || 0} ج.س</td>
+                          <td className="px-6 py-4 font-bold">{p.stock || 0}</td>
+                          <td className="px-6 py-4 font-mono text-gray-400">{p.sku || "—"}</td>
+                          <td className="px-6 py-4">
+                            {hasError ? (
+                              <span className="text-red-500 font-black text-[9px] uppercase">سيتم تجاهله</span>
+                            ) : (
+                              <span className="text-green-600 font-black text-[9px] uppercase">جاهز للاستيراد</span>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="p-8 border-t bg-gray-50 flex items-center justify-between shrink-0">
+               <div className="text-xs font-bold text-gray-400">
+                  إجمالي الصفوف الصالحة: <span className="text-[#1089A4] font-black">{importPreview.data.length - importPreview.errors.length}</span>
+               </div>
+               <div className="flex gap-4">
+                  <button onClick={() => setImportPreview(null)} className="px-8 py-3 bg-white border border-gray-200 text-gray-500 rounded-2xl font-black text-xs hover:bg-gray-100 transition-all">إلغاء</button>
+                  <button 
+                    onClick={confirmImport} 
+                    disabled={actionLoading === "import_confirm"}
+                    className="px-10 py-3 bg-[#1089A4] text-white rounded-2xl font-black text-xs shadow-xl shadow-[#1089A4]/20 hover:scale-105 transition-all disabled:opacity-50"
+                  >
+                    {actionLoading === "import_confirm" ? "جاري الاستيراد..." : "✅ تأكيد استيراد البيانات الصالحة"}
+                  </button>
+               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ── Sidebar ── */}
       <AdminSidebar 
         activeTab={activeTab} 
-        setActiveTab={setActiveTab} 
+        setActiveTab={(t) => { setActiveTab(t); setIsSidebarOpen(false); }} 
         userRole={userRole} 
+        isOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
       />
 
       {/* ── Main ── */}
@@ -1422,9 +1579,17 @@ export default function AdminDashboard() {
 
         {/* Header */}
         <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 lg:px-8 sticky top-0 z-40 shadow-sm">
-          <h2 className="text-lg font-black text-[#021D24]">
-            {NAV_ITEMS.find(i => i.id === activeTab)?.label}
-          </h2>
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={() => setIsSidebarOpen(true)}
+              className="lg:hidden w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-[#021D24] border border-gray-100"
+            >
+              <span className="material-symbols-rounded">menu</span>
+            </button>
+            <h2 className="text-lg font-black text-[#021D24]">
+              {NAV_ITEMS.find(i => i.id === activeTab)?.label}
+            </h2>
+          </div>
           <div className="flex items-center gap-3">
             {activeTab === "finance" && (
               <button
@@ -1583,7 +1748,12 @@ export default function AdminDashboard() {
                     <div className="flex gap-2">
                        <button className="bg-[#FF6B6B] text-white px-4 py-2 rounded font-bold hover:bg-red-500 transition-colors">إضافة حزمة تجميعية</button>
                        <button className="bg-[#FF6B6B] text-white px-4 py-2 rounded font-bold hover:bg-red-500 transition-colors">قراءة باستخدام الباركود</button>
-                       <button className="bg-white border border-gray-300 px-4 py-2 rounded font-bold flex items-center gap-1 hover:bg-gray-50">استيراد/تصدير <span className="material-symbols-rounded text-sm">expand_more</span></button>
+                       <button onClick={handleExportOrdersExcel} className="bg-white border border-gray-300 px-4 py-2 rounded font-bold flex items-center gap-1 hover:bg-gray-50">تصدير إكسل <span className="material-symbols-rounded text-sm">download</span></button>
+                       <label className="bg-white border border-gray-300 px-4 py-2 rounded font-bold flex items-center gap-1 hover:bg-gray-50 cursor-pointer">
+                          تحديث الحالات (Excel)
+                          <span className="material-symbols-rounded text-sm">upload</span>
+                          <input type="file" accept=".xlsx, .xls" className="hidden" onChange={handleImportOrdersExcel} />
+                       </label>
                     </div>
                     <div className="flex items-center gap-2">
                        <span className="font-black text-gray-700 text-lg">إدارة الطرود</span>

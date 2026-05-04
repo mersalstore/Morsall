@@ -1,10 +1,13 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { getAdminSession, adminOnlyResponse } from "@/lib/session";
 
 const db = prisma as any;
 
 // GET — جلب كل الطلبات مع فلترة الحالة
 export async function GET(req: Request) {
+  const session = await getAdminSession();
+  if (!session) return adminOnlyResponse();
   try {
     const { searchParams } = new URL(req.url);
     const status = searchParams.get("status");
@@ -44,6 +47,8 @@ export async function GET(req: Request) {
 
 // PATCH — تغيير حالة طلب
 export async function PATCH(req: Request) {
+  const session = await getAdminSession();
+  if (!session) return adminOnlyResponse();
   try {
     const body = await req.json();
     const { id, status, trackingNumber, driverId, trackingUrl, estimatedDays, shippingCost } = body;

@@ -23,6 +23,8 @@ interface SidebarProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
   slug?: string;
+  isOpen?: boolean;
+  onClose?: () => void;
 }
 
 const NAV_ITEMS = [
@@ -40,11 +42,23 @@ const NAV_ITEMS = [
   { id: "settings",  icon: Settings,         label: "إعدادات المتجر", group: "إعدادات" },
 ];
 
-export default function VendorSidebar({ activeTab, setActiveTab, slug }: SidebarProps) {
+export default function VendorSidebar({ activeTab, setActiveTab, slug, isOpen, onClose }: SidebarProps) {
   const groups = Array.from(new Set(NAV_ITEMS.map(i => i.group)));
 
   return (
-    <aside className="w-72 bg-[#0F1629] text-white flex flex-col h-screen sticky top-0 shadow-2xl z-50 overflow-y-auto custom-scrollbar border-l border-white/5" dir="rtl">
+    <>
+      {/* Overlay for mobile */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[55] lg:hidden"
+          onClick={onClose}
+        />
+      )}
+
+      <aside className={cn(
+        "fixed inset-y-0 right-0 w-72 bg-[#0F1629] text-white flex flex-col h-screen shadow-2xl z-[60] overflow-y-auto custom-scrollbar transition-transform duration-300 lg:translate-x-0 lg:sticky lg:top-0 lg:flex",
+        isOpen ? "translate-x-0" : "translate-x-full"
+      )} dir="rtl">
       {/* Brand Section */}
       <div className="p-8 border-b border-white/5">
         <div className="flex items-center gap-3">
@@ -115,5 +129,6 @@ export default function VendorSidebar({ activeTab, setActiveTab, slug }: Sidebar
         </button>
       </div>
     </aside>
+  </>
   );
 }

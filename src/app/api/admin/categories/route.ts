@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { getAdminSession, adminOnlyResponse } from "@/lib/session";
 
 // GET — جلب الأقسام مع عدد المنتجات
 export async function GET(req: Request) {
+  const session = await getAdminSession();
+  if (!session) return adminOnlyResponse();
   const { searchParams } = new URL(req.url);
   const id = searchParams.get("id");
 
@@ -30,6 +33,8 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
+  const session = await getAdminSession();
+  if (!session) return adminOnlyResponse();
   const { name, icon } = await req.json();
   if (!name) return NextResponse.json({ error: "الاسم مطلوب" }, { status: 400 });
   const category = await prisma.category.create({ data: { name, icon } });
@@ -37,6 +42,8 @@ export async function POST(req: Request) {
 }
 
 export async function PATCH(req: Request) {
+  const session = await getAdminSession();
+  if (!session) return adminOnlyResponse();
   const { id, name, icon } = await req.json();
   const category = await prisma.category.update({
     where: { id },
@@ -46,6 +53,8 @@ export async function PATCH(req: Request) {
 }
 
 export async function DELETE(req: Request) {
+  const session = await getAdminSession();
+  if (!session) return adminOnlyResponse();
   const { id } = await req.json();
   await prisma.category.delete({ where: { id } });
   return NextResponse.json({ success: true });

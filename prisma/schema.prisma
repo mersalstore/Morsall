@@ -5,8 +5,8 @@ generator client {
 
 datasource db {
   provider  = "postgresql"
-  url       = env("POSTGRES_PRISMA_URL") // uses connection pooling
-  directUrl = env("POSTGRES_URL_NON_POOLING") // uses a direct connection
+  url       = env("POSTGRES_PRISMA_URL")
+  directUrl = env("POSTGRES_URL_NON_POOLING")
 }
 
 model User {
@@ -27,9 +27,9 @@ model User {
   updatedAt     DateTime  @updatedAt
   accounts      Account[]
   orders        Order[]
+  reviews       Review[]
   sessions      Session[]
   vendorProfile Vendor?
-  reviews       Review[]
 }
 
 model Account {
@@ -38,12 +38,12 @@ model Account {
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
+  refresh_token     String?
+  access_token      String?
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String? @db.Text
+  id_token          String?
   session_state     String?
   user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -67,45 +67,40 @@ model VerificationToken {
 }
 
 model Vendor {
-  id               String       @id @default(cuid())
-  userId           String       @unique
-  storeName        String
-  storeDescription String?
-  slug             String?      @unique
-  bankStatementUrl String?
-  commercialRegUrl String?
-  status           String       @default("PENDING")
-  commissionType   String       @default("PERCENTAGE")
-  commissionRate   Float        @default(10.0)
-  fixedFee         Float        @default(0.0)
-  subscriptionFee  Float        @default(0.0)
+  id                 String            @id @default(cuid())
+  userId             String            @unique
+  storeName          String
+  storeDescription   String?
+  bankStatementUrl   String?
+  commercialRegUrl   String?
+  status             String            @default("PENDING")
+  commissionType     String            @default("PERCENTAGE")
+  commissionRate     Float             @default(10.0)
+  fixedFee           Float             @default(0.0)
+  subscriptionFee    Float             @default(0.0)
+  location           String?
+  shippingModel      String            @default("VENDOR_PACKS")
+  phone              String?
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+  isTrialUsed        Boolean           @default(false)
+  planId             String?
+  slug               String?           @unique
   subscriptionEndsAt DateTime?
-  isTrialUsed      Boolean      @default(false)
-  planId           String?
-  plan             SubscriptionPlan? @relation(fields: [planId], references: [id])
-  location         String?
-  address          String?      // العنوان التفصيلي للمتجر
-  
-  // Store Customization
-  storeLogo        String?      // شعار المتجر
-  storeBanner      String?      // بانر المتجر
-  primaryColor     String       @default("#0F1629") // اللون الأساسي
-  secondaryColor   String       @default("#3B82F6") // اللون الفرعي
-  
-  // Social Media
-  facebookUrl      String?
-  instagramUrl     String?
-  whatsappNumber   String?
-  
-  shippingModel    String       @default("VENDOR_PACKS") // VENDOR_PACKS | MERSAL_HANDLES
-  phone            String?
-  createdAt        DateTime     @default(now())
-  updatedAt        DateTime     @updatedAt
-  orderItems       OrderItem[]
-  products         Product[]
-  user             User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  withdrawals      Withdrawal[]
-  coupons          Coupon[]
+  address            String?
+  facebookUrl        String?
+  instagramUrl       String?
+  primaryColor       String            @default("#0F1629")
+  secondaryColor     String            @default("#3B82F6")
+  storeBanner        String?
+  storeLogo          String?
+  whatsappNumber     String?
+  coupons            Coupon[]
+  orderItems         OrderItem[]
+  products           Product[]
+  plan               SubscriptionPlan? @relation(fields: [planId], references: [id])
+  user               User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  withdrawals        Withdrawal[]
 }
 
 model SubscriptionPlan {
@@ -114,93 +109,84 @@ model SubscriptionPlan {
   price        Float
   durationDays Int
   isTrial      Boolean  @default(false)
-  vendors      Vendor[]
   createdAt    DateTime @default(now())
+  vendors      Vendor[]
 }
 
 model Product {
-  id            String      @id @default(cuid())
-  title         String
-  description   String
-  price         Float
-  stock         Int         @default(0)
-  images        String?
-  sizes         String?
-  colors        String?
-  brand         String?     // العلامة التجارية
-  range         String?     // النطاق / الحالة
-  
-  // New Fields for Product Management
-  type          String      @default("SIMPLE") // SIMPLE | VARIABLE | BUNDLE
-  sku           String?     // رمز المنتج
-  shortDescription String?  // وصف مصغر
-  weight        Float?      // الوزن
-  length        Float?      // الطول
-  width         Float?      // العرض
-  height        Float?      // الارتفاع
-  
-  // Discount Fields
-  discountPrice Float?      // سعر الخصم
-  discountType  String?     // PERCENTAGE | FIXED
-  
-  // Tech Specs (for Variable Products)
-  ram           String?     // الرام
-  storage       String?     // سعة التخزين
-  screenSize    String?     // حجم الشاشة
-  
-  // Bundle Data (for Composite Products - JSON String)
-  bundleData    String?     // بيانات المنتجات المركبة
-  
-  status        String      @default("PENDING")
-  vendorId      String
-  categoryId    String?
-  purchaseCount Int         @default(0)
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-  orderItems    OrderItem[]
-  category      Category?   @relation(fields: [categoryId], references: [id])
-  vendor        Vendor      @relation(fields: [vendorId], references: [id])
-  reviews       Review[]
-  variations    ProductVariation[]
-  attributes    ProductAttribute[]
+  id               String             @id @default(cuid())
+  title            String
+  description      String
+  price            Float
+  stock            Int                @default(0)
+  images           String?
+  sizes            String?
+  colors           String?
+  status           String             @default("PENDING")
+  vendorId         String
+  categoryId       String?
+  purchaseCount    Int                @default(0)
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  brand            String?
+  bundleData       String?
+  height           Float?
+  length           Float?
+  ram              String?
+  range            String?
+  screenSize       String?
+  shortDescription String?
+  sku              String?
+  storage          String?
+  type             String             @default("SIMPLE")
+  weight           Float?
+  width            Float?
+  discountPrice    Float?
+  discountType     String?
+  orderItems       OrderItem[]
+  category         Category?          @relation(fields: [categoryId], references: [id])
+  vendor           Vendor             @relation(fields: [vendorId], references: [id])
+  attributes       ProductAttribute[]
+  variations       ProductVariation[]
+  reviews          Review[]
 }
 
 model ProductAttribute {
   id        String   @id @default(cuid())
   productId String
-  name      String   // e.g. "Color", "Size"
-  values    String[] // e.g. ["Red", "Blue"]
+  name      String
+  values    String[]
   product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
 }
 
 model ProductVariation {
-  id             String      @id @default(cuid())
-  productId      String
-  sku            String?
-  price          Float?      // If null, uses parent price
-  stock          Int         @default(0)
-  combination    String      // JSON string of selected options e.g. {"Color": "Red", "Size": "XL"}
-  image          String?     // Specific image for this variation
-  product        Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
-  createdAt      DateTime    @default(now())
-  updatedAt      DateTime    @updatedAt
-  orderItems     OrderItem[]
+  id          String      @id @default(cuid())
+  productId   String
+  sku         String?
+  price       Float?
+  stock       Int         @default(0)
+  combination String
+  image       String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  orderItems  OrderItem[]
+  product     Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
 }
 
 model Attribute {
-  id        String   @id @default(cuid())
-  name      String   @unique // e.g. "Colors", "Sizes", "RAM"
+  id        String            @id @default(cuid())
+  name      String            @unique
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
   options   AttributeOption[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 }
 
 model AttributeOption {
   id          String    @id @default(cuid())
   attributeId String
-  value       String    // e.g. "Red", "XL", "8GB"
-  attribute   Attribute @relation(fields: [attributeId], references: [id], onDelete: Cascade)
+  value       String
   createdAt   DateTime  @default(now())
+  attribute   Attribute @relation(fields: [attributeId], references: [id], onDelete: Cascade)
 }
 
 model Category {
@@ -211,40 +197,37 @@ model Category {
 }
 
 model Order {
-  id                String      @id @default(cuid())
+  id                String          @id @default(cuid())
   customerId        String
-  status            String      @default("PENDING_APPROVAL")
-  // Statuses: PENDING_APPROVAL | APPROVED | PACKING | SHIPPED | DELIVERED | REJECTED
+  status            String          @default("PENDING_APPROVAL")
   totalAmount       Float
-  shippingCost      Float       @default(0)
-  paymentMethod     String      // COD | BANK_TRANSFER
+  shippingCost      Float           @default(0)
+  paymentMethod     String
   city              String
   district          String
   street            String
   phone             String
   customerEmail     String?
   customerName      String?
-  notes             String?     // ملاحظات العميل
-  // Payment verification
-  paymentScreenshot String?     // رابط صورة الإيصال
-  paymentVerified   Boolean     @default(false)
-  paymentNote       String?     // ملاحظة الـ AI
-  // Tracking
-  trackingLat       Float?      // موقع المندوب
+  notes             String?
+  paymentScreenshot String?
+  paymentVerified   Boolean         @default(false)
+  paymentNote       String?
+  trackingLat       Float?
   trackingLng       Float?
-  trackingNumber    String?     // رقم تتبع شركة الشحن
-  trackingUrl       String?     // رابط تتبع يدوي (أو خارجي)
-  estimatedDays     Int?        // عدد أيام التوصيل المتوقعة
-  createdAt         DateTime    @default(now())
-  updatedAt         DateTime    @updatedAt
-  customer          User        @relation(fields: [customerId], references: [id])
-  items             OrderItem[]
+  trackingNumber    String?
+  trackingUrl       String?
+  estimatedDays     Int?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
   driverId          String?
+  customer          User            @relation(fields: [customerId], references: [id])
   driver            DeliveryDriver? @relation(fields: [driverId], references: [id])
+  items             OrderItem[]
 }
 
 model OrderItem {
-  id          String  @id @default(cuid())
+  id          String            @id @default(cuid())
   orderId     String
   productId   String
   vendorId    String
@@ -253,10 +236,10 @@ model OrderItem {
   size        String?
   color       String?
   variationId String?
+  order       Order             @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product     Product           @relation(fields: [productId], references: [id])
   variation   ProductVariation? @relation(fields: [variationId], references: [id])
-  vendor      Vendor  @relation(fields: [vendorId], references: [id])
-  product     Product @relation(fields: [productId], references: [id])
-  order       Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  vendor      Vendor            @relation(fields: [vendorId], references: [id])
 }
 
 model Withdrawal {
@@ -269,75 +252,66 @@ model Withdrawal {
 }
 
 model Settings {
-  id                 String  @id @default("global")
-  exchangeRate       Float   @default(1.0)
-  baseCurrency       String  @default("SDG")
-  platformCommission Float   @default(10.0)
-  maintenanceMode    Boolean @default(false)
-  maintenanceMessage String  @default("هناك خطأ تقني يجري إصلاحه")
-  // Payment Settings
-  codEnabled         Boolean @default(true)
-  codExtraFee        Float   @default(2000)
-  codCitiesOnly      String  @default("الخرطوم") // مدن الدفع عند الاستلام
+  id                  String  @id @default("global")
+  exchangeRate        Float   @default(1.0)
+  baseCurrency        String  @default("SDG")
+  platformCommission  Float   @default(10.0)
+  maintenanceMode     Boolean @default(false)
+  maintenanceMessage  String  @default("هناك خطأ تقني يجري إصلاحه")
+  codEnabled          Boolean @default(true)
+  codExtraFee         Float   @default(2000)
+  codCitiesOnly       String  @default("الخرطوم")
   bankTransferEnabled Boolean @default(true)
-  bankName           String  @default("")
-  bankAccountNumber  String  @default("")
-  bankAccountName    String  @default("")
-  
-  // Site Customization
-  logo               String? // شعار الموقع
-  primaryColor       String  @default("#1089A4")
-  secondaryColor     String  @default("#F29124")
-  
-  // Contact Info
-  contactEmail       String?
-  contactPhone       String?
-  whatsappNumber     String?
-  facebookUrl        String?
-  instagramUrl       String?
-  
-  // SEO & Head
-  siteTitle          String  @default("مرسال - تسوق بذكاء")
-  siteDescription    String  @default("أكبر منصة تسوق في السودان")
+  bankName            String  @default("")
+  bankAccountNumber   String  @default("")
+  bankAccountName     String  @default("")
+  contactEmail        String?
+  contactPhone        String?
+  facebookUrl         String?
+  instagramUrl        String?
+  logo                String?
+  primaryColor        String  @default("#1089A4")
+  secondaryColor      String  @default("#F29124")
+  siteDescription     String  @default("أكبر منصة تسوق في السودان")
+  siteTitle           String  @default("مرسال - تسوق بذكاء")
+  whatsappNumber      String?
 }
 
 model SiteBanner {
-  id          String   @id @default(cuid())
-  title       String?
-  subtitle    String?
-  imageUrl    String
-  link        String?
-  type        String   @default("HOME_HERO") // HOME_HERO | PROMO_TOP | PROMO_BOTTOM | CATEGORY
-  targetId    String?  // If it's for a specific category
-  isActive    Boolean  @default(true)
-  order       Int      @default(0)
-  createdAt   DateTime @default(now())
+  id        String   @id @default(cuid())
+  title     String?
+  subtitle  String?
+  imageUrl  String
+  link      String?
+  type      String   @default("HOME_HERO")
+  targetId  String?
+  isActive  Boolean  @default(true)
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
 }
-
-// ── New Models ──────────────────────────────────────────
 
 model Employee {
   id        String   @id @default(cuid())
   name      String
   email     String   @unique
-  role      String   // PACKING | SHIPPING | CUSTOMER_SERVICE | ADMIN
+  role      String
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
 }
 
 model DeliveryZone {
   id       String  @id @default(cuid())
-  fromCity String  // من مدينة
-  toCity   String  // إلى مدينة
-  fee      Float   // رسوم التوصيل بالجنيه السوداني
+  fromCity String
+  toCity   String
+  fee      Float
   isActive Boolean @default(true)
 }
 
 model ShippingProvider {
   id        String   @id @default(cuid())
-  name      String   // اسم الشركة
-  apiKey    String   // API Key المشفّرة
-  baseUrl   String   // رابط الـ API
+  name      String
+  apiKey    String
+  baseUrl   String
   isActive  Boolean  @default(false)
   createdAt DateTime @default(now())
 }
@@ -346,11 +320,13 @@ model DeliveryDriver {
   id          String   @id @default(cuid())
   name        String
   phone       String
-  vehicleType String   // e.g. MOTORCYCLE, CAR, VAN
+  vehicleType String
   isActive    Boolean  @default(true)
-  orders      Order[]
   createdAt   DateTime @default(now())
-}model Review {
+  orders      Order[]
+}
+
+model Review {
   id        String   @id @default(cuid())
   rating    Int
   comment   String?
@@ -362,15 +338,15 @@ model DeliveryDriver {
 }
 
 model Coupon {
-  id              String   @id @default(cuid())
-  code            String   @unique
-  discountType    String   // PERCENTAGE | FIXED
-  discountValue   Float
-  minOrderAmount  Float?   @default(0)
-  maxDiscount     Float?   @default(0)
-  expiryDate      DateTime?
-  isActive        Boolean  @default(true)
-  vendorId        String
-  vendor          Vendor   @relation(fields: [vendorId], references: [id], onDelete: Cascade)
-  createdAt       DateTime @default(now())
+  id             String    @id @default(cuid())
+  code           String    @unique
+  discountType   String
+  discountValue  Float
+  minOrderAmount Float?    @default(0)
+  maxDiscount    Float?    @default(0)
+  expiryDate     DateTime?
+  isActive       Boolean   @default(true)
+  vendorId       String
+  createdAt      DateTime  @default(now())
+  vendor         Vendor    @relation(fields: [vendorId], references: [id], onDelete: Cascade)
 }

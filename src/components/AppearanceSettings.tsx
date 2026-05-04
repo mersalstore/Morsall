@@ -39,6 +39,7 @@ export default function AppearanceSettings() {
     try {
       await fetch("/api/admin/settings/appearance", {
         method: "PATCH",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(settings),
       });
       alert("تم حفظ الإعدادات بنجاح!");
@@ -48,19 +49,13 @@ export default function AppearanceSettings() {
     setActionLoading(null);
   };
 
-  const handleUpload = async (file: File, type: "LOGO" | "BANNER", bannerId?: string) => {
+  const handleUpload = async (file: File) => {
     const fd = new FormData();
     fd.append("file", file);
     const res = await fetch("/api/upload", { method: "POST", body: fd });
     const data = await res.json();
-    if (res.ok) {
-      if (type === "LOGO") {
-        setSettings({ ...settings, logo: data.url });
-      } else {
-        // Handle banner update or add logic here
-      }
-      return data.url;
-    }
+    if (res.ok) return data.url;
+    return null;
   };
 
   const handleAddBanner = async () => {
@@ -71,11 +66,18 @@ export default function AppearanceSettings() {
       const file = e.target.files?.[0];
       if (!file) return;
       setActionLoading("banner_add");
-      const url = await handleUpload(file, "BANNER");
+      const url = await handleUpload(file);
       if (url) {
-        const res = await fetch("/api/admin/settings/appearance", {
-          method: "PATCH",
-          body: JSON.stringify({ type: "BANNER", imageUrl: url, type_name: "HOME_HERO" }),
+        const res = await fetch("/api/admin/banners", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ 
+            imageUrl: url, 
+            type: "HOME_HERO",
+            title: "عنوان جديد",
+            subtitle: "وصف جديد",
+            order: banners.length 
+          }),
         });
         const newBanner = await res.json();
         setBanners([...banners, newBanner]);
@@ -85,10 +87,45 @@ export default function AppearanceSettings() {
     input.click();
   };
 
+  const handleUpdateBanner = async (id: string, data: any) => {
+    setActionLoading(id);
+    try {
+      await fetch("/api/admin/banners", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, ...data }),
+      });
+      setBanners(banners.map(b => b.id === id ? { ...b, ...data } : b));
+    } catch (err) {
+      alert("خطأ في التحديث");
+    }
+    setActionLoading(null);
+  };
+
   const handleDeleteBanner = async (id: string) => {
     if (!confirm("هل أنت متأكد من حذف هذا البانر؟")) return;
-    await fetch("/api/admin/banners", { method: "DELETE", body: JSON.stringify({ id }) });
+    await fetch(`/api/admin/banners?id=${id}`, { method: "DELETE" });
     setBanners(banners.filter(b => b.id !== id));
+  };
+
+  const moveBanner = async (index: number, direction: 'up' | 'down') => {
+    const newBanners = [...banners];
+    const targetIndex = direction === 'up' ? index - 1 : index + 1;
+    if (targetIndex < 0 || targetIndex >= newBanners.length) return;
+
+    [newBanners[index], newBanners[targetIndex]] = [newBanners[targetIndex], newBanners[index]];
+    
+    // Update locally
+    setBanners(newBanners);
+
+    // Sync with DB (sequential for safety)
+    for (let i = 0; i < newBanners.length; i++) {
+      await fetch("/api/admin/banners", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: newBanners[i].id, order: i }),
+      });
+    }
   };
 
   if (loading) return <div className="p-12 text-center text-gray-400">جاري التحميل...</div>;
@@ -171,9 +208,12 @@ export default function AppearanceSettings() {
                   <label className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#1089A4] text-white text-[10px] font-black rounded-xl cursor-pointer hover:bg-[#0d6e84] transition-all shadow-lg shadow-[#1089A4]/20">
                     <UploadCloud size={14} />
                     رفع شعار جديد
-                    <input type="file" className="hidden" onChange={e => {
+                    <input type="file" className="hidden" onChange={async e => {
                       const file = e.target.files?.[0];
-                      if (file) handleUpload(file, "LOGO");
+                      if (file) {
+                        const url = await handleUpload(file);
+                        if (url) setSettings({...settings, logo: url});
+                      }
                     }} />
                   </label>
                 </div>
@@ -201,7 +241,7 @@ export default function AppearanceSettings() {
                 </div>
                 <div>
                   <h3 className="text-xl font-black text-[#021D24]">البانرات الترويجية</h3>
-                  <p className="text-xs text-gray-400 font-bold">إدارة الصور المتحركة في الصفحة الرئيسية</p>
+                  <p className="text-xs text-gray-400 font-bold">إدارة الصور المتحركة والترتيب</p>
                 </div>
               </div>
               <button 
@@ -212,21 +252,40 @@ export default function AppearanceSettings() {
               </button>
             </div>
 
-            <div className="grid grid-cols-1 gap-4">
+            <div className="space-y-4">
               {banners.map((banner, index) => (
-                <div key={banner.id} className="group relative rounded-3xl overflow-hidden aspect-[21/9] bg-gray-50 border border-gray-100">
-                  <Image src={banner.imageUrl} alt="" fill className="object-cover group-hover:scale-105 transition-transform duration-700" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-6 justify-between">
-                    <div className="text-white">
-                      <p className="text-[10px] font-black uppercase tracking-widest text-[#F29124]">البانر #{index + 1}</p>
-                      <p className="text-xs font-bold opacity-80 truncate max-w-[200px]">{banner.link || "بدون رابط"}</p>
+                <div key={banner.id} className="bg-gray-50 rounded-3xl p-4 border border-gray-100 space-y-4">
+                  <div className="flex gap-4">
+                    <div className="relative w-32 aspect-[21/9] rounded-xl overflow-hidden bg-white border shrink-0">
+                      <Image src={banner.imageUrl} alt="" fill className="object-cover" />
                     </div>
-                    <button 
-                      onClick={() => handleDeleteBanner(banner.id)}
-                      className="w-10 h-10 bg-red-500 text-white rounded-2xl flex items-center justify-center hover:scale-110 transition-all"
-                    >
-                      <Trash2 size={18} />
-                    </button>
+                    <div className="flex-1 space-y-2">
+                      <input 
+                        placeholder="العنوان (Title)"
+                        value={banner.title || ""}
+                        onChange={e => handleUpdateBanner(banner.id, { title: e.target.value })}
+                        className="w-full bg-white border border-gray-100 rounded-xl px-3 py-1.5 text-[11px] font-bold outline-none focus:border-[#1089A4]"
+                      />
+                      <input 
+                        placeholder="العنوان الفرعي (Subtitle)"
+                        value={banner.subtitle || ""}
+                        onChange={e => handleUpdateBanner(banner.id, { subtitle: e.target.value })}
+                        className="w-full bg-white border border-gray-100 rounded-xl px-3 py-1.5 text-[11px] font-bold outline-none focus:border-[#1089A4]"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <input 
+                      placeholder="رابط البانر (URL)"
+                      value={banner.link || ""}
+                      onChange={e => handleUpdateBanner(banner.id, { link: e.target.value })}
+                      className="flex-1 bg-white border border-gray-100 rounded-xl px-3 py-1.5 text-[11px] font-mono outline-none focus:border-[#1089A4]"
+                    />
+                    <div className="flex gap-1">
+                      <button onClick={() => moveBanner(index, 'up')} className="p-2 bg-white rounded-lg border border-gray-100 hover:bg-gray-50"><span className="material-symbols-rounded text-sm">keyboard_arrow_up</span></button>
+                      <button onClick={() => moveBanner(index, 'down')} className="p-2 bg-white rounded-lg border border-gray-100 hover:bg-gray-50"><span className="material-symbols-rounded text-sm">keyboard_arrow_down</span></button>
+                      <button onClick={() => handleDeleteBanner(banner.id)} className="p-2 bg-red-50 text-red-500 rounded-lg border border-red-100 hover:bg-red-500 hover:text-white"><Trash2 size={14} /></button>
+                    </div>
                   </div>
                 </div>
               ))}

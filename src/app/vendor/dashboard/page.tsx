@@ -16,6 +16,7 @@ import VendorSidebar from "@/components/VendorSidebar";
 export default function VendorDashboard() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("overview");
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   
@@ -80,17 +81,65 @@ export default function VendorDashboard() {
     }
   };
 
+  const [importPreview, setImportPreview] = useState<{ data: any[], errors: any[] } | null>(null);
+
   const handleImportExcel = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     setActionLoading("import");
     try {
       const { importFromExcel } = await import("@/lib/excel");
+      const { validateProductRow } = await import("@/lib/validation");
       const data = await importFromExcel(file);
-      // Logic to save data to backend would go here
-      alert(`تم استيراد ${data.length} منتج بنجاح (معاينة فقط حالياً)`);
+      
+      const formattedData: any[] = [];
+      const allErrors: any[] = [];
+
+      data.forEach((row: any, index: number) => {
+        const product = {
+          title: row["اسم المنتج"],
+          price: row["السعر"],
+          stock: row["المخزون"],
+          images: row["روابط الصور"] || row["images"],
+          sku: row["SKU"],
+          shortDescription: row["وصف مصغر"]
+        };
+
+        const errors = validateProductRow(product, index);
+        if (errors.length > 0) allErrors.push(...errors);
+        formattedData.push(product);
+      });
+
+      setImportPreview({ data: formattedData, errors: allErrors });
+      setActionLoading(null);
     } catch (err) {
-      alert("حدث خطأ أثناء الاستيراد");
+      alert("فشل قراءة الملف.");
+      setActionLoading(null);
+    }
+    e.target.value = '';
+  };
+
+  const confirmImport = async () => {
+    if (!importPreview) return;
+    const validData = importPreview.data.filter((_, idx) => 
+      !importPreview.errors.some(e => e.row === idx + 1)
+    );
+
+    if (validData.length === 0) return alert("لا توجد بيانات صالحة للاستيراد");
+
+    setActionLoading("import_confirm");
+    const res = await fetch("/api/vendor/products/bulk", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ products: validData })
+    });
+
+    if (res.ok) {
+      alert("تم إرسال المنتجات للمراجعة بنجاح!");
+      setImportPreview(null);
+      router.refresh();
+    } else {
+      alert("حدث خطأ أثناء الاستيراد.");
     }
     setActionLoading(null);
   };
@@ -118,20 +167,34 @@ export default function VendorDashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex font-sans pt-16">
-      <VendorSidebar activeTab={activeTab} setActiveTab={setActiveTab} slug={statsData?.slug} />
+    <div className="min-h-screen bg-[#F8FAFC] flex font-sans">
+      <VendorSidebar 
+        activeTab={activeTab} 
+        setActiveTab={(t) => { setActiveTab(t); setIsSidebarOpen(false); }} 
+        slug={statsData?.slug} 
+        isOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
+      />
 
       {/* Main Content */}
-      <main className="flex-grow p-10">
-        <div className="max-w-7xl mx-auto space-y-12">
+      <main className="flex-grow p-4 md:p-10">
+        <div className="max-w-7xl mx-auto space-y-8 md:space-y-12">
           
           <header className="flex items-center justify-between">
-             <div>
-                <h1 className="text-3xl font-black text-[#021D24]">مرحباً بك مجدداً 👋</h1>
-                <p className="text-gray-400 font-bold mt-1">إليك ملخص أداء متجرك اليوم.</p>
+             <div className="flex items-center gap-4">
+                <button 
+                  onClick={() => setIsSidebarOpen(true)}
+                  className="lg:hidden w-12 h-12 rounded-2xl bg-white border border-gray-100 flex items-center justify-center text-[#021D24] shadow-sm"
+                >
+                   <span className="material-symbols-rounded">menu</span>
+                </button>
+                <div>
+                   <h1 className="text-xl md:text-3xl font-black text-[#021D24]">مرحباً بك مجدداً 👋</h1>
+                   <p className="text-[10px] md:text-sm text-gray-400 font-bold mt-1">إليك ملخص أداء متجرك اليوم.</p>
+                </div>
              </div>
-             <button onClick={() => setIsModalOpen(true)} className="bg-[#1089A4] text-white px-8 py-3 rounded-xl font-black text-sm shadow-lg shadow-[#1089A4]/20 hover:scale-105 transition-all">
-                إضافة منتج جديد
+             <button onClick={() => setIsModalOpen(true)} className="bg-[#1089A4] text-white px-4 md:px-8 py-2 md:py-3 rounded-xl font-black text-[10px] md:text-sm shadow-lg shadow-[#1089A4]/20 hover:scale-105 transition-all">
+                إضافة منتج
              </button>
           </header>
 
@@ -500,6 +563,80 @@ export default function VendorDashboard() {
 
         </div>
       </main>
+
+      {/* ── Import Preview Modal ── */}
+      {importPreview && (
+        <div className="fixed inset-0 z-[600] flex items-center justify-center p-4" dir="rtl">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-md" onClick={() => setImportPreview(null)} />
+          <div className="relative bg-white rounded-[2rem] shadow-2xl w-full max-w-4xl z-10 max-h-[85vh] overflow-hidden flex flex-col">
+            <div className="bg-[#1089A4] text-white p-6 flex items-center justify-between shrink-0">
+               <div>
+                  <h3 className="text-xl font-black">معاينة استيراد المنتجات</h3>
+                  <p className="text-white/60 text-[10px] font-bold uppercase tracking-widest mt-1">تأكد من صحة البيانات قبل التأكيد النهائي</p>
+               </div>
+               <button onClick={() => setImportPreview(null)} className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center hover:bg-white/20 transition-all">
+                  <span className="material-symbols-rounded">close</span>
+               </button>
+            </div>
+
+            <div className="flex-grow overflow-y-auto p-6 space-y-6">
+               {importPreview.errors.length > 0 && (
+                  <div className="bg-red-50 border border-red-100 rounded-xl p-4">
+                     <p className="text-red-600 font-black text-xs flex items-center gap-2 mb-3">
+                        <span className="material-symbols-rounded text-sm">warning</span>
+                        تنبيهات (سيتم تجاهل هذه الصفوف):
+                     </p>
+                     <div className="grid grid-cols-2 gap-2">
+                        {importPreview.errors.map((err, i) => (
+                           <div key={i} className="text-[10px] font-bold text-red-500 bg-white border border-red-50 p-2 rounded-lg">
+                              صف #{err.row}: {err.field} - {err.message}
+                           </div>
+                        ))}
+                     </div>
+                  </div>
+               )}
+
+               <div className="border rounded-xl overflow-hidden">
+                  <table className="w-full text-right text-xs">
+                     <thead className="bg-gray-50 border-b text-[10px] font-black text-gray-400">
+                        <tr>
+                           <th className="px-4 py-3">المنتج</th>
+                           <th className="px-4 py-3">السعر</th>
+                           <th className="px-4 py-3">المخزون</th>
+                           <th className="px-4 py-3">الحالة</th>
+                        </tr>
+                     </thead>
+                     <tbody className="divide-y">
+                        {importPreview.data.map((p, i) => {
+                           const hasError = importPreview.errors.some(e => e.row === i + 1);
+                           return (
+                              <tr key={i} className={cn(hasError ? "bg-red-50/50" : "")}>
+                                 <td className="px-4 py-3 font-bold">{p.title}</td>
+                                 <td className="px-4 py-3 font-black text-[#1089A4]">{p.price} ج.س</td>
+                                 <td className="px-4 py-3">{p.stock}</td>
+                                 <td className="px-4 py-3 font-black text-[9px] uppercase">
+                                    {hasError ? <span className="text-red-500">مرفوض</span> : <span className="text-green-600">جاهز</span>}
+                                 </td>
+                              </tr>
+                           );
+                        })}
+                     </tbody>
+                  </table>
+               </div>
+            </div>
+
+            <div className="p-6 border-t bg-gray-50 flex items-center justify-between shrink-0">
+               <p className="text-xs font-bold text-gray-400">الصفوف الصالحة: <span className="text-[#1089A4]">{importPreview.data.length - importPreview.errors.length}</span></p>
+               <div className="flex gap-3">
+                  <button onClick={() => setImportPreview(null)} className="px-6 py-2.5 bg-white border border-gray-200 rounded-xl font-bold text-xs">إلغاء</button>
+                  <button onClick={confirmImport} disabled={actionLoading === "import_confirm"} className="px-8 py-2.5 bg-[#1089A4] text-white rounded-xl font-black text-xs shadow-lg shadow-[#1089A4]/20 disabled:opacity-50">
+                     {actionLoading === "import_confirm" ? "جاري الاستيراد..." : "✅ استيراد المنتجات الصالحة"}
+                  </button>
+               </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <AddProductModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </div>

