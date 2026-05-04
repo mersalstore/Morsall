@@ -1,15 +1,10 @@
-import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
-import { prisma } from "@/lib/db";
+import { getAdminSession, adminOnlyResponse } from "@/lib/session";
 
 // GET — Fetch all products for the inventory dashboard
 export async function GET(req: Request) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!(session as any)?.user?.email || (session as any).user.role !== 'ADMIN') {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
-    }
+    const session = await getAdminSession();
+    if (!session) return adminOnlyResponse();
 
     const { searchParams } = new URL(req.url);
     const search = searchParams.get("search") || "";
@@ -38,16 +33,34 @@ export async function GET(req: Request) {
   }
 }
 
-// POST — Bulk update products from Excel import
+// POST — Create single or Bulk update products
 export async function POST(req: Request) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!(session as any)?.user?.email || (session as any).user.role !== 'ADMIN') {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    const session = await getAdminSession();
+    if (!session) return adminOnlyResponse();
+
+    const body = await req.json();
+
+    // If it's a single product creation (no products array)
+    if (!body.products && body.title) {
+      const { title, description, price, stock, categoryId, vendorId, images, sku } = body;
+      const product = await prisma.product.create({
+        data: {
+          title,
+          description,
+          price: parseFloat(price),
+          stock: parseInt(stock),
+          categoryId,
+          vendorId,
+          images,
+          sku,
+          status: "APPROVED" // Admin created products are auto-approved
+        }
+      });
+      return NextResponse.json(product);
     }
 
-    const { products } = await req.json();
-
+    const { products } = body;
     if (!Array.isArray(products) || products.length === 0) {
       return NextResponse.json({ error: "مصفوفة المنتجات غير صالحة أو فارغة" }, { status: 400 });
     }
@@ -55,7 +68,6 @@ export async function POST(req: Request) {
     let updatedCount = 0;
     const errors: string[] = [];
 
-    // Perform updates in a loop (could use transactions for bulk, but this gives granular error reporting)
     for (const p of products) {
       if (!p.id) {
         errors.push(`منتج بدون ID: ${p.title || 'Unknown'}`);
@@ -64,8 +76,6 @@ export async function POST(req: Request) {
 
       try {
         const updateData: any = {};
-        
-        // We only update what is provided to avoid erasing data
         if (p.title !== undefined) updateData.title = p.title;
         if (p.price !== undefined) updateData.price = parseFloat(p.price);
         if (p.stock !== undefined) updateData.stock = parseInt(p.stock, 10);

@@ -1,14 +1,9 @@
-import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
+import { getAdminSession, adminOnlyResponse } from "@/lib/session";
 
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions);
-    if ((session?.user as any)?.role !== "ADMIN") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const session = await getAdminSession();
+    if (!session) return adminOnlyResponse();
 
     const drivers = await prisma.deliveryDriver.findMany({
       orderBy: { createdAt: "desc" },
@@ -28,10 +23,8 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
-    const session = await getServerSession(authOptions);
-    if ((session?.user as any)?.role !== "ADMIN") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const session = await getAdminSession();
+    if (!session) return adminOnlyResponse();
 
     const body = await req.json();
     const { name, phone, vehicleType } = body;
@@ -58,10 +51,8 @@ export async function POST(req: Request) {
 
 export async function PATCH(req: Request) {
   try {
-    const session = await getServerSession(authOptions);
-    if ((session?.user as any)?.role !== "ADMIN") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const session = await getAdminSession();
+    if (!session) return adminOnlyResponse();
 
     const { id, isActive, action } = await req.json();
     if (!id) return NextResponse.json({ error: "ID Required" }, { status: 400 });
@@ -81,10 +72,8 @@ export async function PATCH(req: Request) {
 
 export async function DELETE(req: Request) {
   try {
-    const session = await getServerSession(authOptions);
-    if ((session?.user as any)?.role !== "ADMIN") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const session = await getAdminSession();
+    if (!session) return adminOnlyResponse();
 
     const { id } = await req.json();
     if (!id) return NextResponse.json({ error: "ID Required" }, { status: 400 });

@@ -43,7 +43,7 @@ export default function AttributesTab() {
       ...(editingAttr && { id: editingAttr.id }),
       name: formData.name,
       type: formData.type,
-      values: formData.values.split(",").map(v => v.trim()).filter(v => v)
+      options: formData.values.split(",").map(v => v.trim()).filter(v => v)
     };
 
     try {
@@ -107,8 +107,8 @@ export default function AttributesTab() {
             <h3 className="text-lg font-black text-[#021D24] mb-2">{attr.name}</h3>
             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4">النوع: {attr.type}</p>
             <div className="flex flex-wrap gap-2">
-              {attr.values.map((v, i) => (
-                <span key={i} className="px-3 py-1 bg-gray-50 text-gray-500 text-[10px] font-bold rounded-lg border border-gray-100">{v}</span>
+              {attr.options?.map((v: any, i: number) => (
+                <span key={i} className="px-3 py-1 bg-gray-50 text-gray-500 text-[10px] font-bold rounded-lg border border-gray-100">{v.value}</span>
               ))}
             </div>
           </div>

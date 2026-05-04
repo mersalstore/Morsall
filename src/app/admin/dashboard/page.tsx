@@ -10,6 +10,13 @@ import InventoryTable from "@/components/admin/InventoryTable";
 import ApprovalsTab from "@/components/admin/ApprovalsTab";
 import UsersVendorsTab from "@/components/admin/UsersVendorsTab";
 import CategoriesTab from "@/components/admin/CategoriesTab";
+import AttributesTab from "@/components/admin/AttributesTab";
+import DeliveryZonesTab from "@/components/admin/DeliveryZonesTab";
+import FinanceTab from "@/components/admin/FinanceTab";
+import PersonnelTab from "@/components/admin/PersonnelTab";
+import GlobalSettingsTab from "@/components/admin/GlobalSettingsTab";
+import SubscriptionsTab from "@/components/admin/SubscriptionsTab";
+import AddProductModal from "@/components/admin/AddProductModal";
 import { cn } from "@/lib/utils";
 import { useSession } from "next-auth/react";
 
@@ -34,6 +41,7 @@ export default function AdminDashboard() {
   const [stats, setStats] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [isAddProductOpen, setIsAddProductOpen] = useState(false);
 
   const classes = {
     card: "bg-white/80 backdrop-blur-xl rounded-[2.5rem] shadow-2xl shadow-gray-200/40 border border-white/20 overflow-hidden transition-all duration-500",
@@ -184,8 +192,16 @@ export default function AdminDashboard() {
             )}
             {activeTab === "approvals" && <ApprovalsTab pendingVendors={pendingVendors} pendingProducts={pendingProducts} onVendorAction={handleVendorAction} onProductAction={handleProductAction} classes={classes} />}
             {activeTab === "orders" && <OrdersTable orders={orders} onEdit={()=>{}} onPrint={()=>{}} classes={classes} ORDER_STATUSES={ORDER_STATUSES} />}
-            {activeTab === "inventory" && <InventoryTable products={inventoryProducts} onEdit={()=>{}} onAdd={()=>{}} classes={classes} />}
-            {activeTab === "categories" && <CategoriesTab />}
+            {activeTab === "inventory" && (
+              <>
+                <InventoryTable products={inventoryProducts} onEdit={()=>{}} onAdd={() => setIsAddProductOpen(true)} classes={classes} />
+                <AddProductModal 
+                  isOpen={isAddProductOpen} 
+                  onClose={() => setIsAddProductOpen(false)} 
+                  onSuccess={fetchData} 
+                />
+              </>
+            )}
             {activeTab === "attributes" && <AttributesTab />}
             {activeTab === "delivery" && <DeliveryZonesTab />}
             {activeTab === "finance" && <FinanceTab />}
@@ -193,6 +209,7 @@ export default function AdminDashboard() {
             {activeTab === "drivers" && <PersonnelTab type="drivers" />}
             {activeTab === "subscriptions" && <SubscriptionsTab />}
             {activeTab === "globalSettings" && <GlobalSettingsTab />}
+            {activeTab === "categories" && <CategoriesTab />}
             {activeTab === "users" && <UsersVendorsTab type="users" data={users} classes={classes} />}
             {activeTab === "vendors" && <UsersVendorsTab type="vendors" data={vendors} classes={classes} />}
             {activeTab === "appearance" && <AppearanceSettings />}

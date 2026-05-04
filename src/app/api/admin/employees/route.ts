@@ -1,17 +1,12 @@
-import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
+import { getAdminSession, adminOnlyResponse } from "@/lib/session";
 
 const db = prisma as any;
 
 // GET — جلب قائمة الموظفين
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions);
-    if ((session?.user as any)?.role !== "ADMIN") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const session = await getAdminSession();
+    if (!session) return adminOnlyResponse();
 
     const employees = await db.employee.findMany({ orderBy: { createdAt: "desc" } });
     return NextResponse.json(employees);
@@ -59,10 +54,8 @@ export async function POST(req: Request) {
 // PATCH — تحديث بيانات الموظف
 export async function PATCH(req: Request) {
   try {
-    const session = await getServerSession(authOptions);
-    if ((session?.user as any)?.role !== "ADMIN") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const session = await getAdminSession();
+    if (!session) return adminOnlyResponse();
 
     const { id, name, role, isActive } = await req.json();
     if (!id) return NextResponse.json({ error: "ID مطلوب" }, { status: 400 });
@@ -93,10 +86,8 @@ export async function PATCH(req: Request) {
 // DELETE — حذف الموظف وإعادة رتبة المستخدم إلى CUSTOMER
 export async function DELETE(req: Request) {
   try {
-    const session = await getServerSession(authOptions);
-    if ((session?.user as any)?.role !== "ADMIN") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const session = await getAdminSession();
+    if (!session) return adminOnlyResponse();
 
     const { id } = await req.json();
     if (!id) return NextResponse.json({ error: "ID مطلوب" }, { status: 400 });

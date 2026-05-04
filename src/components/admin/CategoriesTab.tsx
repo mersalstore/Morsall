@@ -73,6 +73,9 @@ export default function CategoriesTab() {
         fetchCategories();
         setIsModalOpen(false);
         resetForm();
+      } else {
+        const err = await res.json();
+        alert(err.error || "فشل حفظ القسم");
       }
     } catch (err) {
       console.error(err);

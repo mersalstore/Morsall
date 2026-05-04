@@ -1,13 +1,8 @@
-import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { getAdminSession, adminOnlyResponse } from "@/lib/session";
 
 export async function GET() {
-  const session = await getServerSession(authOptions);
-  if (!session || (session.user as any).role !== "ADMIN") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const session = await getAdminSession();
+  if (!session) return adminOnlyResponse();
 
   const attributes = await prisma.attribute.findMany({
     include: { options: true },
@@ -18,10 +13,8 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-  const session = await getServerSession(authOptions);
-  if (!session || (session.user as any).role !== "ADMIN") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const session = await getAdminSession();
+  if (!session) return adminOnlyResponse();
 
   const { name, options } = await req.json();
 
@@ -45,15 +38,13 @@ export async function POST(req: Request) {
     if (error.code === 'P2002') {
       return NextResponse.json({ error: "هذا المتغير موجود مسبقاً" }, { status: 400 });
     }
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    return NextResponse.json({ error: "Internal Server Error: " + error.message }, { status: 500 });
   }
 }
 
 export async function DELETE(req: Request) {
-  const session = await getServerSession(authOptions);
-  if (!session || (session.user as any).role !== "ADMIN") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const session = await getAdminSession();
+  if (!session) return adminOnlyResponse();
 
   const { id } = await req.json();
 
