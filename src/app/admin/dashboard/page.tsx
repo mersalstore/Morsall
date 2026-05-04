@@ -154,6 +154,7 @@ export default function AdminDashboard() {
               <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
               نظام مرسال المتكامل لإدارة اللوجستيات
             </p>
+            </div>
           </div>
           
           <div className="flex items-center gap-6 bg-white/80 backdrop-blur-xl p-3 pr-6 rounded-[2rem] border border-white shadow-xl shadow-gray-200/50 w-full md:w-auto justify-between md:justify-start">

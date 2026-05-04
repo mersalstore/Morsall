@@ -43,6 +43,22 @@ const nextConfig: NextConfig = {
         protocol: 'http',
         hostname: 'localhost',
       },
+      {
+        protocol: 'https',
+        hostname: 'morsall.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '**.morsall.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '**.hostinger.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '**.amazonaws.com',
+      },
     ],
   },
 };

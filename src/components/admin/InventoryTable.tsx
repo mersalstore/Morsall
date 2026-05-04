@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 interface InventoryTableProps {
@@ -54,8 +53,18 @@ export default function InventoryTable({ products, onEdit, onAdd, classes }: Inv
               <tr key={p.id} className={classes.tableRow}>
                 <td className="px-8 py-8">
                   <div className="flex items-center gap-6">
-                    <div className="w-20 h-20 rounded-[1.5rem] bg-gray-50 overflow-hidden border-2 border-white shadow-2xl shadow-gray-200 shrink-0 transform group-hover:scale-110 transition-transform duration-500">
-                      {p.images && <Image src={p.images.split(",")[0]} alt={p.title} width={80} height={80} className="object-cover h-full" />}
+                    <div className="w-20 h-20 rounded-[1.5rem] bg-gray-50 overflow-hidden border-2 border-white shadow-2xl shadow-gray-200 shrink-0 transform group-hover:scale-110 transition-transform duration-500 flex items-center justify-center">
+                      {p.images ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={p.images.split(",")[0]?.trim()}
+                          alt={p.title}
+                          className="w-full h-full object-cover"
+                          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                        />
+                      ) : (
+                        <span className="material-symbols-rounded text-2xl text-gray-300">image</span>
+                      )}
                     </div>
                     <div className="flex flex-col">
                       <span className="font-black text-[#021D24] text-lg leading-tight mb-1">{p.title}</span>

@@ -1,7 +1,6 @@
 "use client"
 
 import { useWishlist } from "@/lib/WishlistContext";
-import Image from "next/image";
 import Link from "next/link";
 import { useCart } from "@/lib/CartContext";
 import { useEffect, useState } from "react";
@@ -19,12 +18,23 @@ export default function ComparePage() {
         .then(res => res.json())
         .then(data => {
           // format products to match the needed structure
-          const formatted = data.map((p: any) => ({
+          const formatted = data.map((p: any) => {
+            // Handle image: could be comma-separated string or array
+            let rawImages = p.images || "";
+            let imageList: string[] = [];
+            if (Array.isArray(rawImages)) {
+              imageList = rawImages;
+            } else {
+              imageList = rawImages.split(",").map((s: string) => s.trim()).filter(Boolean);
+            }
+            const firstImage = imageList[0] || "";
+
+            return ({
             id: p.id,
             title: p.title,
             price: p.price,
             vendor: p.vendor?.storeName || "متجر",
-            image: p.images?.split(",")[0] || "https://images.unsplash.com/photo-1546435770-a3e426bf472b",
+            image: firstImage,
             category: p.category?.name || "عام",
             rating: 4.5,
             specs: {
@@ -32,7 +42,7 @@ export default function ComparePage() {
               "المخزون": p.stock > 0 ? "متوفر" : "نفذت الكمية",
               "الوصف": p.shortDescription || p.description || "لا يوجد وصف"
             }
-          }));
+          });});
           setProducts(formatted);
           setLoading(false);
         })
@@ -96,8 +106,18 @@ export default function ComparePage() {
                        <span className="material-symbols-rounded text-base">close</span>
                     </button>
                     <div className="space-y-4">
-                       <div className="relative aspect-square w-full rounded-2xl overflow-hidden bg-gray-50 border border-gray-100">
-                          <Image src={product.image} alt={product.title} fill className="object-contain p-4" />
+                       <div className="aspect-square w-full rounded-2xl overflow-hidden bg-gray-50 border border-gray-100 flex items-center justify-center">
+                          {product.image ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={product.image}
+                              alt={product.title}
+                              className="w-full h-full object-contain p-4"
+                              onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=300"; }}
+                            />
+                          ) : (
+                            <span className="material-symbols-rounded text-5xl text-gray-200">image_not_supported</span>
+                          )}
                        </div>
                        <div className="text-right space-y-1">
                           <p className="text-xs font-bold text-gray-400 uppercase tracking-tighter">{product.category}</p>
