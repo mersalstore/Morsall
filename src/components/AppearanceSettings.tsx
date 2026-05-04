@@ -413,8 +413,3 @@ export default function AppearanceSettings() {
     </div>
   );
 }
-
-      </div>
-    </div>
-  );
-}
