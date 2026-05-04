@@ -38,7 +38,22 @@ export async function PATCH(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
-    const { email } = await req.json();
+    const body = await req.json();
+    const { email, id, action } = body;
+
+    if (action) {
+      if (!id) return NextResponse.json({ error: "ID is required for action" }, { status: 400 });
+      let newRole = 'CUSTOMER';
+      if (action === 'BLOCK') newRole = 'BLOCKED';
+      else if (action === 'UNBLOCK') newRole = 'CUSTOMER';
+
+      const updatedUser = await prisma.user.update({
+        where: { id },
+        data: { role: newRole }
+      });
+      return NextResponse.json(updatedUser);
+    }
+
     if (!email) {
       return NextResponse.json({ error: "Email is required" }, { status: 400 });
     }

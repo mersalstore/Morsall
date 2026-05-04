@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { cn } from "@/lib/utils";
 import AddVendorModal from "./AddVendorModal";
+import ItemDetailsModal from "./ItemDetailsModal";
 
 interface UsersVendorsTabProps {
   type: "users" | "vendors";
@@ -15,6 +16,35 @@ interface UsersVendorsTabProps {
 export default function UsersVendorsTab({ type, data, onAction, classes, fetchData }: UsersVendorsTabProps) {
   const [search, setSearch] = useState("");
   const [isAddVendorOpen, setIsAddVendorOpen] = useState(false);
+  const [viewingItem, setViewingItem] = useState<any>(null);
+  const [loadingAction, setLoadingAction] = useState<string | null>(null);
+
+  const handleBlockAction = async (item: any) => {
+    if (!confirm("هل أنت متأكد من تغيير حالة هذا الحساب؟")) return;
+    setLoadingAction(item.id);
+    
+    try {
+      if (type === "users") {
+        const isBlocked = item.role === "BLOCKED";
+        await fetch("/api/admin/users", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: item.id, action: isBlocked ? "UNBLOCK" : "BLOCK" })
+        });
+      } else {
+        const isSuspended = item.status === "SUSPENDED";
+        await fetch("/api/admin/vendors", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: item.id, action: isSuspended ? "ACTIVATE" : "SUSPEND" })
+        });
+      }
+      if (fetchData) fetchData();
+    } catch (e) {
+      alert("حدث خطأ أثناء تنفيذ الإجراء");
+    }
+    setLoadingAction(null);
+  };
 
   const filtered = data.filter(item => 
     (item.name || item.storeName || "").toLowerCase().includes(search.toLowerCase()) ||
@@ -29,6 +59,12 @@ export default function UsersVendorsTab({ type, data, onAction, classes, fetchDa
         onSuccess={() => {
           if (fetchData) fetchData();
         }} 
+      />
+      <ItemDetailsModal 
+        isOpen={!!viewingItem}
+        type={type}
+        item={viewingItem}
+        onClose={() => setViewingItem(null)}
       />
       <div className="p-10 flex flex-wrap justify-between items-center gap-6 bg-white/50 border-b border-gray-100/50">
         <div className="relative flex-grow max-w-xl">
@@ -107,11 +143,27 @@ export default function UsersVendorsTab({ type, data, onAction, classes, fetchDa
                 </td>
                 <td className="px-8 py-8">
                   <div className="flex items-center justify-center gap-3">
-                    <button className="w-12 h-12 rounded-[1.2rem] bg-white border border-gray-100 text-[#021D24] flex items-center justify-center hover:bg-[#021D24] hover:text-white transition-all duration-300 shadow-xl shadow-gray-200/50">
+                    <button 
+                      onClick={() => setViewingItem(item)}
+                      className="w-12 h-12 rounded-[1.2rem] bg-white border border-gray-100 text-[#021D24] flex items-center justify-center hover:bg-[#021D24] hover:text-white transition-all duration-300 shadow-xl shadow-gray-200/50"
+                      title="عرض التفاصيل"
+                    >
                       <span className="material-symbols-rounded text-xl">person_search</span>
                     </button>
-                    <button className="w-12 h-12 rounded-[1.2rem] bg-gray-900 text-white flex items-center justify-center hover:bg-red-600 transition-all duration-300 shadow-xl">
-                      <span className="material-symbols-rounded text-xl">block</span>
+                    <button 
+                      onClick={() => handleBlockAction(item)}
+                      disabled={loadingAction === item.id}
+                      className={cn(
+                        "w-12 h-12 rounded-[1.2rem] flex items-center justify-center transition-all duration-300 shadow-xl disabled:opacity-50",
+                        (type === "users" ? item.role === "BLOCKED" : item.status === "SUSPENDED") 
+                          ? "bg-green-500 text-white hover:bg-green-600" 
+                          : "bg-gray-900 text-white hover:bg-red-600"
+                      )}
+                      title={(type === "users" ? item.role === "BLOCKED" : item.status === "SUSPENDED") ? "فك الحظر" : "حظر الحساب"}
+                    >
+                      <span className="material-symbols-rounded text-xl">
+                        {(type === "users" ? item.role === "BLOCKED" : item.status === "SUSPENDED") ? "lock_open" : "block"}
+                      </span>
                     </button>
                   </div>
                 </td>
