@@ -186,20 +186,16 @@ export default function AdminDashboard() {
             {activeTab === "orders" && <OrdersTable orders={orders} onEdit={()=>{}} onPrint={()=>{}} classes={classes} ORDER_STATUSES={ORDER_STATUSES} />}
             {activeTab === "inventory" && <InventoryTable products={inventoryProducts} onEdit={()=>{}} onAdd={()=>{}} classes={classes} />}
             {activeTab === "categories" && <CategoriesTab />}
+            {activeTab === "attributes" && <AttributesTab />}
+            {activeTab === "delivery" && <DeliveryZonesTab />}
+            {activeTab === "finance" && <FinanceTab />}
+            {activeTab === "employees" && <PersonnelTab type="employees" />}
+            {activeTab === "drivers" && <PersonnelTab type="drivers" />}
+            {activeTab === "subscriptions" && <SubscriptionsTab />}
+            {activeTab === "globalSettings" && <GlobalSettingsTab />}
             {activeTab === "users" && <UsersVendorsTab type="users" data={users} classes={classes} />}
             {activeTab === "vendors" && <UsersVendorsTab type="vendors" data={vendors} classes={classes} />}
             {activeTab === "appearance" && <AppearanceSettings />}
-            
-            {/* Fallback for other tabs - ensures functionality is preserved while modularizing */}
-            {![ "overview", "approvals", "orders", "inventory", "categories", "users", "vendors", "appearance"].includes(activeTab) && (
-              <div className="p-20 text-center bg-white/50 backdrop-blur-md rounded-[3rem] border border-dashed border-gray-200">
-                <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
-                   <span className="material-symbols-rounded text-4xl text-gray-200">construction</span>
-                </div>
-                <h3 className="text-xl font-black text-[#021D24] mb-2">هذا القسم قيد التطوير</h3>
-                <p className="text-sm text-gray-400 font-bold uppercase tracking-widest">سيتم ربط بيانات {activeTab} قريباً من الملفات المنفصلة</p>
-              </div>
-            )}
           </motion.div>
         </AnimatePresence>
       </main>
