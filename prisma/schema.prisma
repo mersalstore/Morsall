@@ -190,10 +190,14 @@ model AttributeOption {
 }
 
 model Category {
-  id       String    @id @default(cuid())
-  name     String    @unique
-  icon     String?
-  products Product[]
+  id           String     @id @default(cuid())
+  name         String     @unique
+  icon         String?
+  parentId     String?
+  showInNavbar Boolean    @default(false)
+  parent       Category?  @relation("SubCategories", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  children     Category[] @relation("SubCategories")
+  products     Product[]
 }
 
 model Order {

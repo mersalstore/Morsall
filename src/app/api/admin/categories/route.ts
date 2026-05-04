@@ -24,9 +24,13 @@ export async function GET(req: Request) {
     return NextResponse.json(category);
   }
 
-  // كل الأقسام مع العدد
+  // كل الأقسام مع العدد والعلاقات
   const categories = await prisma.category.findMany({
-    include: { _count: { select: { products: true } } },
+    include: { 
+      _count: { select: { products: true } },
+      parent: { select: { name: true } },
+      children: { select: { id: true, name: true } }
+    },
     orderBy: { name: "asc" },
   });
   return NextResponse.json(categories);
@@ -35,27 +39,55 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   const session = await getAdminSession();
   if (!session) return adminOnlyResponse();
-  const { name, icon } = await req.json();
+  const { name, icon, parentId, showInNavbar } = await req.json();
   if (!name) return NextResponse.json({ error: "الاسم مطلوب" }, { status: 400 });
-  const category = await prisma.category.create({ data: { name, icon } });
+  const category = await prisma.category.create({ 
+    data: { 
+      name, 
+      icon, 
+      parentId: parentId || null,
+      showInNavbar: !!showInNavbar 
+    } 
+  });
   return NextResponse.json(category);
 }
 
 export async function PATCH(req: Request) {
   const session = await getAdminSession();
   if (!session) return adminOnlyResponse();
-  const { id, name, icon } = await req.json();
-  const category = await prisma.category.update({
-    where: { id },
-    data: { ...(name && { name }), ...(icon !== undefined && { icon }) },
-  });
-  return NextResponse.json(category);
+  
+  try {
+    const { id, name, icon, parentId, showInNavbar } = await req.json();
+    if (!id) return NextResponse.json({ error: "المعرف مطلوب" }, { status: 400 });
+
+    const category = await prisma.category.update({
+      where: { id },
+      data: { 
+        ...(name && { name }), 
+        ...(icon !== undefined && { icon }),
+        ...(parentId !== undefined && { parentId: parentId || null }),
+        ...(showInNavbar !== undefined && { showInNavbar })
+      },
+    });
+    return NextResponse.json(category);
+  } catch (err: any) {
+    console.error("Category Update Error:", err);
+    return NextResponse.json({ error: err.message || "فشل التحديث" }, { status: 500 });
+  }
 }
 
 export async function DELETE(req: Request) {
   const session = await getAdminSession();
   if (!session) return adminOnlyResponse();
-  const { id } = await req.json();
-  await prisma.category.delete({ where: { id } });
-  return NextResponse.json({ success: true });
+  
+  try {
+    const { id } = await req.json();
+    if (!id) return NextResponse.json({ error: "المعرف مطلوب" }, { status: 400 });
+
+    await prisma.category.delete({ where: { id } });
+    return NextResponse.json({ success: true });
+  } catch (err: any) {
+    console.error("Category Delete Error:", err);
+    return NextResponse.json({ error: "لا يمكن حذف هذا القسم لأنه يحتوي على منتجات أو أقسام فرعية" }, { status: 500 });
+  }
 }

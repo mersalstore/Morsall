@@ -250,6 +250,8 @@ export default function AdminDashboard() {
 
   const [activeTab, setActiveTab] = useState<TabId>("overview");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [showSalesDetails, setShowSalesDetails] = useState(false);
+  const [showStoresDetails, setShowStoresDetails] = useState(false);
 
   // تصحيح التبويب الافتراضي بناءً على الدور
   useEffect(() => {
@@ -382,7 +384,7 @@ export default function AdminDashboard() {
   const [newEmployee, setNewEmployee] = useState({ name: "", email: "", role: "PACKING" });
   const [newDriver, setNewDriver] = useState({ name: "", phone: "", vehicleType: "مواتر (دباب)" });
   const [newZone, setNewZone] = useState({ fromCity: "", toCity: "", fee: "" });
-  const [newCategory, setNewCategory] = useState({ name: "", icon: "📦" });
+  const [newCategory, setNewCategory] = useState({ name: "", icon: "📦", parentId: "", showInNavbar: false });
   const [newProvider, setNewProvider] = useState({ name: "", apiKey: "", baseUrl: "" });
 
   // Order Edit Modal (Logestechs-style)
@@ -987,11 +989,28 @@ export default function AdminDashboard() {
   const handleAddCategory = async () => {
     if (!newCategory.name) return;
     setActionLoading("cat");
-    const r = await fetch("/api/admin/categories", { method: "POST", body: JSON.stringify(newCategory) });
+    const r = await fetch("/api/admin/categories", { 
+      method: "POST", 
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(newCategory) 
+    });
     if (r.ok) {
-      const data = await r.json();
-      setCategories(prev => [data, ...prev]);
-      setNewCategory({ name: "", icon: "" });
+      // Refresh to get full object with relations
+      fetchData();
+      setNewCategory({ name: "", icon: "📦", parentId: "", showInNavbar: false });
+    }
+    setActionLoading(null);
+  };
+
+  const toggleCategoryNavbar = async (id: string, show: boolean) => {
+    setActionLoading(id);
+    const r = await fetch("/api/admin/categories", { 
+      method: "PATCH", 
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, showInNavbar: show }) 
+    });
+    if (r.ok) {
+      setCategories(prev => prev.map(c => c.id === id ? { ...c, showInNavbar: show } : c));
     }
     setActionLoading(null);
   };
@@ -1615,15 +1634,26 @@ export default function AdminDashboard() {
               <motion.div key="overview" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   {stats.map((s, i) => (
-                    <div key={i} className="bg-white p-6 rounded-xl border border-gray-200 flex items-center gap-5 shadow-sm">
-                      <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center text-white", s.color)}>
+                    <button 
+                      key={i} 
+                      onClick={() => {
+                        if (s.label.includes("مبيعات")) setShowSalesDetails(true);
+                        else if (s.label.includes("متاجر")) setShowStoresDetails(true);
+                        else setActiveTab("finance");
+                      }}
+                      className="bg-white p-6 rounded-2xl border border-gray-100 flex items-center gap-5 shadow-xl shadow-gray-200/50 hover:scale-[1.03] hover:border-[#1089A4]/30 transition-all text-right group"
+                    >
+                      <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center text-white shadow-lg transition-transform group-hover:rotate-12", s.color)}>
                         <span className="material-symbols-rounded text-2xl">{s.icon}</span>
                       </div>
-                      <div>
-                        <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">{s.label}</p>
-                        <p className="text-3xl font-black text-[#021D24]">{s.value}</p>
+                      <div className="flex-1">
+                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-1">{s.label}</p>
+                        <div className="flex items-center justify-between">
+                          <p className="text-2xl font-black text-[#021D24]">{s.value}</p>
+                          <span className="material-symbols-rounded text-gray-200 group-hover:text-[#1089A4] group-hover:translate-x-[-4px] transition-all">arrow_back_ios</span>
+                        </div>
                       </div>
-                    </div>
+                    </button>
                   ))}
                 </div>
 
@@ -2132,27 +2162,70 @@ export default function AdminDashboard() {
               <motion.div key="categories" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
                 {/* Add Category */}
                 <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
-                  <h3 className="font-black text-[#021D24] mb-4">إضافة قسم جديد</h3>
-                  <div className="flex flex-col md:flex-row gap-3 items-center">
-                    <label className="relative cursor-pointer shrink-0">
-                      <div className="w-16 h-16 rounded-xl border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden bg-gray-50 hover:bg-gray-100 transition-colors">
-                        {newCategory.icon ? (
-                          <Image src={newCategory.icon} alt="icon" fill className="object-cover" />
-                        ) : (
-                          <span className="material-symbols-rounded text-gray-400">add_photo_alternate</span>
-                        )}
-                      </div>
-                      <input type="file" accept="image/*" onChange={handleCategoryIconChange} className="hidden" />
-                      {actionLoading === "cat_upload" && (
-                        <div className="absolute inset-0 bg-white/50 flex items-center justify-center">
-                           <span className="material-symbols-rounded animate-spin">sync</span>
+                  <h3 className="font-black text-[#021D24] mb-4 text-sm uppercase tracking-widest">إضافة قسم جديد أو فرعي</h3>
+                  <div className="space-y-4">
+                    <div className="flex flex-col md:flex-row gap-4 items-start">
+                      <label className="relative cursor-pointer shrink-0">
+                        <div className="w-16 h-16 rounded-xl border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden bg-gray-50 hover:bg-gray-100 transition-colors">
+                          {newCategory.icon && (newCategory.icon.startsWith("http") || newCategory.icon.startsWith("/")) ? (
+                            <Image src={newCategory.icon} alt="icon" fill className="object-cover" />
+                          ) : (
+                            <span className="material-symbols-rounded text-gray-400">add_photo_alternate</span>
+                          )}
                         </div>
-                      )}
-                    </label>
-                    <input value={newCategory.name} onChange={e => setNewCategory(p => ({...p, name: e.target.value}))} className="input-mersal flex-1 h-12" placeholder="اسم القسم مثلاً: ملابس" />
-                    <button onClick={handleAddCategory} disabled={actionLoading === "cat"} className="btn-primary px-8 h-12 disabled:opacity-50">
-                      إضافة +
-                    </button>
+                        <input type="file" accept="image/*" onChange={handleCategoryIconChange} className="hidden" />
+                        {actionLoading === "cat_upload" && (
+                          <div className="absolute inset-0 bg-white/50 flex items-center justify-center">
+                             <span className="material-symbols-rounded animate-spin">sync</span>
+                          </div>
+                        )}
+                      </label>
+                      
+                      <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-black text-gray-400 uppercase">اسم القسم</label>
+                          <input value={newCategory.name} onChange={e => setNewCategory(p => ({...p, name: e.target.value}))} className="input-mersal w-full h-11" placeholder="مثلاً: جوالات، أزياء..." />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-black text-gray-400 uppercase">القسم الأب (اختياري)</label>
+                          <select 
+                            value={(newCategory as any).parentId || ""} 
+                            onChange={e => setNewCategory(p => ({...p, parentId: e.target.value}))}
+                            className="input-mersal w-full h-11"
+                          >
+                            <option value="">قسم رئيسي (بدون أب)</option>
+                            {categories.filter(c => !c.parentId).map(c => (
+                              <option key={c.id} value={c.id}>{c.name}</option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between border-t pt-4">
+                      <label className="flex items-center gap-3 cursor-pointer group">
+                        <div className={cn(
+                          "w-10 h-5 rounded-full transition-all relative border",
+                          (newCategory as any).showInNavbar ? "bg-[#1089A4] border-[#1089A4]" : "bg-gray-200 border-gray-300"
+                        )}>
+                          <div className={cn(
+                            "absolute top-0.5 w-3.5 h-3.5 rounded-full bg-white shadow-sm transition-all",
+                            (newCategory as any).showInNavbar ? "right-5.5" : "right-0.5"
+                          )} />
+                        </div>
+                        <input 
+                          type="checkbox" 
+                          className="hidden" 
+                          checked={(newCategory as any).showInNavbar || false} 
+                          onChange={e => setNewCategory(p => ({...p, showInNavbar: e.target.checked}))} 
+                        />
+                        <span className="text-xs font-black text-gray-500 group-hover:text-[#1089A4]">إظهار في الشريط العلوي للموقع</span>
+                      </label>
+
+                      <button onClick={handleAddCategory} disabled={actionLoading === "cat" || !newCategory.name} className="bg-[#021D24] text-white px-8 h-11 rounded-xl font-black text-xs hover:bg-[#1089A4] transition-all shadow-lg disabled:opacity-50">
+                        {actionLoading === "cat" ? "جاري الحفظ..." : "إضافة القسم +"}
+                      </button>
+                    </div>
                   </div>
                 </div>
 
@@ -2160,12 +2233,22 @@ export default function AdminDashboard() {
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                   {categories.map(cat => (
                     <div key={cat.id} className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm hover:shadow-md transition-shadow relative group">
-                      <button 
-                        onClick={(e) => { e.stopPropagation(); handleDeleteCategory(cat.id); }}
-                        className="absolute top-2 left-2 w-8 h-8 bg-red-50 text-red-500 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500 hover:text-white"
-                      >
-                         <span className="material-symbols-rounded text-sm">delete</span>
-                      </button>
+                      <div className="absolute top-2 left-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); toggleCategoryNavbar(cat.id, !cat.showInNavbar); }}
+                          className={cn("w-8 h-8 rounded-lg flex items-center justify-center border", cat.showInNavbar ? "bg-blue-50 text-blue-600 border-blue-100" : "bg-gray-50 text-gray-400 border-gray-100")}
+                          title={cat.showInNavbar ? "إزالة من الشريط العلوي" : "إضافة للشريط العلوي"}
+                        >
+                           <span className="material-symbols-rounded text-sm">tab</span>
+                        </button>
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); handleDeleteCategory(cat.id); }}
+                          className="w-8 h-8 bg-red-50 text-red-500 rounded-lg border border-red-100 flex items-center justify-center hover:bg-red-500 hover:text-white"
+                        >
+                           <span className="material-symbols-rounded text-sm">delete</span>
+                        </button>
+                      </div>
+
                       <div className="cursor-pointer" onClick={async () => {
                         const r = await fetch(`/api/admin/categories?id=${cat.id}`);
                         if (r.ok) setSelectedCategory(await r.json());
@@ -2177,8 +2260,21 @@ export default function AdminDashboard() {
                              <span>{cat.icon || "📦"}</span>
                           )}
                         </div>
-                        <p className="font-black text-[#021D24] text-center">{cat.name}</p>
-                        <p className="text-xs text-gray-400 mt-1 text-center">{cat._count?.products || 0} منتج</p>
+                        <p className="font-black text-[#021D24] text-center text-sm">{cat.name}</p>
+                        <div className="flex flex-col items-center gap-1 mt-1">
+                          <p className="text-[10px] text-gray-400 font-bold uppercase">{cat._count?.products || 0} منتج</p>
+                          {cat.parent && (
+                            <span className="text-[9px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full font-black">
+                              فرعي من: {cat.parent.name}
+                            </span>
+                          )}
+                          {cat.showInNavbar && (
+                            <span className="text-[9px] bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full font-black flex items-center gap-1">
+                              <span className="w-1 h-1 bg-blue-600 rounded-full animate-pulse" />
+                              في الشريط العلوي
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -3353,6 +3449,156 @@ export default function AdminDashboard() {
           )}
         </div>
       </main>
+
+      {/* ── Drill-down Modals for Stats ── */}
+      <AnimatePresence>
+        {showSalesDetails && (
+          <div className="fixed inset-0 z-[700] flex items-center justify-center p-4">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-[#021D24]/80 backdrop-blur-xl" onClick={() => setShowSalesDetails(false)} />
+            <motion.div 
+              initial={{ y: 50, opacity: 0, scale: 0.95 }} 
+              animate={{ y: 0, opacity: 1, scale: 1 }} 
+              exit={{ y: 50, opacity: 0, scale: 0.95 }}
+              className="relative bg-white/90 rounded-[2.5rem] shadow-3xl w-full max-w-4xl z-10 overflow-hidden border border-white/20 flex flex-col max-h-[85vh]"
+            >
+              <div className="bg-gradient-to-r from-[#1089A4] to-[#021D24] p-8 text-white flex items-center justify-between">
+                <div>
+                  <h3 className="text-2xl font-black mb-1">تفاصيل مبيعات المنصة</h3>
+                  <p className="text-white/60 text-xs font-bold uppercase tracking-widest">تحليل المبيعات الأخيرة والتحويلات</p>
+                </div>
+                <button onClick={() => setShowSalesDetails(false)} className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center hover:bg-white/20 transition-all">
+                  <span className="material-symbols-rounded">close</span>
+                </button>
+              </div>
+              <div className="p-8 overflow-y-auto space-y-6">
+                 {/* Quick summary inside modal */}
+                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="bg-white p-5 rounded-2xl border border-gray-100">
+                       <span className="text-[10px] font-black text-gray-400 uppercase block mb-1">متوسط السلة</span>
+                       <span className="text-xl font-black text-[#1089A4]">{(orders.reduce((acc, curr) => acc + (curr.totalAmount || 0), 0) / (orders.length || 1)).toFixed(0)} ج.س</span>
+                    </div>
+                    <div className="bg-white p-5 rounded-2xl border border-gray-100">
+                       <span className="text-[10px] font-black text-gray-400 uppercase block mb-1">إجمالي الطرود</span>
+                       <span className="text-xl font-black text-[#F29124]">{orders.length}</span>
+                    </div>
+                    <div className="bg-white p-5 rounded-2xl border border-gray-100">
+                       <span className="text-[10px] font-black text-gray-400 uppercase block mb-1">أعلى مدينة</span>
+                       <span className="text-xl font-black text-[#021D24]">الخرطوم</span>
+                    </div>
+                 </div>
+                 
+                 <div className="bg-gray-50/50 rounded-3xl border border-gray-100 overflow-hidden">
+                    <div className="p-5 border-b flex items-center justify-between bg-white">
+                       <h4 className="font-black text-sm">أحدث المعاملات</h4>
+                       <button onClick={() => { setShowSalesDetails(false); setActiveTab("orders"); }} className="text-xs text-[#1089A4] font-black hover:underline">عرض كل الطلبات</button>
+                    </div>
+                    <div className="divide-y divide-gray-100">
+                       {orders.slice(0, 10).map(order => (
+                          <div key={order.id} className="p-4 flex items-center justify-between hover:bg-white transition-all">
+                             <div className="flex items-center gap-4">
+                                <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center text-[#1089A4]">
+                                   <span className="material-symbols-rounded">receipt_long</span>
+                                </div>
+                                <div>
+                                   <p className="text-xs font-black text-[#021D24]">طلب #{order.id.slice(-6).toUpperCase()}</p>
+                                   <p className="text-[10px] text-gray-400 font-bold">{order.city} — {new Date(order.createdAt).toLocaleDateString("ar-EG")}</p>
+                                </div>
+                             </div>
+                             <div className="text-left">
+                                <p className="text-xs font-black text-[#1089A4]">{order.totalAmount?.toLocaleString()} ج.س</p>
+                                <span className={cn("text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest", order.status === 'DELIVERED' ? 'bg-green-100 text-green-600' : 'bg-orange-100 text-orange-600')}>
+                                   {order.status}
+                                </span>
+                             </div>
+                          </div>
+                       ))}
+                    </div>
+                 </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+
+        {showStoresDetails && (
+          <div className="fixed inset-0 z-[700] flex items-center justify-center p-4">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-[#021D24]/80 backdrop-blur-xl" onClick={() => setShowStoresDetails(false)} />
+            <motion.div 
+              initial={{ y: 50, opacity: 0, scale: 0.95 }} 
+              animate={{ y: 0, opacity: 1, scale: 1 }} 
+              exit={{ y: 50, opacity: 0, scale: 0.95 }}
+              className="relative bg-white/90 rounded-[2.5rem] shadow-3xl w-full max-w-4xl z-10 overflow-hidden border border-white/20 flex flex-col max-h-[85vh]"
+            >
+              <div className="bg-gradient-to-r from-[#F29124] to-[#021D24] p-8 text-white flex items-center justify-between">
+                <div>
+                  <h3 className="text-2xl font-black mb-1">دليل المتاجر والشركاء</h3>
+                  <p className="text-white/60 text-xs font-bold uppercase tracking-widest">إدارة الموردين وأدائهم المالي</p>
+                </div>
+                <button onClick={() => setShowStoresDetails(false)} className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center hover:bg-white/20 transition-all">
+                  <span className="material-symbols-rounded">close</span>
+                </button>
+              </div>
+              <div className="p-8 overflow-y-auto space-y-6">
+                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="bg-white p-5 rounded-2xl border border-gray-100 text-center">
+                       <span className="text-[10px] font-black text-gray-400 uppercase block mb-1">المتاجر النشطة</span>
+                       <span className="text-xl font-black text-[#1089A4]">{allVendors.filter(v => v.status === 'APPROVED').length}</span>
+                    </div>
+                    <div className="bg-white p-5 rounded-2xl border border-gray-100 text-center">
+                       <span className="text-[10px] font-black text-gray-400 uppercase block mb-1">بانتظار الموافقة</span>
+                       <span className="text-xl font-black text-orange-500">{pendingVendors.length}</span>
+                    </div>
+                    <div className="bg-white p-5 rounded-2xl border border-gray-100 text-center">
+                       <span className="text-[10px] font-black text-gray-400 uppercase block mb-1">إجمالي المنتجات</span>
+                       <span className="text-xl font-black text-[#021D24]">{inventoryProducts.length}</span>
+                    </div>
+                    <div className="bg-white p-5 rounded-2xl border border-gray-100 text-center">
+                       <span className="text-[10px] font-black text-gray-400 uppercase block mb-1">نمو المتاجر</span>
+                       <span className="text-xl font-black text-green-600">+12%</span>
+                    </div>
+                 </div>
+
+                 <div className="overflow-hidden border border-gray-100 rounded-3xl">
+                    <table className="w-full text-right text-xs">
+                       <thead className="bg-gray-50 border-b text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                          <tr>
+                             <th className="px-6 py-4">المتجر</th>
+                             <th className="px-6 py-4">المدينة</th>
+                             <th className="px-6 py-4">المنتجات</th>
+                             <th className="px-6 py-4">الحالة</th>
+                             <th className="px-6 py-4">إجراء</th>
+                          </tr>
+                       </thead>
+                       <tbody className="divide-y divide-gray-100 bg-white">
+                          {allVendors.slice(0, 8).map(v => (
+                             <tr key={v.id} className="hover:bg-gray-50 transition-all">
+                                <td className="px-6 py-4">
+                                   <div className="flex items-center gap-3">
+                                      <div className="w-8 h-8 rounded-lg bg-[#021D24] text-white flex items-center justify-center font-black">{v.storeName?.[0]}</div>
+                                      <span className="font-bold">{v.storeName}</span>
+                                   </div>
+                                </td>
+                                <td className="px-6 py-4 text-gray-500">{v.location || v.city}</td>
+                                <td className="px-6 py-4 font-black text-[#1089A4]">{v._count?.products || 0}</td>
+                                <td className="px-6 py-4">
+                                   <span className={cn("text-[8px] font-black px-2 py-0.5 rounded-full uppercase", v.status === 'APPROVED' ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-500')}>
+                                      {v.status}
+                                   </span>
+                                </td>
+                                <td className="px-6 py-4">
+                                   <button onClick={() => { setShowStoresDetails(false); setActiveTab("vendors"); }} className="w-7 h-7 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400 hover:text-[#1089A4] transition-all">
+                                      <span className="material-symbols-rounded text-sm">visibility</span>
+                                   </button>
+                                </td>
+                             </tr>
+                          ))}
+                       </tbody>
+                    </table>
+                 </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       {/* ── Mobile Nav ── */}
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-[200] bg-[#021D24]/95 backdrop-blur-xl border-t border-white/10 pb-safe">

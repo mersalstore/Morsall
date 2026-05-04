@@ -10,16 +10,6 @@ import { useWishlist } from "@/lib/WishlistContext";
 import { useRouter, usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 
-const NAV_CATS = [
-  { label: "كل الأقسام",     href: "/shop",              icon: "menu" },
-  { label: "الإلكترونيات",   href: "/category/electronics", icon: "smartphone" },
-  { label: "الأزياء",        href: "/category/fashion",   icon: "checkroom" },
-  { label: "المنزل والمطبخ", href: "/category/home",      icon: "kitchen" },
-  { label: "الجمال والعناية",href: "/category/beauty",    icon: "face" },
-  { label: "العروض 🔥",       href: "/offers",            icon: "bolt" },
-  { label: "كبار المتاجر",  href: "/top-vendors",        icon: "storefront" },
-  { label: "ابدأ تجارتك",    href: "/vendor/register",   icon: "add_business" },
-];
 
 export default function Navbar() {
   const { data: session, status, update } = useSession();
@@ -30,6 +20,7 @@ export default function Navbar() {
   const [showCategories, setShowCategories] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [userCity, setUserCity] = useState("جاري التحديد...");
+  const [navCategories, setNavCategories] = useState<any[]>([]);
   const menuRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const pathname = usePathname();
@@ -38,6 +29,17 @@ export default function Navbar() {
   const [siteSettings, setSiteSettings] = useState<any>(null);
 
   useEffect(() => {
+    // Fetch dynamic categories
+    fetch("/api/admin/categories")
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          const filtered = data.filter((c: any) => c.showInNavbar);
+          setNavCategories(filtered);
+        }
+      })
+      .catch(err => console.error("Nav Categories Fetch Error:", err));
+
     fetch("/api/admin/settings/appearance")
       .then(res => res.json())
       .then(data => {
@@ -49,6 +51,19 @@ export default function Navbar() {
   if (pathname?.startsWith("/admin") || pathname?.startsWith("/vendor")) {
     return null;
   }
+
+  // Combine static and dynamic
+  const ALL_NAV_LINKS = [
+    { label: "كل الأقسام", href: "/shop", icon: "menu" },
+    ...navCategories.map(c => ({
+      label: c.name,
+      href: `/category/${c.id}`,
+      icon: c.icon || "category"
+    })),
+    { label: "العروض 🔥", href: "/offers", icon: "bolt" },
+    { label: "كبار المتاجر", href: "/top-vendors", icon: "storefront" },
+    { label: "ابدأ تجارتك", href: "/vendor/register", icon: "add_business" },
+  ];
 
 
   const handleSearch = (e?: React.FormEvent) => {
@@ -332,13 +347,13 @@ export default function Navbar() {
 
           {/* Categories Links */}
           <div className="flex items-center h-full overflow-x-auto scrollbar-none">
-            {NAV_CATS.slice(1).map(cat => (
+            {ALL_NAV_LINKS.slice(1).map(link => (
               <Link
-                key={cat.href}
-                href={cat.href}
+                key={link.href}
+                href={link.href}
                 className="px-5 h-full flex items-center text-[12px] font-bold text-white/60 hover:text-white hover:bg-white/5 transition-all whitespace-nowrap"
               >
-                {cat.label}
+                {link.label}
               </Link>
             ))}
           </div>
@@ -378,16 +393,16 @@ export default function Navbar() {
                 </button>
               </div>
               <div className="space-y-2">
-                {NAV_CATS.map(cat => (
+                {ALL_NAV_LINKS.map(link => (
                   <Link
-                    key={cat.href}
-                    href={cat.href}
+                    key={link.href}
+                    href={link.href}
                     onClick={() => setShowCategories(false)}
                     className="flex items-center justify-between px-4 py-4 rounded-2xl hover:bg-white/5 border border-white/5 transition-all group"
                   >
                     <div className="flex items-center gap-4">
-                      <span className="material-symbols-rounded text-[#F29124] group-hover:scale-110 transition-transform">{cat.icon}</span>
-                      <span className="font-bold">{cat.label}</span>
+                      <span className="material-symbols-rounded text-[#F29124] group-hover:scale-110 transition-transform">{link.icon}</span>
+                      <span className="font-bold">{link.label}</span>
                     </div>
                     <span className="material-symbols-rounded text-sm opacity-20">chevron_left</span>
                   </Link>
