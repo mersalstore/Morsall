@@ -98,8 +98,9 @@ export default function AdminSidebar({ activeTab, setActiveTab, userRole, isOpen
       )}
 
       <aside className={cn(
-        "fixed inset-y-0 right-0 w-80 bg-gradient-to-b from-[#021D24] via-[#021D24] to-[#011419] text-white flex flex-col h-screen shadow-[0_0_50px_rgba(0,0,0,0.5)] z-[60] overflow-y-auto custom-scrollbar transition-transform duration-500 lg:translate-x-0 lg:sticky lg:top-0 lg:flex border-l border-white/5",
-        isOpen ? "translate-x-0" : "translate-x-full"
+        "fixed inset-y-0 right-0 w-80 bg-gradient-to-b from-[#021D24] via-[#021D24] to-[#011419] text-white flex flex-col h-screen shadow-[0_0_50px_rgba(0,0,0,0.5)] z-[60] overflow-y-auto custom-scrollbar transition-transform duration-500 border-l border-white/5",
+        "lg:sticky lg:top-0 lg:translate-x-0 lg:shrink-0",
+        isOpen ? "translate-x-0" : "translate-x-full lg:translate-x-0"
       )} dir="rtl">
       {/* Logo Section */}
       <div className="p-10 border-b border-white/5 bg-white/5 backdrop-blur-sm relative overflow-hidden group">

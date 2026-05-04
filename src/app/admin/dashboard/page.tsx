@@ -135,7 +135,8 @@ export default function AdminDashboard() {
           <div className="flex items-center gap-4 md:gap-6 w-full md:w-auto">
             <button 
               onClick={() => setIsSidebarOpen(true)}
-              className="lg:hidden w-14 h-14 shrink-0 bg-[#021D24] text-white rounded-[1.2rem] shadow-xl flex items-center justify-center hover:bg-[#1089A4] transition-all"
+              className="lg:hidden w-14 h-14 shrink-0 bg-[#021D24] text-white rounded-[1.2rem] shadow-xl flex items-center justify-center hover:bg-[#1089A4] active:scale-95 transition-all z-30"
+              aria-label="فتح القائمة"
             >
               <span className="material-symbols-rounded text-2xl">menu</span>
             </button>
