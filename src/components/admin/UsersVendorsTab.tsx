@@ -2,16 +2,19 @@
 
 import React, { useState } from "react";
 import { cn } from "@/lib/utils";
+import AddVendorModal from "./AddVendorModal";
 
 interface UsersVendorsTabProps {
   type: "users" | "vendors";
   data: any[];
   onAction?: (id: string, action: string) => void;
   classes: any;
+  fetchData?: () => void;
 }
 
-export default function UsersVendorsTab({ type, data, onAction, classes }: UsersVendorsTabProps) {
+export default function UsersVendorsTab({ type, data, onAction, classes, fetchData }: UsersVendorsTabProps) {
   const [search, setSearch] = useState("");
+  const [isAddVendorOpen, setIsAddVendorOpen] = useState(false);
 
   const filtered = data.filter(item => 
     (item.name || item.storeName || "").toLowerCase().includes(search.toLowerCase()) ||
@@ -20,6 +23,13 @@ export default function UsersVendorsTab({ type, data, onAction, classes }: Users
 
   return (
     <div className={cn(classes.card, "border-0 shadow-none")}>
+      <AddVendorModal 
+        isOpen={isAddVendorOpen} 
+        onClose={() => setIsAddVendorOpen(false)} 
+        onSuccess={() => {
+          if (fetchData) fetchData();
+        }} 
+      />
       <div className="p-10 flex flex-wrap justify-between items-center gap-6 bg-white/50 border-b border-gray-100/50">
         <div className="relative flex-grow max-w-xl">
           <span className="absolute right-6 top-1/2 -translate-y-1/2 material-symbols-rounded text-[#1089A4]">search</span>
@@ -30,6 +40,15 @@ export default function UsersVendorsTab({ type, data, onAction, classes }: Users
             className={cn(classes.input, "pr-16")} 
           />
         </div>
+        {type === "vendors" && (
+          <button 
+            onClick={() => setIsAddVendorOpen(true)}
+            className={cn(classes.btnPrimary, "flex items-center gap-2 px-8")}
+          >
+            <span className="material-symbols-rounded">add</span>
+            إضافة مورد جديد
+          </button>
+        )}
       </div>
 
       <div className="overflow-x-auto">

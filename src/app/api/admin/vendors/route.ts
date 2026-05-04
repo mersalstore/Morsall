@@ -27,10 +27,8 @@ export async function GET() {
 }
 export async function POST(req: Request) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!(session as any)?.user?.email || (session as any).user.role !== 'ADMIN') {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
-    }
+    const session = await getAdminSession();
+    if (!session) return adminOnlyResponse();
 
     const body = await req.json();
     const { storeName, ownerName, ownerEmail, ownerPassword, phone, location } = body;

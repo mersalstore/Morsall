@@ -249,8 +249,8 @@ export default function AdminDashboard() {
             {activeTab === "subscriptions" && <SubscriptionsTab />}
             {activeTab === "globalSettings" && <GlobalSettingsTab />}
             {activeTab === "categories" && <CategoriesTab />}
-            {activeTab === "users" && <UsersVendorsTab type="users" data={users} classes={classes} />}
-            {activeTab === "vendors" && <UsersVendorsTab type="vendors" data={vendors} classes={classes} />}
+            {activeTab === "users" && <UsersVendorsTab type="users" data={users} classes={classes} fetchData={fetchData} />}
+            {activeTab === "vendors" && <UsersVendorsTab type="vendors" data={vendors} classes={classes} fetchData={fetchData} />}
             {activeTab === "appearance" && <AppearanceSettings />}
           </motion.div>
         </AnimatePresence>
