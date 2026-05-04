@@ -6,7 +6,7 @@ import { Plus, Trash2, MapPin, Truck } from "lucide-react";
 export default function DeliveryZonesTab() {
   const [zones, setZones] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [formData, setFormData] = useState({ name: "", fee: "" });
+  const [formData, setFormData] = useState({ fromCity: "الخرطوم", toCity: "", fee: "" });
 
   useEffect(() => { fetchZones(); }, []);
 
@@ -21,9 +21,13 @@ export default function DeliveryZonesTab() {
     const res = await fetch("/api/admin/delivery-zones", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: formData.name, fee: parseFloat(formData.fee) })
+      body: JSON.stringify({ 
+        fromCity: formData.fromCity, 
+        toCity: formData.toCity, 
+        fee: parseFloat(formData.fee) 
+      })
     });
-    if (res.ok) { fetchZones(); setFormData({ name: "", fee: "" }); }
+    if (res.ok) { fetchZones(); setFormData({ fromCity: "الخرطوم", toCity: "", fee: "" }); }
   };
 
   const handleDelete = async (id: string) => {
@@ -36,7 +40,7 @@ export default function DeliveryZonesTab() {
     fetchZones();
   };
 
-  if (loading) return <div className="p-20 text-center font-black text-gray-400">جاري التحميل...</div>;
+  if (loading) return <div className="p-20 text-center font-black text-gray-400">جاري تحميل مناطق التوصيل...</div>;
 
   return (
     <div className="space-y-12">
@@ -45,12 +49,19 @@ export default function DeliveryZonesTab() {
             <h2 className="text-3xl font-black text-[#021D24]">مناطق التوصيل</h2>
             <p className="text-gray-400 text-sm font-medium">إدارة رسوم التوصيل لمختلف المناطق والمدن.</p>
          </div>
-         <form onSubmit={handleAdd} className="flex gap-3 bg-white p-3 rounded-3xl border border-gray-100 shadow-2xl shadow-gray-200/50">
+         <form onSubmit={handleAdd} className="flex flex-wrap gap-3 bg-white p-3 rounded-[2rem] border border-gray-100 shadow-2xl shadow-gray-200/50">
             <input 
-              placeholder="اسم المنطقة" 
-              value={formData.name}
-              onChange={e => setFormData({...formData, name: e.target.value})}
-              className="bg-gray-50 px-6 py-3 rounded-2xl text-sm font-bold outline-none border border-transparent focus:border-[#1089A4]" 
+              placeholder="من مدينة" 
+              value={formData.fromCity}
+              onChange={e => setFormData({...formData, fromCity: e.target.value})}
+              className="w-32 bg-gray-50 px-6 py-3 rounded-2xl text-sm font-bold outline-none border border-transparent focus:border-[#1089A4]" 
+              required 
+            />
+            <input 
+              placeholder="إلى مدينة" 
+              value={formData.toCity}
+              onChange={e => setFormData({...formData, toCity: e.target.value})}
+              className="w-32 bg-gray-50 px-6 py-3 rounded-2xl text-sm font-bold outline-none border border-transparent focus:border-[#1089A4]" 
               required 
             />
             <input 
@@ -61,7 +72,7 @@ export default function DeliveryZonesTab() {
               className="w-24 bg-gray-50 px-4 py-3 rounded-2xl text-sm font-bold outline-none border border-transparent focus:border-[#1089A4]" 
               required 
             />
-            <button className="bg-[#1089A4] text-white px-6 py-3 rounded-2xl font-black text-xs hover:bg-[#021D24] transition-all">إضافة</button>
+            <button className="bg-[#1089A4] text-white px-8 py-3 rounded-2xl font-black text-xs hover:bg-[#021D24] transition-all">إضافة</button>
          </form>
       </div>
 
@@ -73,7 +84,7 @@ export default function DeliveryZonesTab() {
                      <MapPin size={24} />
                   </div>
                   <div>
-                     <h4 className="font-black text-[#021D24]">{zone.name}</h4>
+                     <h4 className="font-black text-[#021D24]">{zone.fromCity} ➔ {zone.toCity}</h4>
                      <p className="text-[10px] font-black text-[#1089A4] uppercase tracking-widest mt-1">رسوم التوصيل: {zone.fee} ج.س</p>
                   </div>
                </div>

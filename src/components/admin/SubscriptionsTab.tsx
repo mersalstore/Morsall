@@ -9,12 +9,13 @@ export default function SubscriptionsTab() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/admin/subscriptions")
+    fetch("/api/admin/subscriptions/plans")
       .then(res => res.json())
       .then(data => {
-        setPlans(data);
+        setPlans(Array.isArray(data) ? data : []);
         setLoading(false);
-      });
+      })
+      .catch(() => setLoading(false));
   }, []);
 
   if (loading) return <div className="p-20 text-center font-black text-gray-400">جاري تحميل باقات الاشتراك...</div>;
