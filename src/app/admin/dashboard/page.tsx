@@ -131,18 +131,18 @@ export default function AdminDashboard() {
       />
       
       <main className="flex-1 p-8 md:p-16 overflow-y-auto relative z-10 custom-scrollbar w-full">
-        <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-16 gap-6">
-          <div className="flex items-center gap-4">
+        <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 md:mb-16 gap-6 w-full relative z-20">
+          <div className="flex items-center gap-4 md:gap-6 w-full md:w-auto">
             <button 
               onClick={() => setIsSidebarOpen(true)}
-              className="lg:hidden w-12 h-12 bg-white rounded-2xl shadow-lg border border-gray-100 flex items-center justify-center text-[#021D24]"
+              className="lg:hidden w-14 h-14 shrink-0 bg-[#021D24] text-white rounded-[1.2rem] shadow-xl flex items-center justify-center hover:bg-[#1089A4] transition-all"
             >
-              <span className="material-symbols-rounded">menu</span>
+              <span className="material-symbols-rounded text-2xl">menu</span>
             </button>
             <div>
-              <div className="flex items-center gap-3 mb-2">
-               <span className="w-8 h-1.5 bg-[#F29124] rounded-full" />
-               <h1 className="text-4xl font-black text-[#021D24] tracking-tight">
+              <div className="flex items-center gap-3 mb-1">
+               <span className="hidden md:block w-8 h-1.5 bg-[#F29124] rounded-full" />
+               <h1 className="text-2xl md:text-4xl font-black text-[#021D24] tracking-tight">
                  {activeTab === "overview" ? "لوحة القيادة" : 
                   activeTab === "orders" ? "إدارة الطلبيات" :
                   activeTab === "inventory" ? "المخزون المركزي" :
@@ -156,7 +156,7 @@ export default function AdminDashboard() {
             </p>
           </div>
           
-          <div className="flex items-center gap-6 bg-white/60 backdrop-blur-xl p-3 pr-6 rounded-[2rem] border border-white shadow-2xl shadow-gray-200/50">
+          <div className="flex items-center gap-6 bg-white/80 backdrop-blur-xl p-3 pr-6 rounded-[2rem] border border-white shadow-xl shadow-gray-200/50 w-full md:w-auto justify-between md:justify-start">
              <div className="text-right">
                 <p className="font-black text-[#021D24] text-sm leading-tight">{session?.user?.name || "مدير النظام"}</p>
                 <p className="text-[9px] text-[#F29124] font-black uppercase tracking-widest mt-1">Super Admin Account</p>
