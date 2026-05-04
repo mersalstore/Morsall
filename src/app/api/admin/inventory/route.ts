@@ -1,3 +1,5 @@
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/db";
 import { getAdminSession, adminOnlyResponse } from "@/lib/session";
 
 // GET — Fetch all products for the inventory dashboard
