@@ -17,6 +17,8 @@ import PersonnelTab from "@/components/admin/PersonnelTab";
 import GlobalSettingsTab from "@/components/admin/GlobalSettingsTab";
 import SubscriptionsTab from "@/components/admin/SubscriptionsTab";
 import AddProductModal from "@/components/admin/AddProductModal";
+import EditOrderModal from "@/components/admin/EditOrderModal";
+import PrintInvoiceModal from "@/components/admin/PrintInvoiceModal";
 import { cn } from "@/lib/utils";
 import { useSession } from "next-auth/react";
 
@@ -44,6 +46,7 @@ export default function AdminDashboard() {
   const [isAddProductOpen, setIsAddProductOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<any>(null);
   const [editingOrder, setEditingOrder] = useState<any>(null);
+  const [printingOrder, setPrintingOrder] = useState<any>(null);
 
   const classes = {
     card: "bg-white/80 backdrop-blur-xl rounded-[2.5rem] shadow-2xl shadow-gray-200/40 border border-white/20 overflow-hidden transition-all duration-500",
@@ -197,13 +200,27 @@ export default function AdminDashboard() {
             )}
             {activeTab === "approvals" && <ApprovalsTab pendingVendors={pendingVendors} pendingProducts={pendingProducts} onVendorAction={handleVendorAction} onProductAction={handleProductAction} classes={classes} />}
             {activeTab === "orders" && (
-              <OrdersTable 
-                orders={orders} 
-                onEdit={setEditingOrder} 
-                onPrint={()=>{}} 
-                classes={classes} 
-                ORDER_STATUSES={ORDER_STATUSES} 
-              />
+              <>
+                <OrdersTable 
+                  orders={orders} 
+                  onEdit={setEditingOrder} 
+                  onPrint={setPrintingOrder} 
+                  classes={classes} 
+                  ORDER_STATUSES={ORDER_STATUSES} 
+                />
+                <EditOrderModal
+                  isOpen={!!editingOrder}
+                  order={editingOrder}
+                  onClose={() => setEditingOrder(null)}
+                  onSuccess={fetchData}
+                  ORDER_STATUSES={ORDER_STATUSES}
+                />
+                <PrintInvoiceModal
+                  isOpen={!!printingOrder}
+                  order={printingOrder}
+                  onClose={() => setPrintingOrder(null)}
+                />
+              </>
             )}
             {activeTab === "inventory" && (
               <>

@@ -5,6 +5,7 @@ import { Users, Truck, Plus, Trash2, ShieldCheck, Mail, Phone } from "lucide-rea
 import { cn } from "@/lib/utils";
 
 import AddPersonnelModal from "./AddPersonnelModal";
+import EditPermissionsModal from "./EditPermissionsModal";
 
 interface PersonnelTabProps {
   type: "employees" | "drivers";
@@ -14,6 +15,7 @@ export default function PersonnelTab({ type }: PersonnelTabProps) {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isAddOpen, setIsAddOpen] = useState(false);
+  const [editingPerson, setEditingPerson] = useState<any>(null);
 
   useEffect(() => {
     fetchData();
@@ -41,6 +43,12 @@ export default function PersonnelTab({ type }: PersonnelTabProps) {
         onClose={() => setIsAddOpen(false)} 
         onSuccess={fetchData} 
         type={type} 
+      />
+      <EditPermissionsModal 
+        isOpen={!!editingPerson}
+        person={editingPerson}
+        onClose={() => setEditingPerson(null)}
+        onSuccess={fetchData}
       />
       <div className="flex justify-between items-center">
          <div className="flex items-center gap-6">
@@ -94,7 +102,7 @@ export default function PersonnelTab({ type }: PersonnelTabProps) {
                         <ShieldCheck size={14} className="text-[#1089A4]" />
                         <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">نشط</span>
                      </div>
-                     <button className="text-[10px] font-black text-[#1089A4] hover:underline underline-offset-4">تعديل الصلاحيات</button>
+                     <button onClick={() => setEditingPerson(person)} className="text-[10px] font-black text-[#1089A4] hover:underline underline-offset-4">تعديل الصلاحيات</button>
                   </div>
                </div>
                <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-gray-50/50 rounded-full blur-2xl group-hover:bg-[#1089A4]/5 transition-colors" />
