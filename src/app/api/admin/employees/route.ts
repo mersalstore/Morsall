@@ -1,6 +1,8 @@
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/db";
 import { getAdminSession, adminOnlyResponse } from "@/lib/session";
 
-const db = prisma as any;
+const db = prisma;
 
 // GET — جلب قائمة الموظفين
 export async function GET() {
@@ -18,10 +20,8 @@ export async function GET() {
 // POST — إضافة موظف جديد ومزامنة الدور مع جدول المستخدمين
 export async function POST(req: Request) {
   try {
-    const session = await getServerSession(authOptions);
-    if ((session?.user as any)?.role !== "ADMIN") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const session = await getAdminSession();
+    if (!session) return adminOnlyResponse();
 
     const { name, email, role } = await req.json();
     if (!name || !email || !role) {

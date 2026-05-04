@@ -1,14 +1,9 @@
-import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
-import { prisma } from "@/lib/db";
+import { getAdminSession, adminOnlyResponse } from "@/lib/session";
 
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions);
-    if (!(session as any)?.user?.email || (session as any).user.role !== 'ADMIN') {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
-    }
+    const session = await getAdminSession();
+    if (!session) return adminOnlyResponse();
 
     const vendors = await prisma.vendor.findMany({
       include: {
@@ -21,19 +16,7 @@ export async function GET() {
       orderBy: { createdAt: 'desc' }
     });
 
-    return NextResponse.json(vendors.map((v: any) => ({
-      id: v.id,
-      name: v.storeName,
-      owner: v.user?.name || "بدون اسم",
-      email: v.user?.email,
-      sales: 0,
-      rating: "5.0",
-      status: v.status === 'APPROVED' ? 'نشط' : (v.status === 'PENDING' ? 'قيد المراجعة' : 'موقف'),
-      productsCount: v._count.products,
-      subscriptionEndsAt: v.subscriptionEndsAt,
-      plan: v.plan,
-      slug: v.slug
-    })));
+    return NextResponse.json(vendors);
 
   } catch (error) {
     console.error("Fetch Vendors Error:", error);
@@ -95,10 +78,8 @@ export async function POST(req: Request) {
 // PATCH — موافقة أو رفض بائع
 export async function PATCH(req: Request) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!(session as any)?.user?.email || (session as any).user.role !== 'ADMIN') {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
-    }
+    const session = await getAdminSession();
+    if (!session) return adminOnlyResponse();
 
     const { id, action } = await req.json();
     if (!id || !action) return NextResponse.json({ error: "Missing ID or Action" }, { status: 400 });
@@ -135,10 +116,8 @@ export async function PATCH(req: Request) {
 
 export async function DELETE(req: Request) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!(session as any)?.user?.email || (session as any).user.role !== 'ADMIN') {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
-    }
+    const session = await getAdminSession();
+    if (!session) return adminOnlyResponse();
 
     const { id } = await req.json();
     await prisma.vendor.delete({ where: { id } });

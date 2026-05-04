@@ -42,6 +42,8 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [isAddProductOpen, setIsAddProductOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<any>(null);
+  const [editingOrder, setEditingOrder] = useState<any>(null);
 
   const classes = {
     card: "bg-white/80 backdrop-blur-xl rounded-[2.5rem] shadow-2xl shadow-gray-200/40 border border-white/20 overflow-hidden transition-all duration-500",
@@ -69,7 +71,10 @@ export default function AdminDashboard() {
       ]);
       if (resOrders.ok) setOrders(await resOrders.json());
       if (resProducts.ok) setInventoryProducts(await resProducts.json());
-      if (resStats.ok) setStats(await resStats.json());
+      if (resStats.ok) {
+        const d = await resStats.json();
+        setStats(d.stats || []);
+      }
       if (resUsers.ok) setUsers(await resUsers.json());
       if (resVendors.ok) setVendors(await resVendors.json());
       if (resPending?.ok) {
@@ -191,13 +196,30 @@ export default function AdminDashboard() {
               </div>
             )}
             {activeTab === "approvals" && <ApprovalsTab pendingVendors={pendingVendors} pendingProducts={pendingProducts} onVendorAction={handleVendorAction} onProductAction={handleProductAction} classes={classes} />}
-            {activeTab === "orders" && <OrdersTable orders={orders} onEdit={()=>{}} onPrint={()=>{}} classes={classes} ORDER_STATUSES={ORDER_STATUSES} />}
+            {activeTab === "orders" && (
+              <OrdersTable 
+                orders={orders} 
+                onEdit={setEditingOrder} 
+                onPrint={()=>{}} 
+                classes={classes} 
+                ORDER_STATUSES={ORDER_STATUSES} 
+              />
+            )}
             {activeTab === "inventory" && (
               <>
-                <InventoryTable products={inventoryProducts} onEdit={()=>{}} onAdd={() => setIsAddProductOpen(true)} classes={classes} />
+                <InventoryTable 
+                  products={inventoryProducts} 
+                  onEdit={setEditingProduct} 
+                  onAdd={() => setIsAddProductOpen(true)} 
+                  classes={classes} 
+                />
                 <AddProductModal 
-                  isOpen={isAddProductOpen} 
-                  onClose={() => setIsAddProductOpen(false)} 
+                  isOpen={isAddProductOpen || !!editingProduct} 
+                  editingProduct={editingProduct}
+                  onClose={() => {
+                    setIsAddProductOpen(false);
+                    setEditingProduct(null);
+                  }} 
                   onSuccess={fetchData} 
                 />
               </>

@@ -4,6 +4,8 @@ import React, { useState, useEffect } from "react";
 import { Users, Truck, Plus, Trash2, ShieldCheck, Mail, Phone } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+import AddPersonnelModal from "./AddPersonnelModal";
+
 interface PersonnelTabProps {
   type: "employees" | "drivers";
 }
@@ -11,6 +13,7 @@ interface PersonnelTabProps {
 export default function PersonnelTab({ type }: PersonnelTabProps) {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isAddOpen, setIsAddOpen] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -33,6 +36,12 @@ export default function PersonnelTab({ type }: PersonnelTabProps) {
 
   return (
     <div className="space-y-10">
+      <AddPersonnelModal 
+        isOpen={isAddOpen} 
+        onClose={() => setIsAddOpen(false)} 
+        onSuccess={fetchData} 
+        type={type} 
+      />
       <div className="flex justify-between items-center">
          <div className="flex items-center gap-6">
             <div className="w-16 h-16 rounded-[2rem] bg-[#021D24] text-white flex items-center justify-center shadow-2xl">
@@ -43,7 +52,10 @@ export default function PersonnelTab({ type }: PersonnelTabProps) {
                <p className="text-gray-400 text-xs font-bold uppercase tracking-widest mt-1">Personnel Management System</p>
             </div>
          </div>
-         <button className="bg-[#1089A4] text-white px-10 py-5 rounded-[1.5rem] font-black text-sm shadow-xl hover:bg-[#021D24] transition-all flex items-center gap-3">
+         <button 
+           onClick={() => setIsAddOpen(true)}
+           className="bg-[#1089A4] text-white px-10 py-5 rounded-[1.5rem] font-black text-sm shadow-xl hover:bg-[#021D24] transition-all flex items-center gap-3"
+         >
             <Plus size={20} />
             إضافة {type === 'employees' ? 'موظف' : 'مندوب'} جديد
          </button>

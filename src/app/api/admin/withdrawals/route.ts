@@ -1,31 +1,21 @@
-import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
-import { prisma } from "@/lib/db";
+import { getAdminSession, adminOnlyResponse } from "@/lib/session";
 
 // GET all withdrawals
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions);
-    if (!(session as any)?.user?.email || (session as any).user.role !== 'ADMIN') {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
-    }
+    const session = await getAdminSession();
+    if (!session) return adminOnlyResponse();
 
     const withdrawals = await prisma.withdrawal.findMany({
       include: {
-        vendor: true
+        vendor: {
+          include: { user: true }
+        }
       },
       orderBy: { createdAt: 'desc' }
     });
 
-    return NextResponse.json(withdrawals.map((w: any) => ({
-      id: w.id,
-      vendor: w.vendor.storeName,
-      amount: w.amount,
-      status: w.status,
-      date: new Date(w.createdAt).toLocaleString('ar-EG'),
-      method: "بنك الخرطوم" // Default for now
-    })));
+    return NextResponse.json(withdrawals);
 
   } catch (error) {
     console.error("Fetch Withdrawals Error:", error);
@@ -36,10 +26,8 @@ export async function GET() {
 // PATCH update withdrawal status
 export async function PATCH(req: Request) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!(session as any)?.user?.email || (session as any).user.role !== 'ADMIN') {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
-    }
+    const session = await getAdminSession();
+    if (!session) return adminOnlyResponse();
 
     const { id, status } = await req.json();
 

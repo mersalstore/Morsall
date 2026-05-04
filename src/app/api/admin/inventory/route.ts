@@ -117,3 +117,32 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Internal Server Error: " + error.message }, { status: 500 });
   }
 }
+export async function PATCH(req: Request) {
+  try {
+    const session = await getAdminSession();
+    if (!session) return adminOnlyResponse();
+
+    const { id, title, description, price, stock, categoryId, vendorId, images, sku } = await req.json();
+
+    if (!id) return NextResponse.json({ error: "id مطلوب" }, { status: 400 });
+
+    const updated = await prisma.product.update({
+      where: { id },
+      data: {
+        title,
+        description,
+        price: price !== undefined ? parseFloat(price) : undefined,
+        stock: stock !== undefined ? parseInt(stock) : undefined,
+        categoryId,
+        vendorId,
+        images,
+        sku
+      }
+    });
+
+    return NextResponse.json(updated);
+  } catch (error: any) {
+    console.error("Inventory PATCH error:", error);
+    return NextResponse.json({ error: "Internal Server Error: " + error.message }, { status: 500 });
+  }
+}

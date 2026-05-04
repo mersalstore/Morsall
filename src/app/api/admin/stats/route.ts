@@ -1,15 +1,9 @@
-import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
-import { prisma } from "@/lib/db";
+import { getAdminSession, adminOnlyResponse } from "@/lib/session";
 
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!(session as any)?.user?.email || (session as any).user.role !== 'ADMIN') {
-      return NextResponse.json({ error: "Unauthorized Access" }, { status: 403 });
-    }
+    const session = await getAdminSession();
+    if (!session) return adminOnlyResponse();
 
     // Get date 7 days ago
     const sevenDaysAgo = new Date();

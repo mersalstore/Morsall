@@ -1,7 +1,4 @@
-import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { getAdminSession, adminOnlyResponse } from "@/lib/session";
 
 export async function GET() {
   try {
@@ -15,13 +12,8 @@ export async function GET() {
 
 export async function PATCH(req: Request) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session || (session.user as any).role !== "ADMIN") {
-      // Special check for our super-admin credentials just in case session is tricky
-      // but standard auth should handle it. 
-      // For now, let's stick to session.
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const session = await getAdminSession();
+    if (!session) return adminOnlyResponse();
 
     const body = await req.json();
     const { type, id, ...data } = body;

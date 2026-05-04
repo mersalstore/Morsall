@@ -8,9 +8,10 @@ interface AddProductModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
+  editingProduct?: any;
 }
 
-export default function AddProductModal({ isOpen, onClose, onSuccess }: AddProductModalProps) {
+export default function AddProductModal({ isOpen, onClose, onSuccess, editingProduct }: AddProductModalProps) {
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState<any[]>([]);
   const [vendors, setVendors] = useState<any[]>([]);
@@ -29,8 +30,23 @@ export default function AddProductModal({ isOpen, onClose, onSuccess }: AddProdu
     if (isOpen) {
       fetch("/api/admin/categories").then(res => res.json()).then(setCategories);
       fetch("/api/admin/vendors").then(res => res.json()).then(setVendors);
+
+      if (editingProduct) {
+        setFormData({
+          title: editingProduct.title || "",
+          description: editingProduct.description || "",
+          price: editingProduct.price?.toString() || "",
+          stock: editingProduct.stock?.toString() || "",
+          categoryId: editingProduct.categoryId || "",
+          vendorId: editingProduct.vendorId || "",
+          sku: editingProduct.sku || "",
+          images: Array.isArray(editingProduct.images) ? editingProduct.images : (editingProduct.images?.split(",").filter(Boolean) || [])
+        });
+      } else {
+        setFormData({ title: "", description: "", price: "", stock: "", categoryId: "", vendorId: "", sku: "", images: [] });
+      }
     }
-  }, [isOpen]);
+  }, [isOpen, editingProduct]);
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -54,10 +70,11 @@ export default function AddProductModal({ isOpen, onClose, onSuccess }: AddProdu
     e.preventDefault();
     setLoading(true);
     const res = await fetch("/api/admin/inventory", {
-      method: "POST",
+      method: editingProduct ? "PATCH" : "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         ...formData,
+        id: editingProduct?.id,
         price: parseFloat(formData.price),
         stock: parseInt(formData.stock),
         images: formData.images.join(",")
@@ -91,8 +108,8 @@ export default function AddProductModal({ isOpen, onClose, onSuccess }: AddProdu
               <Package size={32} />
            </div>
            <div>
-              <h2 className="text-3xl font-black text-[#021D24]">إضافة منتج جديد</h2>
-              <p className="text-gray-400 text-xs font-bold uppercase tracking-widest mt-1">Add new inventory item</p>
+              <h2 className="text-3xl font-black text-[#021D24]">{editingProduct ? "تعديل بيانات المنتج" : "إضافة منتج جديد"}</h2>
+              <p className="text-gray-400 text-xs font-bold uppercase tracking-widest mt-1">{editingProduct ? "Update inventory item" : "Add new inventory item"}</p>
            </div>
         </div>
 
@@ -156,7 +173,7 @@ export default function AddProductModal({ isOpen, onClose, onSuccess }: AddProdu
 
               <button type="submit" disabled={loading} className="w-full bg-[#1089A4] text-white py-6 rounded-2xl font-black shadow-xl hover:bg-[#021D24] transition-all flex items-center justify-center gap-4 active:scale-95 disabled:opacity-50 mt-auto">
                  {loading ? <div className="w-6 h-6 border-4 border-white border-t-transparent rounded-full animate-spin" /> : <Plus size={24} />}
-                 تأكيد إضافة المنتج
+                 {editingProduct ? "حفظ التغييرات" : "تأكيد إضافة المنتج"}
               </button>
            </div>
         </form>
