@@ -47,6 +47,7 @@ export default function AdminDashboard() {
   const [editingProduct, setEditingProduct] = useState<any>(null);
   const [editingOrder, setEditingOrder] = useState<any>(null);
   const [printingOrder, setPrintingOrder] = useState<any>(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const classes = {
     card: "bg-white/80 backdrop-blur-xl rounded-[2.5rem] shadow-2xl shadow-gray-200/40 border border-white/20 overflow-hidden transition-all duration-500",
@@ -118,12 +119,28 @@ export default function AdminDashboard() {
       <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-[#1089A4]/5 blur-[120px] rounded-full pointer-events-none" />
       <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] bg-[#F29124]/5 blur-[120px] rounded-full pointer-events-none" />
 
-      <AdminSidebar activeTab={activeTab} setActiveTab={setActiveTab} userRole={(session?.user as any)?.role || "ADMIN"} />
+      <AdminSidebar 
+        activeTab={activeTab} 
+        setActiveTab={(tab) => {
+          setActiveTab(tab);
+          setIsSidebarOpen(false);
+        }} 
+        userRole={(session?.user as any)?.role || "ADMIN"} 
+        isOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
+      />
       
-      <main className="flex-1 p-8 md:p-16 overflow-y-auto relative z-10 custom-scrollbar">
+      <main className="flex-1 p-8 md:p-16 overflow-y-auto relative z-10 custom-scrollbar w-full">
         <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-16 gap-6">
-          <div>
-            <div className="flex items-center gap-3 mb-2">
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={() => setIsSidebarOpen(true)}
+              className="lg:hidden w-12 h-12 bg-white rounded-2xl shadow-lg border border-gray-100 flex items-center justify-center text-[#021D24]"
+            >
+              <span className="material-symbols-rounded">menu</span>
+            </button>
+            <div>
+              <div className="flex items-center gap-3 mb-2">
                <span className="w-8 h-1.5 bg-[#F29124] rounded-full" />
                <h1 className="text-4xl font-black text-[#021D24] tracking-tight">
                  {activeTab === "overview" ? "لوحة القيادة" : 
