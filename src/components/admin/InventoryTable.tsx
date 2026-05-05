@@ -98,7 +98,7 @@ export default function InventoryTable({ products, onEdit, onAdd, classes }: Inv
             </div>
             <div className="flex-grow min-w-0">
               <p className="font-black text-[#021D24] text-sm truncate">{p.title}</p>
-              <p className="text-xs text-gray-400 mt-0.5">{p.category?.name || "غير مصنف"}</p>
+              <p className="text-xs text-gray-400 mt-0.5">{p.category?.name || "غير مصنف"} • {p.vendor?.storeName || "بدون مورد"}</p>
               <div className="flex items-center gap-3 mt-1.5">
                 <span className="font-black text-[#021D24] text-sm">{p.price?.toLocaleString()} <span className="text-[10px] text-[#1089A4]">ج.س</span></span>
                 <span className={cn(
@@ -131,6 +131,7 @@ export default function InventoryTable({ products, onEdit, onAdd, classes }: Inv
               <th className="px-8 py-6 rounded-tr-[2.5rem]">بيانات المنتج</th>
               <th className="px-8 py-6">الكود (SKU)</th>
               <th className="px-8 py-6">السعر</th>
+              <th className="px-8 py-6">المورد</th>
               <th className="px-8 py-6 text-center">المخزون</th>
               <th className="px-8 py-6 text-center">الحالة</th>
               <th className="px-8 py-6 text-center rounded-tl-[2.5rem]">إجراءات</th>
@@ -169,6 +170,9 @@ export default function InventoryTable({ products, onEdit, onAdd, classes }: Inv
                 <td className="px-8 py-8 font-black text-[#021D24] text-lg">
                   {p.price?.toLocaleString()}
                   <span className="text-[11px] text-[#1089A4] mr-2 font-black">ج.س</span>
+                </td>
+                <td className="px-8 py-8">
+                  <span className="text-xs font-bold text-gray-500">{p.vendor?.storeName || "بدون مورد"}</span>
                 </td>
                 <td className="px-8 py-8 text-center">
                   <span className={cn(

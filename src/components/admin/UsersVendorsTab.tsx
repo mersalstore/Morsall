@@ -11,9 +11,10 @@ interface UsersVendorsTabProps {
   onAction?: (id: string, action: string) => void;
   classes: any;
   fetchData?: () => void;
+  onAddProduct?: (vendorId: string) => void;
 }
 
-export default function UsersVendorsTab({ type, data, onAction, classes, fetchData }: UsersVendorsTabProps) {
+export default function UsersVendorsTab({ type, data, onAction, classes, fetchData, onAddProduct }: UsersVendorsTabProps) {
   const [search, setSearch] = useState("");
   const [isAddVendorOpen, setIsAddVendorOpen] = useState(false);
   const [viewingItem, setViewingItem] = useState<any>(null);
@@ -106,9 +107,19 @@ export default function UsersVendorsTab({ type, data, onAction, classes, fetchDa
               <button
                 onClick={() => setViewingItem(item)}
                 className="w-9 h-9 rounded-xl bg-[#1089A4]/10 text-[#1089A4] flex items-center justify-center hover:bg-[#1089A4] hover:text-white transition-all"
+                title="عرض التفاصيل"
               >
                 <span className="material-symbols-rounded text-base">person_search</span>
               </button>
+              {type === "vendors" && onAddProduct && (
+                <button
+                  onClick={() => onAddProduct(item.id)}
+                  className="w-9 h-9 rounded-xl bg-[#F29124]/10 text-[#F29124] flex items-center justify-center hover:bg-[#F29124] hover:text-white transition-all"
+                  title="إضافة منتج لهذا المورد"
+                >
+                  <span className="material-symbols-rounded text-base">add_box</span>
+                </button>
+              )}
               <button
                 onClick={() => handleBlockAction(item)}
                 disabled={loadingAction === item.id}
@@ -198,6 +209,15 @@ export default function UsersVendorsTab({ type, data, onAction, classes, fetchDa
                     >
                       <span className="material-symbols-rounded text-xl">person_search</span>
                     </button>
+                    {type === "vendors" && onAddProduct && (
+                      <button
+                        onClick={() => onAddProduct(item.id)}
+                        className="w-12 h-12 rounded-[1.2rem] bg-white border border-gray-100 text-[#F29124] flex items-center justify-center hover:bg-[#F29124] hover:text-white transition-all shadow-xl"
+                        title="إضافة منتج لهذا المورد"
+                      >
+                        <span className="material-symbols-rounded text-xl">add_box</span>
+                      </button>
+                    )}
                     <button
                       onClick={() => handleBlockAction(item)}
                       disabled={loadingAction === item.id}

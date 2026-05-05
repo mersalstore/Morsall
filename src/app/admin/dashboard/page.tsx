@@ -54,6 +54,7 @@ export default function AdminDashboard() {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [isAddProductOpen, setIsAddProductOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<any>(null);
+  const [initialVendorId, setInitialVendorId] = useState<string | undefined>(undefined);
   const [editingOrder, setEditingOrder] = useState<any>(null);
   const [printingOrder, setPrintingOrder] = useState<any>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -348,9 +349,11 @@ export default function AdminDashboard() {
                 <AddProductModal 
                   isOpen={isAddProductOpen || !!editingProduct} 
                   editingProduct={editingProduct}
+                  initialVendorId={initialVendorId}
                   onClose={() => {
                     setIsAddProductOpen(false);
                     setEditingProduct(null);
+                    setInitialVendorId(undefined);
                   }} 
                   onSuccess={fetchData} 
                 />
@@ -365,7 +368,7 @@ export default function AdminDashboard() {
             {activeTab === "globalSettings" && <GlobalSettingsTab />}
             {activeTab === "categories" && <CategoriesTab />}
             {activeTab === "users" && <UsersVendorsTab type="users" data={users} classes={classes} fetchData={fetchData} />}
-            {activeTab === "vendors" && <UsersVendorsTab type="vendors" data={vendors} classes={classes} fetchData={fetchData} />}
+            {activeTab === "vendors" && <UsersVendorsTab type="vendors" data={vendors} classes={classes} fetchData={fetchData} onAddProduct={(vId) => { setInitialVendorId(vId); setIsAddProductOpen(true); setActiveTab("inventory"); }} />}
             {activeTab === "appearance" && <AppearanceSettings />}
           </motion.div>
         </AnimatePresence>

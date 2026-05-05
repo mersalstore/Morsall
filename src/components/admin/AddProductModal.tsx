@@ -9,9 +9,10 @@ interface AddProductModalProps {
   onClose: () => void;
   onSuccess: () => void;
   editingProduct?: any;
+  initialVendorId?: string;
 }
 
-export default function AddProductModal({ isOpen, onClose, onSuccess, editingProduct }: AddProductModalProps) {
+export default function AddProductModal({ isOpen, onClose, onSuccess, editingProduct, initialVendorId }: AddProductModalProps) {
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [categories, setCategories] = useState<any[]>([]);
@@ -56,7 +57,7 @@ export default function AddProductModal({ isOpen, onClose, onSuccess, editingPro
           images: imgs
         });
       } else {
-        setFormData({ title: "", description: "", shortDescription: "", price: "", stock: "", categoryId: "", vendorId: "", sku: "", discountPrice: "", discountType: "PERCENTAGE", images: [] });
+        setFormData({ title: "", description: "", shortDescription: "", price: "", stock: "", categoryId: "", vendorId: initialVendorId || "", sku: "", discountPrice: "", discountType: "PERCENTAGE", images: [] });
       }
     }
   }, [isOpen, editingProduct]);
