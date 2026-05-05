@@ -127,3 +127,52 @@ export async function DELETE(req: Request) {
   }
 }
 
+export async function PUT(req: Request) {
+  try {
+    const session = await getAdminSession();
+    if (!session) return adminOnlyResponse();
+
+    const body = await req.json();
+    const { id, storeName, ownerName, ownerEmail, ownerPassword, phone, location } = body;
+
+    if (!id) return NextResponse.json({ error: "Missing Vendor ID" }, { status: 400 });
+
+    const vendor = await prisma.vendor.findUnique({ where: { id }, include: { user: true } });
+    if (!vendor) return NextResponse.json({ error: "Vendor not found" }, { status: 404 });
+
+    const updateData: any = {};
+    if (storeName) updateData.storeName = storeName;
+    if (location) updateData.location = location;
+    if (phone) updateData.phone = phone;
+
+    const userUpdateData: any = {};
+    if (ownerName) userUpdateData.name = ownerName;
+    if (ownerEmail) userUpdateData.email = ownerEmail;
+    if (phone) userUpdateData.phone = phone;
+
+    if (ownerPassword) {
+      const bcrypt = await import("bcryptjs");
+      userUpdateData.password = await bcrypt.default.hash(ownerPassword, 12);
+    }
+
+    const updatedVendor = await prisma.$transaction(async (tx: any) => {
+      if (Object.keys(userUpdateData).length > 0) {
+        await tx.user.update({
+          where: { id: vendor.userId },
+          data: userUpdateData
+        });
+      }
+      return await tx.vendor.update({
+        where: { id },
+        data: updateData,
+        include: { user: true }
+      });
+    });
+
+    return NextResponse.json(updatedVendor);
+  } catch (error: any) {
+    console.error("Admin Update Vendor Error:", error);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+  }
+}
+

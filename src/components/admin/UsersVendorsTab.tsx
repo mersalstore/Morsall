@@ -18,6 +18,7 @@ export default function UsersVendorsTab({ type, data, onAction, classes, fetchDa
   const [search, setSearch] = useState("");
   const [isAddVendorOpen, setIsAddVendorOpen] = useState(false);
   const [viewingItem, setViewingItem] = useState<any>(null);
+  const [editingItem, setEditingItem] = useState<any>(null);
   const [loadingAction, setLoadingAction] = useState<string | null>(null);
 
   const handleBlockAction = async (item: any) => {
@@ -56,8 +57,9 @@ export default function UsersVendorsTab({ type, data, onAction, classes, fetchDa
   return (
     <div className={cn(classes.card, "border-0 shadow-none")}>
       <AddVendorModal
-        isOpen={isAddVendorOpen}
-        onClose={() => setIsAddVendorOpen(false)}
+        isOpen={isAddVendorOpen || !!editingItem}
+        editingVendor={editingItem}
+        onClose={() => { setIsAddVendorOpen(false); setEditingItem(null); }}
         onSuccess={() => { if (fetchData) fetchData(); }}
       />
       <ItemDetailsModal
@@ -111,6 +113,15 @@ export default function UsersVendorsTab({ type, data, onAction, classes, fetchDa
               >
                 <span className="material-symbols-rounded text-base">person_search</span>
               </button>
+              {type === "vendors" && (
+                <button
+                  onClick={() => setEditingItem(item)}
+                  className="w-9 h-9 rounded-xl bg-blue-50 text-blue-500 flex items-center justify-center hover:bg-blue-500 hover:text-white transition-all"
+                  title="تعديل بيانات المورد"
+                >
+                  <span className="material-symbols-rounded text-base">edit</span>
+                </button>
+              )}
               {type === "vendors" && onAddProduct && (
                 <button
                   onClick={() => onAddProduct(item.id)}
@@ -209,6 +220,15 @@ export default function UsersVendorsTab({ type, data, onAction, classes, fetchDa
                     >
                       <span className="material-symbols-rounded text-xl">person_search</span>
                     </button>
+                    {type === "vendors" && (
+                      <button
+                        onClick={() => setEditingItem(item)}
+                        className="w-12 h-12 rounded-[1.2rem] bg-white border border-gray-100 text-blue-500 flex items-center justify-center hover:bg-blue-500 hover:text-white transition-all shadow-xl"
+                        title="تعديل بيانات المورد"
+                      >
+                        <span className="material-symbols-rounded text-xl">edit</span>
+                      </button>
+                    )}
                     {type === "vendors" && onAddProduct && (
                       <button
                         onClick={() => onAddProduct(item.id)}

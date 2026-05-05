@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 
@@ -8,9 +8,10 @@ interface AddVendorModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
+  editingVendor?: any;
 }
 
-export default function AddVendorModal({ isOpen, onClose, onSuccess }: AddVendorModalProps) {
+export default function AddVendorModal({ isOpen, onClose, onSuccess, editingVendor }: AddVendorModalProps) {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     storeName: "",
@@ -21,16 +22,41 @@ export default function AddVendorModal({ isOpen, onClose, onSuccess }: AddVendor
     location: "الخرطوم",
   });
 
+  useEffect(() => {
+    if (editingVendor && isOpen) {
+      setFormData({
+        storeName: editingVendor.storeName || "",
+        ownerName: editingVendor.user?.name || editingVendor.ownerName || "",
+        ownerEmail: editingVendor.user?.email || editingVendor.ownerEmail || "",
+        ownerPassword: "",
+        phone: editingVendor.phone || "",
+        location: editingVendor.location || "الخرطوم",
+      });
+    } else if (isOpen) {
+      setFormData({
+        storeName: "",
+        ownerName: "",
+        ownerEmail: "",
+        ownerPassword: "",
+        phone: "",
+        location: "الخرطوم",
+      });
+    }
+  }, [editingVendor, isOpen]);
+
   if (!isOpen) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
+      const method = editingVendor ? "PUT" : "POST";
+      const bodyData = editingVendor ? { ...formData, id: editingVendor.id } : formData;
+
       const res = await fetch("/api/admin/vendors", {
-        method: "POST",
+        method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(bodyData),
       });
 
       if (res.ok) {
@@ -46,7 +72,7 @@ export default function AddVendorModal({ isOpen, onClose, onSuccess }: AddVendor
         });
       } else {
         const err = await res.json();
-        alert(err.error || "فشل إضافة المورد");
+        alert(err.error || (editingVendor ? "فشل تعديل المورد" : "فشل إضافة المورد"));
       }
     } catch (err) {
       alert("حدث خطأ أثناء الاتصال بالخادم");
@@ -60,7 +86,7 @@ export default function AddVendorModal({ isOpen, onClose, onSuccess }: AddVendor
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} className="absolute inset-0 bg-[#021D24]/40 backdrop-blur-sm" />
         <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="bg-white w-full max-w-lg rounded-[2.5rem] shadow-2xl relative z-10 overflow-hidden">
           <div className="p-8 border-b border-gray-100 flex items-center justify-between">
-            <h2 className="text-2xl font-black text-[#021D24]">إضافة مورد جديد</h2>
+            <h2 className="text-2xl font-black text-[#021D24]">{editingVendor ? "تعديل بيانات المورد" : "إضافة مورد جديد"}</h2>
             <button type="button" onClick={onClose} className="w-10 h-10 bg-gray-50 text-gray-400 rounded-xl flex items-center justify-center hover:bg-red-50 hover:text-red-500 transition-all">
               <span className="material-symbols-rounded">close</span>
             </button>
@@ -81,8 +107,8 @@ export default function AddVendorModal({ isOpen, onClose, onSuccess }: AddVendor
                   <input required value={formData.ownerEmail} onChange={(e) => setFormData({...formData, ownerEmail: e.target.value})} type="email" className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-6 py-4 text-sm font-bold outline-none focus:border-[#1089A4] transition-all" placeholder="email@example.com" />
                 </div>
                 <div>
-                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-2">كلمة المرور المؤقتة</label>
-                  <input required value={formData.ownerPassword} onChange={(e) => setFormData({...formData, ownerPassword: e.target.value})} type="password" minLength={6} className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-6 py-4 text-sm font-bold outline-none focus:border-[#1089A4] transition-all" placeholder="******" />
+                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-2">كلمة المرور {editingVendor ? "(اتركه فارغاً لعدم التغيير)" : "المؤقتة"}</label>
+                  <input required={!editingVendor} value={formData.ownerPassword} onChange={(e) => setFormData({...formData, ownerPassword: e.target.value})} type="password" minLength={6} className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-6 py-4 text-sm font-bold outline-none focus:border-[#1089A4] transition-all" placeholder={editingVendor ? "اتركه فارغاً لعدم التغيير" : "******"} />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
@@ -101,7 +127,7 @@ export default function AddVendorModal({ isOpen, onClose, onSuccess }: AddVendor
                 إلغاء
               </button>
               <button type="submit" disabled={loading} className="flex-1 bg-[#1089A4] text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-[#1089A4]/20 hover:scale-105 active:scale-95 transition-all disabled:opacity-50">
-                {loading ? "جاري الإضافة..." : "حفظ المورد"}
+                {loading ? (editingVendor ? "جاري التعديل..." : "جاري الإضافة...") : (editingVendor ? "حفظ التعديلات" : "حفظ المورد")}
               </button>
             </div>
           </form>
