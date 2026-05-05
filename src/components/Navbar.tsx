@@ -20,7 +20,6 @@ export default function Navbar() {
   const [showCategories, setShowCategories] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [userCity, setUserCity] = useState("جاري التحديد...");
-  const [showLocationModal, setShowLocationModal] = useState(false);
   const [availableCities, setAvailableCities] = useState<string[]>(["الخرطوم", "أم درمان", "بحري", "شندي", "مدني", "بورتسودان", "عطبرة", "كسلا", "الأبيض"]);
   const [navCategories, setNavCategories] = useState<any[]>([]);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -90,36 +89,52 @@ export default function Navbar() {
   }, []);
 
   useEffect(() => {
-    // 1. Try local storage first
-    const saved = localStorage.getItem("mersal_user_city");
-    if (saved) {
-      setUserCity(saved);
-      return;
-    }
-
-    // 2. Try GeoIP (Sudan cities mapping)
-    fetch("https://ipapi.co/json/")
-      .then(res => res.json())
-      .then(data => {
-        const city = data.city || "الخرطوم";
-        // Map English names to Arabic for Sudan
+    const fetchCityByIP = async () => {
+      try {
+        const res = await fetch("https://ipapi.co/json/");
+        const data = await res.json();
         const cityMap: Record<string, string> = {
-          "Khartoum": "الخرطوم",
-          "Omdurman": "أمدرمان",
-          "Bahri": "بحري",
-          "Port Sudan": "بورتسودان",
-          "Atbara": "عطبرة",
-          "Wad Madani": "ود مدني",
-          "Kassala": "كسلا",
-          "El Obeid": "الأبيض",
-          "Kosti": "كوسطي",
-          "Dongola": "دنقلا"
+          "Khartoum": "الخرطوم", "Omdurman": "أمدرمان", "Bahri": "بحري", "Port Sudan": "بورتسودان",
+          "Atbara": "عطبرة", "Wad Madani": "ود مدني", "Kassala": "كسلا", "El Obeid": "الأبيض"
         };
-        const arabicCity = cityMap[city] || city;
-        setUserCity(arabicCity);
-        localStorage.setItem("mersal_user_city", arabicCity);
-      })
-      .catch(() => setUserCity("الخرطوم")); // Fallback
+        return cityMap[data.city] || data.city || "الخرطوم";
+      } catch (e) {
+        return "الخرطوم";
+      }
+    };
+
+    const detectLocation = () => {
+      if (!("geolocation" in navigator)) {
+        fetchCityByIP().then(c => { setUserCity(c); localStorage.setItem("mersal_user_city", c); window.dispatchEvent(new Event("mersal_city_changed")); });
+        return;
+      }
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          try {
+            const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${position.coords.latitude}&longitude=${position.coords.longitude}&localityLanguage=ar`);
+            const data = await res.json();
+            const city = data.city || data.locality || data.principalSubdivision || "الخرطوم";
+            setUserCity(city);
+            localStorage.setItem("mersal_user_city", city);
+            window.dispatchEvent(new Event("mersal_city_changed"));
+          } catch (e) {
+            fetchCityByIP().then(c => { setUserCity(c); localStorage.setItem("mersal_user_city", c); window.dispatchEvent(new Event("mersal_city_changed")); });
+          }
+        },
+        () => {
+          // If user denies permission, fallback to IP
+          fetchCityByIP().then(c => { setUserCity(c); localStorage.setItem("mersal_user_city", c); window.dispatchEvent(new Event("mersal_city_changed")); });
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      );
+    };
+
+    const saved = localStorage.getItem("mersal_user_city");
+    if (saved && saved !== "جاري التحديد...") {
+      setUserCity(saved);
+    } else {
+      detectLocation();
+    }
   }, []);
 
   useEffect(() => {
@@ -170,15 +185,15 @@ export default function Navbar() {
               </motion.div>
             </Link>
 
-            <button onClick={() => setShowLocationModal(true)} className="flex items-center gap-1.5 sm:gap-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full px-2 sm:px-4 py-1 sm:py-1.5 transition-all cursor-pointer group">
-              <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-[#F29124]/20 flex items-center justify-center group-hover:scale-110 transition-transform shrink-0">
-                <span className="material-symbols-rounded text-sm sm:text-lg text-[#F29124]">location_on</span>
+            <div className="flex items-center gap-1.5 sm:gap-3 bg-white/5 border border-white/10 rounded-full px-2 sm:px-4 py-1 sm:py-1.5 transition-all group">
+              <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-[#F29124]/20 flex items-center justify-center shrink-0">
+                <span className="material-symbols-rounded text-sm sm:text-lg text-[#F29124] animate-pulse">location_on</span>
               </div>
               <div className="flex flex-col leading-tight text-right overflow-hidden">
                 <span className="text-[8px] sm:text-[10px] text-white/40 font-medium whitespace-nowrap">نصلك إلى</span>
                 <span className="text-[9px] sm:text-[13px] font-bold text-white truncate max-w-[65px] sm:max-w-none">{userCity}</span>
               </div>
-            </button>
+            </div>
           </div>
 
           {/* Advanced Search Bar */}
@@ -436,56 +451,6 @@ export default function Navbar() {
               </div>
             </motion.div>
           </>
-        )}
-      </AnimatePresence>
-      {/* Location Modal */}
-      <AnimatePresence>
-        {showLocationModal && (
-          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
-            <motion.div 
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              onClick={() => setShowLocationModal(false)}
-              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-            />
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="bg-[#020D10] border border-white/10 shadow-2xl rounded-3xl p-6 w-full max-w-md relative z-10"
-              dir="rtl"
-            >
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-black text-white flex items-center gap-2">
-                  <span className="material-symbols-rounded text-[#F29124]">location_on</span>
-                  اختر مدينة التوصيل
-                </h3>
-                <button onClick={() => setShowLocationModal(false)} className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 text-white transition-colors">
-                  <span className="material-symbols-rounded text-sm">close</span>
-                </button>
-              </div>
-              
-              <div className="space-y-2 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
-                {availableCities.map(city => (
-                  <button
-                    key={city}
-                    onClick={() => {
-                      setUserCity(city);
-                      localStorage.setItem("mersal_user_city", city);
-                      setShowLocationModal(false);
-                      window.dispatchEvent(new Event('mersal_city_changed'));
-                    }}
-                    className={cn(
-                      "w-full flex items-center justify-between p-4 rounded-xl border transition-all text-right",
-                      userCity === city 
-                        ? "bg-[#F29124]/10 border-[#F29124] text-[#F29124]" 
-                        : "bg-white/5 border-white/5 text-white hover:bg-white/10 hover:border-white/20"
-                    )}
-                  >
-                    <span className="font-bold">{city}</span>
-                    {userCity === city && <span className="material-symbols-rounded">check_circle</span>}
-                  </button>
-                ))}
-              </div>
-            </motion.div>
-          </div>
         )}
       </AnimatePresence>
     </header>
