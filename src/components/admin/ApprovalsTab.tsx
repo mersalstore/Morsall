@@ -36,10 +36,10 @@ export default function ApprovalsTab({ pendingVendors, pendingProducts, onVendor
                 </div>
               </div>
               <div className="flex gap-3 opacity-0 group-hover:opacity-100 transition-all translate-x-4 group-hover:translate-x-0">
-                <button onClick={() => onVendorAction(v.id, "APPROVED")} className="w-12 h-12 bg-green-500 text-white rounded-2xl flex items-center justify-center hover:bg-green-600 transition-all shadow-xl shadow-green-500/20 active:scale-90">
+                <button onClick={() => onVendorAction(v.id, "APPROVE")} className="w-12 h-12 bg-green-500 text-white rounded-2xl flex items-center justify-center hover:bg-green-600 transition-all shadow-xl shadow-green-500/20 active:scale-90">
                   <span className="material-symbols-rounded text-xl">check_circle</span>
                 </button>
-                <button onClick={() => onVendorAction(v.id, "REJECTED")} className="w-12 h-12 bg-red-500 text-white rounded-2xl flex items-center justify-center hover:bg-red-600 transition-all shadow-xl shadow-red-500/20 active:scale-90">
+                <button onClick={() => onVendorAction(v.id, "REJECT")} className="w-12 h-12 bg-red-500 text-white rounded-2xl flex items-center justify-center hover:bg-red-600 transition-all shadow-xl shadow-red-500/20 active:scale-90">
                   <span className="material-symbols-rounded text-xl">cancel</span>
                 </button>
               </div>
@@ -79,10 +79,10 @@ export default function ApprovalsTab({ pendingVendors, pendingProducts, onVendor
                 </div>
               </div>
               <div className="flex gap-3 opacity-0 group-hover:opacity-100 transition-all translate-x-4 group-hover:translate-x-0">
-                <button onClick={() => onProductAction(p.id, "APPROVED")} className="w-12 h-12 bg-green-500 text-white rounded-2xl flex items-center justify-center hover:bg-green-600 transition-all shadow-xl shadow-green-500/20 active:scale-90">
+                <button onClick={() => onProductAction(p.id, "APPROVE")} className="w-12 h-12 bg-green-500 text-white rounded-2xl flex items-center justify-center hover:bg-green-600 transition-all shadow-xl shadow-green-500/20 active:scale-90">
                   <span className="material-symbols-rounded text-xl">verified</span>
                 </button>
-                <button onClick={() => onProductAction(p.id, "REJECTED")} className="w-12 h-12 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center hover:bg-red-500 hover:text-white transition-all shadow-xl shadow-red-200/20 active:scale-90">
+                <button onClick={() => onProductAction(p.id, "REJECT")} className="w-12 h-12 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center hover:bg-red-500 hover:text-white transition-all shadow-xl shadow-red-200/20 active:scale-90">
                   <span className="material-symbols-rounded text-xl">delete_sweep</span>
                 </button>
               </div>

@@ -112,16 +112,24 @@ export default function AdminDashboard() {
     setLoading(false);
   };
 
-  const handleVendorAction = async (id: string, status: string) => {
+  const handleVendorAction = async (id: string, action: string) => {
     setActionLoading(id);
-    await fetch("/api/admin/vendors/action", { method: "POST", body: JSON.stringify({ id, status }) });
+    await fetch("/api/admin/vendors", { 
+      method: "PATCH", 
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, action }) 
+    });
     fetchData();
     setActionLoading(null);
   };
 
-  const handleProductAction = async (id: string, status: string) => {
+  const handleProductAction = async (id: string, action: string) => {
     setActionLoading(id);
-    await fetch("/api/admin/products/action", { method: "POST", body: JSON.stringify({ id, status }) });
+    await fetch("/api/admin/products", { 
+      method: "POST", 
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, action }) 
+    });
     fetchData();
     setActionLoading(null);
   };
