@@ -50,13 +50,16 @@ export async function POST(req: Request) {
         data: {
           title,
           description,
+          shortDescription: body.shortDescription,
           price: parseFloat(price),
           stock: parseInt(stock),
           categoryId,
           vendorId,
           images,
           sku,
-          status: "APPROVED" // Admin created products are auto-approved
+          discountPrice: body.discountPrice ? parseFloat(body.discountPrice) : null,
+          discountType: body.discountType || null,
+          status: body.status || "APPROVED"
         }
       });
       return NextResponse.json(product);
@@ -124,21 +127,26 @@ export async function PATCH(req: Request) {
     const session = await getAdminSession();
     if (!session) return adminOnlyResponse();
 
-    const { id, title, description, price, stock, categoryId, vendorId, images, sku } = await req.json();
+    const body = await req.json();
+    const { id, title, description, price, stock, categoryId, vendorId, images, sku, shortDescription, discountPrice, discountType, status } = body;
 
     if (!id) return NextResponse.json({ error: "id مطلوب" }, { status: 400 });
 
     const updated = await prisma.product.update({
       where: { id },
       data: {
-        title,
-        description,
-        price: price !== undefined ? parseFloat(price) : undefined,
-        stock: stock !== undefined ? parseInt(stock) : undefined,
-        categoryId,
-        vendorId,
-        images,
-        sku
+        ...(title !== undefined && { title }),
+        ...(description !== undefined && { description }),
+        ...(shortDescription !== undefined && { shortDescription }),
+        ...(price !== undefined && { price: parseFloat(price) }),
+        ...(stock !== undefined && { stock: parseInt(stock) }),
+        ...(categoryId !== undefined && { categoryId }),
+        ...(vendorId !== undefined && { vendorId }),
+        ...(images !== undefined && { images }),
+        ...(sku !== undefined && { sku }),
+        ...(discountPrice !== undefined && { discountPrice: discountPrice ? parseFloat(discountPrice) : null }),
+        ...(discountType !== undefined && { discountType }),
+        ...(status !== undefined && { status })
       }
     });
 

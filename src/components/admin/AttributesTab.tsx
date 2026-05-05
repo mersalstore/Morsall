@@ -10,6 +10,7 @@ interface Attribute {
   name: string;
   type: string;
   values: string[];
+  options?: Array<{ value: string }>;
 }
 
 export default function AttributesTab() {
@@ -107,8 +108,8 @@ export default function AttributesTab() {
             <h3 className="text-lg font-black text-[#021D24] mb-2">{attr.name}</h3>
             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4">النوع: {attr.type}</p>
             <div className="flex flex-wrap gap-2">
-              {attr.options?.map((v: any, i: number) => (
-                <span key={i} className="px-3 py-1 bg-gray-50 text-gray-500 text-[10px] font-bold rounded-lg border border-gray-100">{v.value}</span>
+              {(attr.options || attr.values || []).map((v: any, i: number) => (
+                <span key={i} className="px-3 py-1 bg-gray-50 text-gray-500 text-[10px] font-bold rounded-lg border border-gray-100">{typeof v === "string" ? v : v.value}</span>
               ))}
             </div>
           </div>

@@ -17,14 +17,16 @@ export async function POST(req: Request) {
   try {
     const session = await getAdminSession();
     if (!session) return adminOnlyResponse();
-    const { fromCity, toCity, fee } = await req.json();
+    const { fromCity, toCity, fee, deliveryDays } = await req.json();
     if (!fromCity || !toCity || fee === undefined) {
       return NextResponse.json({ error: "البيانات غير مكتملة" }, { status: 400 });
     }
-    const zone = await prisma.deliveryZone.create({ data: { fromCity, toCity, fee: Number(fee) } });
+    const zone = await prisma.deliveryZone.create({ 
+      data: { fromCity, toCity, fee: Number(fee), deliveryDays: Number(deliveryDays) || 1 } 
+    });
     return NextResponse.json(zone);
-  } catch (error) {
-    return NextResponse.json({ error: "Failed to create zone" }, { status: 500 });
+  } catch (error: any) {
+    return NextResponse.json({ error: "Failed to create zone: " + error.message }, { status: 500 });
   }
 }
 

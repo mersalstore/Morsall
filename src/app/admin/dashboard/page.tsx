@@ -23,12 +23,18 @@ import { cn } from "@/lib/utils";
 import { useSession } from "next-auth/react";
 
 const ORDER_STATUSES: any = {
-  PENDING: { label: "معلق", cls: "badge-pending", icon: "schedule" },
-  PROCESSING: { label: "قيد التجهيز", cls: "badge-active", icon: "package" },
-  SHIPPED: { label: "قيد التوصيل", cls: "badge-active", icon: "local_shipping" },
-  DELIVERED: { label: "تم التوصيل", cls: "badge-active", icon: "check_circle" },
-  RETURNED: { label: "مرتجع", cls: "badge-pending", icon: "keyboard_return" },
-  REJECTED: { label: "ملغاة", cls: "badge-pending", icon: "cancel" },
+  PENDING:          { label: "معلق",                    cls: "badge-pending", icon: "schedule",          color: "from-gray-400 to-gray-600" },
+  PENDING_CONFIRM:  { label: "جاري تأكيد الطلب",        cls: "badge-pending", icon: "hourglass_top",     color: "from-yellow-400 to-yellow-600" },
+  CONFIRMED:        { label: "تم استلام الطلب",          cls: "badge-active",  icon: "task_alt",          color: "from-blue-400 to-blue-600" },
+  PROCESSING:       { label: "جاري التجهيز",             cls: "badge-active",  icon: "inventory_2",       color: "from-indigo-400 to-indigo-600" },
+  PENDING_PICKUP:   { label: "في انتظار التحميل",       cls: "badge-pending", icon: "local_shipping",    color: "from-orange-400 to-orange-600" },
+  AT_BRANCH:        { label: "في الفرع",                 cls: "badge-active",  icon: "store",             color: "from-cyan-400 to-cyan-600" },
+  SHIPPED:          { label: "جاري التوصيل",             cls: "badge-active",  icon: "delivery_dining",   color: "from-[#1089A4] to-[#021D24]" },
+  DELIVERED:        { label: "تم التسليم",               cls: "badge-active",  icon: "check_circle",      color: "from-green-400 to-green-600" },
+  CANCELLED:        { label: "ملغي",                     cls: "badge-pending", icon: "cancel",            color: "from-red-400 to-red-600" },
+  RETURNED:         { label: "مرجع",                     cls: "badge-pending", icon: "keyboard_return",   color: "from-pink-400 to-pink-600" },
+  NO_ANSWER:        { label: "لم يتم الرد",              cls: "badge-pending", icon: "phone_missed",      color: "from-amber-400 to-amber-600" },
+  POSTPONED:        { label: "مؤجل",                     cls: "badge-pending", icon: "event_repeat",      color: "from-purple-400 to-purple-600" },
 };
 
 export default function AdminDashboard() {
@@ -41,6 +47,9 @@ export default function AdminDashboard() {
   const [users, setUsers] = useState<any[]>([]);
   const [vendors, setVendors] = useState<any[]>([]);
   const [stats, setStats] = useState<any[]>([]);
+  const [orderStatuses, setOrderStatuses] = useState<Record<string,number>>({});
+  const [deliveryByCity, setDeliveryByCity] = useState<any[]>([]);
+  const [activeDrivers, setActiveDrivers] = useState(0);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [isAddProductOpen, setIsAddProductOpen] = useState(false);
@@ -48,6 +57,10 @@ export default function AdminDashboard() {
   const [editingOrder, setEditingOrder] = useState<any>(null);
   const [printingOrder, setPrintingOrder] = useState<any>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [dateRange, setDateRange] = useState("all"); // today, week, month, all, custom
+  const [customFrom, setCustomFrom] = useState("");
+  const [customTo, setCustomTo] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string | null>(null);
 
   const classes = {
     card: "bg-white/80 backdrop-blur-xl rounded-[2.5rem] shadow-2xl shadow-gray-200/40 border border-white/20 overflow-hidden transition-all duration-500",
@@ -62,13 +75,17 @@ export default function AdminDashboard() {
     fetchData();
   }, []);
 
-  const fetchData = async () => {
+  const fetchData = async (range?: string, from?: string, to?: string) => {
     setLoading(true);
     try {
+      const r = range || dateRange;
+      let statsUrl = `/api/admin/stats?range=${r}`;
+      if (r === "custom" && from && to) statsUrl += `&from=${from}&to=${to}`;
+
       const [resOrders, resProducts, resStats, resPending, resUsers, resVendors] = await Promise.all([
         fetch("/api/admin/orders"),
         fetch("/api/admin/inventory"),
-        fetch("/api/admin/stats"),
+        fetch(statsUrl),
         fetch("/api/admin/approvals"),
         fetch("/api/admin/users"),
         fetch("/api/admin/vendors"),
@@ -78,6 +95,9 @@ export default function AdminDashboard() {
       if (resStats.ok) {
         const d = await resStats.json();
         setStats(d.stats || []);
+        setOrderStatuses(d.orderStatuses || {});
+        setDeliveryByCity(d.deliveryByCity || []);
+        setActiveDrivers(d.activeDrivers || 0);
       }
       if (resUsers.ok) setUsers(await resUsers.json());
       if (resVendors.ok) setVendors(await resVendors.json());
@@ -172,48 +192,123 @@ export default function AdminDashboard() {
         <AnimatePresence mode="wait">
           <motion.div key={activeTab} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
             {activeTab === "overview" && (
-              <div className="space-y-12">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="space-y-8">
+                {/* Date Filter */}
+                <div className="bg-white rounded-[2rem] p-4 border border-gray-100 shadow-xl flex flex-wrap gap-3 items-center">
+                  <span className="text-xs font-black text-gray-400 uppercase tracking-widest ml-2">الفترة:</span>
+                  {[
+                    { key: "today", label: "اليوم" },
+                    { key: "week",  label: "آخر 7 أيام" },
+                    { key: "month", label: "آخر 30 يوم" },
+                    { key: "all",   label: "الكل" },
+                    { key: "custom", label: "مخصص" },
+                  ].map(r => (
+                    <button
+                      key={r.key}
+                      onClick={() => { setDateRange(r.key); fetchData(r.key); }}
+                      className={cn(
+                        "px-4 py-2 rounded-2xl text-xs font-black transition-all",
+                        dateRange === r.key ? "bg-[#1089A4] text-white" : "bg-gray-50 text-gray-400 hover:bg-gray-100"
+                      )}
+                    >{r.label}</button>
+                  ))}
+                  {dateRange === "custom" && (
+                    <div className="flex items-center gap-2 mr-2">
+                      <input type="date" value={customFrom} onChange={e => setCustomFrom(e.target.value)} className="bg-gray-50 border border-gray-100 rounded-xl px-3 py-2 text-xs font-bold outline-none" />
+                      <span className="text-gray-400">←</span>
+                      <input type="date" value={customTo} onChange={e => setCustomTo(e.target.value)} className="bg-gray-50 border border-gray-100 rounded-xl px-3 py-2 text-xs font-bold outline-none" />
+                      <button onClick={() => fetchData("custom", customFrom, customTo)} className="bg-[#1089A4] text-white px-4 py-2 rounded-xl text-xs font-black">تطبيق</button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Main Stats Cards */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
                   {stats.map((s: any, i: number) => (
-                    <div 
-                      key={i} 
-                      onClick={() => {
-                        if (s.label.includes("المتاجر")) setActiveTab("vendors");
-                        if (s.label.includes("مبيعات")) setActiveTab("orders");
-                      }}
-                      className={cn(classes.card, "p-10 group hover:scale-[1.02] active:scale-95 cursor-pointer")}
+                    <div
+                      key={i}
+                      onClick={() => s.tab && setActiveTab(s.tab)}
+                      className={cn(classes.card, "p-6 md:p-10 group hover:scale-[1.02] active:scale-95 cursor-pointer")}
                     >
-                       <div className="flex items-center justify-between mb-6">
-                          <div className={cn("w-16 h-16 rounded-[1.5rem] flex items-center justify-center text-white shadow-2xl transition-all duration-500 group-hover:rotate-12", s.color)}>
-                            <span className="material-symbols-rounded text-3xl">{s.icon}</span>
+                       <div className="flex items-center justify-between mb-4">
+                          <div className={cn("w-12 h-12 md:w-16 md:h-16 rounded-[1.5rem] flex items-center justify-center text-white shadow-2xl transition-all duration-500 group-hover:rotate-12", s.color)}>
+                            <span className="material-symbols-rounded text-2xl md:text-3xl">{s.icon}</span>
                           </div>
-                          <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-300 group-hover:bg-[#F29124]/10 group-hover:text-[#F29124] transition-colors">
-                             <span className="material-symbols-rounded text-lg">arrow_outward</span>
+                          <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-300 group-hover:bg-[#F29124]/10 group-hover:text-[#F29124] transition-colors">
+                             <span className="material-symbols-rounded text-base md:text-lg">arrow_outward</span>
                           </div>
                        </div>
-                       <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-2">{s.label}</p>
-                       <div className="flex items-end gap-3">
-                         <p className="text-4xl font-black text-[#021D24] tracking-tighter">{s.value}</p>
-                         <span className="text-[10px] font-black text-green-500 bg-green-50 px-2 py-1 rounded-lg mb-2">+12%</span>
-                       </div>
+                       <p className="text-[9px] md:text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-1">{s.label}</p>
+                       <p className="text-2xl md:text-3xl font-black text-[#021D24] tracking-tighter">{s.value}</p>
                     </div>
                   ))}
                 </div>
-                
-                <div className={cn(classes.card, "p-14 bg-gradient-to-br from-[#021D24] to-[#0D3B47] text-white relative overflow-hidden group")}>
-                   <div className="relative z-10 max-w-2xl">
-                      <span className="bg-[#F29124] text-[9px] font-black uppercase tracking-[0.4em] px-4 py-1.5 rounded-full mb-6 inline-block shadow-lg shadow-[#F29124]/20">Mersall Intelligent Engine</span>
-                      <h2 className="text-4xl font-black mb-4 leading-tight">تحليلات الأداء المتقدمة <br/> لمنصة مرسال</h2>
-                      <p className="text-white/50 text-sm font-medium mb-10 leading-relaxed">
-                        نظام مرسال يوفر لك رؤية كاملة لجميع العمليات اللوجستية، المبيعات، وأداء الموردين في مكان واحد وبأعلى دقة ممكنة.
-                      </p>
-                      <button className="bg-white text-[#021D24] px-10 py-5 rounded-3xl font-black text-sm shadow-2xl hover:bg-[#F29124] hover:text-white transition-all duration-500">
-                        عرض التقارير التفصيلية
+
+                {/* Order Statuses Grid - Click to filter */}
+                <div>
+                  <h3 className="text-lg font-black text-[#021D24] mb-4 flex items-center gap-3">
+                    <span className="w-8 h-1.5 bg-[#F29124] rounded-full"/>
+                    حالات الطلبات
+                    <button onClick={() => { setStatusFilter(null); setActiveTab("orders"); }} className="text-[10px] font-black text-[#1089A4] bg-[#1089A4]/10 px-3 py-1 rounded-xl mr-2">عرض الكل</button>
+                  </h3>
+                  <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
+                    {Object.entries(ORDER_STATUSES).map(([key, s]: any) => (
+                      <button
+                        key={key}
+                        onClick={() => { setStatusFilter(key); setActiveTab("orders"); }}
+                        className="bg-white rounded-[1.5rem] p-4 border border-gray-100 shadow-md hover:shadow-xl hover:border-[#1089A4]/30 transition-all text-center group"
+                      >
+                        <div className={cn("w-10 h-10 rounded-2xl bg-gradient-to-br flex items-center justify-center text-white mx-auto mb-3 group-hover:scale-110 transition-transform", s.color)}>
+                          <span className="material-symbols-rounded text-lg">{s.icon}</span>
+                        </div>
+                        <p className="text-[11px] font-black text-[#021D24] leading-tight">{s.label}</p>
+                        <p className="text-xl font-black text-[#1089A4] mt-1">{orderStatuses[key] || 0}</p>
                       </button>
-                   </div>
-                   <div className="absolute top-0 left-0 w-full h-full bg-[url('/grid.svg')] opacity-10 pointer-events-none" />
-                   <div className="absolute -bottom-20 -right-20 w-80 h-80 bg-[#1089A4]/20 blur-[100px] rounded-full group-hover:scale-150 transition-all duration-1000" />
-                   <span className="absolute -bottom-10 -right-10 material-symbols-rounded text-[240px] text-white/5 rotate-12 transition-transform duration-1000 group-hover:rotate-45">insights</span>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Delivery by City + Active Drivers */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className={cn(classes.card, "p-8")}>
+                    <h4 className="text-base font-black text-[#021D24] mb-6 flex items-center gap-3">
+                      <span className="material-symbols-rounded text-[#1089A4]">map</span>
+                      التوصيل حسب المنطقة
+                    </h4>
+                    <div className="space-y-4">
+                      {deliveryByCity.slice(0,6).map((d: any) => (
+                        <div key={d.city} className="flex items-center gap-4">
+                          <div className="flex-grow">
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="text-sm font-black text-[#021D24]">{d.city}</span>
+                              <span className="text-xs font-black text-gray-400">{d.count} طلب</span>
+                            </div>
+                            <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                              <div
+                                className="h-full bg-gradient-to-r from-[#1089A4] to-[#F29124] rounded-full transition-all"
+                                style={{ width: `${Math.min((d.count / Math.max(...deliveryByCity.map((x:any)=>x.count), 1)) * 100, 100)}%` }}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                      {deliveryByCity.length === 0 && <p className="text-gray-300 text-sm font-black text-center py-8">لا توجد بيانات</p>}
+                    </div>
+                  </div>
+
+                  <div className={cn(classes.card, "p-8")}>
+                    <h4 className="text-base font-black text-[#021D24] mb-6 flex items-center gap-3">
+                      <span className="material-symbols-rounded text-[#1089A4]">delivery_dining</span>
+                      السائقون
+                    </h4>
+                    <div className="flex flex-col items-center justify-center h-32">
+                      <p className="text-6xl font-black text-[#021D24]">{activeDrivers}</p>
+                      <p className="text-xs font-black text-gray-400 uppercase tracking-widest mt-2">سائق نشط</p>
+                    </div>
+                    <button onClick={() => setActiveTab("drivers")} className="w-full mt-4 py-3 rounded-2xl bg-[#1089A4]/10 text-[#1089A4] font-black text-sm hover:bg-[#1089A4] hover:text-white transition-all">
+                      إدارة المناديب
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
@@ -225,7 +320,8 @@ export default function AdminDashboard() {
                   onEdit={setEditingOrder} 
                   onPrint={setPrintingOrder} 
                   classes={classes} 
-                  ORDER_STATUSES={ORDER_STATUSES} 
+                  ORDER_STATUSES={ORDER_STATUSES}
+                  defaultStatusFilter={statusFilter}
                 />
                 <EditOrderModal
                   isOpen={!!editingOrder}

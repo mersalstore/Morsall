@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { cn } from "@/lib/utils";
 
 interface InventoryTableProps {
@@ -12,11 +12,33 @@ interface InventoryTableProps {
 
 export default function InventoryTable({ products, onEdit, onAdd, classes }: InventoryTableProps) {
   const [search, setSearch] = useState("");
+  const [vendorFilter, setVendorFilter] = useState("all");
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [stockFilter, setStockFilter] = useState("all"); // all, low, out
 
-  const filtered = products.filter(p =>
-    p.title?.toLowerCase().includes(search.toLowerCase()) ||
-    p.sku?.toLowerCase().includes(search.toLowerCase())
-  );
+  // Extract unique vendors and categories
+  const vendors = useMemo(() => Array.from(new Map(products.map(p => [p.vendorId, p.vendor || { id: p.vendorId, storeName: "بدون مورد" }])).values()), [products]);
+  const categories = useMemo(() => Array.from(new Map(products.map(p => [p.categoryId, p.category || { id: p.categoryId, name: "بدون قسم" }])).values()), [products]);
+
+  // Export CSV
+  const exportCSV = () => {
+    const headers = ["اسم المنتج", "SKU", "السعر", "المخزون", "القسم", "المورد", "الحالة"];
+    const rows = filtered.map(p => [p.title, p.sku || "", p.price, p.stock, p.category?.name || "", p.vendor?.storeName || "", p.status]);
+    const csv = [headers, ...rows].map(r => r.map(c => `"${c}"`).join(",")).join("\n");
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+    const a = document.createElement("a"); a.href = URL.createObjectURL(blob);
+    a.download = `inventory_${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+  };
+
+  const filtered = products.filter(p => {
+    const matchSearch = p.title?.toLowerCase().includes(search.toLowerCase()) || p.sku?.toLowerCase().includes(search.toLowerCase());
+    const matchVendor = vendorFilter === "all" || p.vendorId === vendorFilter;
+    const matchCategory = categoryFilter === "all" || p.categoryId === categoryFilter;
+    const matchStock = stockFilter === "all" || (stockFilter === "low" && p.stock > 0 && p.stock <= 5) || (stockFilter === "out" && p.stock === 0);
+    return matchSearch && matchVendor && matchCategory && matchStock;
+  });
+
 
   return (
     <div className={cn(classes.card, "border-0 shadow-none")}>
@@ -31,11 +53,31 @@ export default function InventoryTable({ products, onEdit, onAdd, classes }: Inv
             className={cn(classes.input, "pr-14 py-4")}
           />
         </div>
-        <button onClick={onAdd} className={cn(classes.btnPrimary, "flex items-center justify-center gap-2 py-4 px-6 text-sm")}>
-          <span className="material-symbols-rounded text-xl">add_box</span>
-          إضافة منتج
-        </button>
+        <select value={vendorFilter} onChange={e => setVendorFilter(e.target.value)} className={cn(classes.input, "py-4 md:w-44")}>
+          <option value="all">كل الموردين</option>
+          {vendors.map((v: any) => <option key={v.id} value={v.id}>{v.storeName}</option>)}
+        </select>
+        <select value={categoryFilter} onChange={e => setCategoryFilter(e.target.value)} className={cn(classes.input, "py-4 md:w-40")}>
+          <option value="all">كل الأقسام</option>
+          {categories.map((c: any) => <option key={c.id} value={c.id}>{c.name}</option>)}
+        </select>
+        <select value={stockFilter} onChange={e => setStockFilter(e.target.value)} className={cn(classes.input, "py-4 md:w-40")}>
+          <option value="all">كل المخزون</option>
+          <option value="low">مخزون منخفض (≤5)</option>
+          <option value="out">نفذ المخزون</option>
+        </select>
+        <div className="flex gap-3">
+          <button onClick={exportCSV} className="flex items-center gap-2 bg-green-500 text-white px-4 py-4 rounded-3xl font-black text-xs hover:bg-green-600 transition-all whitespace-nowrap">
+            <span className="material-symbols-rounded text-base">download</span>
+            تصدير CSV
+          </button>
+          <button onClick={onAdd} className={cn(classes.btnPrimary, "flex items-center gap-2 py-4 px-5 text-sm")}>
+            <span className="material-symbols-rounded text-xl">add_box</span>
+            إضافة
+          </button>
+        </div>
       </div>
+
 
       {/* MOBILE: Card Layout */}
       <div className="md:hidden divide-y divide-gray-100">

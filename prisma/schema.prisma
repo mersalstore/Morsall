@@ -304,11 +304,12 @@ model Employee {
 }
 
 model DeliveryZone {
-  id       String  @id @default(cuid())
-  fromCity String
-  toCity   String
-  fee      Float
-  isActive Boolean @default(true)
+  id           String  @id @default(cuid())
+  fromCity     String
+  toCity       String
+  fee          Float
+  deliveryDays Int     @default(1)
+  isActive     Boolean @default(true)
 }
 
 model ShippingProvider {
