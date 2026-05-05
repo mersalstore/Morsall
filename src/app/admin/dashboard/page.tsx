@@ -16,6 +16,7 @@ import FinanceTab from "@/components/admin/FinanceTab";
 import PersonnelTab from "@/components/admin/PersonnelTab";
 import GlobalSettingsTab from "@/components/admin/GlobalSettingsTab";
 import SubscriptionsTab from "@/components/admin/SubscriptionsTab";
+import OffersAdsTab from "@/components/admin/OffersAdsTab";
 import AddProductModal from "@/components/admin/AddProductModal";
 import EditOrderModal from "@/components/admin/EditOrderModal";
 import PrintInvoiceModal from "@/components/admin/PrintInvoiceModal";
@@ -370,6 +371,7 @@ export default function AdminDashboard() {
             {activeTab === "users" && <UsersVendorsTab type="users" data={users} classes={classes} fetchData={fetchData} />}
             {activeTab === "vendors" && <UsersVendorsTab type="vendors" data={vendors} classes={classes} fetchData={fetchData} onAddProduct={(vId) => { setInitialVendorId(vId); setIsAddProductOpen(true); setActiveTab("inventory"); }} />}
             {activeTab === "appearance" && <AppearanceSettings />}
+            {activeTab === "offersAds" && <OffersAdsTab />}
           </motion.div>
         </AnimatePresence>
       </main>

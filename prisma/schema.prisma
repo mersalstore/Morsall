@@ -283,6 +283,11 @@ model Settings {
   whatsappNumber      String?
 }
 
+model SiteConfig {
+  key   String @id
+  value String @db.Text
+}
+
 model SiteBanner {
   id        String   @id @default(cuid())
   title     String?

@@ -59,7 +59,17 @@ const discountProducts = [
 ];
 
 export default function OffersPage() {
+  const [config, setConfig] = useState<any>(null);
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 14, minutes: 22, seconds: 55 });
+
+  useEffect(() => {
+    fetch("/api/site-config?key=offers_config")
+      .then(res => res.json())
+      .then(data => {
+        if (data) setConfig(data);
+      })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -79,9 +89,11 @@ export default function OffersPage() {
       <section className="bg-[#1089A4] pt-44 pb-24 px-12 relative overflow-hidden">
          <div className="max-w-[1920px] mx-auto flex flex-col items-center text-center space-y-12 relative z-10">
             <div className="flex flex-col items-center gap-6">
-              <span className="bg-[#F29124] text-[#021D24] px-10 py-3 rounded-full text-xs font-black uppercase tracking-[0.4em] shadow-3xl animate-bounce">خصومات اليوم المحدودة</span>
-              <h1 className="text-7xl md:text-9xl font-black text-white tracking-tighter leading-none font-heading">
-                صـفـقـات كـبرى <br /> <span className="text-[#021D24]">لا تتكرر</span>
+              <span className="bg-[#F29124] text-[#021D24] px-10 py-3 rounded-full text-xs font-black uppercase tracking-[0.4em] shadow-3xl animate-bounce">
+                {config?.offersHeroBadge || "خصومات اليوم المحدودة"}
+              </span>
+              <h1 className="text-4xl md:text-6xl font-black text-white tracking-tighter leading-none font-heading whitespace-pre-line">
+                {config?.offersHeroTitle || "صفقات كبرى \n لا تتكرر"}
               </h1>
             </div>
 
@@ -110,15 +122,15 @@ export default function OffersPage() {
             </div>
             <div className="flex flex-col justify-center space-y-10 text-right">
                <div className="space-y-4">
-                  <span className="text-[#F29124] text-[10px] font-black uppercase tracking-[0.6em]">DEAL OF THE MOMENT</span>
-                  <h2 className="text-5xl md:text-7xl font-black text-white tracking-tighter leading-[0.9] font-heading">ماك بوك برو M3 <br /> الإصدار السينمائي</h2>
-                  <p className="text-white/40 text-xl font-medium leading-relaxed max-w-xl pr-2 border-r-4 border-[#1089A4]/30">تحكم كامل في القوة والإبداع مع أقوى معالج في تاريخ آبل، متاح الآن بخصم لفترة محدودة جداً.</p>
+                   <span className="text-[#F29124] text-[10px] font-black uppercase tracking-[0.4em]">DEAL OF THE MOMENT</span>
+                   <h2 className="text-3xl md:text-4xl font-black text-white tracking-tighter leading-tight font-heading">ماك بوك برو M3 <br /> الإصدار السينمائي</h2>
+                   <p className="text-white/40 text-sm font-medium leading-relaxed max-w-xl pr-2 border-r-4 border-[#1089A4]/30">تحكم كامل في القوة والإبداع مع أقوى معالج في تاريخ آبل، متاح الآن بخصم لفترة محدودة جداً.</p>
                </div>
                
                <div className="space-y-6">
-                  <div className="flex items-baseline gap-6 justify-end">
-                     <span className="text-white text-6xl font-black tracking-tighter">1,250,000 ج.س</span>
-                     <span className="text-white/20 text-3xl font-black line-through">1,800,000</span>
+                   <div className="flex items-baseline gap-4 justify-end">
+                      <span className="text-white text-3xl md:text-4xl font-black tracking-tighter">1,250,000 ج.س</span>
+                      <span className="text-white/20 text-xl font-black line-through">1,800,000</span>
                   </div>
                   <div className="space-y-4">
                      <div className="h-4 bg-white/5 rounded-full overflow-hidden relative border border-white/10">
@@ -144,8 +156,8 @@ export default function OffersPage() {
       <section className="max-w-[1920px] mx-auto px-6 md:px-12 py-32 space-y-20">
          <div className="flex flex-col md:flex-row items-end justify-between gap-10">
             <div className="space-y-5">
-               <h3 className="text-5xl md:text-7xl font-black text-[#021D24] tracking-tighter font-heading border-r-8 border-[#F29124] pr-10">عروض <span className="text-[#1089A4]">الساعة الحالية</span></h3>
-               <p className="text-[10px] font-black uppercase tracking-[0.6em] text-[#021D24]/20 pr-12">تحديث كل 6 ساعات لضمان أفضل سعر في السوق</p>
+                <h3 className="text-2xl md:text-4xl font-black text-[#021D24] tracking-tighter font-heading border-r-8 border-[#F29124] pr-6">عروض <span className="text-[#1089A4]">الساعة الحالية</span></h3>
+                <p className="text-[10px] font-black uppercase tracking-widest text-[#021D24]/20 pr-8">تحديث كل 6 ساعات لضمان أفضل سعر في السوق</p>
             </div>
             <div className="flex gap-4">
                {["الكل", "إلكترونيات", "أزياء", "منزل"].map((cat) => (
@@ -181,9 +193,9 @@ export default function OffersPage() {
 
 function CountdownUnit({ value, label }: { value: number, label: string }) {
   return (
-    <div className="flex flex-col items-center gap-1.5 min-w-[100px] p-6 bg-white/5 backdrop-blur-3xl rounded-[2rem] border border-white/10 group hover:bg-[#F29124]/10 transition-all cursor-default">
-       <span className="text-4xl md:text-6xl font-black text-white group-hover:scale-110 transition-transform">{value.toString().padStart(2, '0')}</span>
-       <span className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em]">{label}</span>
+    <div className="flex flex-col items-center gap-1 min-w-[70px] p-4 bg-white/5 backdrop-blur-3xl rounded-[1.5rem] border border-white/10 group hover:bg-[#F29124]/10 transition-all cursor-default">
+       <span className="text-3xl md:text-4xl font-black text-white group-hover:scale-110 transition-transform">{value.toString().padStart(2, '0')}</span>
+       <span className="text-[9px] font-black text-white/30 uppercase tracking-widest">{label}</span>
     </div>
   );
 }

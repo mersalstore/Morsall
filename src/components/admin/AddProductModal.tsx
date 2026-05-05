@@ -75,12 +75,18 @@ export default function AddProductModal({ isOpen, onClose, onSuccess, editingPro
         if (res.ok) {
           const { url } = await res.json();
           uploadedUrls.push(url);
+        } else {
+          const errData = await res.json().catch(() => ({}));
+          alert(`فشل رفع الصورة (${files[i].name}): ${errData.error || "خطأ في السيرفر"}`);
         }
       } catch (err) {
         console.error("Upload error:", err);
+        alert(`فشل رفع الصورة (${files[i].name}): تأكد من حجم الملف واتصالك بالإنترنت`);
       }
     }
-    setFormData(prev => ({ ...prev, images: [...prev.images, ...uploadedUrls] }));
+    if (uploadedUrls.length > 0) {
+      setFormData(prev => ({ ...prev, images: [...prev.images, ...uploadedUrls] }));
+    }
     // Reset input so same file can be re-uploaded
     e.target.value = "";
     setUploading(false);
@@ -94,6 +100,14 @@ export default function AddProductModal({ isOpen, onClose, onSuccess, editingPro
     e.preventDefault();
     if (formData.images.length === 0 && !editingProduct) {
       alert("يرجى رفع صورة واحدة على الأقل للمنتج");
+      return;
+    }
+    if (!formData.categoryId) {
+      alert("يرجى اختيار القسم (Category). إذا لم يكن هناك أقسام، يرجى إنشاؤها أولاً من تبويب الأقسام.");
+      return;
+    }
+    if (!formData.vendorId) {
+      alert("يرجى اختيار المورد (Vendor).");
       return;
     }
     setLoading(true);

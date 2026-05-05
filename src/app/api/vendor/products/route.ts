@@ -60,7 +60,7 @@ export async function POST(req: Request) {
     } = body;
 
     const numericPrice = parseFloat(price);
-    const numericStock = parseInt(stock) || 0;
+    const numericStock = parseInt(stock);
     const numericWeight = weight ? parseFloat(weight) : null;
     const numericLength = length ? parseFloat(length) : null;
     const numericWidth = width ? parseFloat(width) : null;
@@ -68,7 +68,10 @@ export async function POST(req: Request) {
     const numericDiscountPrice = discountPrice ? parseFloat(discountPrice) : null;
 
     if (!title || isNaN(numericPrice)) {
-      return NextResponse.json({ error: "الاسم والسعر مطلوبان بشكل صحيح" }, { status: 400 });
+      return NextResponse.json({ error: "الاسم مطلوب والسعر يجب أن يكون رقماً صالحاً" }, { status: 400 });
+    }
+    if (isNaN(numericStock)) {
+      return NextResponse.json({ error: "الكمية يجب أن تكون رقماً صالحاً" }, { status: 400 });
     }
 
     const product = await prisma.$transaction(async (tx) => {

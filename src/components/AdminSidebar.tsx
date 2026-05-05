@@ -30,7 +30,7 @@ import { useSession, signOut } from "next-auth/react";
 export type TabId =
   | "overview" | "approvals" | "users" | "vendors"
   | "categories" | "employees" | "orders" | "payments"
-  | "delivery" | "shipping" | "finance" | "settings" | "inventory" | "drivers" | "subscriptions" | "attributes" | "globalSettings" | "appearance";
+  | "delivery" | "shipping" | "finance" | "settings" | "inventory" | "drivers" | "subscriptions" | "attributes" | "globalSettings" | "appearance" | "offersAds";
 
 interface SidebarProps {
   activeTab: TabId;
@@ -59,11 +59,12 @@ const NAV_ITEMS: { id: TabId; icon: any; label: string; group?: string }[] = [
   { id: "delivery",    icon: MapPin,           label: "مناطق التوصيل", group: "عمليات" },
   
   { id: "appearance",  icon: Palette,          label: "المظهر والصور", group: "إعدادات" },
+  { id: "offersAds",   icon: TrendingUp,        label: "العروض والإعلانات", group: "إعدادات" },
   { id: "globalSettings", icon: Settings,      label: "الإعدادات العامة", group: "إعدادات" },
 ];
 
 const ROLE_PERMISSIONS: Record<string, TabId[]> = {
-  ADMIN: ["overview", "approvals", "users", "vendors", "categories", "employees", "orders", "payments", "delivery", "shipping", "finance", "settings", "inventory", "drivers", "subscriptions", "attributes", "globalSettings", "appearance"],
+  ADMIN: ["overview", "approvals", "users", "vendors", "categories", "employees", "orders", "payments", "delivery", "shipping", "finance", "settings", "inventory", "drivers", "subscriptions", "attributes", "globalSettings", "appearance", "offersAds"],
   PACKING: ["orders", "inventory"],
   SHIPPING: ["orders", "drivers"],
   CUSTOMER_SERVICE: ["overview", "approvals", "orders", "users"],

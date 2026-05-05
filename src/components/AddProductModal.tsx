@@ -53,7 +53,7 @@ export default function AddProductModal({ isOpen, onClose }: AddProductModalProp
   useEffect(() => {
     if (isOpen) {
       // Fetch Categories
-      fetch("/api/admin/categories")
+      fetch("/api/categories")
         .then(res => res.json())
         .then(data => setCategories(data))
         .catch(err => console.error("Failed to fetch categories", err));
@@ -132,9 +132,11 @@ export default function AddProductModal({ isOpen, onClose }: AddProductModalProp
         }),
       });
 
-      const result = await res.json().catch(() => ({ error: "خطأ غير معروف في السيرفر" }));
+      const result = await res.json().catch(() => ({ error: "خطأ في السيرفر أو لم يتم استلام استجابة صالحة" }));
 
-      if (!res.ok) throw new Error(result.error || "فشل في حفظ بيانات المنتج");
+      if (!res.ok) {
+        throw new Error(result.error || result.message || "فشل في حفظ بيانات المنتج — تأكد من صحة البيانات المدخلة");
+      }
 
       alert("تم إرسال المنتج للمراجعة بنجاح!");
       onClose();
@@ -151,7 +153,8 @@ export default function AddProductModal({ isOpen, onClose }: AddProductModalProp
       setSelectedAttributes([]);
       setVariations([]);
     } catch (error: any) {
-      alert(error.message || "حدث خطأ أثناء حفظ المنتج");
+      console.error("Submission Error:", error);
+      alert(error.message || "حدث خطأ غير متوقع أثناء حفظ المنتج");
     } finally {
       setLoading(false);
     }

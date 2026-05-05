@@ -143,7 +143,7 @@ export default function VendorStoreSettings() {
                   {formData.storeLogo ? (
                     <img src={formData.storeLogo} alt="Logo" className="w-full h-full object-contain" />
                   ) : (
-                    <span className="material-symbols-rounded text-2xl text-gray-200">storefront</span>
+                     <span className="material-symbols-rounded text-2xl text-gray-200">storefront</span>
                   )}
                 </div>
               </div>
@@ -151,7 +151,7 @@ export default function VendorStoreSettings() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-6">
               <div className="space-y-1.5">
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">تغيير البانر</label>
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">شعار المتجر (الغلاف)</label>
                 <div className="relative group">
                   <input 
                     type="file" 
@@ -164,13 +164,13 @@ export default function VendorStoreSettings() {
                     htmlFor="banner-upload"
                     className="w-full flex items-center justify-between bg-white border border-dashed border-gray-200 rounded-xl px-4 py-3 cursor-pointer hover:border-[#1089A4] hover:bg-gray-50 transition-all"
                   >
-                    <span className="text-xs font-bold text-gray-400">اختر صورة للغلاف...</span>
+                    <span className="text-xs font-bold text-gray-400">اختر صورة الشعار (الغلاف)...</span>
                     <span className="material-symbols-rounded text-[#1089A4]">upload_file</span>
                   </label>
                 </div>
               </div>
               <div className="space-y-1.5">
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">تغيير الشعار</label>
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">أيقونة المتجر</label>
                 <div className="relative group">
                   <input 
                     type="file" 
@@ -183,7 +183,7 @@ export default function VendorStoreSettings() {
                     htmlFor="logo-upload"
                     className="w-full flex items-center justify-between bg-white border border-dashed border-gray-200 rounded-xl px-4 py-3 cursor-pointer hover:border-[#1089A4] hover:bg-gray-50 transition-all"
                   >
-                    <span className="text-xs font-bold text-gray-400">اختر صورة الشعار...</span>
+                    <span className="text-xs font-bold text-gray-400">اختر أيقونة المتجر...</span>
                     <span className="material-symbols-rounded text-[#1089A4]">cloud_upload</span>
                   </label>
                 </div>
@@ -304,49 +304,6 @@ export default function VendorStoreSettings() {
                   onChange={e => setFormData({ ...formData, secondaryColor: e.target.value })}
                   className="w-12 h-12 rounded-xl cursor-pointer border-2 border-gray-50"
                 />
-              </div>
-            </div>
-          </div>
-
-          {/* Social Media Card */}
-          <div className="bg-white p-8 rounded-3xl border shadow-sm space-y-6">
-            <h3 className="text-xs font-black uppercase tracking-widest text-[#1089A4]">بيانات النشر</h3>
-            <div className="space-y-4">
-              <div className="space-y-1">
-                <div className="flex items-center bg-gray-50 rounded-xl border border-transparent focus-within:border-[#1089A4] focus-within:bg-white transition-all overflow-hidden px-3">
-                  <span className="material-symbols-rounded text-lg text-blue-600">facebook</span>
-                  <input 
-                    type="text" 
-                    value={formData.facebookUrl}
-                    onChange={e => setFormData({ ...formData, facebookUrl: e.target.value })}
-                    placeholder="facebook.com/..."
-                    className="bg-transparent flex-grow px-2 py-3 text-xs outline-none font-bold"
-                  />
-                </div>
-              </div>
-              <div className="space-y-1">
-                <div className="flex items-center bg-gray-50 rounded-xl border border-transparent focus-within:border-[#1089A4] focus-within:bg-white transition-all overflow-hidden px-3">
-                  <span className="material-symbols-rounded text-lg text-pink-600">photo_camera</span>
-                  <input 
-                    type="text" 
-                    value={formData.instagramUrl}
-                    onChange={e => setFormData({ ...formData, instagramUrl: e.target.value })}
-                    placeholder="instagram.com/..."
-                    className="bg-transparent flex-grow px-2 py-3 text-xs outline-none font-bold"
-                  />
-                </div>
-              </div>
-              <div className="space-y-1">
-                <div className="flex items-center bg-gray-50 rounded-xl border border-transparent focus-within:border-[#1089A4] focus-within:bg-white transition-all overflow-hidden px-3">
-                  <span className="material-symbols-rounded text-lg text-green-600">chat</span>
-                  <input 
-                    type="text" 
-                    value={formData.whatsappNumber}
-                    onChange={e => setFormData({ ...formData, whatsappNumber: e.target.value })}
-                    placeholder="249..."
-                    className="bg-transparent flex-grow px-2 py-3 text-xs outline-none font-bold"
-                  />
-                </div>
               </div>
             </div>
           </div>

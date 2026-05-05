@@ -46,17 +46,28 @@ export async function POST(req: Request) {
     // If it's a single product creation (no products array)
     if (!body.products && body.title) {
       const { title, description, price, stock, categoryId, vendorId, images, sku } = body;
+      
+      const numPrice = parseFloat(price);
+      const numStock = parseInt(stock);
+
+      if (isNaN(numPrice)) {
+        return NextResponse.json({ error: "السعر يجب أن يكون رقماً صالحاً" }, { status: 400 });
+      }
+      if (isNaN(numStock)) {
+        return NextResponse.json({ error: "الكمية يجب أن تكون رقماً صالحاً" }, { status: 400 });
+      }
+
       const product = await prisma.product.create({
         data: {
           title,
-          description,
-          shortDescription: body.shortDescription,
-          price: parseFloat(price),
-          stock: parseInt(stock),
-          categoryId,
+          description: description || "",
+          shortDescription: body.shortDescription || null,
+          price: numPrice,
+          stock: numStock,
+          categoryId: categoryId || null,
           vendorId,
-          images,
-          sku,
+          images: images || "",
+          sku: sku || null,
           discountPrice: body.discountPrice ? parseFloat(body.discountPrice) : null,
           discountType: body.discountType || null,
           status: body.status || "APPROVED"

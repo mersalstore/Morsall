@@ -29,9 +29,11 @@ export default function Navbar() {
   const isAuthenticated = status === "authenticated";
   const [siteSettings, setSiteSettings] = useState<any>(null);
 
+  const [adLinks, setAdLinks] = useState<any[]>([]);
+
   useEffect(() => {
-    // Fetch dynamic categories
-    fetch("/api/admin/categories")
+    // Fetch dynamic categories (PUBLIC)
+    fetch("/api/categories")
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) {
@@ -40,6 +42,16 @@ export default function Navbar() {
         }
       })
       .catch(err => console.error("Nav Categories Fetch Error:", err));
+
+    // Fetch Dynamic Ad Links
+    fetch("/api/site-config?key=ad_links")
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          setAdLinks(data.filter((l: any) => l.isActive));
+        }
+      })
+      .catch(() => {});
 
     fetch("/api/admin/settings/appearance")
       .then(res => res.json())
@@ -71,9 +83,11 @@ export default function Navbar() {
       href: `/category/${c.id}`,
       icon: c.icon || "category"
     })),
-    { label: "العروض 🔥", href: "/offers", icon: "bolt" },
-    { label: "كبار المتاجر", href: "/top-vendors", icon: "storefront" },
-    { label: "ابدأ تجارتك", href: "/vendor/register", icon: "add_business" },
+    ...(adLinks.length > 0 ? adLinks : [
+      { label: "العروض 🔥", href: "/offers", icon: "bolt" },
+      { label: "كبار المتاجر", href: "/top-vendors", icon: "storefront" },
+      { label: "ابدأ تجارتك", href: "/vendor/register", icon: "add_business" },
+    ])
   ];
 
 
