@@ -391,55 +391,56 @@
 /* ── Print — ورقة الشحن ──────────────────────────────── */
 @media print {
   /* إخفاء كل شيء بشكل افتراضي */
-  body * {
-    visibility: hidden;
+  body {
+    visibility: hidden !important;
+    background: white !important;
   }
   
-  /* إظهار ورقة الشحن وكل ما بداخلها فقط */
-  #shipping-label-print,
-  #shipping-label-print * {
-    visibility: visible;
-  }
-
-  @page {
-    size: 100mm 150mm !important;
-    margin: 0 !important;
-  }
-
-  /* تحديد موقع الورقة في أعلى الصفحة لتناسب أبعاد البوليصة */
-  #shipping-label-print {
+  /* إظهار حاوية المودال وتوسيعها */
+  .print-modal-container {
+    visibility: visible !important;
     position: absolute !important;
     left: 0 !important;
     top: 0 !important;
-    width: 100mm !important; 
-    height: 150mm !important;
-    max-height: 150mm !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    border: none !important;
-    box-shadow: none !important;
-    overflow: hidden !important;
+    width: 100% !important;
+    height: auto !important;
     display: block !important;
+    z-index: 9999 !important;
     background: white !important;
   }
 
-  /* إلغاء الـ modal background والطبقات الشفافة */
-  .fixed.inset-0.z-\[999\] {
+  /* إظهار ورقة الشحن وكل ما بداخلها */
+  #shipping-label-print,
+  #shipping-label-print * {
+    visibility: visible !important;
+  }
+
+  /* تخصيص حجم الورقة (اختياري، يمكن تركه للمتصفح) */
+  @page {
+    margin: 5mm !important;
+  }
+
+  /* تحديد موقع الورقة */
+  #shipping-label-print {
+    width: 100% !important;
+    max-width: 800px; /* ليناسب A4 بشكل جيد */
+    margin: 0 auto !important;
+    padding: 20px !important;
+    border: 1px solid #eee !important;
     background: white !important;
-    backdrop-filter: none !important;
-    position: absolute !important;
-    overflow: visible !important;
+    box-shadow: none !important;
+    position: relative !important;
+  }
+
+  /* إخفاء أي أزرار أو هوامش إضافية */
+  .print-hidden, .print\:hidden, button {
+    display: none !important;
   }
 
   /* التأكد من طباعة الألوان والخلفيات */
   * {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
-  }
-
-  /* إخفاء أي أزرار أو هوامش إضافية */
-  .print-hidden, .print\:hidden {
-    display: none !important;
   }
 }
 

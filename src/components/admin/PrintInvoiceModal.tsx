@@ -18,7 +18,7 @@ export default function PrintInvoiceModal({ isOpen, order, onClose }: PrintInvoi
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 print:p-0" dir="rtl">
+      <div className="fixed inset-0 z-[999] flex items-center justify-center p-4 print:p-0 print-modal-container" dir="rtl">
         <motion.div
           initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
           onClick={onClose}
@@ -50,7 +50,7 @@ export default function PrintInvoiceModal({ isOpen, order, onClose }: PrintInvoi
           </div>
 
           {/* WAYBILL CONTENT */}
-          <div id="print-content" className="p-8 print:p-6">
+          <div id="shipping-label-print" className="p-8 print:p-6">
             {/* Logo / Brand Header */}
             <div className="flex items-center justify-between mb-8 pb-6 border-b-4 border-[#021D24]">
               <div>
