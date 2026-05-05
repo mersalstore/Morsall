@@ -152,33 +152,34 @@ export default function Navbar() {
 
         <div className="max-w-[1600px] mx-auto px-4 lg:px-8 py-3 md:py-0 md:h-16 flex flex-wrap md:flex-nowrap items-center justify-between gap-y-3 gap-x-4 lg:gap-8">
 
-          {/* Logo Section */}
-          <Link href="/" className="flex items-center gap-3 shrink-0 group order-1">
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="relative w-[130px] h-10 lg:w-[180px] lg:h-16"
-            >
-              <Image
-                src={siteSettings?.logo || "/logo-navbar-final.png"}
-                alt={siteSettings?.siteTitle || "مرسال - MERSAL"}
-                fill
-                className="object-contain"
-                priority
-              />
-            </motion.div>
-          </Link>
+          {/* Logo & Location Section */}
+          <div className="flex items-center gap-2 sm:gap-4 shrink-0 order-1">
+            <Link href="/" className="flex items-center gap-3 shrink-0 group">
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="relative w-[100px] h-8 lg:w-[180px] lg:h-16"
+              >
+                <Image
+                  src={siteSettings?.logo || "/logo-navbar-final.png"}
+                  alt={siteSettings?.siteTitle || "مرسال - MERSAL"}
+                  fill
+                  className="object-contain"
+                  priority
+                />
+              </motion.div>
+            </Link>
 
-          {/* Location Picker (Premium Pill) */}
-          <button onClick={() => setShowLocationModal(true)} className="hidden xl:flex items-center gap-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full px-4 py-1.5 transition-all cursor-pointer group md:order-2">
-            <div className="w-8 h-8 rounded-full bg-[#F29124]/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-              <span className="material-symbols-rounded text-lg text-[#F29124]">location_on</span>
-            </div>
-            <div className="flex flex-col leading-tight text-right">
-              <span className="text-[10px] text-white/40 font-medium">نصلك إلى</span>
-              <span className="text-[13px] font-bold text-white">{userCity}</span>
-            </div>
-          </button>
+            <button onClick={() => setShowLocationModal(true)} className="flex items-center gap-1.5 sm:gap-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full px-2 sm:px-4 py-1 sm:py-1.5 transition-all cursor-pointer group">
+              <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-[#F29124]/20 flex items-center justify-center group-hover:scale-110 transition-transform shrink-0">
+                <span className="material-symbols-rounded text-sm sm:text-lg text-[#F29124]">location_on</span>
+              </div>
+              <div className="flex flex-col leading-tight text-right overflow-hidden">
+                <span className="text-[8px] sm:text-[10px] text-white/40 font-medium whitespace-nowrap">نصلك إلى</span>
+                <span className="text-[9px] sm:text-[13px] font-bold text-white truncate max-w-[65px] sm:max-w-none">{userCity}</span>
+              </div>
+            </button>
+          </div>
 
           {/* Advanced Search Bar */}
           <form
@@ -368,14 +369,7 @@ export default function Navbar() {
             <span className="block sm:hidden">الأقسام</span>
           </button>
 
-          {/* Mobile Location Picker */}
-          <button 
-            onClick={() => setShowLocationModal(true)} 
-            className="flex xl:hidden shrink-0 items-center gap-1.5 px-3 h-full border-l border-white/5 font-bold text-[11px] text-white/90 hover:bg-white/5 transition-colors"
-          >
-            <span className="material-symbols-rounded text-base text-[#F29124]">location_on</span>
-            <span className="truncate max-w-[70px]">{userCity}</span>
-          </button>
+
 
           {/* Categories Links */}
           <div className="flex items-center h-full overflow-x-auto scrollbar-none">
