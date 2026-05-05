@@ -28,6 +28,74 @@ export default function VendorDashboard() {
   const [productStatusFilter, setProductStatusFilter] = useState("all");
   const [orderSearch, setOrderSearch] = useState("");
   const [orderStatusFilter, setOrderStatusFilter] = useState("all");
+  const [selectedProducts, setSelectedProducts] = useState<Set<string>>(new Set());
+  const [selectedOrders, setSelectedOrders] = useState<Set<string>>(new Set());
+
+  const toggleProductSelection = (id: string) => {
+    const newSelected = new Set(selectedProducts);
+    if (newSelected.has(id)) newSelected.delete(id);
+    else newSelected.add(id);
+    setSelectedProducts(newSelected);
+  };
+
+  const toggleAllProducts = () => {
+    if (selectedProducts.size === filteredProducts.length) setSelectedProducts(new Set());
+    else setSelectedProducts(new Set(filteredProducts.map(p => p.id)));
+  };
+
+  const toggleOrderSelection = (id: string) => {
+    const newSelected = new Set(selectedOrders);
+    if (newSelected.has(id)) newSelected.delete(id);
+    else newSelected.add(id);
+    setSelectedOrders(newSelected);
+  };
+
+  const toggleAllOrders = () => {
+    if (selectedOrders.size === filteredOrders.length) setSelectedOrders(new Set());
+    else setSelectedOrders(new Set(filteredOrders.map(o => o.id)));
+  };
+
+  const handleExportExcel = async (type: "products" | "orders" = "products") => {
+    try {
+      const { exportToExcel } = await import("@/lib/excel");
+      
+      if (type === "products") {
+        const dataToExport = selectedProducts.size > 0 
+          ? products.filter(p => selectedProducts.has(p.id))
+          : products;
+
+        const exportData = dataToExport.map((p: any) => ({
+          "معرف المنتج (ID)": p.id,
+          "اسم المنتج": p.title,
+          "السعر": p.price,
+          "المخزون": p.stock,
+          "الحالة": p.status === "APPROVED" ? "نشط" : "قيد المراجعة",
+          "القسم": p.category?.name || "—",
+          "SKU": p.sku || "—",
+          "الوصف": p.shortDescription || "—"
+        }));
+        exportToExcel(exportData, `مخزون_${statsData?.storeName || "متجري"}`);
+      } else {
+        const dataToExport = selectedOrders.size > 0 
+          ? orders.filter(o => selectedOrders.has(o.id))
+          : orders;
+
+        const exportData = dataToExport.map((o: any) => ({
+          "رقم الطلب": o.id,
+          "العميل": o.customerName,
+          "التاريخ": new Date(o.createdAt).toLocaleDateString("ar-EG"),
+          "الصافي": o.totalAmount,
+          "الحالة": o.status,
+          "المدينة": o.city || "—",
+          "الهاتف": o.phone || "—"
+        }));
+        exportToExcel(exportData, `طلبات_${statsData?.storeName || "متجري"}`);
+      }
+    } catch (err) {
+      alert("حدث خطأ أثناء التصدير");
+    }
+  };
+
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   useEffect(() => {
@@ -59,25 +127,6 @@ export default function VendorDashboard() {
       if (res.ok) setProducts(prev => prev.filter(p => p.id !== id));
     } catch (err) {
       alert("فشل حذف المنتج");
-    }
-  };
-
-  const handleExportExcel = async () => {
-    try {
-      const { exportToExcel } = await import("@/lib/excel");
-      const exportData = products.map((p: any) => ({
-        "معرف المنتج (ID)": p.id,
-        "اسم المنتج": p.title,
-        "السعر": p.price,
-        "المخزون": p.stock,
-        "الحالة": p.status === "APPROVED" ? "نشط" : "قيد المراجعة",
-        "القسم": p.category?.name || "—",
-        "SKU": p.sku || "—",
-        "الوصف": p.shortDescription || "—"
-      }));
-      exportToExcel(exportData, `مخزون_${statsData?.storeName || "متجري"}`);
-    } catch (err) {
-      alert("حدث خطأ أثناء التصدير");
     }
   };
 
@@ -271,9 +320,9 @@ export default function VendorDashboard() {
                     <p className="text-[10px] md:text-sm text-gray-400 font-bold mt-1">عرض وتعديل مخزون متجرك</p>
                   </div>
                   <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
-                     <button onClick={handleExportExcel} className="w-full sm:w-auto justify-center bg-white border border-border px-4 py-2 rounded-xl text-[10px] md:text-sm font-bold text-gray-600 hover:bg-gray-50 transition-colors flex items-center gap-2">
+                     <button onClick={() => handleExportExcel("products")} className="w-full sm:w-auto justify-center bg-white border border-border px-4 py-2 rounded-xl text-[10px] md:text-sm font-bold text-gray-600 hover:bg-gray-50 transition-colors flex items-center gap-2">
                         <span className="material-symbols-rounded text-base">download</span>
-                        تصدير Excel
+                        تصدير Excel {selectedProducts.size > 0 && `(${selectedProducts.size})`}
                      </button>
                      <label className="w-full sm:w-auto justify-center bg-[#F29124] text-white px-4 py-2 rounded-xl text-[10px] md:text-sm font-bold shadow-lg shadow-[#F29124]/20 hover:scale-105 transition-all cursor-pointer flex items-center gap-2">
                         <span className="material-symbols-rounded text-base">upload_file</span>

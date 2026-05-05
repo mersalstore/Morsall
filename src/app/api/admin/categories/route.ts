@@ -39,12 +39,13 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   const session = await getAdminSession();
   if (!session) return adminOnlyResponse();
-  const { name, icon, parentId, showInNavbar } = await req.json();
+  const { name, icon, image, parentId, showInNavbar } = await req.json();
   if (!name) return NextResponse.json({ error: "الاسم مطلوب" }, { status: 400 });
   const category = await prisma.category.create({ 
     data: { 
       name, 
       icon, 
+      image,
       parentId: parentId || null,
       showInNavbar: !!showInNavbar 
     } 
@@ -57,7 +58,7 @@ export async function PATCH(req: Request) {
   if (!session) return adminOnlyResponse();
   
   try {
-    const { id, name, icon, parentId, showInNavbar } = await req.json();
+    const { id, name, icon, image, parentId, showInNavbar } = await req.json();
     if (!id) return NextResponse.json({ error: "المعرف مطلوب" }, { status: 400 });
 
     const category = await prisma.category.update({
@@ -65,6 +66,7 @@ export async function PATCH(req: Request) {
       data: { 
         ...(name && { name }), 
         ...(icon !== undefined && { icon }),
+        ...(image !== undefined && { image }),
         ...(parentId !== undefined && { parentId: parentId || null }),
         ...(showInNavbar !== undefined && { showInNavbar })
       },

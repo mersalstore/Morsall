@@ -14,14 +14,18 @@ import {
   Eye, 
   EyeOff,
   FolderTree,
-  Tags
+  Tags,
+  Image as ImageIcon,
+  Type
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import IconPicker from "./IconPicker";
 
 interface Category {
   id: string;
   name: string;
   icon?: string;
+  image?: string;
   parentId?: string | null;
   showInNavbar: boolean;
   children?: Category[];
@@ -35,10 +39,13 @@ export default function CategoriesTab() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isIconPickerOpen, setIsIconPickerOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+  const [uploading, setUploading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     icon: "",
+    image: "",
     parentId: "",
     showInNavbar: false
   });
@@ -101,7 +108,7 @@ export default function CategoriesTab() {
   };
 
   const resetForm = () => {
-    setFormData({ name: "", icon: "", parentId: "", showInNavbar: false });
+    setFormData({ name: "", icon: "", image: "", parentId: "", showInNavbar: false });
     setEditingCategory(null);
   };
 
@@ -110,10 +117,35 @@ export default function CategoriesTab() {
     setFormData({
       name: cat.name,
       icon: cat.icon || "",
+      image: cat.image || "",
       parentId: cat.parentId || "",
       showInNavbar: cat.showInNavbar
     });
     setIsModalOpen(true);
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    const formDataUpload = new FormData();
+    formDataUpload.append("file", file);
+
+    try {
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formDataUpload,
+      });
+      const data = await res.json();
+      if (data.url) {
+        setFormData(prev => ({ ...prev, image: data.url, icon: "" })); // Clear icon if image uploaded
+      }
+    } catch (err) {
+      console.error(err);
+      alert("فشل رفع الصورة");
+    } finally {
+      setUploading(false);
+    }
   };
 
   // Build tree structure for display
@@ -216,15 +248,49 @@ export default function CategoriesTab() {
                      </div>
 
                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="space-y-2">
-                           <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2">أيقونة القسم (Material Icon Name)</label>
-                           <input 
-                              value={formData.icon}
-                              onChange={e => setFormData({...formData, icon: e.target.value})}
-                              className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-6 py-4 text-sm font-bold outline-none focus:border-[#1089A4] transition-all"
-                              placeholder="مثلاً: devices"
-                           />
-                        </div>
+                         <div className="space-y-2">
+                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2">الأيقونة أو الصورة</label>
+                            <div className="flex gap-2">
+                               <button 
+                                 type="button"
+                                 onClick={() => setIsIconPickerOpen(true)}
+                                 className="flex-1 bg-gray-50 border border-gray-100 rounded-2xl px-4 py-4 flex items-center justify-center gap-3 hover:bg-gray-100 transition-all"
+                               >
+                                 {formData.icon ? (
+                                   <>
+                                     <span className="material-symbols-rounded text-[#1089A4]">{formData.icon}</span>
+                                     <span className="text-[10px] font-black text-[#021D24] uppercase">{formData.icon}</span>
+                                   </>
+                                 ) : formData.image ? (
+                                   <>
+                                      <img src={formData.image} alt="" className="w-6 h-6 rounded-md object-cover" />
+                                      <span className="text-[10px] font-black text-[#021D24] uppercase">صورة مخصصة</span>
+                                   </>
+                                 ) : (
+                                   <>
+                                     <Layout className="text-gray-400" size={18} />
+                                     <span className="text-[10px] font-black text-gray-400 uppercase">اختر أيقونة</span>
+                                   </>
+                                 )}
+                               </button>
+                               
+                               <div className="relative">
+                                  <input 
+                                    type="file" 
+                                    className="absolute inset-0 opacity-0 cursor-pointer" 
+                                    accept="image/*"
+                                    onChange={handleImageUpload}
+                                  />
+                                  <div className="w-14 h-14 bg-[#1089A4]/10 text-[#1089A4] rounded-2xl flex items-center justify-center hover:bg-[#1089A4]/20 transition-all">
+                                     {uploading ? (
+                                       <div className="w-5 h-5 border-2 border-[#1089A4] border-t-transparent rounded-full animate-spin" />
+                                     ) : (
+                                       <ImageIcon size={20} />
+                                     )}
+                                  </div>
+                               </div>
+                            </div>
+                         </div>
                         <div className="space-y-2">
                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2">القسم الأب</label>
                            <select 
@@ -275,6 +341,15 @@ export default function CategoriesTab() {
                         </button>
                      </div>
                   </form>
+
+                  <AnimatePresence>
+                     {isIconPickerOpen && (
+                       <IconPicker 
+                         onSelect={(icon) => setFormData(prev => ({ ...prev, icon, image: "" }))}
+                         onClose={() => setIsIconPickerOpen(false)}
+                       />
+                     )}
+                  </AnimatePresence>
                </motion.div>
             </div>
          )}
@@ -291,12 +366,16 @@ function CategoryItem({ category, onEdit, onDelete }: { category: Category, onEd
     <div className="bg-white rounded-[2rem] shadow-2xl shadow-gray-200/40 border border-gray-100 overflow-hidden group">
       <div className="p-6 flex items-center justify-between gap-4">
         <div className="flex items-center gap-5">
-           <div className={cn(
-             "w-12 h-12 rounded-2xl flex items-center justify-center transition-all",
-             category.showInNavbar ? "bg-[#1089A4]/10 text-[#1089A4]" : "bg-gray-100 text-gray-400"
-           )}>
-             <span className="material-symbols-rounded">{category.icon || "category"}</span>
-           </div>
+            <div className={cn(
+              "w-12 h-12 rounded-2xl flex items-center justify-center transition-all overflow-hidden",
+              category.showInNavbar ? "bg-[#1089A4]/10 text-[#1089A4]" : "bg-gray-100 text-gray-400"
+            )}>
+              {category.image ? (
+                <img src={category.image} alt={category.name} className="w-full h-full object-cover" />
+              ) : (
+                <span className="material-symbols-rounded">{category.icon || "category"}</span>
+              )}
+            </div>
            <div>
               <div className="flex items-center gap-2">
                  <h4 className="text-sm font-black text-[#021D24]">{category.name}</h4>
@@ -336,7 +415,13 @@ function CategoryItem({ category, onEdit, onDelete }: { category: Category, onEd
                {category.children?.map(child => (
                   <div key={child.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border border-white">
                      <div className="flex items-center gap-4">
-                        <span className="material-symbols-rounded text-gray-400 text-lg">{child.icon || "subdirectory_arrow_right"}</span>
+                        <div className="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center bg-white border border-gray-100">
+                           {child.image ? (
+                             <img src={child.image} alt={child.name} className="w-full h-full object-cover" />
+                           ) : (
+                             <span className="material-symbols-rounded text-gray-400 text-sm">{child.icon || "subdirectory_arrow_right"}</span>
+                           )}
+                        </div>
                         <span className="text-xs font-bold text-[#021D24]">{child.name}</span>
                      </div>
                      <div className="flex items-center gap-2">

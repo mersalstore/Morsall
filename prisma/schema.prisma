@@ -195,6 +195,7 @@ model Category {
   id           String     @id @default(cuid())
   name         String     @unique
   icon         String?
+  image        String?
   parentId     String?
   showInNavbar Boolean    @default(false)
   parent       Category?  @relation("SubCategories", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
