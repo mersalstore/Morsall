@@ -30,6 +30,7 @@ model User {
   reviews       Review[]
   sessions      Session[]
   vendorProfile Vendor?
+  vendorReviews VendorReview[]
 }
 
 model Account {
@@ -101,6 +102,7 @@ model Vendor {
   plan               SubscriptionPlan? @relation(fields: [planId], references: [id])
   user               User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   withdrawals        Withdrawal[]
+  reviews            VendorReview[]
 }
 
 model SubscriptionPlan {
@@ -339,6 +341,17 @@ model Review {
   userId    String
   createdAt DateTime @default(now())
   product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model VendorReview {
+  id        String   @id @default(cuid())
+  rating    Int
+  comment   String?
+  vendorId  String
+  userId    String
+  createdAt DateTime @default(now())
+  vendor    Vendor   @relation(fields: [vendorId], references: [id], onDelete: Cascade)
   user      User     @relation(fields: [userId], references: [id])
 }
 

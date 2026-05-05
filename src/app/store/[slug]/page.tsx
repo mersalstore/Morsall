@@ -4,6 +4,7 @@ import Image from "next/image";
 import ProductCard from "@/components/ProductCard";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import VendorRating from "@/components/VendorRating";
 
 export default async function VendorStorePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -127,6 +128,8 @@ export default async function VendorStorePage({ params }: { params: Promise<{ sl
                   </div>
                   <span className="material-symbols-rounded absolute -bottom-8 -right-8 text-8xl text-white/5 -rotate-12">verified</span>
                </div>
+               
+               <VendorRating vendorId={vendor.id} />
             </div>
 
             {/* Products Grid */}

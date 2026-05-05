@@ -250,6 +250,16 @@ export default function Navbar() {
                           طلباتي ومشترياتي
                           <span className="material-symbols-rounded text-lg opacity-40 group-hover/item:opacity-100 group-hover/item:text-[#C5A021]">package_2</span>
                         </Link>
+                        
+                        <Link href="/wishlist" className="flex items-center justify-between px-4 py-3 rounded-xl hover:bg-white/5 text-xs font-bold text-white/80 transition-all group/item">
+                          المفضلات
+                          <span className="material-symbols-rounded text-lg opacity-40 group-hover/item:opacity-100 group-hover/item:text-[#C5A021]">favorite</span>
+                        </Link>
+                        
+                        <Link href="/compare" className="flex items-center justify-between px-4 py-3 rounded-xl hover:bg-white/5 text-xs font-bold text-white/80 transition-all group/item">
+                          المقارنات
+                          <span className="material-symbols-rounded text-lg opacity-40 group-hover/item:opacity-100 group-hover/item:text-[#C5A021]">compare_arrows</span>
+                        </Link>
 
                         <div className="h-px bg-white/5 my-2 mx-2" />
 
