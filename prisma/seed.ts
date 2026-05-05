@@ -4,18 +4,22 @@ const prisma = new PrismaClient();
 async function main() {
   console.log("Seeding database...");
 
-  // 0. Ensure Admin User
-  await prisma.user.upsert({
-    where: { email: 'zomatube2012@gmail.com' },
-    update: { role: 'ADMIN' },
-    create: {
-      email: 'zomatube2012@gmail.com',
-      name: 'Morsall Admin',
-      role: 'ADMIN',
-      isOnboarded: true,
-    },
-  });
-  console.log("Admin account set for zomatube2012@gmail.com");
+  // 0. Ensure Admin Users
+  const adminEmails = ['zomatube2012@gmail.com', 'mersalstore122@gmail.com', 'Blackhatsd.sd@gmail.com'];
+  
+  for (const email of adminEmails) {
+    await prisma.user.upsert({
+      where: { email },
+      update: { role: 'ADMIN' },
+      create: {
+        email,
+        name: email.split('@')[0],
+        role: 'ADMIN',
+        isOnboarded: true,
+      },
+    });
+  }
+  console.log("Admin accounts ensured:", adminEmails.join(", "));
 
   // 1. Create a Vendor (which needs a User)
   const vendorUser = await prisma.user.upsert({
