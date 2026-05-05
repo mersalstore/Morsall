@@ -121,38 +121,38 @@ export default function Navbar() {
   }, []);
 
   return (
-    <header 
+    <header
       className={cn(
         "w-full fixed top-0 left-0 z-[100] flex flex-col transition-all duration-300",
         isScrolled ? "translate-y-[-2px]" : "translate-y-0"
-      )} 
+      )}
       dir="rtl"
     >
       {/* ── HIGH-END TOP BAR ─────────────────────────── */}
       <div className="bg-[#020D10] text-white shadow-2xl border-b border-white/5 relative">
         {/* Animated accent line */}
-        <motion.div 
+        <motion.div
           initial={{ scaleX: 0 }}
           animate={{ scaleX: 1 }}
           transition={{ duration: 1.5, ease: "circOut" }}
-          className="absolute bottom-0 left-0 h-[2px] w-full bg-gradient-to-r from-transparent via-[#F29124] to-transparent opacity-50" 
+          className="absolute bottom-0 left-0 h-[2px] w-full bg-gradient-to-r from-transparent via-[#F29124] to-transparent opacity-50"
         />
-        
+
         <div className="max-w-[1600px] mx-auto px-4 lg:px-8 h-16 flex items-center gap-4 lg:gap-8">
 
           {/* Logo Section */}
           <Link href="/" className="flex items-center gap-3 shrink-0 group">
-            <motion.div 
+            <motion.div
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className="relative w-[150px] h-12 lg:w-[180px] lg:h-16"
             >
-              <Image 
-                src={siteSettings?.logo || "/logo-navbar-final.png"} 
-                alt={siteSettings?.siteTitle || "مرسال - MERSAL"} 
-                fill 
-                className="object-contain" 
-                priority 
+              <Image
+                src={siteSettings?.logo || "/logo-navbar-final.png"}
+                alt={siteSettings?.siteTitle || "مرسال - MERSAL"}
+                fill
+                className="object-contain"
+                priority
               />
             </motion.div>
           </Link>
@@ -169,8 +169,8 @@ export default function Navbar() {
           </Link>
 
           {/* Advanced Search Bar */}
-          <form 
-            onSubmit={handleSearch} 
+          <form
+            onSubmit={handleSearch}
             className="flex-grow flex items-stretch h-11 bg-white/5 rounded-xl border border-white/10 hover:border-[#C5A021]/50 focus-within:border-[#C5A021] focus-within:ring-4 focus-within:ring-[#C5A021]/10 transition-all overflow-hidden"
           >
             <select className="hidden md:block bg-transparent text-white/70 text-[12px] font-bold px-4 hover:text-white outline-none cursor-pointer border-l border-white/10">
@@ -195,7 +195,7 @@ export default function Navbar() {
 
           {/* Action Icons */}
           <div className="flex items-center gap-2 lg:gap-5 shrink-0" ref={menuRef}>
-            
+
             {/* Account Dropdown */}
             <div className="relative">
               <motion.button
@@ -207,11 +207,11 @@ export default function Navbar() {
                 <div className="relative group-hover:scale-110 transition-transform">
                   {isAuthenticated && session?.user?.image ? (
                     <div className="w-7 h-7 rounded-full overflow-hidden border border-[#C5A021]/50 shadow-lg">
-                      <Image 
-                        src={session.user.image} 
-                        alt={session.user.name || "User"} 
-                        width={28} 
-                        height={28} 
+                      <Image
+                        src={session.user.image}
+                        alt={session.user.name || "User"}
+                        width={28}
+                        height={28}
                         className="object-cover"
                       />
                     </div>
@@ -227,7 +227,7 @@ export default function Navbar() {
 
               <AnimatePresence>
                 {showUserMenu && (
-                  <motion.div 
+                  <motion.div
                     initial={{ opacity: 0, y: 10, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 10, scale: 0.95 }}
@@ -245,17 +245,17 @@ export default function Navbar() {
                           حسابي الشخصي
                           <span className="material-symbols-rounded text-lg opacity-40 group-hover/item:opacity-100 group-hover/item:text-[#C5A021]">person</span>
                         </Link>
-                        
+
                         <Link href="/orders" className="flex items-center justify-between px-4 py-3 rounded-xl hover:bg-white/5 text-xs font-bold text-white/80 transition-all group/item">
                           طلباتي ومشترياتي
                           <span className="material-symbols-rounded text-lg opacity-40 group-hover/item:opacity-100 group-hover/item:text-[#C5A021]">package_2</span>
                         </Link>
-                        
+
                         <Link href="/wishlist" className="flex items-center justify-between px-4 py-3 rounded-xl hover:bg-white/5 text-xs font-bold text-white/80 transition-all group/item">
                           المفضلات
                           <span className="material-symbols-rounded text-lg opacity-40 group-hover/item:opacity-100 group-hover/item:text-[#C5A021]">favorite</span>
                         </Link>
-                        
+
                         <Link href="/compare" className="flex items-center justify-between px-4 py-3 rounded-xl hover:bg-white/5 text-xs font-bold text-white/80 transition-all group/item">
                           المقارنات
                           <span className="material-symbols-rounded text-lg opacity-40 group-hover/item:opacity-100 group-hover/item:text-[#C5A021]">compare_arrows</span>
@@ -324,7 +324,7 @@ export default function Navbar() {
 
             {/* Cart Button (Premium) */}
             <Link href="/cart">
-              <motion.div 
+              <motion.div
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 className="bg-[#C5A021] text-white rounded-xl h-11 px-4 lg:px-6 flex items-center gap-3 shadow-lg shadow-[#C5A021]/20 hover:brightness-110 transition-all"
@@ -345,14 +345,24 @@ export default function Navbar() {
       {/* ── GLASS NAVIGATION BAR ─────────────────────────── */}
       <nav className="bg-[#020D10]/80 backdrop-blur-xl border-b border-white/5">
         <div className="max-w-[1600px] mx-auto px-4 lg:px-8 flex items-center h-12">
-          
+
           {/* Hamburger */}
           <button
             onClick={() => setShowCategories(p => !p)}
-            className="flex items-center gap-3 px-4 h-full border-l border-white/5 font-black text-xs text-[#F29124] hover:bg-white/5 transition-colors"
+            className="flex shrink-0 items-center gap-2 px-3 lg:px-4 h-full border-l border-white/5 font-black text-xs text-[#F29124] hover:bg-white/5 transition-colors"
           >
             <span className="material-symbols-rounded text-xl">menu</span>
-            تصفح الأقسام
+            <span className="hidden sm:block">تصفح الأقسام</span>
+            <span className="block sm:hidden">الأقسام</span>
+          </button>
+
+          {/* Mobile Location Picker */}
+          <button 
+            onClick={() => setShowLocationModal(true)} 
+            className="flex xl:hidden shrink-0 items-center gap-1.5 px-3 h-full border-l border-white/5 font-bold text-[11px] text-white/90 hover:bg-white/5 transition-colors"
+          >
+            <span className="material-symbols-rounded text-base text-[#F29124]">location_on</span>
+            <span className="truncate max-w-[70px]">{userCity}</span>
           </button>
 
           {/* Categories Links */}
@@ -382,14 +392,14 @@ export default function Navbar() {
       <AnimatePresence>
         {showCategories && (
           <>
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[-1]"
               onClick={() => setShowCategories(false)}
             />
-            <motion.div 
+            <motion.div
               initial={{ x: "100%" }}
               animate={{ x: 0 }}
               exit={{ x: "100%" }}

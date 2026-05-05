@@ -15,24 +15,24 @@ export default function CheckoutPage() {
   const router = useRouter();
 
   const [form, setForm] = useState({
-    name:     session?.user?.name || "",
-    phone:    "",
-    city:     "الخرطوم",
+    name: session?.user?.name || "",
+    phone: "",
+    city: "الخرطوم",
     district: "",
-    street:   "",
-    notes:    "",
+    street: "",
+    notes: "",
     paymentMethod: "COD",
     paymentScreenshot: "",
   });
-  const [settings, setSettings]   = useState<any>(null);
+  const [settings, setSettings] = useState<any>(null);
   const [submitted, setSubmitted] = useState(false);
-  const [orderId, setOrderId]     = useState<string | null>(null);
-  const [loading, setLoading]     = useState(false);
+  const [orderId, setOrderId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [error, setError]         = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const shippingCost = 5000;
-  const total        = subtotal + shippingCost;
+  const total = subtotal + shippingCost;
 
   useEffect(() => {
     // Fetch Settings
@@ -53,7 +53,7 @@ export default function CheckoutPage() {
             district: parsed.district || prev.district,
             street: parsed.street || prev.street,
           }));
-        } catch (e) {}
+        } catch (e) { }
       }
     }
   }, []);
@@ -106,13 +106,13 @@ export default function CheckoutPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name:          form.name,
-          phone:         form.phone,
-          email:         session?.user?.email || "",
-          city:          form.city,
-          district:      form.district || form.city,
-          street:        form.street,
-          notes:         form.notes,
+          name: form.name,
+          phone: form.phone,
+          email: session?.user?.email || "",
+          city: form.city,
+          district: form.district || form.city,
+          street: form.street,
+          notes: form.notes,
           paymentMethod: form.paymentMethod,
           paymentScreenshot: form.paymentScreenshot,
           subtotal,
@@ -120,11 +120,11 @@ export default function CheckoutPage() {
           items: cart.map(item => ({
             productId: item.id,
             variationId: item.variationId || null,
-            vendorId:  item.vendorId || "unknown",
-            quantity:  item.quantity,
-            price:     item.price,
-            size:      item.size  || null,
-            color:     item.color || null,
+            vendorId: item.vendorId || "unknown",
+            quantity: item.quantity,
+            price: item.price,
+            size: item.size || null,
+            color: item.color || null,
             selectedOptions: item.selectedOptions || null,
           })),
         }),
@@ -295,8 +295,8 @@ export default function CheckoutPage() {
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
                 {[
-                  { value: "COD",           icon: "payments",        label: "دفع عند الاستلام",  sub: "ادفع لما المندوب يوصلك", disabled: settings?.codEnabled === false },
-                  { value: "BANK_TRANSFER", icon: "account_balance", label: "تحويل بنكي",        sub: "حوّل المبلغ وارفع الإيصال", disabled: settings?.bankTransferEnabled === false },
+                  { value: "COD", icon: "payments", label: "دفع عند الاستلام", sub: "ادفع لما المندوب يوصلك", disabled: settings?.codEnabled === false },
+                  { value: "BANK_TRANSFER", icon: "account_balance", label: "تحويل بنكي", sub: "حوّل المبلغ وارفع الإيصال", disabled: settings?.bankTransferEnabled === false },
                 ].filter(m => !m.disabled).map(m => (
                   <label key={m.value}
                     className={`flex items-center gap-3 p-4 rounded-lg border-2 cursor-pointer transition-all ${form.paymentMethod === m.value ? "border-[#1089A4] bg-[#1089A4]/5" : "border-gray-200 hover:border-gray-300"}`}>
@@ -342,7 +342,7 @@ export default function CheckoutPage() {
                         <p className="text-[10px] font-bold text-gray-400 uppercase">رقم الحساب / IBAN</p>
                         <p className="font-black text-lg text-[#1089A4] tracking-wider">{settings.bankAccountNumber || "XXXX-XXXX-XXXX"}</p>
                       </div>
-                      <button type="button" onClick={() => navigator.clipboard.writeText(settings.bankAccountNumber)} 
+                      <button type="button" onClick={() => navigator.clipboard.writeText(settings.bankAccountNumber)}
                         className="w-10 h-10 bg-gray-100 text-gray-500 rounded-lg flex items-center justify-center hover:bg-gray-200 transition-colors">
                         <span className="material-symbols-rounded text-lg">content_copy</span>
                       </button>
@@ -364,7 +364,7 @@ export default function CheckoutPage() {
                         <div className="flex flex-col items-center">
                           <span className="material-symbols-rounded text-3xl text-green-500 mb-1">check_circle</span>
                           <p className="text-xs font-bold text-green-600">تم رفع الإيصال بنجاح</p>
-                          <button type="button" onClick={(e) => { e.preventDefault(); setForm(p => ({...p, paymentScreenshot: ""})) }} className="text-[10px] text-red-500 font-bold mt-1 underline">تغيير الصورة</button>
+                          <button type="button" onClick={(e) => { e.preventDefault(); setForm(p => ({ ...p, paymentScreenshot: "" })) }} className="text-[10px] text-red-500 font-bold mt-1 underline">تغيير الصورة</button>
                         </div>
                       ) : (
                         <div className="flex flex-col items-center">
