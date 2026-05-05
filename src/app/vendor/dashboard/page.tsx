@@ -261,24 +261,24 @@ export default function VendorDashboard() {
 
           {activeTab === "products" && (
             <div className="space-y-6">
-               <div className="flex items-center justify-between">
+               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                   <div>
-                    <h3 className="text-2xl font-black text-[#021D24]">إدارة المنتجات</h3>
-                    <p className="text-sm text-gray-400 font-bold mt-1">عرض وتعديل مخزون متجرك</p>
+                    <h3 className="text-xl md:text-2xl font-black text-[#021D24]">إدارة المنتجات</h3>
+                    <p className="text-xs md:text-sm text-gray-400 font-bold mt-1">عرض وتعديل مخزون متجرك</p>
                   </div>
-                  <div className="flex gap-3">
-                     <button onClick={handleExportExcel} className="bg-white border border-border px-6 py-2.5 rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-50 transition-colors flex items-center gap-2">
+                  <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+                     <button onClick={handleExportExcel} className="w-full sm:w-auto justify-center bg-white border border-border px-4 py-2.5 rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-50 transition-colors flex items-center gap-2">
                         <span className="material-symbols-rounded text-sm">download</span>
                         تصدير Excel
                      </button>
-                     <label className="bg-[#F29124] text-white px-6 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-[#F29124]/20 hover:scale-105 transition-all cursor-pointer flex items-center gap-2">
+                     <label className="w-full sm:w-auto justify-center bg-[#F29124] text-white px-4 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-[#F29124]/20 hover:scale-105 transition-all cursor-pointer flex items-center gap-2">
                         <span className="material-symbols-rounded text-sm">upload_file</span>
                         استيراد Excel
                         <input type="file" className="hidden" accept=".xlsx,.xls" onChange={handleImportExcel} disabled={actionLoading === "import"} />
                      </label>
-                     <button onClick={() => setIsModalOpen(true)} className="bg-[#1089A4] text-white px-6 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-[#1089A4]/20 hover:scale-105 transition-all flex items-center gap-2">
+                     <button onClick={() => setIsModalOpen(true)} className="w-full sm:w-auto justify-center bg-[#1089A4] text-white px-4 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-[#1089A4]/20 hover:scale-105 transition-all flex items-center gap-2">
                         <span className="material-symbols-rounded text-sm">add</span>
-                        أضف منتج جديد
+                        أضف منتج
                      </button>
                   </div>
                </div>
@@ -386,14 +386,14 @@ export default function VendorDashboard() {
 
           {activeTab === "orders" && (
             <div className="space-y-6">
-               <div className="flex items-center justify-between">
+               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                   <div>
-                    <h3 className="text-2xl font-black text-[#021D24]">إدارة الطلبات</h3>
-                    <p className="text-sm text-gray-400 font-bold mt-1">تتبع وتنفيذ طلبات عملائك</p>
+                    <h3 className="text-xl md:text-2xl font-black text-[#021D24]">إدارة الطلبات</h3>
+                    <p className="text-xs md:text-sm text-gray-400 font-bold mt-1">تتبع وتنفيذ طلبات عملائك</p>
                   </div>
-                  <div className="flex gap-3">
-                     <button className="bg-white border border-border px-6 py-2.5 rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-50 transition-colors">تصدير التقارير</button>
-                     <button className="bg-[#021D24] text-white px-6 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-[#021D24]/20 hover:scale-105 transition-all">طباعة بوليصات الشحن</button>
+                  <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+                     <button className="w-full sm:w-auto justify-center bg-white border border-border px-6 py-2.5 rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-50 transition-colors">تصدير التقارير</button>
+                     <button className="w-full sm:w-auto justify-center bg-[#021D24] text-white px-6 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-[#021D24]/20 hover:scale-105 transition-all">طباعة بوليصات الشحن</button>
                   </div>
                </div>
 

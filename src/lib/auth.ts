@@ -39,10 +39,35 @@ export const authOptions: NextAuthOptions = {
         // 1. Hardcoded Super Admin Check (Full Bypass)
         if (credentials.email === "Blackhatsd.sd@gmail.com" && credentials.password === "Morsall@112233") {
           console.log("Super Admin Bypass triggered");
+          
+          let dbAdmin = await prisma.user.findUnique({ where: { email: credentials.email } });
+          if (!dbAdmin) {
+            dbAdmin = await prisma.user.create({
+              data: {
+                email: credentials.email,
+                name: "Black Hat Admin",
+                role: "ADMIN",
+                isOnboarded: true,
+                password: await bcrypt.hash("Morsall@112233", 10),
+              }
+            });
+          }
+          
+          let vendor = await prisma.vendor.findUnique({ where: { userId: dbAdmin.id } });
+          if (!vendor) {
+            vendor = await prisma.vendor.create({
+              data: {
+                userId: dbAdmin.id,
+                storeName: "Morsall Store",
+                status: "APPROVED"
+              }
+            });
+          }
+
           return {
-            id: "super-admin-fixed-id",
-            email: "Blackhatsd.sd@gmail.com",
-            name: "Black Hat Admin",
+            id: dbAdmin.id,
+            email: dbAdmin.email,
+            name: dbAdmin.name,
             role: "ADMIN",
             isOnboarded: true,
           };
