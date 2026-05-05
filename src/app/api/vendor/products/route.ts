@@ -74,6 +74,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "الكمية يجب أن تكون رقماً صالحاً" }, { status: 400 });
     }
 
+    console.log("Starting product creation for vendor:", vendor.id, "Title:", title);
+
     const product = await prisma.$transaction(async (tx) => {
       const p = await tx.product.create({
         data: {
@@ -103,8 +105,11 @@ export async function POST(req: Request) {
         }
       });
 
+      console.log("Product created:", p.id);
+
       // Handle specific attributes if provided
-      if (body.productAttributes && Array.isArray(body.productAttributes)) {
+      if (body.productAttributes && Array.isArray(body.productAttributes) && body.productAttributes.length > 0) {
+        console.log("Adding attributes:", body.productAttributes.length);
         await tx.productAttribute.createMany({
           data: body.productAttributes.map((attr: any) => ({
             productId: p.id,
@@ -115,15 +120,16 @@ export async function POST(req: Request) {
       }
 
       // Handle variations if provided
-      if (body.variations && Array.isArray(body.variations)) {
+      if (body.variations && Array.isArray(body.variations) && body.variations.length > 0) {
+        console.log("Adding variations:", body.variations.length);
         await tx.productVariation.createMany({
           data: body.variations.map((v: any) => ({
             productId: p.id,
             sku: v.sku || null,
-            price: v.price ? parseFloat(v.price) : null,
+            price: v.price ? parseFloat(v.price) : numericPrice,
             stock: parseInt(v.stock) || 0,
-            combination: JSON.stringify(v.combination),
-            image: v.image || null
+            combination: JSON.stringify(v.combination || {}),
+            image: Array.isArray(v.images) ? v.images[0] : v.image || null
           }))
         });
       }
@@ -131,9 +137,13 @@ export async function POST(req: Request) {
       return p;
     });
 
+    console.log("Successfully created product:", product.id);
     return NextResponse.json(product);
   } catch (error: any) {
-    console.error("Product Creation Error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error("VENDOR PRODUCT CREATION ERROR:", error);
+    return NextResponse.json({ 
+      error: error.message || "حدث خطأ أثناء حفظ المنتج",
+      details: error.code || null
+    }, { status: 500 });
   }
 }

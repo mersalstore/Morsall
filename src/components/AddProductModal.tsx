@@ -110,7 +110,7 @@ export default function AddProductModal({ isOpen, onClose }: AddProductModalProp
         });
 
         const urls = await Promise.all(uploadPromises);
-        finalImageUrl = urls.join(",");
+        finalImageUrl = urls.filter(u => !!u).join(",");
       }
 
       // Merge with external URL if provided
