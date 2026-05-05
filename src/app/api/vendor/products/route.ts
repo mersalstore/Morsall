@@ -56,7 +56,7 @@ export async function POST(req: Request) {
     const { 
       title, description, shortDescription, price, stock, images, categoryId, 
       sizes, colors, brand, range, type, sku, weight, length, width, height,
-      ram, storage, screenSize, bundleData, discountPrice, discountType
+      bundleData, discountPrice, discountType
     } = body;
 
     const numericPrice = parseFloat(price);
@@ -95,9 +95,6 @@ export async function POST(req: Request) {
           height: numericHeight,
           discountPrice: numericDiscountPrice,
           discountType: discountType || null,
-          ram: ram || null,
-          storage: storage || null,
-          screenSize: screenSize || null,
           bundleData: bundleData || null,
           vendorId: vendor.id,
           categoryId: categoryId || null,

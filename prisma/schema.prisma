@@ -134,12 +134,9 @@ model Product {
   bundleData       String?
   height           Float?
   length           Float?
-  ram              String?
   range            String?
-  screenSize       String?
   shortDescription String?
   sku              String?
-  storage          String?
   type             String             @default("SIMPLE")
   weight           Float?
   width            Float?
