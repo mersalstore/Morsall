@@ -215,11 +215,11 @@ export default function Navbar() {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setShowUserMenu(p => !p)}
-                className="flex flex-col items-center justify-center w-14 h-14 rounded-2xl bg-white/5 border border-white/10 hover:border-white/30 transition-all text-center group"
+                className="flex flex-col items-center justify-center w-10 h-10 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-white/5 border border-white/10 hover:border-white/30 transition-all text-center group"
               >
                 <div className="relative group-hover:scale-110 transition-transform">
                   {isAuthenticated && session?.user?.image ? (
-                    <div className="w-7 h-7 rounded-full overflow-hidden border border-[#C5A021]/50 shadow-lg">
+                    <div className="w-6 h-6 md:w-7 md:h-7 rounded-full overflow-hidden border border-[#C5A021]/50 shadow-lg">
                       <Image
                         src={session.user.image}
                         alt={session.user.name || "User"}
@@ -229,11 +229,11 @@ export default function Navbar() {
                       />
                     </div>
                   ) : (
-                    <span className="material-symbols-rounded text-2xl text-white/70 group-hover:text-white transition-colors">person</span>
+                    <span className="material-symbols-rounded text-xl md:text-2xl text-white/70 group-hover:text-white transition-colors">person</span>
                   )}
-                  <div className="absolute top-0 right-0 w-2 h-2 bg-[#C5A021] rounded-full border border-black shadow-[0_0_10px_rgba(197,160,33,0.5)]" />
+                  <div className="absolute top-0 right-0 w-1.5 h-1.5 md:w-2 md:h-2 bg-[#C5A021] rounded-full border border-black shadow-[0_0_10px_rgba(197,160,33,0.5)]" />
                 </div>
-                <span className="text-[9px] font-black text-white/40 group-hover:text-white transition-colors uppercase tracking-widest leading-none mt-1">
+                <span className="hidden md:block text-[9px] font-black text-white/40 group-hover:text-white transition-colors uppercase tracking-widest leading-none mt-1">
                   {isAuthenticated ? (session?.user?.name?.split(' ')[0] || "حسابي") : "حسابي"}
                 </span>
               </motion.button>
@@ -340,11 +340,11 @@ export default function Navbar() {
               <motion.div
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="bg-[#C5A021] text-white rounded-xl h-11 px-4 lg:px-6 flex items-center gap-3 shadow-lg shadow-[#C5A021]/20 hover:brightness-110 transition-all"
+                className="bg-[#C5A021] text-white rounded-xl h-10 md:h-11 px-3 md:px-4 lg:px-6 flex items-center gap-2 md:gap-3 shadow-lg shadow-[#C5A021]/20 hover:brightness-110 transition-all"
               >
                 <div className="relative">
-                  <span className="material-symbols-rounded text-2xl">shopping_bag</span>
-                  <span className="absolute -top-1 -right-1 h-4 min-w-[16px] bg-white text-[#C5A021] text-[9px] font-black rounded-full flex items-center justify-center px-1">
+                  <span className="material-symbols-rounded text-xl md:text-2xl">shopping_bag</span>
+                  <span className="absolute -top-1 -right-1 h-3 min-w-[12px] md:h-4 md:min-w-[16px] bg-white text-[#C5A021] text-[8px] md:text-[9px] font-black rounded-full flex items-center justify-center px-0.5 md:px-1">
                     {cartCount}
                   </span>
                 </div>

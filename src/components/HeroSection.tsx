@@ -90,7 +90,7 @@ export default function HeroSection() {
 
   return (
     <section className="w-full pt-[80px]" dir="rtl">
-      <div className="relative h-[450px] md:h-[600px] lg:h-[700px] w-full overflow-hidden bg-[#021D24]">
+      <div className="relative h-[550px] md:h-[600px] lg:h-[700px] w-full overflow-hidden bg-[#021D24]">
         
         {/* Slide Content */}
         <div className="absolute inset-0">
@@ -114,35 +114,35 @@ export default function HeroSection() {
           "relative h-full max-w-[1600px] mx-auto px-6 lg:px-24 flex flex-col justify-center items-start transition-all duration-700",
           transitioning ? "opacity-0 -translate-x-10" : "opacity-100 translate-x-0"
         )}>
-          <div className="space-y-6 max-w-2xl text-right md:text-right">
+          <div className="space-y-4 md:space-y-6 max-w-2xl text-right mt-10 md:mt-0">
             <div className="flex items-center gap-3">
-               <span className="w-12 h-[2px] bg-[#F29124]" />
-               <span className="text-[#F29124] text-xs font-black uppercase tracking-[0.4em]">{s.tag}</span>
+               <span className="w-8 md:w-12 h-[2px] bg-[#F29124]" />
+               <span className="text-[#F29124] text-[10px] md:text-xs font-black uppercase tracking-[0.2em] md:tracking-[0.4em]">{s.tag}</span>
             </div>
             
-            <h1 className="text-4xl md:text-6xl lg:text-8xl font-black text-white leading-[1.1] drop-shadow-2xl">
+            <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-8xl font-black text-white leading-[1.2] drop-shadow-2xl">
               {s.title}
             </h1>
             
-            <p className="text-base md:text-xl text-white/70 font-medium leading-relaxed max-w-lg">
+            <p className="text-xs sm:text-sm md:text-xl text-white/70 font-medium leading-relaxed max-w-lg">
               {s.desc}
             </p>
 
-            <div className="pt-6 flex flex-wrap gap-5">
+            <div className="pt-4 md:pt-6 flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
               <Link
                 href={s.ctaHref}
-                className="group relative px-12 py-5 bg-[#1089A4] text-white rounded-2xl font-black text-sm overflow-hidden shadow-2xl shadow-[#1089A4]/30 hover:shadow-[#F29124]/40 transition-all active:scale-95"
+                className="group relative px-6 md:px-12 py-3.5 md:py-5 bg-[#1089A4] text-white rounded-xl md:rounded-2xl font-black text-xs md:text-sm overflow-hidden shadow-2xl shadow-[#1089A4]/30 hover:shadow-[#F29124]/40 transition-all active:scale-95 w-full sm:w-auto flex items-center justify-center"
               >
                 <div className="absolute inset-0 bg-[#F29124] translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
-                <span className="relative flex items-center gap-3">
+                <span className="relative flex items-center gap-2 md:gap-3">
                   {s.cta}
-                  <span className="material-symbols-rounded group-hover:-translate-x-2 transition-transform">arrow_back</span>
+                  <span className="material-symbols-rounded text-lg group-hover:-translate-x-2 transition-transform">arrow_back</span>
                 </span>
               </Link>
               
               <Link
                 href="/shop"
-                className="px-10 py-5 bg-white/5 backdrop-blur-xl text-white border border-white/10 rounded-2xl font-black text-sm hover:bg-white/10 transition-all"
+                className="px-6 md:px-10 py-3.5 md:py-5 bg-white/5 backdrop-blur-xl text-white border border-white/10 rounded-xl md:rounded-2xl font-black text-xs md:text-sm hover:bg-white/10 transition-all w-full sm:w-auto flex items-center justify-center"
               >
                 اكتشف الأقسام
               </Link>
@@ -166,21 +166,21 @@ export default function HeroSection() {
         {currentSlides.length > 1 && (
           <>
             {/* Dots */}
-            <div className="absolute bottom-10 right-6 lg:right-24 flex gap-3">
+            <div className="absolute bottom-6 md:bottom-10 right-0 left-0 flex justify-center md:justify-start md:right-24 gap-2 md:gap-3">
               {currentSlides.map((_, i) => (
                 <button
                   key={i}
                   onClick={() => changeSlide(i)}
                   className={cn(
                     "h-1.5 rounded-full transition-all duration-500",
-                    i === active ? "w-12 bg-[#F29124]" : "w-4 bg-white/20 hover:bg-white/40"
+                    i === active ? "w-8 md:w-12 bg-[#F29124]" : "w-3 md:w-4 bg-white/20 hover:bg-white/40"
                   )}
                 />
               ))}
             </div>
 
             {/* Arrows - Minimalist */}
-            <div className="absolute bottom-10 left-6 lg:left-24 flex gap-4">
+            <div className="hidden md:flex absolute bottom-10 left-6 lg:left-24 gap-4">
               <button 
                 onClick={() => changeSlide((active - 1 + currentSlides.length) % currentSlides.length)}
                 className="w-14 h-14 rounded-full border border-white/10 bg-white/5 backdrop-blur-sm text-white flex items-center justify-center hover:bg-white hover:text-[#021D24] transition-all"
