@@ -20,6 +20,8 @@ export default function Navbar() {
   const [showCategories, setShowCategories] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [userCity, setUserCity] = useState("جاري التحديد...");
+  const [showLocationModal, setShowLocationModal] = useState(false);
+  const [availableCities, setAvailableCities] = useState<string[]>(["الخرطوم", "أم درمان", "بحري", "شندي", "مدني", "بورتسودان", "عطبرة", "كسلا", "الأبيض"]);
   const [navCategories, setNavCategories] = useState<any[]>([]);
   const menuRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
@@ -46,6 +48,16 @@ export default function Navbar() {
         if (data.settings) setSiteSettings(data.settings);
       })
       .catch(err => console.error("Settings fetch error:", err));
+
+    fetch("/api/delivery-zones")
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data) && data.length > 0) {
+          const cities = Array.from(new Set(data.map((z: any) => z.toCity)));
+          setAvailableCities(cities as string[]);
+        }
+      })
+      .catch(err => console.error("Zones Fetch Error:", err));
   }, []);
 
   if (pathname?.startsWith("/admin") || pathname?.startsWith("/vendor")) {
@@ -138,14 +150,14 @@ export default function Navbar() {
           className="absolute bottom-0 left-0 h-[2px] w-full bg-gradient-to-r from-transparent via-[#F29124] to-transparent opacity-50"
         />
 
-        <div className="max-w-[1600px] mx-auto px-4 lg:px-8 h-16 flex items-center gap-4 lg:gap-8">
+        <div className="max-w-[1600px] mx-auto px-4 lg:px-8 py-3 md:py-0 md:h-16 flex flex-wrap md:flex-nowrap items-center justify-between gap-y-3 gap-x-4 lg:gap-8">
 
           {/* Logo Section */}
-          <Link href="/" className="flex items-center gap-3 shrink-0 group">
+          <Link href="/" className="flex items-center gap-3 shrink-0 group order-1">
             <motion.div
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="relative w-[150px] h-12 lg:w-[180px] lg:h-16"
+              className="relative w-[130px] h-10 lg:w-[180px] lg:h-16"
             >
               <Image
                 src={siteSettings?.logo || "/logo-navbar-final.png"}
@@ -158,20 +170,20 @@ export default function Navbar() {
           </Link>
 
           {/* Location Picker (Premium Pill) */}
-          <Link href="/delivery" className="hidden xl:flex items-center gap-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full px-4 py-1.5 transition-all cursor-pointer group">
+          <button onClick={() => setShowLocationModal(true)} className="hidden xl:flex items-center gap-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full px-4 py-1.5 transition-all cursor-pointer group md:order-2">
             <div className="w-8 h-8 rounded-full bg-[#F29124]/20 flex items-center justify-center group-hover:scale-110 transition-transform">
               <span className="material-symbols-rounded text-lg text-[#F29124]">location_on</span>
             </div>
-            <div className="flex flex-col leading-tight">
+            <div className="flex flex-col leading-tight text-right">
               <span className="text-[10px] text-white/40 font-medium">نصلك إلى</span>
               <span className="text-[13px] font-bold text-white">{userCity}</span>
             </div>
-          </Link>
+          </button>
 
           {/* Advanced Search Bar */}
           <form
             onSubmit={handleSearch}
-            className="flex-grow flex items-stretch h-11 bg-white/5 rounded-xl border border-white/10 hover:border-[#C5A021]/50 focus-within:border-[#C5A021] focus-within:ring-4 focus-within:ring-[#C5A021]/10 transition-all overflow-hidden"
+            className="w-full md:w-auto md:flex-grow flex items-stretch h-11 bg-white/5 rounded-xl border border-white/10 hover:border-[#C5A021]/50 focus-within:border-[#C5A021] focus-within:ring-4 focus-within:ring-[#C5A021]/10 transition-all overflow-hidden order-3"
           >
             <select className="hidden md:block bg-transparent text-white/70 text-[12px] font-bold px-4 hover:text-white outline-none cursor-pointer border-l border-white/10">
               <option className="bg-[#020D10]">كل الأقسام</option>
@@ -183,18 +195,18 @@ export default function Navbar() {
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               placeholder="ابحث عن أفضل العروض في مرسال..."
-              className="flex-grow bg-transparent text-white px-5 text-sm outline-none placeholder:text-white/30 text-right"
+              className="flex-grow w-full bg-transparent text-white px-4 md:px-5 text-sm outline-none placeholder:text-white/30 text-right"
             />
             <button
               type="submit"
-              className="px-6 flex items-center justify-center text-white/50 hover:text-[#C5A021] transition-colors"
+              className="px-4 md:px-6 flex items-center justify-center text-white/50 hover:text-[#C5A021] transition-colors"
             >
               <span className="material-symbols-rounded text-2xl">search</span>
             </button>
           </form>
 
           {/* Action Icons */}
-          <div className="flex items-center gap-2 lg:gap-5 shrink-0" ref={menuRef}>
+          <div className="flex items-center gap-2 lg:gap-5 shrink-0 order-2 md:order-4" ref={menuRef}>
 
             {/* Account Dropdown */}
             <div className="relative">
@@ -430,6 +442,56 @@ export default function Navbar() {
               </div>
             </motion.div>
           </>
+        )}
+      </AnimatePresence>
+      {/* Location Modal */}
+      <AnimatePresence>
+        {showLocationModal && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              onClick={() => setShowLocationModal(false)}
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="bg-[#020D10] border border-white/10 shadow-2xl rounded-3xl p-6 w-full max-w-md relative z-10"
+              dir="rtl"
+            >
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xl font-black text-white flex items-center gap-2">
+                  <span className="material-symbols-rounded text-[#F29124]">location_on</span>
+                  اختر مدينة التوصيل
+                </h3>
+                <button onClick={() => setShowLocationModal(false)} className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 text-white transition-colors">
+                  <span className="material-symbols-rounded text-sm">close</span>
+                </button>
+              </div>
+              
+              <div className="space-y-2 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
+                {availableCities.map(city => (
+                  <button
+                    key={city}
+                    onClick={() => {
+                      setUserCity(city);
+                      localStorage.setItem("mersal_user_city", city);
+                      setShowLocationModal(false);
+                      window.dispatchEvent(new Event('mersal_city_changed'));
+                    }}
+                    className={cn(
+                      "w-full flex items-center justify-between p-4 rounded-xl border transition-all text-right",
+                      userCity === city 
+                        ? "bg-[#F29124]/10 border-[#F29124] text-[#F29124]" 
+                        : "bg-white/5 border-white/5 text-white hover:bg-white/10 hover:border-white/20"
+                    )}
+                  >
+                    <span className="font-bold">{city}</span>
+                    {userCity === city && <span className="material-symbols-rounded">check_circle</span>}
+                  </button>
+                ))}
+              </div>
+            </motion.div>
+          </div>
         )}
       </AnimatePresence>
     </header>
