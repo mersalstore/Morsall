@@ -7,8 +7,8 @@ import { cn } from "@/lib/utils";
 export default function ProductGallery({ images }: { images: string[] }) {
   const [activeImage, setActiveImage] = useState(0);
   
-  const displayImages = images.length > 0 ? images : [
-    "https://images.unsplash.com/photo-1695048133142-1a20484d2569?auto=format&fit=crop&q=80&w=1200"
+  const displayImages = images && images.length > 0 ? images : [
+    "https://placehold.co/1200x1200/F3F4F6/1089A4?text=No+Product+Image"
   ];
 
   return (

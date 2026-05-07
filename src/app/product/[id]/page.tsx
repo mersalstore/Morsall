@@ -78,7 +78,11 @@ export default function ProductPage() {
 
         {/* Pillar 3: Gallery (Right) */}
         <div className="lg:col-span-4 lg:order-3 order-1">
-           <ProductGallery images={product.images || [product.image]} />
+           <ProductGallery images={
+             typeof product.images === "string" && product.images.trim()
+               ? product.images.split(",").map((s: any) => s.trim())
+               : (product.image ? [product.image] : [])
+           } />
         </div>
       </div>
 

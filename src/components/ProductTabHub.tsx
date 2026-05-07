@@ -98,7 +98,7 @@ export default function ProductTabHub() {
       vendorLocation: p.vendor?.location || "السودان",
       image: (p.images && p.images.trim().length > 0) 
         ? p.images.split(",")[0].trim() 
-        : "https://placehold.co/800x1000/F3F4F6/1089A4?text=%D9%84%D8%A7+%D8%AA%D9%88%D8%AC%D8%AF+%D8%B5%D9%88%D8%B1%D8%A9",
+        : "https://placehold.co/800x1000/F3F4F6/1089A4?text=No+Image",
       badge: "جديد",
     })),
     best: bestProducts.map(p => ({
@@ -109,7 +109,7 @@ export default function ProductTabHub() {
       vendorLocation: p.vendor?.location || "السودان",
       image: (p.images && p.images.trim().length > 0) 
         ? p.images.split(",")[0].trim() 
-        : "https://placehold.co/800x1000/F3F4F6/1089A4?text=%D9%84%D8%A7+%D8%AA%D9%88%D8%AC%D8%AF+%D8%B5%D9%88%D8%B1%D8%A9",
+        : "https://placehold.co/800x1000/F3F4F6/1089A4?text=No+Image",
       badge: "الأكثر مبيعاً",
     }))
   };
