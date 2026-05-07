@@ -67,11 +67,32 @@ export default function AddProductModal({ isOpen, onClose, onSuccess, editingPro
     if (!files || files.length === 0) return;
     setUploading(true);
     const uploadedUrls: string[] = [];
+    const HOSTINGER_IP = "82.198.228.182";
+
     for (let i = 0; i < files.length; i++) {
       const fd = new FormData();
       fd.append("file", files[i]);
       try {
-        const res = await fetch("/api/upload", { method: "POST", body: fd });
+        // Try the main API first
+        let res = await fetch("/api/upload", { method: "POST", body: fd });
+        
+        // If it fails (likely due to Vercel/Hostinger bridge issue), try DIRECTLY to Hostinger IP
+        if (!res.ok) {
+          console.warn("Main upload failed, trying direct upload to Hostinger...");
+          try {
+            res = await fetch(`http://${HOSTINGER_IP}/api/upload`, { 
+              method: "POST", 
+              body: fd,
+              headers: {
+                "X-Proxy-Secret": "Mersal_Internal_Proxy_2026",
+                "Host": "morsall.com"
+              }
+            });
+          } catch (directErr) {
+            console.error("Direct upload failed too:", directErr);
+          }
+        }
+
         if (res.ok) {
           const { url } = await res.json();
           uploadedUrls.push(url);
