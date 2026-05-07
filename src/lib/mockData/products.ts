@@ -43,7 +43,7 @@ export const MOCK_PRODUCTS: Product[] = [
     oldPrice: 1150000,
     category: "موبايلات",
     categoryId: "electronics",
-    vendor: "مرسال جادجتس",
+    vendor: "مبهورون جادجتس",
     vendorLocation: "الخرطوم",
     image: "https://images.unsplash.com/photo-1695048133142-1a20484d2569?auto=format&fit=crop&q=80&w=800",
     badge: "الأكثر مبيعاً",
@@ -74,9 +74,9 @@ export const MOCK_PRODUCTS: Product[] = [
     price: 15000,
     category: "إكسسوارات",
     categoryId: "accessories",
-    vendor: "مرسال جادجتس",
+    vendor: "مبهورون جادجتس",
     vendorLocation: "الخرطوم",
-    image: "https://images.unsplash.com/photo-1603302576837-37561b2e2302?auto=format&fit=crop&q=80&w=400",
+    image: "https://via.placeholder.com/800x1000/F3F4F6/021D24?text=%D9%84%D8%A7+%D8%AA%D9%82%D8%AF%D8%AC+%D8%B5%D9%88%D8%B1%D8%A9",
     rating: 4.5,
     reviews: 12,
     description: "حماية فائقة لهاتفك مع ملمس ناعم ودعم للشحن اللاسلكي.",
@@ -88,7 +88,7 @@ export const MOCK_PRODUCTS: Product[] = [
     price: 18000,
     category: "إكسسوارات",
     categoryId: "accessories",
-    vendor: "مرسال جادجتس",
+    vendor: "مبهورون جادجتس",
     vendorLocation: "الخرطوم",
     image: "https://images.unsplash.com/photo-1619130762460-6346597b4754?auto=format&fit=crop&q=80&w=400",
     rating: 4.7,
@@ -115,7 +115,7 @@ export const MOCK_PRODUCTS: Product[] = [
       "الوزن": "250 جرام"
     },
     otherOffers: [
-        { vendor: "مرسال جادجتس", price: 188000, rating: 4.9 }
+        { vendor: "مبهورون جادجتس", price: 188000, rating: 4.9 }
     ]
   },
   {

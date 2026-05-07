@@ -96,7 +96,7 @@ export default function ProductTabHub() {
       price: p.price,
       vendor: p.vendor?.storeName,
       vendorLocation: p.vendor?.location || "السودان",
-      image: p.images ? p.images.split(",")[0] : "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&q=80&w=800",
+      image: p.images ? p.images.split(",")[0] : "https://images.unsplash.com/photo-1560393464-5c69a73c5770?auto=format&fit=crop&q=80&w=800",
       badge: "جديد",
     })),
     best: bestProducts.map(p => ({
@@ -105,7 +105,7 @@ export default function ProductTabHub() {
       price: p.price,
       vendor: p.vendor?.storeName,
       vendorLocation: p.vendor?.location || "السودان",
-      image: p.images ? p.images.split(",")[0] : "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&q=80&w=800",
+      image: p.images ? p.images.split(",")[0] : "https://images.unsplash.com/photo-1560393464-5c69a73c5770?auto=format&fit=crop&q=80&w=800",
       badge: "الأكثر مبيعاً",
     }))
   };
