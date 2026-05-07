@@ -70,8 +70,11 @@ export default function AddProductModal({ isOpen, onClose, onSuccess, editingPro
     const HOSTINGER_IP = "82.198.228.182";
 
     for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      if (!file) continue;
+
       const fd = new FormData();
-      fd.append("file", files[i]);
+      fd.append("file", file);
       try {
         // Try the main API first
         let res = await fetch("/api/upload", { method: "POST", body: fd });
@@ -80,7 +83,7 @@ export default function AddProductModal({ isOpen, onClose, onSuccess, editingPro
         if (!res.ok) {
           console.warn("Main upload failed, trying direct upload to Hostinger...");
           try {
-            res = await fetch(`http://${HOSTINGER_IP}/api/upload`, { 
+            const directRes = await fetch(`http://${HOSTINGER_IP}/api/upload`, { 
               method: "POST", 
               body: fd,
               headers: {
@@ -88,21 +91,22 @@ export default function AddProductModal({ isOpen, onClose, onSuccess, editingPro
                 "Host": "morsall.com"
               }
             });
+            if (directRes.ok) res = directRes;
           } catch (directErr) {
             console.error("Direct upload failed too:", directErr);
           }
         }
 
         if (res.ok) {
-          const { url } = await res.json();
-          uploadedUrls.push(url);
+          const data = await res.json();
+          uploadedUrls.push(data.url);
         } else {
           const errData = await res.json().catch(() => ({}));
-          alert(`فشل رفع الصورة (${files[i].name}): ${errData.error || "خطأ في السيرفر"}`);
+          alert(`فشل رفع الصورة (${file.name}): ${errData.error || "خطأ في السيرفر"}`);
         }
       } catch (err) {
         console.error("Upload error:", err);
-        alert(`فشل رفع الصورة (${files[i].name}): تأكد من حجم الملف واتصالك بالإنترنت`);
+        alert(`فشل رفع الصورة (${file.name}): تأكد من حجم الملف واتصالك بالإنترنت`);
       }
     }
     if (uploadedUrls.length > 0) {
