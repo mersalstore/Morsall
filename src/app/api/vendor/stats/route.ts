@@ -39,8 +39,19 @@ export async function GET(req: Request) {
     const totalSales = orderItems.reduce((acc, item) => acc + (item.priceAtTime * item.quantity), 0);
 
     // 2. Net Profit (Subtracting platform commission)
-    // Formula: totalSales * (1 - commissionRate / 100) - fixedFee
-    const netProfit = totalSales * (1 - vendor.commissionRate / 100) - vendor.fixedFee;
+    const grossProfit = totalSales * (1 - vendor.commissionRate / 100) - vendor.fixedFee;
+
+    // 3. Subtract Withdrawals (anything not REJECTED counts against balance)
+    const withdrawals = await prisma.withdrawal.findMany({
+      where: {
+        vendorId: vendor.id,
+        status: { not: "REJECTED" }
+      },
+      select: { amount: true }
+    });
+    const totalWithdrawn = withdrawals.reduce((acc, w) => acc + w.amount, 0);
+
+    const availableBalance = grossProfit - totalWithdrawn;
 
     // 3. Active Orders Count (PENDING_APPROVAL, APPROVED, PACKING, SHIPPED)
     const activeOrdersCount = await prisma.order.count({
@@ -54,7 +65,8 @@ export async function GET(req: Request) {
 
     return NextResponse.json({
       totalSales,
-      netProfit: Math.max(0, netProfit),
+      netProfit: Math.max(0, availableBalance),
+      totalWithdrawn,
       activeOrdersCount,
       subscriptionEndsAt: vendor.subscriptionEndsAt,
       planName: vendor.plan?.name,

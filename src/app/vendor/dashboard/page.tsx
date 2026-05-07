@@ -30,6 +30,7 @@ export default function VendorDashboard() {
   const [orderStatusFilter, setOrderStatusFilter] = useState("all");
   const [selectedProducts, setSelectedProducts] = useState<Set<string>>(new Set());
   const [selectedOrders, setSelectedOrders] = useState<Set<string>>(new Set());
+  const [withdrawals, setWithdrawals] = useState<any[]>([]);
 
   const toggleProductSelection = (id: string) => {
     const newSelected = new Set(selectedProducts);
@@ -102,15 +103,17 @@ export default function VendorDashboard() {
     async function fetchData() {
       setLoading(true);
       try {
-        const [sRes, pRes, oRes] = await Promise.all([
+        const [sRes, pRes, oRes, wRes] = await Promise.all([
           fetch("/api/vendor/stats"),
           fetch("/api/vendor/products"),
-          fetch("/api/vendor/orders")
+          fetch("/api/vendor/orders"),
+          fetch("/api/vendor/withdrawals")
         ]);
 
         if (sRes.ok) setStatsData(await sRes.json());
         if (pRes.ok) setProducts(await pRes.json());
         if (oRes.ok) setOrders(await oRes.json());
+        if (wRes.ok) setWithdrawals(await wRes.json());
       } catch (err) {
         console.error("Dashboard fetch error:", err);
       } finally {
@@ -128,6 +131,38 @@ export default function VendorDashboard() {
     } catch (err) {
       alert("فشل حذف المنتج");
     }
+  };
+
+  const handleWithdrawalRequest = async () => {
+    if (!statsData?.netProfit || statsData.netProfit < 1000) {
+      alert("عذراً، يجب أن يكون رصيدك 1000 ج.س على الأقل للسحب.");
+      return;
+    }
+
+    if (!confirm(`هل ترغب في سحب رصيدك المتاح بالكامل (${statsData.netProfit.toLocaleString()} ج.س)؟`)) return;
+
+    setActionLoading("withdrawal");
+    try {
+      const res = await fetch("/api/vendor/withdrawals", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amount: statsData.netProfit })
+      });
+
+      if (res.ok) {
+        const newWithdrawal = await res.json();
+        setWithdrawals(prev => [newWithdrawal, ...prev]);
+        const sRes = await fetch("/api/vendor/stats");
+        if (sRes.ok) setStatsData(await sRes.json());
+        alert("تم إرسال طلب السحب بنجاح! سيتم مراجعته من قبل الإدارة.");
+      } else {
+        const err = await res.json();
+        alert(err.error || "فشل إرسال الطلب");
+      }
+    } catch (err) {
+      alert("خطأ في الاتصال بالخادم");
+    }
+    setActionLoading(null);
   };
 
   const [importPreview, setImportPreview] = useState<{ data: any[], errors: any[] } | null>(null);
@@ -587,8 +622,12 @@ export default function VendorDashboard() {
                      <div className="relative z-10">
                         <p className="text-white/60 text-xs font-bold uppercase tracking-widest mb-2">الرصيد القابل للسحب</p>
                         <p className="text-4xl font-black">{statsData?.netProfit?.toLocaleString() || 0} <span className="text-sm">ج.س</span></p>
-                        <button className="mt-8 bg-[#1089A4] text-white w-full py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-[#0d6e84] transition-all shadow-xl shadow-[#1089A4]/20">
-                           طلب سحب الأرباح
+                        <button 
+                           onClick={handleWithdrawalRequest}
+                           disabled={actionLoading === "withdrawal"}
+                           className="mt-8 bg-[#1089A4] text-white w-full py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-[#0d6e84] transition-all shadow-xl shadow-[#1089A4]/20 disabled:opacity-50"
+                        >
+                           {actionLoading === "withdrawal" ? "جاري الإرسال..." : "طلب سحب الأرباح"}
                         </button>
                      </div>
                      <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-white/5 rounded-full blur-3xl"></div>
@@ -605,7 +644,7 @@ export default function VendorDashboard() {
 
                   <div className="bg-white p-8 rounded-[2rem] border shadow-sm flex flex-col justify-center">
                      <p className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-2">العمولات المدفوعة</p>
-                     <p className="text-3xl font-black text-[#F29124]">{(statsData?.totalSales - statsData?.netProfit)?.toLocaleString() || 0} <span className="text-sm font-bold opacity-40">ج.س</span></p>
+                     <p className="text-3xl font-black text-[#F29124]">{(statsData?.totalSales - (statsData?.netProfit + (statsData?.totalWithdrawn || 0)))?.toLocaleString() || 0} <span className="text-sm font-bold opacity-40">ج.س</span></p>
                      <p className="text-[10px] text-gray-400 font-bold mt-2">بناءً على نسبة عمولة 10%</p>
                   </div>
                </div>
@@ -615,13 +654,51 @@ export default function VendorDashboard() {
                      <h3 className="font-black text-[#021D24] text-xl">سجل السحوبات</h3>
                      <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">آخر 10 عمليات</span>
                   </div>
-                  <div className="p-12 text-center">
-                     <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-dashed border-gray-200">
-                        <span className="material-symbols-rounded text-3xl text-gray-300">receipt_long</span>
-                     </div>
-                     <p className="text-gray-400 font-bold">لا يوجد سجل سحوبات حالياً</p>
-                     <p className="text-[10px] text-gray-300 mt-1 uppercase tracking-widest">تظهر هنا العمليات بعد اكتمال أول طلب سحب</p>
-                  </div>
+                  
+                  {withdrawals.length > 0 ? (
+                    <div className="overflow-x-auto">
+                       <table className="w-full text-right">
+                          <thead>
+                             <tr className="bg-gray-50 border-b">
+                                <th className="px-8 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">التاريخ</th>
+                                <th className="px-8 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">المبلغ</th>
+                                <th className="px-8 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">الحالة</th>
+                             </tr>
+                          </thead>
+                          <tbody>
+                             {withdrawals.map((w) => (
+                                <tr key={w.id} className="border-b hover:bg-gray-50/50 transition-colors">
+                                   <td className="px-8 py-6">
+                                      <p className="text-sm font-bold text-[#021D24]">{new Date(w.createdAt).toLocaleDateString("ar-EG")}</p>
+                                   </td>
+                                   <td className="px-8 py-6">
+                                      <p className="text-sm font-black text-[#1089A4]">{w.amount.toLocaleString()} ج.س</p>
+                                   </td>
+                                   <td className="px-8 py-6">
+                                      <span className={cn(
+                                         "px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm",
+                                         w.status === "PENDING" ? "bg-amber-100 text-amber-600" :
+                                         w.status === "APPROVED" ? "bg-green-100 text-green-600" :
+                                         "bg-red-100 text-red-600"
+                                      )}>
+                                         {w.status === "PENDING" ? "قيد المراجعة" :
+                                          w.status === "APPROVED" ? "تم التحويل" : "مرفوض"}
+                                      </span>
+                                   </td>
+                                </tr>
+                             ))}
+                          </tbody>
+                       </table>
+                    </div>
+                  ) : (
+                    <div className="p-12 text-center">
+                       <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-dashed border-gray-200">
+                          <span className="material-symbols-rounded text-3xl text-gray-300">receipt_long</span>
+                       </div>
+                       <p className="text-gray-400 font-bold">لا يوجد سجل سحوبات حالياً</p>
+                       <p className="text-[10px] text-gray-300 mt-1 uppercase tracking-widest">تظهر هنا العمليات بعد اكتمال أول طلب سحب</p>
+                    </div>
+                  )}
                </div>
             </div>
           )}
@@ -726,20 +803,5 @@ export default function VendorDashboard() {
 
       <AddProductModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </div>
-  );
-}
-
-function NavItem({ icon, label, active, onClick }: { icon: string, label: string, active?: boolean, onClick: () => void }) {
-  return (
-    <button 
-      onClick={onClick}
-      className={cn(
-        "w-full flex items-center gap-4 px-4 py-3 rounded-xl font-bold text-sm transition-all group",
-        active ? "bg-[#1089A4] text-white shadow-lg shadow-[#1089A4]/20" : "text-gray-500 hover:bg-gray-50"
-      )}
-    >
-      <span className={cn("material-symbols-rounded text-xl", active ? "text-white" : "text-gray-400 group-hover:text-[#1089A4]")}>{icon}</span>
-      {label}
-    </button>
   );
 }
