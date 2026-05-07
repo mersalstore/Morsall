@@ -31,18 +31,25 @@ export async function POST(req: Request) {
     if (!session) return adminOnlyResponse();
 
     const body = await req.json();
-    const { storeName, ownerName, ownerEmail, ownerPassword, phone, location } = body;
+    const { 
+      storeName, ownerName, ownerEmail, ownerPassword, phone, location,
+      commissionType, commissionRate, fixedFee, subscriptionFee, trialDays 
+    } = body;
 
     const bcrypt = await import("bcryptjs");
     const hashedPassword = await bcrypt.default.hash(ownerPassword, 12);
 
     // Generate Slug
-    const slug = storeName
+    const slugBase = storeName
       .toLowerCase()
       .trim()
       .replace(/[^\w\s-ء-ي0-9]/g, '')
       .replace(/[\s_-]+/g, '-')
       .replace(/^-+|-+$/g, '');
+
+    const subscriptionEndsAt = trialDays > 0 
+      ? new Date(Date.now() + trialDays * 24 * 60 * 60 * 1000) 
+      : null;
 
     const vendor = await prisma.$transaction(async (tx: any) => {
       const user = await tx.user.create({
@@ -60,10 +67,15 @@ export async function POST(req: Request) {
         data: {
           userId: user.id,
           storeName,
-          slug: `${slug}-${Math.random().toString(36).substring(2, 7)}`,
+          slug: `${slugBase}-${Math.random().toString(36).substring(2, 7)}`,
           location: location || "الخرطوم",
           status: "APPROVED",
           phone: phone,
+          commissionType: commissionType || "PERCENTAGE",
+          commissionRate: commissionRate ?? 10.0,
+          fixedFee: fixedFee ?? 0.0,
+          subscriptionFee: subscriptionFee ?? 0.0,
+          subscriptionEndsAt,
         }
       });
     });
@@ -95,11 +107,10 @@ export async function PATCH(req: Request) {
       where: { id },
       data: { 
         status,
-        subscriptionEndsAt: action === 'APPROVE' ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) : undefined // 30 days trial
+        subscriptionEndsAt: action === 'APPROVE' ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) : undefined
       },
     });
 
-    // If approved, update user role to VENDOR if it's not already
     if (action === 'APPROVE') {
       await prisma.user.update({
         where: { id: updatedVendor.userId },
@@ -133,7 +144,10 @@ export async function PUT(req: Request) {
     if (!session) return adminOnlyResponse();
 
     const body = await req.json();
-    const { id, storeName, ownerName, ownerEmail, ownerPassword, phone, location } = body;
+    const { 
+      id, storeName, ownerName, ownerEmail, ownerPassword, phone, location,
+      commissionType, commissionRate, fixedFee, subscriptionFee 
+    } = body;
 
     if (!id) return NextResponse.json({ error: "Missing Vendor ID" }, { status: 400 });
 
@@ -144,6 +158,10 @@ export async function PUT(req: Request) {
     if (storeName) updateData.storeName = storeName;
     if (location) updateData.location = location;
     if (phone) updateData.phone = phone;
+    if (commissionType) updateData.commissionType = commissionType;
+    if (commissionRate !== undefined) updateData.commissionRate = commissionRate;
+    if (fixedFee !== undefined) updateData.fixedFee = fixedFee;
+    if (subscriptionFee !== undefined) updateData.subscriptionFee = subscriptionFee;
 
     const userUpdateData: any = {};
     if (ownerName) userUpdateData.name = ownerName;

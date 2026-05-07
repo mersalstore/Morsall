@@ -168,7 +168,7 @@ export default function CheckoutPage() {
           </div>
           <div>
             <h1 className="text-2xl font-black text-[#021D24] mb-2">ممتاز! طلبك قيد التجهيز الآن 🎉</h1>
-            <p className="text-sm text-gray-500">سيتواصل فريق مبهورون معك قريباً على رقم <strong>{form.phone}</strong></p>
+            <p className="text-sm text-gray-500">سيتواصل فريق مرسال معك قريباً على رقم <strong>{form.phone}</strong></p>
           </div>
           {orderId && (
             <div className="bg-[#F3F4F6] rounded-lg p-4 text-right">
@@ -341,7 +341,7 @@ export default function CheckoutPage() {
                       </div>
                       <div className="bg-white p-3 rounded-lg border border-gray-100 shadow-sm">
                         <p className="text-[10px] font-bold text-gray-400 uppercase">اسم الحساب</p>
-                        <p className="font-black text-sm text-[#021D24]">{settings.bankAccountName || "شركة مبهورون للتجارة"}</p>
+                        <p className="font-black text-sm text-[#021D24]">{settings.bankAccountName || "شركة مرسال للتجارة"}</p>
                       </div>
                       <div className="bg-white p-3 rounded-lg border border-gray-100 shadow-sm sm:col-span-2 flex justify-between items-center">
                         <div>
@@ -461,7 +461,7 @@ export default function CheckoutPage() {
               </div>
               <div className="p-4 pt-0 border-t border-gray-100 flex items-center gap-3 text-xs text-gray-400">
                 <span className="material-symbols-rounded text-base text-green-500">verified</span>
-                شراء آمن ومضمون مع مبهورون
+                شراء آمن ومضمون مع مرسال
               </div>
             </div>
           </div>

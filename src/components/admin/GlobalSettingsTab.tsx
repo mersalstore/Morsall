@@ -99,7 +99,7 @@ export default function GlobalSettingsTab() {
                   value={settings.siteTitle || ""}
                   onChange={e => setSettings({...settings, siteTitle: e.target.value})}
                   className="w-full bg-gray-50 border border-transparent focus:border-[#1089A4] rounded-2xl px-6 py-5 text-sm font-black outline-none transition-all"
-                  placeholder="مبهورون - Mobhroon"
+                  placeholder="مرسال - Morsall"
                />
             </div>
 
@@ -143,7 +143,7 @@ export default function GlobalSettingsTab() {
                      onChange={e => setSettings({...settings, bankAccounts: e.target.value})}
                      className="w-full bg-gray-50 border border-transparent focus:border-[#1089A4] rounded-2xl px-6 py-5 text-sm font-bold min-h-[150px] outline-none transition-all"
                      placeholder="مثال:
-بنك الخرطوم: 1234567 (باسم: شركة مبهورون)
+بنك الخرطوم: 1234567 (باسم: شركة مرسال)
 بنك أم درمان الوطني: 7654321"
                   />
                   <p className="text-[9px] text-gray-400 px-2 leading-relaxed">اكتب تفاصيل الحسابات البنكية التي ستظهر للعملاء عند اختيار التحويل البنكي.</p>

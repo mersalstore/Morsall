@@ -183,7 +183,7 @@ export default function AdminDashboard() {
             </div>
             <p className="text-xs text-gray-400 font-bold uppercase tracking-[0.3em] flex items-center gap-2">
               <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-              نظام مبهورون المتكامل لإدارة اللوجستيات
+              نظام مرسال المتكامل لإدارة اللوجستيات
             </p>
             </div>
           </div>

@@ -77,11 +77,13 @@ export default function StoreAnalytics({ stats }: { stats: any }) {
                     <div className="h-full bg-[#1089A4]" style={{ width: '100%' }} />
                  </div>
                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-gray-400">عمولة المنصة (10%)</span>
-                    <span className="font-black text-red-500">-{ (stats?.totalSales * 0.1 || 0).toLocaleString() } ج.س</span>
+                    <span className="text-xs font-bold text-gray-400">
+                      عمولة المنصة ({stats?.commissionType === 'PERCENTAGE' ? `${stats?.commissionRate}%` : `${stats?.commissionRate} ج.س/قطعة`})
+                    </span>
+                    <span className="font-black text-red-500">-{ (stats?.totalSales - stats?.netProfit || 0).toLocaleString() } ج.س</span>
                  </div>
                  <div className="w-full h-1.5 bg-gray-50 rounded-full overflow-hidden">
-                    <div className="h-full bg-red-400" style={{ width: '10%' }} />
+                    <div className="h-full bg-red-400" style={{ width: stats?.totalSales > 0 ? `${((stats?.totalSales - stats?.netProfit) / stats?.totalSales) * 100}%` : '0%' }} />
                  </div>
                  <div className="pt-4 border-t flex items-center justify-between">
                     <span className="text-xs font-black text-[#021D24]">صافي الربح</span>

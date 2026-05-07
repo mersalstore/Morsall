@@ -249,10 +249,43 @@ export default function VendorDashboard() {
 
           {activeTab === "overview" && (
             <>
+              {/* Plan Info Card */}
+              <div className="bg-[#021D24] p-6 md:p-10 rounded-[2.5rem] text-white flex flex-col md:flex-row items-center justify-between gap-8 relative overflow-hidden shadow-2xl">
+                 <div className="relative z-10 flex flex-col items-center md:items-start text-center md:text-right gap-4">
+                    <div className="bg-white/10 px-4 py-1.5 rounded-full border border-white/10 flex items-center gap-2">
+                       <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+                       <span className="text-[10px] font-black uppercase tracking-widest">{statsData?.planName || "باقة مرسال الأساسية"}</span>
+                    </div>
+                    <div>
+                       <h2 className="text-2xl md:text-4xl font-black mb-2">إحصائيات متجرك</h2>
+                       <p className="text-white/60 text-xs md:text-sm font-bold">
+                         {statsData?.commissionType === 'PERCENTAGE' 
+                           ? `عمولة المنصة الحالية: ${statsData?.commissionRate}%` 
+                           : `عمولة المنصة الحالية: ${statsData?.commissionRate} ج.س/قطعة`}
+                       </p>
+                    </div>
+                 </div>
+
+                 <div className="flex flex-col sm:flex-row items-center gap-4 relative z-10">
+                    {statsData?.subscriptionEndsAt && (
+                       <div className="bg-white/5 border border-white/10 p-4 rounded-2xl text-center min-w-[140px]">
+                          <p className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-1">ينتهي الاشتراك في</p>
+                          <p className="text-sm font-black text-white">{new Date(statsData.subscriptionEndsAt).toLocaleDateString("ar-EG")}</p>
+                       </div>
+                    )}
+                    <button onClick={() => setActiveTab("promotion")} className="bg-[#1089A4] hover:bg-[#0d6e84] text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-xl shadow-black/20 hover:scale-105">
+                       ترقية المتجر 🚀
+                    </button>
+                 </div>
+                 
+                 <div className="absolute -left-20 -bottom-20 w-80 h-80 bg-[#1089A4]/20 rounded-full blur-[100px]" />
+                 <div className="absolute -right-20 -top-20 w-80 h-80 bg-white/5 rounded-full blur-[100px]" />
+              </div>
+
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
                 {stats.map((stat, i) => (
-                  <div key={i} className="bg-white p-5 md:p-8 rounded-2xl md:rounded-3xl border border-border shadow-sm flex items-center gap-4 md:gap-6">
-                    <div className={cn("w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-2xl flex items-center justify-center shrink-0", stat.color)}>
+                  <div key={i} className="bg-white p-5 md:p-8 rounded-2xl md:rounded-3xl border border-border shadow-sm flex items-center gap-4 md:gap-6 group hover:border-[#1089A4] transition-all">
+                    <div className={cn("w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-2xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-110", stat.color)}>
                        <span className="material-symbols-rounded text-2xl md:text-3xl">{stat.icon}</span>
                     </div>
                     <div className="min-w-0">

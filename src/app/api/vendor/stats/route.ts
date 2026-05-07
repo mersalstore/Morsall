@@ -59,7 +59,9 @@ export async function GET(req: Request) {
       subscriptionEndsAt: vendor.subscriptionEndsAt,
       planName: vendor.plan?.name,
       slug: vendor.slug,
-      currency: "ج.س"
+      currency: "ج.س",
+      commissionRate: vendor.commissionRate,
+      commissionType: vendor.commissionType,
     });
   } catch (error: any) {
     console.error("Vendor Stats API Error:", error);

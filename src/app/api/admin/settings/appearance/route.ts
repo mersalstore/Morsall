@@ -70,7 +70,7 @@ export async function PATCH(req: Request) {
       update: updateSettings,
       create: { 
         id: "global",
-        siteTitle: data.siteTitle || "مبهورون",
+        siteTitle: data.siteTitle || "مرسال",
         siteDescription: data.siteDescription || "",
         logo: data.logo,
         primaryColor: data.primaryColor || "#1089A4",

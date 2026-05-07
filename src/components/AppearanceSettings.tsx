@@ -8,8 +8,8 @@ import { cn } from "@/lib/utils";
 
 export default function AppearanceSettings() {
   const [settings, setSettings] = useState<any>({
-    siteTitle: "مبهورون",
-    siteDescription: "منصة مبهورون للتجارة الإلكترونية",
+    siteTitle: "مرسال",
+    siteDescription: "منصة مرسال للتجارة الإلكترونية",
     logo: "",
     primaryColor: "#1089A4",
     secondaryColor: "#F29124",

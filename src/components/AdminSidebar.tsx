@@ -109,13 +109,13 @@ export default function AdminSidebar({ activeTab, setActiveTab, userRole, isOpen
         <div className="relative w-full h-14 mb-4 transform group-hover:scale-105 transition-transform duration-500">
           <Image 
             src="/logo-navbar-final.png" 
-            alt="Mobhroon Logo" 
+            alt="Morsall Logo" 
             fill 
             className="object-contain filter drop-shadow-[0_0_8px_rgba(16,137,164,0.3)]" 
           />
         </div>
         <div className="text-center">
-          <p className="text-[#1089A4] text-[10px] font-black uppercase tracking-[0.4em] mb-1">Mobhroon Platform</p>
+          <p className="text-[#1089A4] text-[10px] font-black uppercase tracking-[0.4em] mb-1">Morsall Platform</p>
           <div className="h-0.5 w-12 bg-gradient-to-r from-transparent via-[#F29124] to-transparent mx-auto opacity-50" />
         </div>
       </div>
