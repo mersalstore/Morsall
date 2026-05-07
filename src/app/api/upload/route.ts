@@ -34,7 +34,7 @@ export async function POST(req: Request) {
     
     // Detect if we are on Vercel or a restricted environment
     const isRestricted = projectRoot.includes('var/task') || process.env.VERCEL === '1';
-    const HOSTINGER_IP = "216.198.79.1"; // Your Hostinger IP
+    const HOSTINGER_IP = "82.198.228.182"; // Your Correct Hostinger Web IP
     const PROXY_SECRET = "Mersal_Internal_Proxy_2026"; // Secure token
     
     if (isRestricted) {
