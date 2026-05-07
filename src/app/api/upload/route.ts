@@ -28,12 +28,31 @@ export async function POST(req: Request) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Save to public/uploads
-    const uploadDir = join(process.cwd(), "public", "uploads");
+    // Determine the upload directory
+    const projectRoot = process.cwd();
+    const uploadDir = join(projectRoot, "public", "uploads");
     
-    // Ensure directory exists
-    if (!existsSync(uploadDir)) {
-      await mkdir(uploadDir, { recursive: true });
+    console.log("Upload attempt details:", {
+      cwd: projectRoot,
+      uploadDir,
+      exists: existsSync(uploadDir)
+    });
+
+    // Ensure the directory exists
+    try {
+      if (!existsSync(uploadDir)) {
+        // Recursive true handles creating both public and uploads if missing
+        await mkdir(uploadDir, { recursive: true, mode: 0o755 });
+      }
+    } catch (dirError: any) {
+      console.error("Directory Creation Error:", dirError);
+      // Check if we are on a read-only filesystem (typical of Vercel)
+      if (dirError.code === 'EROFS' || projectRoot.includes('var/task') || dirError.message.includes('read-only')) {
+        return NextResponse.json({ 
+          error: "عذراً، نظام الملفات للقراءة فقط. يبدو أن الموقع ما زال يعمل على Vercel أو ببيئة مقيدة. يرجى التأكد من تشغيل الموقع من Hostinger عبر npm start." 
+        }, { status: 500 });
+      }
+      return NextResponse.json({ error: `فشل إنشاء مجلد الرفع: ${dirError.message}` }, { status: 500 });
     }
 
     // Generate unique filename
@@ -42,15 +61,19 @@ export async function POST(req: Request) {
     const uniqueName = `${timestamp}-${cleanFileName}`;
     const filePath = join(uploadDir, uniqueName);
 
-    await writeFile(filePath, buffer);
+    try {
+      await writeFile(filePath, buffer);
+    } catch (writeError: any) {
+      console.error("File Write Error:", writeError);
+      return NextResponse.json({ error: `فشل حفظ الملف: ${writeError.message}` }, { status: 500 });
+    }
 
     // Return the relative URL
     const fileUrl = `/uploads/${uniqueName}`;
-
     return NextResponse.json({ url: fileUrl });
 
   } catch (error: any) {
-    console.error("Upload API Error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error("Upload API General Error:", error);
+    return NextResponse.json({ error: error.message || "خطأ غير متوقع في رفع الملف" }, { status: 500 });
   }
 }
