@@ -30,7 +30,14 @@ export async function POST(req: Request) {
 
     // Determine the upload directory
     const projectRoot = process.cwd();
-    const uploadDir = join(projectRoot, "public", "uploads");
+    let uploadDir = join(projectRoot, "public", "uploads");
+    
+    // Force Hostinger path if we detect we are on the Hostinger server
+    const HOSTINGER_ROOT = "/home/u754458241/domains/morsall.com/public_html/.builds/source";
+    if (existsSync(HOSTINGER_ROOT)) {
+      uploadDir = join(HOSTINGER_ROOT, "public", "uploads");
+      console.log("Hostinger detected, using absolute path:", uploadDir);
+    }
     
     console.log("Upload attempt details:", {
       cwd: projectRoot,
