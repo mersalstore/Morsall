@@ -32,33 +32,67 @@ export async function POST(req: Request) {
     const projectRoot = process.cwd();
     let uploadDir = join(projectRoot, "public", "uploads");
     
+    // Detect if we are on Vercel or a restricted environment
+    const isRestricted = projectRoot.includes('var/task') || process.env.VERCEL === '1';
+    const HOSTINGER_IP = "216.198.79.1"; // Your Hostinger IP
+    const PROXY_SECRET = "Mersal_Internal_Proxy_2026"; // Secure token
+    
+    if (isRestricted) {
+      console.log("Vercel detected. Proxying upload to Hostinger...");
+      try {
+        // Prepare to forward the request to Hostinger
+        const forwardData = new FormData();
+        forwardData.append("file", file);
+        
+        const response = await fetch(`http://${HOSTINGER_IP}/api/upload`, {
+          method: "POST",
+          body: forwardData,
+          headers: {
+            "X-Proxy-Secret": PROXY_SECRET,
+            "Host": "morsall.com" // Important for Hostinger vhost detection
+          }
+        });
+        
+        if (response.ok) {
+          const result = await response.json();
+          return NextResponse.json(result);
+        } else {
+          const errText = await response.text();
+          throw new Error(`Hostinger Proxy Failed: ${errText}`);
+        }
+      } catch (proxyError: any) {
+        console.error("Proxy Error:", proxyError);
+        return NextResponse.json({ 
+          error: "فشل تحويل الملف لـ Hostinger. يرجى التأكد من تشغيل الموقع على Hostinger مباشرة." 
+        }, { status: 500 });
+      }
+    }
+
+    // --- FROM HERE DOWN: We are on Hostinger or local ---
+    
+    // Check if we are receiving a proxied request from Vercel
+    const incomingSecret = req.headers.get("X-Proxy-Secret");
+    // If it's a proxy request, we bypass standard auth check because it was checked on Vercel
+    // Or we rely on the secret token
+    if (incomingSecret !== PROXY_SECRET) {
+        const session = await getServerSession(authOptions);
+        if (!session) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+    }
+
     // Force Hostinger path if we detect we are on the Hostinger server
     const HOSTINGER_ROOT = "/home/u754458241/domains/morsall.com/public_html/.builds/source";
     if (existsSync(HOSTINGER_ROOT)) {
       uploadDir = join(HOSTINGER_ROOT, "public", "uploads");
-      console.log("Hostinger detected, using absolute path:", uploadDir);
     }
     
-    console.log("Upload attempt details:", {
-      cwd: projectRoot,
-      uploadDir,
-      exists: existsSync(uploadDir)
-    });
-
     // Ensure the directory exists
     try {
       if (!existsSync(uploadDir)) {
-        // Recursive true handles creating both public and uploads if missing
         await mkdir(uploadDir, { recursive: true, mode: 0o755 });
       }
     } catch (dirError: any) {
-      console.error("Directory Creation Error:", dirError);
-      // Check if we are on a read-only filesystem (typical of Vercel)
-      if (dirError.code === 'EROFS' || projectRoot.includes('var/task') || dirError.message.includes('read-only')) {
-        return NextResponse.json({ 
-          error: "عذراً، نظام الملفات للقراءة فقط. يبدو أن الموقع ما زال يعمل على Vercel أو ببيئة مقيدة. يرجى التأكد من تشغيل الموقع من Hostinger عبر npm start." 
-        }, { status: 500 });
-      }
       return NextResponse.json({ error: `فشل إنشاء مجلد الرفع: ${dirError.message}` }, { status: 500 });
     }
 
@@ -71,7 +105,6 @@ export async function POST(req: Request) {
     try {
       await writeFile(filePath, buffer);
     } catch (writeError: any) {
-      console.error("File Write Error:", writeError);
       return NextResponse.json({ error: `فشل حفظ الملف: ${writeError.message}` }, { status: 500 });
     }
 
@@ -80,7 +113,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ url: fileUrl });
 
   } catch (error: any) {
-    console.error("Upload API General Error:", error);
     return NextResponse.json({ error: error.message || "خطأ غير متوقع في رفع الملف" }, { status: 500 });
   }
 }
