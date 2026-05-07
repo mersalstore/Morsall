@@ -143,16 +143,19 @@ export default function InventoryTable({ products, onEdit, onAdd, classes }: Inv
                 <td className="px-8 py-8">
                   <div className="flex items-center gap-6">
                     <div className="w-20 h-20 rounded-[1.5rem] bg-gray-50 overflow-hidden border-2 border-white shadow-2xl shadow-gray-200 shrink-0 flex items-center justify-center">
-                      {p.images ? (
+                      {(p.images && p.images.trim().length > 0) ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
                           src={p.images.split(",")[0]?.trim()}
                           alt={p.title}
                           className="w-full h-full object-cover"
-                          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                          onError={(e) => { (e.target as HTMLImageElement).src = "https://placehold.co/400x400/F3F4F6/1089A4?text=Error"; }}
                         />
                       ) : (
-                        <span className="material-symbols-rounded text-2xl text-gray-300">image</span>
+                        <div className="flex flex-col items-center gap-1 opacity-20">
+                          <span className="material-symbols-rounded text-2xl text-[#1089A4]">image</span>
+                          <span className="text-[8px] font-black text-[#021D24]">بدون صورة</span>
+                        </div>
                       )}
                     </div>
                     <div className="flex flex-col">
