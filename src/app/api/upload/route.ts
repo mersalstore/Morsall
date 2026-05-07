@@ -10,7 +10,9 @@ export async function POST(req: Request) {
     const HOSTINGER_IP = process.env.HOSTINGER_UPLOAD_HOST?.trim() || "82.198.228.182";
     const PROXY_SECRET = process.env.INTERNAL_UPLOAD_PROXY_SECRET?.trim() || "Mersal_Internal_Proxy_2026";
     const MAX_FILE_SIZE = Number(process.env.MAX_UPLOAD_SIZE_MB || "10") * 1024 * 1024;
-    const PROXY_TIMEOUT_MS = Number(process.env.UPLOAD_PROXY_TIMEOUT_MS || "15000");
+    const PROXY_TIMEOUT_MS = Number(process.env.UPLOAD_PROXY_TIMEOUT_MS || "20000");
+    const INLINE_FALLBACK_ENABLED = (process.env.UPLOAD_INLINE_FALLBACK || "1") === "1";
+    const MAX_INLINE_SIZE = Number(process.env.MAX_INLINE_UPLOAD_SIZE_MB || "2") * 1024 * 1024;
     const proxyHop = Number(req.headers.get("X-Upload-Proxy-Hop") || "0");
     const incomingSecret = req.headers.get("X-Proxy-Secret");
     const isTrustedProxy = incomingSecret === PROXY_SECRET;
@@ -54,9 +56,6 @@ export async function POST(req: Request) {
           : join(projectRoot, configuredUploadPath))
       : join(projectRoot, "public", "uploads");
 
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-
     // --- TRY LOCAL WRITE FIRST (Works on Hostinger) ---
     try {
       if (!existsSync(uploadDir)) {
@@ -72,8 +71,11 @@ export async function POST(req: Request) {
       
       return NextResponse.json({ url: `/uploads/${uniqueName}` });
     } catch (writeError: any) {
-      // If the error is NOT a read-only filesystem error, it's a real failure
-      const isReadOnly = writeError.code === 'EROFS' || projectRoot.includes('var/task') || writeError.message.includes('read-only');
+      // Non read-only errors should fail immediately.
+      const isReadOnly =
+        writeError?.code === "EROFS" ||
+        projectRoot.includes("var/task") ||
+        String(writeError?.message || "").toLowerCase().includes("read-only");
       if (!isReadOnly) {
         throw writeError;
       }
@@ -81,19 +83,18 @@ export async function POST(req: Request) {
       console.log("Local write failed (Read-Only). Attempting Proxy to Hostinger...");
       
       // --- FALLBACK: PROXY TO HOSTINGER (Works on Vercel during propagation) ---
-      const proxyHop = Number(req.headers.get("X-Upload-Proxy-Hop") || "0");
       if (proxyHop > 0) {
         return NextResponse.json({ error: "Recursion detected" }, { status: 508 });
       }
 
-      const PROXY_SECRET = process.env.INTERNAL_UPLOAD_PROXY_SECRET?.trim() || "Mersal_Internal_Proxy_2026";
-      const PROXY_TIMEOUT_MS = Number(process.env.UPLOAD_PROXY_TIMEOUT_MS || "20000");
-      const HOSTINGER_IP = process.env.HOSTINGER_UPLOAD_HOST?.trim() || "82.198.228.182";
+      const configuredTargets = process.env.HOSTINGER_UPLOAD_TARGETS?.trim();
+      const targets = configuredTargets
+        ? configuredTargets.split(",").map((t) => t.trim()).filter(Boolean)
+        : [`http://${HOSTINGER_IP}/api/upload`, "https://morsall.com/api/upload"];
 
-      // Try the IP target first as it's the most reliable bypass
-      const target = `http://${HOSTINGER_IP}/api/upload`;
-      
-      try {
+      let lastProxyError = "unknown";
+      for (const target of targets) {
+        try {
         const forwardData = new FormData();
         forwardData.append("file", file);
 
@@ -105,7 +106,7 @@ export async function POST(req: Request) {
           body: forwardData,
           headers: {
             "X-Proxy-Secret": PROXY_SECRET,
-            "X-Upload-Proxy-Hop": "1",
+            "X-Upload-Proxy-Hop": String(proxyHop + 1),
             "Host": "morsall.com" // CRITICAL for Hostinger/LiteSpeed
           },
           signal: controller.signal,
@@ -117,15 +118,30 @@ export async function POST(req: Request) {
         }
         
         const errText = await response.text();
-        return NextResponse.json({ 
-          error: `فشل الرفع التلقائي (الرمز: ${response.status}). يرجى التأكد من انتقال الدومين بالكامل لـ Hostinger.` 
-        }, { status: 500 });
-
+        lastProxyError = `target=${target} status=${response.status} body=${errText.slice(0, 200)}`;
       } catch (proxyError: any) {
-        return NextResponse.json({ 
-          error: `خطأ في الاتصال بالسيرفر: ${proxyError.message}. يرجى محاولة الرفع بعد قليل.` 
-        }, { status: 500 });
+        lastProxyError = `target=${target} error=${proxyError?.message || String(proxyError)}`;
       }
+      }
+
+      // --- LAST RESORT: INLINE DATA URL (temporary survival mode) ---
+      if (INLINE_FALLBACK_ENABLED && buffer.length <= MAX_INLINE_SIZE) {
+        const base64 = buffer.toString("base64");
+        const dataUrl = `data:${file.type};base64,${base64}`;
+        return NextResponse.json({
+          url: dataUrl,
+          storage: "inline",
+          warning: "Image stored inline temporarily until DNS fully points to Hostinger.",
+        });
+      }
+
+      return NextResponse.json(
+        {
+          error: "فشل الرفع: تعذر الكتابة محليًا وتعذر التحويل إلى Hostinger.",
+          details: lastProxyError,
+        },
+        { status: 500 }
+      );
     }
 
   } catch (error: any) {
