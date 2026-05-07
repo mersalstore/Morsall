@@ -279,6 +279,7 @@ model Settings {
   siteDescription     String  @default("أكبر منصة تسوق في السودان")
   siteTitle           String  @default("مرسال - تسوق بذكاء")
   whatsappNumber      String?
+  bankAccounts        String? @db.Text
 }
 
 model SiteConfig {

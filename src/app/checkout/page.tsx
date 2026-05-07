@@ -32,7 +32,8 @@ export default function CheckoutPage() {
   const [error, setError] = useState<string | null>(null);
 
   const shippingCost = 5000;
-  const total = subtotal + shippingCost;
+  const codFee = (form.paymentMethod === "COD" && settings?.codExtraFee) ? settings.codExtraFee : 0;
+  const total = subtotal + shippingCost + codFee;
 
   useEffect(() => {
     // Fetch Settings
@@ -167,7 +168,7 @@ export default function CheckoutPage() {
           </div>
           <div>
             <h1 className="text-2xl font-black text-[#021D24] mb-2">ممتاز! طلبك قيد التجهيز الآن 🎉</h1>
-            <p className="text-sm text-gray-500">سيتواصل فريق مرسال معك قريباً على رقم <strong>{form.phone}</strong></p>
+            <p className="text-sm text-gray-500">سيتواصل فريق مبهورون معك قريباً على رقم <strong>{form.phone}</strong></p>
           </div>
           {orderId && (
             <div className="bg-[#F3F4F6] rounded-lg p-4 text-right">
@@ -328,26 +329,32 @@ export default function CheckoutPage() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="bg-white p-3 rounded-lg border border-gray-100 shadow-sm">
-                      <p className="text-[10px] font-bold text-gray-400 uppercase">اسم البنك</p>
-                      <p className="font-black text-sm text-[#021D24]">{settings.bankName || "بنك الخرطوم"}</p>
+                  {settings.bankAccounts ? (
+                    <div className="bg-white p-5 rounded-lg border border-gray-100 shadow-sm whitespace-pre-wrap text-sm font-bold text-[#021D24]">
+                      {settings.bankAccounts}
                     </div>
-                    <div className="bg-white p-3 rounded-lg border border-gray-100 shadow-sm">
-                      <p className="text-[10px] font-bold text-gray-400 uppercase">اسم الحساب</p>
-                      <p className="font-black text-sm text-[#021D24]">{settings.bankAccountName || "شركة مرسال للتجارة"}</p>
-                    </div>
-                    <div className="bg-white p-3 rounded-lg border border-gray-100 shadow-sm sm:col-span-2 flex justify-between items-center">
-                      <div>
-                        <p className="text-[10px] font-bold text-gray-400 uppercase">رقم الحساب / IBAN</p>
-                        <p className="font-black text-lg text-[#1089A4] tracking-wider">{settings.bankAccountNumber || "XXXX-XXXX-XXXX"}</p>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="bg-white p-3 rounded-lg border border-gray-100 shadow-sm">
+                        <p className="text-[10px] font-bold text-gray-400 uppercase">اسم البنك</p>
+                        <p className="font-black text-sm text-[#021D24]">{settings.bankName || "بنك الخرطوم"}</p>
                       </div>
-                      <button type="button" onClick={() => navigator.clipboard.writeText(settings.bankAccountNumber)}
-                        className="w-10 h-10 bg-gray-100 text-gray-500 rounded-lg flex items-center justify-center hover:bg-gray-200 transition-colors">
-                        <span className="material-symbols-rounded text-lg">content_copy</span>
-                      </button>
+                      <div className="bg-white p-3 rounded-lg border border-gray-100 shadow-sm">
+                        <p className="text-[10px] font-bold text-gray-400 uppercase">اسم الحساب</p>
+                        <p className="font-black text-sm text-[#021D24]">{settings.bankAccountName || "شركة مبهورون للتجارة"}</p>
+                      </div>
+                      <div className="bg-white p-3 rounded-lg border border-gray-100 shadow-sm sm:col-span-2 flex justify-between items-center">
+                        <div>
+                          <p className="text-[10px] font-bold text-gray-400 uppercase">رقم الحساب / IBAN</p>
+                          <p className="font-black text-lg text-[#1089A4] tracking-wider">{settings.bankAccountNumber || "XXXX-XXXX-XXXX"}</p>
+                        </div>
+                        <button type="button" onClick={() => navigator.clipboard.writeText(settings.bankAccountNumber)}
+                          className="w-10 h-10 bg-gray-100 text-gray-500 rounded-lg flex items-center justify-center hover:bg-gray-200 transition-colors">
+                          <span className="material-symbols-rounded text-lg">content_copy</span>
+                        </button>
+                      </div>
                     </div>
-                  </div>
+                  )}
 
                   <div className="pt-2">
                     <p className="text-xs font-black text-[#021D24] mb-3 flex items-center gap-2">
@@ -441,6 +448,12 @@ export default function CheckoutPage() {
                   <span className="font-bold">{shippingCost.toLocaleString()} ج.س</span>
                   <span>الشحن</span>
                 </div>
+                {codFee > 0 && (
+                  <div className="flex justify-between text-[#F29124] animate-in slide-in-from-right-4 duration-300">
+                    <span className="font-bold">{codFee.toLocaleString()} ج.س</span>
+                    <span>رسوم الدفع عند الاستلام</span>
+                  </div>
+                )}
                 <div className="border-t pt-3 flex justify-between font-black text-[#021D24]">
                   <span className="text-lg">{total.toLocaleString()} ج.س</span>
                   <span>الإجمالي</span>
@@ -448,7 +461,7 @@ export default function CheckoutPage() {
               </div>
               <div className="p-4 pt-0 border-t border-gray-100 flex items-center gap-3 text-xs text-gray-400">
                 <span className="material-symbols-rounded text-base text-green-500">verified</span>
-                شراء آمن ومضمون مع مرسال
+                شراء آمن ومضمون مع مبهورون
               </div>
             </div>
           </div>

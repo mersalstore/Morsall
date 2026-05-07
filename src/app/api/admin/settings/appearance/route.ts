@@ -62,13 +62,15 @@ export async function PATCH(req: Request) {
     if (data.whatsappNumber !== undefined) updateSettings.whatsappNumber = data.whatsappNumber;
     if (data.facebookUrl !== undefined) updateSettings.facebookUrl = data.facebookUrl;
     if (data.instagramUrl !== undefined) updateSettings.instagramUrl = data.instagramUrl;
+    if (data.codExtraFee !== undefined) updateSettings.codExtraFee = data.codExtraFee;
+    if (data.bankAccounts !== undefined) updateSettings.bankAccounts = data.bankAccounts;
 
     const settings = await prisma.settings.upsert({
       where: { id: "global" },
       update: updateSettings,
       create: { 
         id: "global",
-        siteTitle: data.siteTitle || "مرسال",
+        siteTitle: data.siteTitle || "مبهورون",
         siteDescription: data.siteDescription || "",
         logo: data.logo,
         primaryColor: data.primaryColor || "#1089A4",
@@ -76,6 +78,8 @@ export async function PATCH(req: Request) {
         whatsappNumber: data.whatsappNumber,
         facebookUrl: data.facebookUrl,
         instagramUrl: data.instagramUrl,
+        codExtraFee: data.codExtraFee || 0,
+        bankAccounts: data.bankAccounts || "",
       },
     });
     return NextResponse.json(settings);

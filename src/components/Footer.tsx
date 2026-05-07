@@ -6,21 +6,21 @@ import { usePathname } from "next/navigation";
 
 const COLS = [
   {
-    title: "تعرف على مرسال",
+    title: "تعرف على مبهورون",
     links: [
       { label: "من نحن",            href: "/about" },
       { label: "وظائف",             href: "/careers" },
-      { label: "أخبار مرسال",       href: "/news" },
+      { label: "أخبار مبهورون",       href: "/news" },
       { label: "شراكات استراتيجية", href: "/partners" },
     ],
   },
   {
     title: "اربح معنا",
     links: [
-      { label: "ابدأ تجارتك — بع على مرسال", href: "/vendor/register" },
+      { label: "ابدأ تجارتك — بع على مبهورون", href: "/vendor/register" },
       { label: "برنامج التوصيل",   href: "/delivery-jobs" },
       { label: "المسوقون بالعمولة", href: "/affiliates" },
-      { label: "استثمر في مرسال",  href: "/invest" },
+      { label: "استثمر في مبهورون",  href: "/invest" },
     ],
   },
   {
@@ -29,7 +29,7 @@ const COLS = [
       { label: "الدفع عند الاستلام", href: "/payment/cod" },
       { label: "التحويل البنكي",      href: "/payment/bank" },
       { label: "الدفع الإلكتروني",   href: "/payment/online" },
-      { label: "مرسال ريوارد",        href: "/rewards" },
+      { label: "مبهورون ريوارد",        href: "/rewards" },
     ],
   },
   {
@@ -67,7 +67,7 @@ export default function Footer() {
             <div className="relative w-full max-w-[500px] h-20 lg:h-24">
               <Image 
                 src="/footer-identity.png" 
-                alt="مرسال - MERSAL" 
+                alt="مبهورون - MOBHROON" 
                 fill 
                 className="object-contain object-right" 
               />
@@ -103,7 +103,7 @@ export default function Footer() {
               <span>|</span>
               <Link href="/cookies" className="hover:text-white transition-colors">سياسة الكوكيز</Link>
               <span>|</span>
-              <span>© 2026 مرسال — جميع الحقوق محفوظة</span>
+              <span>© 2026 مبهورون — جميع الحقوق محفوظة</span>
             </div>
 
             {/* Security badges */}
@@ -121,7 +121,7 @@ export default function Footer() {
       {/* ── Bottom band (like Amazon) ── */}
       <div className="bg-[#011116] text-center py-3">
         <p className="text-[10px] text-white/20 font-bold">
-          Powered by Mersal Tech — Sudan's #1 E-Commerce Platform 🇸🇩
+          Powered by Mobhroon Tech — Sudan's #1 E-Commerce Platform 🇸🇩
         </p>
       </div>
     </footer>

@@ -99,7 +99,7 @@ export default function GlobalSettingsTab() {
                   value={settings.siteTitle || ""}
                   onChange={e => setSettings({...settings, siteTitle: e.target.value})}
                   className="w-full bg-gray-50 border border-transparent focus:border-[#1089A4] rounded-2xl px-6 py-5 text-sm font-black outline-none transition-all"
-                  placeholder="مرسال - Mersall"
+                  placeholder="مبهورون - Mobhroon"
                />
             </div>
 
@@ -111,6 +111,43 @@ export default function GlobalSettingsTab() {
                   className="w-full bg-gray-50 border border-transparent focus:border-[#1089A4] rounded-2xl px-6 py-5 text-sm font-bold min-h-[120px] outline-none transition-all"
                   placeholder="أكبر منصة تجارة إلكترونية في السودان..."
                />
+            </div>
+         </div>
+
+         {/* Payment Configuration */}
+         <div className="bg-white p-12 rounded-[3.5rem] border border-gray-100 shadow-2xl space-y-10 md:col-span-2">
+            <div className="flex items-center gap-4 text-[#1089A4]">
+               <div className="w-10 h-10 rounded-xl bg-[#1089A4]/10 flex items-center justify-center text-[#1089A4]">
+                  <Globe size={20} />
+               </div>
+               <h3 className="text-xl font-black text-[#021D24]">إعدادات الدفع والحسابات</h3>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+               <div className="space-y-4">
+                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2">رسوم الدفع عند الاستلام (ج.س)</label>
+                  <input 
+                     type="number"
+                     value={settings.codExtraFee || ""}
+                     onChange={e => setSettings({...settings, codExtraFee: parseFloat(e.target.value)})}
+                     className="w-full bg-gray-50 border border-transparent focus:border-[#1089A4] rounded-2xl px-6 py-5 text-lg font-black outline-none transition-all"
+                     placeholder="2000"
+                  />
+                  <p className="text-[9px] text-gray-400 px-2 leading-relaxed">المبلغ الإضافي الذي يتم تحصيله عند اختيار الدفع عند الاستلام.</p>
+               </div>
+
+               <div className="space-y-4">
+                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2">الحسابات البنكية</label>
+                  <textarea 
+                     value={settings.bankAccounts || ""}
+                     onChange={e => setSettings({...settings, bankAccounts: e.target.value})}
+                     className="w-full bg-gray-50 border border-transparent focus:border-[#1089A4] rounded-2xl px-6 py-5 text-sm font-bold min-h-[150px] outline-none transition-all"
+                     placeholder="مثال:
+بنك الخرطوم: 1234567 (باسم: شركة مبهورون)
+بنك أم درمان الوطني: 7654321"
+                  />
+                  <p className="text-[9px] text-gray-400 px-2 leading-relaxed">اكتب تفاصيل الحسابات البنكية التي ستظهر للعملاء عند اختيار التحويل البنكي.</p>
+               </div>
             </div>
          </div>
       </div>
