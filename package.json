@@ -9,9 +9,9 @@
   "scripts": {
     "dev": "next dev",
     "prebuild": "node scripts/fix-perms.js",
-    "build": "prisma generate && next build",
+    "build": "prisma generate && cross-env NODE_OPTIONS=--max-old-space-size=2048 next build",
     "postbuild": "node scripts/copy-next-static.js",
-    "start": "node server.js",
+    "start": "node server-hostinger.js",
     "start:hostinger": "node server-hostinger.js",
     "db:push": "prisma db push",
     "lint": "eslint"
@@ -40,6 +40,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
+    "cross-env": "^7.0.3",
     "@eslint/js": "^9.18.0",
     "@tailwindcss/postcss": "^4",
     "@types/bcryptjs": "^2.4.6",

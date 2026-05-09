@@ -7,7 +7,7 @@ const fs = require('fs');
 
 function bootstrapEnv() {
   process.env.NODE_ENV = process.env.NODE_ENV || 'production';
-  process.env.PRISMA_CLIENT_ENGINE_TYPE = process.env.PRISMA_CLIENT_ENGINE_TYPE || 'binary';
+  process.env.PRISMA_CLIENT_ENGINE_TYPE = process.env.PRISMA_CLIENT_ENGINE_TYPE || 'library';
 
   const pool = (process.env.POSTGRES_PRISMA_URL || process.env.DATABASE_URL || '').trim();
   const direct = (
@@ -38,7 +38,7 @@ function bootstrapEnv() {
 bootstrapEnv();
 
 const dev = false;
-const hostname = '0.0.0.0';
+const hostname = '127.0.0.1';
 const port = parseInt(process.env.PORT || '3000', 10);
 const dir = __dirname;
 
@@ -48,7 +48,7 @@ const handle = app.getRequestHandler();
 // Serve static files from _next/static and public directories
 const serveStaticFile = (filePath, res) => {
   try {
-    if (fs.existsSync(filePath)) {
+    if (fs.existsSync(filePath) && fs.lstatSync(filePath).isFile()) {
       const content = fs.readFileSync(filePath);
       const ext = path.extname(filePath);
       
@@ -86,9 +86,11 @@ app.prepare().then(() => {
       const parsedUrl = parse(req.url, true);
       const pathname = parsedUrl.pathname;
       
-      // Try to serve static files from _next/static
-      if (pathname.startsWith('/_next/static/')) {
-        const filePath = path.join(dir, pathname);
+      // Try to serve static files from _next/static (with or without /assets prefix)
+      if (pathname.startsWith('/_next/static/') || pathname.startsWith('/assets/_next/static/')) {
+        // Clean the pathname to point to the local _next/static folder
+        const cleanPathname = pathname.replace('/assets', '');
+        const filePath = path.join(dir, cleanPathname);
         if (serveStaticFile(filePath, res)) {
           return;
         }

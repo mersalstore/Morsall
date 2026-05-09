@@ -14,7 +14,7 @@ export const metadata = {
   openGraph: {
     title: "مرسال | ابدأ تجارتك أو اتسوّق الآن",
     description: "آلاف المنتجات من موردين موثوقين — توصيل لكل أنحاء السودان.",
-    url: "https://mersal.sd",
+    url: "https://morsall.com",
     siteName: "مرسال",
     locale: "ar_SD",
     type: "website",

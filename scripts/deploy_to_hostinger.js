@@ -5,8 +5,8 @@ const path = require('path');
 console.log('Starting deployment script...');
 
 const conn = new Client();
-const localFile = path.join(__dirname, '..', 'Morsall_Deploy_Final.zip');
-const remoteFile = '/home/u754458241/domains/morsall.com/nodejs/Morsall_Deploy_Final.zip';
+const localFile = path.join(__dirname, '..', 'Morsall_Hostinger_Deploy.zip');
+const remoteFile = '/home/u754458241/domains/morsall.com/nodejs/Morsall_Hostinger_Deploy.zip';
 
 console.log('Local file:', localFile);
 console.log('Remote file:', remoteFile);
@@ -33,7 +33,7 @@ conn.on('ready', () => {
       console.log('Upload completed');
       
       console.log('Extracting zip...');
-      conn.exec(`cd /home/u754458241/domains/morsall.com/nodejs/ && unzip -o Morsall_Deploy_Final.zip && rm Morsall_Deploy_Final.zip`, (err, stream) => {
+      conn.exec(`cd /home/u754458241/domains/morsall.com/nodejs/ && unzip -o Morsall_Hostinger_Deploy.zip && rm Morsall_Hostinger_Deploy.zip`, (err, stream) => {
         if (err) {
           console.error('Exec Error:', err);
           conn.end();

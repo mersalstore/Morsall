@@ -8,7 +8,7 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  assetPrefix: process.env.NODE_ENV === 'production' ? '/assets' : '',
+  /* assetPrefix: process.env.NODE_ENV === 'production' ? '/assets' : '', */
   serverExternalPackages: ["@prisma/client"],
   async redirects() {
     return [
@@ -23,6 +23,11 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
     ]
+  },
+  experimental: {
+    webpackBuildWorker: true,
+    parallelServerBuildTraces: false,
+    parallelServerCompiles: false,
   },
   images: {
     unoptimized: true,

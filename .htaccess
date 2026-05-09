@@ -1,24 +1,14 @@
-<IfModule mod_rewrite.c>
-  RewriteEngine On
-  RewriteBase /
-  
-  # Disable directory listing
-  Options -Indexes
-  
-  # 1. Handle the custom /assets prefix for Next.js static files
-  # This maps /assets/_next/static/ to /_next/static/
-  RewriteRule ^assets/_next/static/(.*)$ _next/static/$1 [L]
-  
-  # 2. Don't rewrite if it's a real file or directory
-  RewriteCond %{REQUEST_FILENAME} !-f
-  RewriteCond %{REQUEST_FILENAME} !-d
-  
-  # 3. Exclude public assets
-  RewriteCond %{REQUEST_URI} !^/(favicon\.ico|robots\.txt|sitemap\.xml|public)
-  
-  # 4. Route all other requests to Node.js server on port 3000
-  RewriteRule ^(.*)$ http://127.0.0.1:3000/$1 [P,L]
-</IfModule>
+PassengerEnabled on
+PassengerAppRoot /home/u754458241/domains/morsall.com/nodejs
+PassengerAppType node
+PassengerStartupFile server-hostinger.js
+PassengerNodejs /opt/alt/alt-nodejs22/root/usr/bin/node
+
+RewriteEngine On
+
+# Redirect HTTP to HTTPS
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
 # Security Headers for LiteSpeed
 <IfModule mod_headers.c>

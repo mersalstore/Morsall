@@ -69,7 +69,12 @@ export async function POST(req: Request) {
       
       await writeFile(filePath, buffer);
       
-      return NextResponse.json({ url: `/uploads/${uniqueName}` });
+      // If uploadDir is outside the project root, we still want to return a public URL.
+      // Usually /uploads/ is mapped to public/uploads or a symlink.
+      return NextResponse.json({ 
+        url: `/uploads/${uniqueName}`,
+        success: true
+      });
     } catch (writeError: any) {
       // Non read-only errors should fail immediately.
       const isReadOnly =

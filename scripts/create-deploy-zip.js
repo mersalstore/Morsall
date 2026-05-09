@@ -23,11 +23,12 @@ async function createZip() {
 
     const ignoreList = [
       'node_modules', '.git', 'matger2-deploy.zip', 
-      'matger2-hostinger-deploy.zip', 'Morsall_Deploy_Final.zip'
+      'matger2-hostinger-deploy.zip', 'Morsall_Deploy_Final.zip',
+      'Morsall_Hostinger_Deploy.zip', 'staging_deploy', 'scratch'
     ];
 
     files.forEach(file => {
-      if (ignoreList.includes(file) || file.endsWith('.log')) {
+      if (ignoreList.includes(file) || file.endsWith('.log') || file.endsWith('.zip')) {
         return;
       }
       const fullPath = path.join(projectDir, file);
