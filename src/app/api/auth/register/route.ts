@@ -8,7 +8,8 @@ export async function POST(req: Request) {
     console.log(`[REG] Registration attempt for: ${email}`);
 
     if (!email || !password || !name) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+      console.log(`[REG] Missing fields: email=${!!email}, password=${!!password}, name=${!!name}`);
+      return NextResponse.json({ error: `Missing required fields: ${!email ? 'email ' : ''}${!password ? 'password ' : ''}${!name ? 'name' : ''}` }, { status: 400 });
     }
 
     // 1. Check if user already exists
