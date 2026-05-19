@@ -66,17 +66,17 @@ export default async function ShopPage(props: {
         </div>
       </div>
 
-      <div className="max-w-[1400px] mx-auto px-4 lg:px-6 py-4 grid grid-cols-1 lg:grid-cols-12 gap-4">
+      <div className="max-w-[1400px] mx-auto px-4 lg:px-6 py-4 grid grid-cols-1 md:grid-cols-[250px_1fr] gap-6">
 
         {/* Sidebar */}
-        <aside className="lg:col-span-2 hidden lg:block">
-          <div className="bg-white rounded-lg border border-gray-200 p-4 sticky top-28">
+        <aside className="hidden md:block">
+          <div className="sticky top-28">
             <ShopFilters />
           </div>
         </aside>
 
         {/* Main content */}
-        <main className="lg:col-span-10 space-y-3">
+        <main className="space-y-3">
 
           {/* Toolbar & Mobile Filters */}
           <ShopClientControls 
@@ -93,7 +93,7 @@ export default async function ShopPage(props: {
 
           {/* Products Grid */}
           {products.length > 0 ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               {products.map((p: any) => (
                 <ProductCard key={p.id} {...p} />
               ))}

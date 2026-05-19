@@ -4,27 +4,17 @@ import { cn } from "@/lib/utils";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
-const COLORS = [
-  { name: "أسود", value: "أسود", hex: "#000000" },
-  { name: "أبيض", value: "أبيض", hex: "#ffffff" },
-  { name: "أحمر", value: "أحمر", hex: "#ef4444" },
-  { name: "أزرق", value: "أزرق", hex: "#3b82f6" },
-  { name: "ذهبي", value: "ذهبي", hex: "#C5A021" },
-];
-
-const SIZES = ["S", "M", "L", "XL", "128GB", "256GB"];
-
 export default function ShopFilters() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const currentCategory = searchParams.get("category");
   const currentMinPrice = searchParams.get("minPrice") || "";
   const currentMaxPrice = searchParams.get("maxPrice") || "";
-  const currentAttributes = searchParams.get("attributes") ? searchParams.get("attributes")?.split(",") : [];
   
   const [categories, setCategories] = useState<any[]>([]);
   const [minPrice, setMinPrice] = useState(currentMinPrice);
   const [maxPrice, setMaxPrice] = useState(currentMaxPrice);
+  const [outOfStock, setOutOfStock] = useState(false);
   
   useEffect(() => {
     fetch("/api/categories")
@@ -40,22 +30,21 @@ export default function ShopFilters() {
     router.push(`/shop?${params.toString()}`);
   };
 
-  const handleAttributeToggle = (attr: string) => {
-    let attrs = [...(currentAttributes || [])];
-    if (attrs.includes(attr)) {
-      attrs = attrs.filter(a => a !== attr);
-    } else {
-      attrs.push(attr);
-    }
-    updateFilters("attributes", attrs.length > 0 ? attrs.join(",") : null);
-  };
-
   const applyPriceFilter = () => {
     const params = new URLSearchParams(searchParams.toString());
     if (minPrice) params.set("minPrice", minPrice);
     else params.delete("minPrice");
     if (maxPrice) params.set("maxPrice", maxPrice);
     else params.delete("maxPrice");
+    router.push(`/shop?${params.toString()}`);
+  };
+
+  const handlePriceRange = (min: string, max: string) => {
+    setMinPrice(min);
+    setMaxPrice(max);
+    const params = new URLSearchParams(searchParams.toString());
+    if (min) params.set("minPrice", min); else params.delete("minPrice");
+    if (max) params.set("maxPrice", max); else params.delete("maxPrice");
     router.push(`/shop?${params.toString()}`);
   };
 
@@ -66,115 +55,120 @@ export default function ShopFilters() {
   };
 
   return (
-    <div className="flex flex-col gap-10 sticky top-40 h-fit pb-20">
+    <div className="flex flex-col gap-5 text-[#0F172A] text-sm pb-10">
+      {/* Delivery */}
+      <div className="space-y-2">
+         <h4 className="font-bold mb-2 text-[#0F172A]">الشحن والتوصيل</h4>
+         <label className="flex items-center gap-2 cursor-pointer group">
+            <input type="checkbox" className="w-4 h-4 rounded border-gray-400 accent-[#e77600] cursor-pointer" />
+            <span className="text-sm group-hover:text-[#C7511F] transition-colors">احصل عليه غداً</span>
+         </label>
+      </div>
+
       {/* Category Filter */}
-      <div className="space-y-6">
-         <h4 className="font-black text-xs uppercase tracking-[0.2em] border-b-2 border-[#C5A021]/10 pb-4 text-[#C5A021]">
-            الأقـسـام
-         </h4>
-         <div className="flex flex-col gap-4">
+      <div className="space-y-2">
+         <h4 className="font-bold mb-2 text-[#0F172A]">القسم</h4>
+         <div className="flex flex-col gap-2">
             {categories.map((cat, i) => {
                const isChecked = currentCategory === cat.id;
                return (
-                 <label key={i} className="flex items-center gap-4 cursor-pointer group">
+                 <label key={i} className="flex items-center gap-2 cursor-pointer group">
                     <input 
                       type="checkbox" 
                       checked={isChecked}
                       onChange={() => updateFilters("category", isChecked ? null : cat.id)}
-                      className="w-5 h-5 rounded accent-[#C5A021]" 
+                      className="w-4 h-4 rounded border-gray-400 accent-[#e77600] cursor-pointer" 
                     />
-                    <span className={cn("text-sm font-black transition-colors", isChecked ? "text-[#C5A021]" : "text-[#0F172A]/70 group-hover:text-[#C5A021]")}>{cat.name}</span>
+                    <span className={cn("text-sm transition-colors group-hover:text-[#C7511F]", isChecked ? "font-bold text-[#e77600]" : "text-gray-800")}>{cat.name}</span>
                  </label>
                );
             })}
          </div>
       </div>
 
-      {/* Price Slider */}
-      <div className="space-y-6">
-         <h4 className="font-black text-xs uppercase tracking-[0.2em] border-b-2 border-[#C5A021]/10 pb-4 text-[#C5A021]">
-            نطاق السعر
-         </h4>
-         <div className="flex flex-col gap-4">
-            <div className="flex items-center gap-2">
-              <input 
-                type="number" 
-                placeholder="من" 
-                value={minPrice}
-                onChange={e => setMinPrice(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold outline-none focus:border-[#C5A021]"
-              />
-              <span className="text-slate-400">-</span>
-              <input 
-                type="number" 
-                placeholder="إلى" 
-                value={maxPrice}
-                onChange={e => setMaxPrice(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold outline-none focus:border-[#C5A021]"
-              />
-            </div>
-            <button onClick={applyPriceFilter} className="w-full bg-[#0F172A] text-white py-2 rounded-xl text-xs font-black hover:bg-[#C5A021] transition-colors">
-              تطبيق السعر
+      {/* Customer Reviews */}
+      <div className="space-y-2">
+         <h4 className="font-bold mb-2 text-[#0F172A]">تقييم العملاء</h4>
+         <div className="flex flex-col gap-2">
+           {[4, 3, 2, 1].map(stars => (
+             <div key={stars} className="flex items-center gap-1 cursor-pointer group hover:text-[#C7511F] transition-colors">
+               <div className="flex text-[#FFA41C]">
+                 {[1,2,3,4,5].map(i => (
+                   <span key={i} className={`text-lg ${i <= stars ? "text-[#FFA41C]" : "text-gray-300"}`}>★</span>
+                 ))}
+               </div>
+               <span className="text-xs text-gray-800 group-hover:text-[#C7511F]">وأكثر</span>
+             </div>
+           ))}
+         </div>
+      </div>
+
+      {/* Brands */}
+      <div className="space-y-2">
+         <h4 className="font-bold mb-2 text-[#0F172A]">العلامة التجارية / البائع</h4>
+         <div className="flex flex-col gap-2">
+            {["Vixcell", "Mersal Official", "Samsung", "Apple"].map(brand => (
+               <label key={brand} className="flex items-center gap-2 cursor-pointer group">
+                  <input type="checkbox" className="w-4 h-4 rounded border-gray-400 accent-[#e77600] cursor-pointer" />
+                  <span className="text-sm text-gray-800 group-hover:text-[#C7511F] transition-colors">{brand}</span>
+               </label>
+            ))}
+            <button className="text-right text-sm text-[#007185] hover:text-[#C7511F] hover:underline mt-1 font-medium">عرض المزيد</button>
+         </div>
+      </div>
+
+      {/* Price */}
+      <div className="space-y-2">
+         <h4 className="font-bold mb-2 text-[#0F172A]">السعر</h4>
+         <div className="flex flex-col gap-1.5 mb-3">
+            <button onClick={() => handlePriceRange("", "5000")} className="text-right text-sm text-gray-800 hover:text-[#C7511F]">أقل من 5,000 ج.س</button>
+            <button onClick={() => handlePriceRange("5000", "15000")} className="text-right text-sm text-gray-800 hover:text-[#C7511F]">5,000 ج.س إلى 15,000 ج.س</button>
+            <button onClick={() => handlePriceRange("15000", "50000")} className="text-right text-sm text-gray-800 hover:text-[#C7511F]">15,000 ج.س إلى 50,000 ج.س</button>
+            <button onClick={() => handlePriceRange("50000", "")} className="text-right text-sm text-gray-800 hover:text-[#C7511F]">50,000 ج.س وأكثر</button>
+         </div>
+         <div className="flex items-center gap-2">
+            <input 
+              type="number" 
+              placeholder="الحد الأدنى" 
+              value={minPrice}
+              onChange={e => setMinPrice(e.target.value)}
+              className="w-[85px] border border-gray-400 rounded px-2 py-1 text-sm outline-none focus:border-[#e77600] focus:shadow-[0_0_3px_2px_rgba(228,121,17,0.5)] transition-shadow placeholder:text-xs"
+            />
+            <span className="text-gray-500 font-bold">-</span>
+            <input 
+              type="number" 
+              placeholder="الحد الأقصى" 
+              value={maxPrice}
+              onChange={e => setMaxPrice(e.target.value)}
+              className="w-[85px] border border-gray-400 rounded px-2 py-1 text-sm outline-none focus:border-[#e77600] focus:shadow-[0_0_3px_2px_rgba(228,121,17,0.5)] transition-shadow placeholder:text-xs"
+            />
+            <button onClick={applyPriceFilter} className="bg-white border border-gray-300 shadow-sm text-sm px-3 py-1 rounded-md hover:bg-gray-50 transition-colors font-medium">
+              انتقال
             </button>
          </div>
       </div>
 
-      {/* Color Visual Attributes */}
-      <div className="space-y-6">
-         <h4 className="font-black text-xs uppercase tracking-[0.2em] border-b-2 border-[#C5A021]/10 pb-4 text-[#C5A021]">
-            اللون
-         </h4>
-         <div className="flex flex-wrap gap-3">
-            {COLORS.map((c) => {
-               const isActive = currentAttributes?.includes(c.value);
-               return (
-                 <button
-                   key={c.value}
-                   onClick={() => handleAttributeToggle(c.value)}
-                   title={c.name}
-                   className={cn(
-                     "w-8 h-8 rounded-full border-2 transition-all flex items-center justify-center",
-                     isActive ? "border-[#C5A021] scale-110 shadow-md" : "border-slate-200 hover:scale-105"
-                   )}
-                   style={{ backgroundColor: c.hex }}
-                 >
-                   {isActive && <span className={cn("material-symbols-rounded text-[14px]", c.hex === "#ffffff" ? "text-black" : "text-white")}>check</span>}
-                 </button>
-               )
-            })}
-         </div>
+      {/* Availability */}
+      <div className="space-y-2 mt-2 border-t border-gray-200 pt-4">
+         <h4 className="font-bold mb-2 text-[#0F172A]">التوفر</h4>
+         <label className="flex items-center gap-2 cursor-pointer group">
+            <input 
+              type="checkbox" 
+              checked={outOfStock}
+              onChange={e => setOutOfStock(e.target.checked)}
+              className="w-4 h-4 rounded border-gray-400 accent-[#e77600] cursor-pointer" 
+            />
+            <span className="text-sm text-gray-800 group-hover:text-[#C7511F] transition-colors">تضمين غير المتوفر</span>
+         </label>
       </div>
 
-      {/* Size/Storage Visual Attributes */}
-      <div className="space-y-6">
-         <h4 className="font-black text-xs uppercase tracking-[0.2em] border-b-2 border-[#C5A021]/10 pb-4 text-[#C5A021]">
-            المقاس / السعة
-         </h4>
-         <div className="flex flex-wrap gap-2">
-            {SIZES.map((s) => {
-               const isActive = currentAttributes?.includes(s);
-               return (
-                 <button
-                   key={s}
-                   onClick={() => handleAttributeToggle(s)}
-                   className={cn(
-                     "px-3 py-1.5 rounded-xl border text-xs font-black transition-all",
-                     isActive ? "bg-[#C5A021] text-white border-[#C5A021] shadow-md" : "bg-white text-slate-500 border-slate-200 hover:border-[#C5A021]"
-                   )}
-                 >
-                   {s}
-                 </button>
-               )
-            })}
-         </div>
-      </div>
-
-      {/* Footer Actions */}
-      <div className="pt-6 border-t border-slate-100 flex flex-col gap-3">
-        <button onClick={clearFilters} className="w-full text-center text-[10px] font-black text-slate-400 hover:text-red-500 transition-colors uppercase tracking-[0.3em] flex items-center justify-center gap-2">
-           <span className="material-symbols-rounded text-lg">restart_alt</span> مسح جميع الفلاتر
+      {/* Clear */}
+      {(currentCategory || currentMinPrice || currentMaxPrice) && (
+        <button onClick={clearFilters} className="text-sm text-[#007185] hover:text-[#C7511F] hover:underline mt-4 text-right font-medium flex items-center gap-1">
+           <span className="material-symbols-rounded text-[16px]">clear</span>
+           مسح جميع الفلاتر
         </button>
-      </div>
+      )}
     </div>
   );
 }

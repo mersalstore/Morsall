@@ -28,34 +28,34 @@ export default function ShopClientControls({ resultCount, query, initialSort }: 
 
   return (
     <>
-      <div className="bg-white rounded-lg border border-gray-200 p-3 flex flex-wrap items-center justify-between gap-4">
-        <p className="text-sm text-gray-600">
+      <div className="bg-white border border-gray-300 rounded shadow-sm p-2 px-3 flex flex-wrap items-center justify-between gap-4">
+        <p className="text-sm text-gray-800">
           {query ? (
-            <><strong className="text-[#0F172A]">{resultCount}</strong> نتيجة لـ &quot;<strong>{query}</strong>&quot;</>
+            <>1-{resultCount} من أكثر من 2,000 نتيجة لـ <span className="text-[#c60] font-bold">&quot;{query}&quot;</span></>
           ) : (
-            <><strong className="text-[#0F172A]">{resultCount}</strong> منتج متوفر</>
+            <>1-{resultCount} من أكثر من 2,000 نتيجة</>
           )}
         </p>
         <div className="flex items-center gap-3">
           <button 
             onClick={() => setIsMobileFiltersOpen(true)}
-            className="lg:hidden flex items-center gap-2 bg-gray-50 border border-gray-200 px-3 py-1.5 rounded text-xs font-bold text-gray-700 hover:bg-gray-100"
+            className="md:hidden flex items-center gap-2 bg-gray-100 border border-gray-300 px-3 py-1 rounded-md text-sm font-bold text-gray-800 hover:bg-gray-200"
           >
             <span className="material-symbols-rounded text-sm">tune</span>
             فلاتر
           </button>
-          <div className="flex items-center gap-2">
-            <label className="text-xs font-bold text-gray-400">ترتيب حسب:</label>
+          <div className="flex items-center gap-2 bg-gray-100 border border-gray-300 rounded-md px-2 py-1 hover:bg-gray-200 transition-colors">
+            <span className="text-sm text-gray-700">الترتيب حسب:</span>
             <select 
               value={initialSort}
               onChange={handleSortChange}
-              className="border border-gray-300 rounded px-2 py-1 text-xs font-bold outline-none focus:border-[#C5A021] bg-white cursor-pointer"
+              className="bg-transparent text-sm text-gray-900 outline-none cursor-pointer font-bold"
             >
-              <option value="">الأكثر مبيعاً</option>
-              <option value="new">الأحدث</option>
-              <option value="price_asc">السعر: الأقل أولاً</option>
-              <option value="price_desc">السعر: الأعلى أولاً</option>
-              <option value="rated">الأعلى تقييماً</option>
+              <option value="">متميز</option>
+              <option value="price_asc">السعر: من الأقل للأعلى</option>
+              <option value="price_desc">السعر: من الأعلى للأقل</option>
+              <option value="rated">متوسط تقييم العملاء</option>
+              <option value="new">وصلنا حديثاً</option>
             </select>
           </div>
         </div>

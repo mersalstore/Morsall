@@ -235,29 +235,30 @@ export default function Navbar() {
             </div>
           </div>
 
-          {/* Advanced Search Bar */}
+          {/* Advanced Search Bar (Amazon Style) */}
           <div className="relative w-full md:w-auto md:flex-grow order-3">
             <form
               onSubmit={handleSearch}
-              className="flex items-stretch h-11 bg-white/5 rounded-xl border border-white/10 hover:border-[#C5A021]/50 focus-within:border-[#C5A021] focus-within:ring-4 focus-within:ring-[#C5A021]/10 transition-all overflow-hidden"
+              className="flex items-stretch h-10 bg-white rounded-md border-0 focus-within:ring-2 focus-within:ring-[#f90] transition-all overflow-hidden"
             >
-              <select className="hidden md:block bg-transparent text-white/70 text-[12px] font-bold px-4 hover:text-white outline-none cursor-pointer border-l border-white/10">
-                <option className="bg-[#020D10]">كل الأقسام</option>
-                <option className="bg-[#020D10]">الإلكترونيات</option>
-                <option className="bg-[#020D10]">الأزياء</option>
+              <select className="hidden md:block bg-[#f3f3f3] text-gray-700 text-xs px-3 hover:bg-[#d4d4d4] outline-none cursor-pointer border-l border-gray-300">
+                <option value="all">كل الأقسام</option>
+                {navCategories.map(c => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ))}
               </select>
               <input
                 type="text"
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                placeholder="ابحث عن أفضل العروض في مرسال..."
-                className="flex-grow w-full bg-transparent text-white px-4 md:px-5 text-sm outline-none placeholder:text-white/30 text-right"
+                placeholder="ابحث في مرسال"
+                className="flex-grow w-full bg-white text-[#0F172A] px-4 text-sm outline-none placeholder:text-gray-400 text-right"
               />
               <button
                 type="submit"
-                className="px-4 md:px-6 flex items-center justify-center text-white/50 hover:text-[#C5A021] transition-colors"
+                className="px-5 flex items-center justify-center bg-[#febd69] hover:bg-[#f3a847] text-[#0F172A] transition-colors"
               >
-                <span className="material-symbols-rounded text-2xl">search</span>
+                <span className="material-symbols-rounded text-2xl font-black">search</span>
               </button>
             </form>
             
@@ -268,35 +269,30 @@ export default function Navbar() {
                    initial={{ opacity: 0, y: 10 }}
                    animate={{ opacity: 1, y: 0 }}
                    exit={{ opacity: 0, y: 10 }}
-                   className="absolute top-full mt-2 w-full bg-[#0F172A] rounded-2xl border border-white/10 shadow-2xl overflow-hidden z-50 text-right"
+                   className="absolute top-full mt-2 w-full bg-white rounded-lg border border-gray-200 shadow-2xl overflow-hidden z-50 text-right"
                  >
                    {isSearching ? (
-                     <div className="p-4 flex items-center justify-center gap-2 text-white/50 text-xs font-bold">
+                     <div className="p-4 flex items-center gap-2 text-gray-500 text-sm font-bold">
                         <span className="material-symbols-rounded animate-spin text-[16px]">refresh</span>
                         جاري البحث...
                      </div>
                    ) : (
-                     <div className="flex flex-col">
+                     <div className="flex flex-col py-2">
                        {suggestions.map((p) => (
-                         <Link key={p.id} href={`/product/${p.id}`} onClick={() => setSearchQuery("")} className="flex items-center gap-3 p-3 hover:bg-white/5 border-b border-white/5 transition-all group">
-                           <div className="w-10 h-10 rounded-lg bg-white/10 overflow-hidden shrink-0">
-                             {p.images && p.images.length > 0 ? (
-                               // eslint-disable-next-line @next/next/no-img-element
-                               <img src={p.images.split(",")[0]} alt={p.title} className="w-full h-full object-cover" />
-                             ) : (
-                               <span className="material-symbols-rounded text-white/20 w-full h-full flex items-center justify-center">image</span>
-                             )}
-                           </div>
-                           <div className="flex flex-col flex-1">
-                              <span className="text-xs font-black text-white group-hover:text-[#C5A021] transition-colors line-clamp-1">{p.title}</span>
-                              <span className="text-[10px] text-white/40">{p.category?.name || "عام"}</span>
-                           </div>
-                           <div className="mr-auto text-left shrink-0">
-                              <span className="text-xs font-black text-[#C5A021]">{p.price.toLocaleString()} ج.س</span>
-                           </div>
-                         </Link>
+                         <div key={p.id} className="flex flex-col">
+                           <Link href={`/product/${p.id}`} onClick={() => setSearchQuery("")} className="flex items-center gap-3 px-4 py-2 hover:bg-gray-100 transition-colors text-right">
+                              <span className="material-symbols-rounded text-gray-400 text-lg">search</span>
+                              <span className="text-sm font-bold text-[#0F172A] line-clamp-1">{p.title}</span>
+                           </Link>
+                           {p.category && (
+                             <Link href={`/shop?category=${p.categoryId}`} onClick={() => setSearchQuery("")} className="flex items-center gap-3 px-4 pb-2 pt-0 hover:bg-gray-100 transition-colors text-right">
+                                <span className="material-symbols-rounded text-gray-400 text-lg opacity-0">search</span>
+                                <span className="text-xs font-bold text-gray-500">في {p.category.name}</span>
+                             </Link>
+                           )}
+                         </div>
                        ))}
-                       <Link href={`/shop?q=${encodeURIComponent(searchQuery.trim())}`} onClick={() => setSearchQuery("")} className="p-3 text-center text-xs font-bold text-white/50 hover:bg-white/5 hover:text-white transition-colors bg-white/[0.02]">
+                       <Link href={`/shop?q=${encodeURIComponent(searchQuery.trim())}`} onClick={() => setSearchQuery("")} className="px-4 py-3 text-right text-sm font-bold text-blue-600 hover:underline transition-colors border-t border-gray-100 mt-2 block">
                          عرض جميع النتائج لـ &quot;{searchQuery}&quot;
                        </Link>
                      </div>
