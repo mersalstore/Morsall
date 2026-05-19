@@ -18,6 +18,8 @@ export default function Navbar() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showCategories, setShowCategories] = useState(false);
+  const [suggestions, setSuggestions] = useState<any[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
   const [expandedCat, setExpandedCat] = useState<string | null>(null);
   const [isScrolled, setIsScrolled] = useState(false);
   const [userCity, setUserCity] = useState("جاري التحديد...");
@@ -95,8 +97,29 @@ export default function Navbar() {
 
   const handleSearch = (e?: React.FormEvent) => {
     e?.preventDefault();
-    if (searchQuery.trim()) router.push(`/shop?q=${encodeURIComponent(searchQuery.trim())}`);
+    if (searchQuery.trim()) {
+      setSuggestions([]);
+      router.push(`/shop?q=${encodeURIComponent(searchQuery.trim())}`);
+    }
   };
+
+  useEffect(() => {
+    if (!searchQuery.trim() || searchQuery.trim().length < 2) {
+      setSuggestions([]);
+      return;
+    }
+    const timer = setTimeout(() => {
+      setIsSearching(true);
+      fetch(`/api/products?search=${encodeURIComponent(searchQuery)}`)
+        .then(res => res.json())
+        .then(data => {
+           setSuggestions(Array.isArray(data) ? data.slice(0, 5) : []);
+           setIsSearching(false);
+        })
+        .catch(() => setIsSearching(false));
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20);
@@ -213,29 +236,75 @@ export default function Navbar() {
           </div>
 
           {/* Advanced Search Bar */}
-          <form
-            onSubmit={handleSearch}
-            className="w-full md:w-auto md:flex-grow flex items-stretch h-11 bg-white/5 rounded-xl border border-white/10 hover:border-[#C5A021]/50 focus-within:border-[#C5A021] focus-within:ring-4 focus-within:ring-[#C5A021]/10 transition-all overflow-hidden order-3"
-          >
-            <select className="hidden md:block bg-transparent text-white/70 text-[12px] font-bold px-4 hover:text-white outline-none cursor-pointer border-l border-white/10">
-              <option className="bg-[#020D10]">كل الأقسام</option>
-              <option className="bg-[#020D10]">الإلكترونيات</option>
-              <option className="bg-[#020D10]">الأزياء</option>
-            </select>
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              placeholder="ابحث عن أفضل العروض في مرسال..."
-              className="flex-grow w-full bg-transparent text-white px-4 md:px-5 text-sm outline-none placeholder:text-white/30 text-right"
-            />
-            <button
-              type="submit"
-              className="px-4 md:px-6 flex items-center justify-center text-white/50 hover:text-[#C5A021] transition-colors"
+          <div className="relative w-full md:w-auto md:flex-grow order-3">
+            <form
+              onSubmit={handleSearch}
+              className="flex items-stretch h-11 bg-white/5 rounded-xl border border-white/10 hover:border-[#C5A021]/50 focus-within:border-[#C5A021] focus-within:ring-4 focus-within:ring-[#C5A021]/10 transition-all overflow-hidden"
             >
-              <span className="material-symbols-rounded text-2xl">search</span>
-            </button>
-          </form>
+              <select className="hidden md:block bg-transparent text-white/70 text-[12px] font-bold px-4 hover:text-white outline-none cursor-pointer border-l border-white/10">
+                <option className="bg-[#020D10]">كل الأقسام</option>
+                <option className="bg-[#020D10]">الإلكترونيات</option>
+                <option className="bg-[#020D10]">الأزياء</option>
+              </select>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                placeholder="ابحث عن أفضل العروض في مرسال..."
+                className="flex-grow w-full bg-transparent text-white px-4 md:px-5 text-sm outline-none placeholder:text-white/30 text-right"
+              />
+              <button
+                type="submit"
+                className="px-4 md:px-6 flex items-center justify-center text-white/50 hover:text-[#C5A021] transition-colors"
+              >
+                <span className="material-symbols-rounded text-2xl">search</span>
+              </button>
+            </form>
+            
+            {/* Auto Suggest Dropdown */}
+            <AnimatePresence>
+              {searchQuery.trim().length >= 2 && (suggestions.length > 0 || isSearching) && (
+                 <motion.div 
+                   initial={{ opacity: 0, y: 10 }}
+                   animate={{ opacity: 1, y: 0 }}
+                   exit={{ opacity: 0, y: 10 }}
+                   className="absolute top-full mt-2 w-full bg-[#0F172A] rounded-2xl border border-white/10 shadow-2xl overflow-hidden z-50 text-right"
+                 >
+                   {isSearching ? (
+                     <div className="p-4 flex items-center justify-center gap-2 text-white/50 text-xs font-bold">
+                        <span className="material-symbols-rounded animate-spin text-[16px]">refresh</span>
+                        جاري البحث...
+                     </div>
+                   ) : (
+                     <div className="flex flex-col">
+                       {suggestions.map((p) => (
+                         <Link key={p.id} href={`/product/${p.id}`} onClick={() => setSearchQuery("")} className="flex items-center gap-3 p-3 hover:bg-white/5 border-b border-white/5 transition-all group">
+                           <div className="w-10 h-10 rounded-lg bg-white/10 overflow-hidden shrink-0">
+                             {p.images && p.images.length > 0 ? (
+                               // eslint-disable-next-line @next/next/no-img-element
+                               <img src={p.images.split(",")[0]} alt={p.title} className="w-full h-full object-cover" />
+                             ) : (
+                               <span className="material-symbols-rounded text-white/20 w-full h-full flex items-center justify-center">image</span>
+                             )}
+                           </div>
+                           <div className="flex flex-col flex-1">
+                              <span className="text-xs font-black text-white group-hover:text-[#C5A021] transition-colors line-clamp-1">{p.title}</span>
+                              <span className="text-[10px] text-white/40">{p.category?.name || "عام"}</span>
+                           </div>
+                           <div className="mr-auto text-left shrink-0">
+                              <span className="text-xs font-black text-[#C5A021]">{p.price.toLocaleString()} ج.س</span>
+                           </div>
+                         </Link>
+                       ))}
+                       <Link href={`/shop?q=${encodeURIComponent(searchQuery.trim())}`} onClick={() => setSearchQuery("")} className="p-3 text-center text-xs font-bold text-white/50 hover:bg-white/5 hover:text-white transition-colors bg-white/[0.02]">
+                         عرض جميع النتائج لـ &quot;{searchQuery}&quot;
+                       </Link>
+                     </div>
+                   )}
+                 </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
 
           {/* Action Icons */}
           <div className="flex items-center gap-2 lg:gap-5 shrink-0 order-2 md:order-4" ref={menuRef}>

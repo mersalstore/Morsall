@@ -17,6 +17,7 @@ export interface ProductCardProps {
   badge?: string;
   sold?: number;
   vendorId?: string;
+  stock?: number;
 }
 
 // Star rating helper
@@ -34,12 +35,13 @@ function Stars({ rating = 4.3, count = 128 }: { rating?: number; count?: number 
   );
 }
 
-export default function ProductCard({ id, title, price, image, vendor, vendorLocation, discount, badge, vendorId }: ProductCardProps) {
+export default function ProductCard({ id, title, price, image, vendor, vendorLocation, discount, badge, vendorId, stock }: ProductCardProps) {
   const [added, setAdded] = useState(false);
   const { addItem } = useCart();
   const { toggleFavorite, toggleCompare, isInFavorites, isInCompare } = useWishlist();
 
   const discountedPrice = discount ? Math.floor(price * (1 - discount / 100)) : price;
+  const isOutOfStock = stock !== undefined && stock <= 0;
 
   const handleAdd = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -102,6 +104,13 @@ export default function ProductCard({ id, title, price, image, vendor, vendorLoc
           className="object-contain p-6 group-hover:scale-110 transition-transform duration-1000 ease-out"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+        {isOutOfStock && (
+          <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] flex items-center justify-center z-20">
+             <div className="bg-red-50 border border-red-100 px-6 py-2 rounded-2xl shadow-xl transform -rotate-12">
+               <span className="text-red-500 font-black uppercase tracking-[0.2em] text-lg">نفذ المخزون</span>
+             </div>
+          </div>
+        )}
       </Link>
 
       {/* Product Content */}
@@ -142,14 +151,21 @@ export default function ProductCard({ id, title, price, image, vendor, vendorLoc
             </div>
             
             <button
+              disabled={isOutOfStock}
               onClick={handleAdd}
               className={`relative overflow-hidden group/btn flex items-center justify-center h-14 rounded-2xl font-black text-xs transition-all duration-500 shadow-xl ${
+                isOutOfStock ? "bg-gray-100 text-gray-400 cursor-not-allowed shadow-none" :
                 added
                   ? "bg-green-600 text-white shadow-green-500/20"
                   : "bg-[#0F172A] text-white shadow-gray-200/50 hover:bg-[#C5A021] hover:shadow-[#C5A021]/30 hover:scale-[1.02]"
               }`}
             >
-              {added ? (
+              {isOutOfStock ? (
+                <span className="flex items-center gap-2">
+                  <span className="material-symbols-rounded text-xl opacity-50">production_quantity_limits</span>
+                  نفذ المخزون
+                </span>
+              ) : added ? (
                 <span className="flex items-center gap-2 animate-in zoom-in duration-300">
                   <span className="material-symbols-rounded text-xl">verified</span>
                   تمت الإضافة للسلة

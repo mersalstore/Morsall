@@ -9,7 +9,7 @@ const toNum = (v: any): number | null => {
   return isNaN(n) ? null : n;
 };
 
-// GET — جلب منتجات بفلتر (للمخزون) أو منتجات معلقة
+// GET — جلب منتجات مع فلاتر (البحث المتقدم)
 export async function GET(req: Request) {
   try {
     const session = await getServerSession(authOptions);
@@ -22,8 +22,28 @@ export async function GET(req: Request) {
 
     const { searchParams } = new URL(req.url);
     const type = searchParams.get("type"); // "pending" | "all"
+    const search = searchParams.get("search");
+    const vendorId = searchParams.get("vendorId");
+    const categoryId = searchParams.get("categoryId");
+    const stockStatus = searchParams.get("stockStatus"); // "IN_STOCK", "OUT_OF_STOCK", "LOW_STOCK"
+    const productStatus = searchParams.get("productStatus");
 
-    const where: any = type === "pending" ? { status: "PENDING" } : {};
+    const where: any = {};
+    if (type === "pending") where.status = "PENDING";
+    else if (productStatus) where.status = productStatus;
+
+    if (search) {
+      where.OR = [
+        { title: { contains: search } },
+        { sku: { contains: search } }
+      ];
+    }
+    if (vendorId) where.vendorId = vendorId;
+    if (categoryId) where.categoryId = categoryId;
+    
+    if (stockStatus === "OUT_OF_STOCK") where.stock = 0;
+    else if (stockStatus === "LOW_STOCK") where.stock = { gt: 0, lte: 10 };
+    else if (stockStatus === "IN_STOCK") where.stock = { gt: 0 };
 
     const products = await prisma.product.findMany({
       where,
@@ -161,7 +181,7 @@ export async function PATCH(req: Request) {
   }
 }
 
-// DELETE — حذف منتج
+// DELETE — حذف منتج أو مجموعة منتجات
 export async function DELETE(req: Request) {
   try {
     const session = await getServerSession(authOptions);
@@ -172,8 +192,15 @@ export async function DELETE(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
-    const { id } = await req.json();
-    await prisma.product.delete({ where: { id } });
+    const { id, ids } = await req.json();
+    if (ids && Array.isArray(ids)) {
+      await prisma.product.deleteMany({ where: { id: { in: ids } } });
+    } else if (id) {
+      await prisma.product.delete({ where: { id } });
+    } else {
+      return NextResponse.json({ error: "No id provided" }, { status: 400 });
+    }
+    
     return NextResponse.json({ success: true });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });

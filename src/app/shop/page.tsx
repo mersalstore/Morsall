@@ -49,6 +49,7 @@ export default async function ShopPage(props: {
     vendorLocation: p.vendor.location ?? "",
     image: p.images?.split(",")[0] || "https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&q=80&w=800",
     badge: p.purchaseCount > 5 ? "الأكثر مبيعاً" : undefined,
+    stock: p.stock,
   }));
 
   return (

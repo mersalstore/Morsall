@@ -55,6 +55,7 @@ export default function ShopClientControls({ resultCount, query, initialSort }: 
               <option value="new">الأحدث</option>
               <option value="price_asc">السعر: الأقل أولاً</option>
               <option value="price_desc">السعر: الأعلى أولاً</option>
+              <option value="rated">الأعلى تقييماً</option>
             </select>
           </div>
         </div>

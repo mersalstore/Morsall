@@ -457,6 +457,7 @@ export default function AdminDashboard() {
                   onEdit={setEditingProduct} 
                   onAdd={() => setIsAddProductOpen(true)} 
                   classes={classes} 
+                  onRefresh={fetchData}
                 />
                 <AddProductModal 
                   isOpen={isAddProductOpen || !!editingProduct} 
