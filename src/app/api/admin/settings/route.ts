@@ -50,6 +50,7 @@ export async function PATCH(req: Request) {
         instagramUrl: data.instagramUrl,
         siteTitle: data.siteTitle,
         siteDescription: data.siteDescription,
+        bankAccounts: data.bankAccounts,
       },
       create: {
         id: 'global',
@@ -67,6 +68,7 @@ export async function PATCH(req: Request) {
         secondaryColor: data.secondaryColor || "#F29124",
         siteTitle: data.siteTitle || "مرسال - تسوق بذكاء",
         siteDescription: data.siteDescription || "أكبر منصة تسوق في السودان",
+        bankAccounts: data.bankAccounts || "",
       }
     });
 

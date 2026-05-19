@@ -29,9 +29,9 @@ function ProductStrip({ title, products, icon }: { title: string, products: any[
       <div className="flex items-center justify-between px-5 pt-5 pb-3">
         <div className="flex items-center gap-2">
           <span className="text-xl">{icon}</span>
-          <h2 className="font-black text-lg text-[#021D24]">{title}</h2>
+          <h2 className="font-black text-lg text-[#0F172A]">{title}</h2>
         </div>
-        <Link href="/shop" className="text-xs font-bold text-[#1089A4] hover:underline flex items-center gap-1 group">
+        <Link href="/shop" className="text-xs font-bold text-[#C5A021] hover:underline flex items-center gap-1 group">
           عرض الكل
           <span className="material-symbols-rounded text-base group-hover:-translate-x-1 transition-transform">chevron_left</span>
         </Link>
@@ -69,7 +69,7 @@ function ProductStrip({ title, products, icon }: { title: string, products: any[
   );
 }
 
-export default function ProductTabHub() {
+export default function ProductTabHub({ filter }: { filter?: "new" | "best" }) {
   const [products, setProducts] = useState<any[]>([]);
   const [bestProducts, setBestProducts] = useState<any[]>([]);
 
@@ -120,60 +120,13 @@ export default function ProductTabHub() {
 
         {/* ── Product Sections (Stacked Strips) ── */}
         <div className="flex flex-col">
-          {SECTIONS.map(sec => tabProducts[sec.id]?.length > 0 && (
+          {SECTIONS.filter(sec => !filter || sec.id === filter).map(sec => tabProducts[sec.id]?.length > 0 && (
             <ProductStrip 
               key={sec.id}
               title={sec.label}
               products={tabProducts[sec.id]}
               icon={sec.icon}
             />
-          ))}
-        </div>
-
-        {/* ── Advertisement Banner Row ── */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-12 border-t border-gray-200 pt-10">
-          {[
-            { 
-               bg: "from-[#021D24] to-[#1089A4]", 
-               title: "مساحة إعلانية لمتجرك", 
-               desc: "أبرز منتجاتك أمام آلاف الزوار", 
-               icon: "campaign", 
-               href: "/contact", 
-               img: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&q=80&w=600" 
-            },
-            { 
-               bg: "from-[#F29124] to-[#D97B10]", 
-               title: "عرض لفترة محدودة؟", 
-               desc: "أعلن هنا عن أحدث التخفيضات", 
-               icon: "local_offer", 
-               href: "/contact", 
-               img: "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&q=80&w=600"
-            },
-            { 
-               bg: "from-[#2C1810] to-[#4A2F25]", 
-               title: "منتجك الجديد", 
-               desc: "احجز مساحتك الآن للترويج", 
-               icon: "storefront", 
-               href: "/vendor/register",
-               img: "https://images.unsplash.com/photo-1557821552-17105176677c?auto=format&fit=crop&q=80&w=600"
-            },
-          ].map((b, i) => (
-            <div key={i} className={`relative overflow-hidden rounded-xl p-6 text-white min-h-[140px] flex items-end shadow-md transition-all hover:shadow-xl bg-gradient-to-l ${b.bg} group cursor-pointer`}>
-               {/* Background image overlay */}
-               <div className="absolute inset-0 z-0">
-                  <Image src={b.img} alt={b.title} fill className="object-cover opacity-20 group-hover:opacity-30 transition-opacity mix-blend-overlay" />
-               </div>
-               {/* Content */}
-               <div className="relative z-10 w-full flex items-center justify-between">
-                  <div>
-                    <h3 className="font-black text-base md:text-lg mb-1 drop-shadow-md">{b.title}</h3>
-                    <p className="text-[10px] md:text-xs text-white/90 font-bold max-w-[80%]">{b.desc}</p>
-                  </div>
-                  <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center shrink-0 border border-white/30">
-                     <span className="material-symbols-rounded block">{b.icon}</span>
-                  </div>
-               </div>
-            </div>
           ))}
         </div>
 

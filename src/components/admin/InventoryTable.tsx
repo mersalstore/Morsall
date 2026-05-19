@@ -45,7 +45,7 @@ export default function InventoryTable({ products, onEdit, onAdd, classes }: Inv
       {/* Toolbar */}
       <div className="p-5 md:p-10 flex flex-col md:flex-row gap-4 justify-between items-stretch md:items-center bg-white/50 border-b border-gray-100/50">
         <div className="relative flex-grow max-w-full md:max-w-xl">
-          <span className="absolute right-5 top-1/2 -translate-y-1/2 material-symbols-rounded text-[#1089A4]">search</span>
+          <span className="absolute right-5 top-1/2 -translate-y-1/2 material-symbols-rounded text-[#C5A021]">search</span>
           <input
             value={search}
             onChange={e => setSearch(e.target.value)}
@@ -97,10 +97,10 @@ export default function InventoryTable({ products, onEdit, onAdd, classes }: Inv
               )}
             </div>
             <div className="flex-grow min-w-0">
-              <p className="font-black text-[#021D24] text-sm truncate">{p.title}</p>
+              <p className="font-black text-[#0F172A] text-sm truncate">{p.title}</p>
               <p className="text-xs text-gray-400 mt-0.5">{p.category?.name || "غير مصنف"} • {p.vendor?.storeName || "بدون مورد"}</p>
               <div className="flex items-center gap-3 mt-1.5">
-                <span className="font-black text-[#021D24] text-sm">{p.price?.toLocaleString()} <span className="text-[10px] text-[#1089A4]">ج.س</span></span>
+                <span className="font-black text-[#0F172A] text-sm">{p.price?.toLocaleString()} <span className="text-[10px] text-[#C5A021]">ج.س</span></span>
                 <span className={cn(
                   "px-2 py-0.5 rounded-lg text-[10px] font-black",
                   p.stock > 10 ? "bg-green-50 text-green-600" : "bg-red-50 text-red-500"
@@ -109,7 +109,7 @@ export default function InventoryTable({ products, onEdit, onAdd, classes }: Inv
             </div>
             <button
               onClick={() => onEdit(p)}
-              className="w-10 h-10 rounded-xl bg-[#1089A4]/10 text-[#1089A4] flex items-center justify-center shrink-0 hover:bg-[#1089A4] hover:text-white transition-all"
+              className="w-10 h-10 rounded-xl bg-[#C5A021]/10 text-[#C5A021] flex items-center justify-center shrink-0 hover:bg-[#C5A021] hover:text-white transition-all"
             >
               <span className="material-symbols-rounded text-lg">edit_square</span>
             </button>
@@ -153,15 +153,15 @@ export default function InventoryTable({ products, onEdit, onAdd, classes }: Inv
                         />
                       ) : (
                         <div className="flex flex-col items-center gap-1 opacity-20">
-                          <span className="material-symbols-rounded text-2xl text-[#1089A4]">image</span>
-                          <span className="text-[8px] font-black text-[#021D24]">بدون صورة</span>
+                          <span className="material-symbols-rounded text-2xl text-[#C5A021]">image</span>
+                          <span className="text-[8px] font-black text-[#0F172A]">بدون صورة</span>
                         </div>
                       )}
                     </div>
                     <div className="flex flex-col">
-                      <span className="font-black text-[#021D24] text-lg leading-tight mb-1">{p.title}</span>
+                      <span className="font-black text-[#0F172A] text-lg leading-tight mb-1">{p.title}</span>
                       <div className="flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full bg-[#1089A4]" />
+                        <span className="w-2 h-2 rounded-full bg-[#C5A021]" />
                         <span className="text-[11px] font-black text-gray-400 uppercase tracking-widest">{p.category?.name || "عام"}</span>
                       </div>
                     </div>
@@ -170,9 +170,9 @@ export default function InventoryTable({ products, onEdit, onAdd, classes }: Inv
                 <td className="px-8 py-8">
                   <span className="font-mono text-xs font-black text-gray-300 tracking-widest">{p.sku || "NO-SKU"}</span>
                 </td>
-                <td className="px-8 py-8 font-black text-[#021D24] text-lg">
+                <td className="px-8 py-8 font-black text-[#0F172A] text-lg">
                   {p.price?.toLocaleString()}
-                  <span className="text-[11px] text-[#1089A4] mr-2 font-black">ج.س</span>
+                  <span className="text-[11px] text-[#C5A021] mr-2 font-black">ج.س</span>
                 </td>
                 <td className="px-8 py-8">
                   <span className="text-xs font-bold text-gray-500">{p.vendor?.storeName || "بدون مورد"}</span>
@@ -188,14 +188,14 @@ export default function InventoryTable({ products, onEdit, onAdd, classes }: Inv
                 <td className="px-8 py-8 text-center">
                   <span className={cn(
                     classes.badge,
-                    p.status === 'APPROVED' ? 'bg-[#1089A4]/10 text-[#1089A4]' : 'bg-orange-50 text-orange-500'
+                    p.status === 'APPROVED' ? 'bg-[#C5A021]/10 text-[#C5A021]' : 'bg-orange-50 text-orange-500'
                   )}>
                     {p.status === 'APPROVED' ? 'معتمد' : 'قيد المراجعة'}
                   </span>
                 </td>
                 <td className="px-8 py-8">
                   <div className="flex items-center justify-center gap-3">
-                    <button onClick={() => onEdit(p)} className="w-12 h-12 rounded-[1.2rem] bg-white border border-gray-100 text-[#021D24] flex items-center justify-center hover:bg-[#021D24] hover:text-white transition-all shadow-xl shadow-gray-200/50">
+                    <button onClick={() => onEdit(p)} className="w-12 h-12 rounded-[1.2rem] bg-white border border-gray-100 text-[#0F172A] flex items-center justify-center hover:bg-[#0F172A] hover:text-white transition-all shadow-xl shadow-gray-200/50">
                       <span className="material-symbols-rounded text-xl">edit_square</span>
                     </button>
                     <button className="w-12 h-12 rounded-[1.2rem] bg-red-50 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all shadow-xl">

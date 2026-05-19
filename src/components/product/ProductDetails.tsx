@@ -16,18 +16,34 @@ export default function ProductDetails({ product }: { product: Product }) {
     <div className="space-y-12">
       {/* Product Title & Identity */}
       <div className="space-y-6">
-        <div className="flex items-center gap-4 text-[10px] font-black uppercase tracking-[0.3em] text-[#1089A4]">
-           <span>زيارة متجر {product.vendor}</span>
+        <div className="flex items-center gap-4 text-[10px] font-black uppercase tracking-[0.3em] text-[#C5A021]">
+           {/* الباب الرابع: حقل البائع */}
+           {((product as any).vendor || (product as any).vendorName || (product as any).storeName) && (
+             <span className="flex items-center gap-1.5">
+               <span className="material-symbols-rounded text-sm">storefront</span>
+               يباع بواسطة: <span className="text-[#0F172A] font-black">{(product as any).storeName || (product as any).vendorName || (product as any).vendor}</span>
+             </span>
+           )}
            <span className="w-1.5 h-1.5 rounded-full bg-gray-200" />
            <Stars rating={product.rating} count={product.reviews} />
+           {/* الباب الرابع: عداد مرات الشراء */}
+           {(product as any).purchaseCount && (product as any).purchaseCount > 0 && (
+             <>
+               <span className="w-1.5 h-1.5 rounded-full bg-gray-200" />
+               <span className="flex items-center gap-1 text-[#0F172A]">
+                 <span className="material-symbols-rounded text-xs fill-1 text-[#F29124]">shopping_bag</span>
+                 {(product as any).purchaseCount.toLocaleString()} عملية شراء
+               </span>
+             </>
+           )}
         </div>
 
-        <h1 className="text-4xl md:text-5xl font-black text-[#021D24] leading-[1.1] tracking-tight">
+        <h1 className="text-4xl md:text-5xl font-black text-[#0F172A] leading-[1.1] tracking-tight">
            {product.title}
         </h1>
 
         {product.shortDescription && (
-          <p className="text-lg font-bold text-[#1089A4] bg-[#1089A4]/5 px-6 py-3 rounded-2xl border border-[#1089A4]/10 inline-block">
+          <p className="text-lg font-bold text-[#C5A021] bg-[#C5A021]/5 px-6 py-3 rounded-2xl border border-[#C5A021]/10 inline-block">
              {product.shortDescription}
           </p>
         )}
@@ -36,7 +52,7 @@ export default function ProductDetails({ product }: { product: Product }) {
            <div className="flex flex-col">
               <span className="text-sm font-black text-[#CB2E26]">{product.discount ? `%${product.discount}-` : "سعر مغري"}</span>
               <div className="flex items-baseline gap-1">
-                 <span className="text-4xl font-black text-[#021D24]">{discountedPrice.toLocaleString()}</span>
+                 <span className="text-4xl font-black text-[#0F172A]">{discountedPrice.toLocaleString()}</span>
                  <span className="text-sm font-black text-gray-400">ج.س</span>
               </div>
               {product.oldPrice && (
@@ -49,28 +65,54 @@ export default function ProductDetails({ product }: { product: Product }) {
               <span className="material-symbols-rounded text-green-600">sell</span>
               <div className="flex flex-col">
                  <span className="text-[10px] font-black text-green-800 uppercase tracking-widest">توفير رائع</span>
-                 <p className="text-xs font-bold text-green-700">خصم إضافي %15 عند استخدام الكود <span className="font-black text-[#021D24]">MERSAL15</span></p>
+                 <p className="text-xs font-bold text-green-700">خصم إضافي %15 عند استخدام الكود <span className="font-black text-[#0F172A]">MERSAL15</span></p>
               </div>
            </div>
         </div>
       </div>
 
+      {/* Variant Selection - الباب الرابع: إخفاء "النمط" و"الحجم المتاح" من عرض المستخدم */}
+      {/* نُبقي منطق الاختيار لكن نخفي النمط والحجم المتاح كما طلب العميل */}
+      <div className="space-y-12 pb-8 border-b border-gray-100">
+         {/* Color Selection - مخفي النص "النمط" */}
+         {product.colors && (
+           <div className="space-y-6">
+              <span className="text-xs font-black uppercase tracking-wide text-gray-400">اختر اللون: <span className="text-[#0F172A]">{selectedColor.name}</span></span>
+              <div className="flex gap-4">
+                 {product.colors.map((color: any) => (
+                   <button 
+                    key={color.name}
+                    onClick={() => setSelectedColor(color)}
+                    className={cn(
+                      "w-12 h-12 rounded-2xl border-2 transition-all p-1.5 bg-white",
+                      selectedColor.name === color.name ? "border-[#C5A021] shadow-lg scale-110" : "border-gray-100 hover:border-gray-200"
+                    )}
+                   >
+                      <div className="w-full h-full rounded-xl shadow-inner" style={{ backgroundColor: color.hex }} />
+                   </button>
+                 ))}
+              </div>
+           </div>
+         )}
+         {/* Size Selection - الحجم المتاح مخفي حسب طلب الباب الرابع */}
+      </div>
+
       {/* Description Deep Dive */}
       <div className="space-y-4">
-         <h4 className="text-xs font-black uppercase tracking-widest text-gray-400">حول هذه السلعة</h4>
+         <h4 className="text-xl font-black uppercase tracking-widest text-[#0F172A]">تفاصيل المنتج</h4>
          <p className="text-sm font-medium text-gray-600 leading-relaxed">
             {product.description}
          </p>
          <ul className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
             <li className="flex items-center gap-3 text-xs font-bold text-gray-500">
-               <span className="w-1.5 h-1.5 bg-[#1089A4] rounded-full" /> العلامة التجارية: {product.brand || "غير محدد"}
+               <span className="w-1.5 h-1.5 bg-[#C5A021] rounded-full" /> العلامة التجارية: {product.brand || "غير محدد"}
             </li>
             <li className="flex items-center gap-3 text-xs font-bold text-gray-500">
-               <span className="w-1.5 h-1.5 bg-[#1089A4] rounded-full" /> النطاق: {product.range || "أصلي 100%"}
+               <span className="w-1.5 h-1.5 bg-[#C5A021] rounded-full" /> النطاق: {product.range || "أصلي 100%"}
             </li>
             {product.sku && (
               <li className="flex items-center gap-3 text-xs font-bold text-gray-500">
-                 <span className="w-1.5 h-1.5 bg-[#1089A4] rounded-full" /> رمز المنتج: {product.sku}
+                 <span className="w-1.5 h-1.5 bg-[#C5A021] rounded-full" /> رمز المنتج: {product.sku}
               </li>
             )}
          </ul>
@@ -82,19 +124,19 @@ export default function ProductDetails({ product }: { product: Product }) {
             {product.ram && (
                <div className="flex flex-col items-center gap-1 text-center">
                   <span className="text-[8px] font-black text-gray-400 uppercase">ذاكرة الرام</span>
-                  <span className="text-xs font-black text-[#021D24]">{product.ram}</span>
+                  <span className="text-xs font-black text-[#0F172A]">{product.ram}</span>
                </div>
             )}
             {product.storage && (
                <div className="flex flex-col items-center gap-1 border-r border-gray-200 text-center">
                   <span className="text-[8px] font-black text-gray-400 uppercase">سعة التخزين</span>
-                  <span className="text-xs font-black text-[#021D24]">{product.storage}</span>
+                  <span className="text-xs font-black text-[#0F172A]">{product.storage}</span>
                </div>
             )}
             {product.screenSize && (
                <div className="flex flex-col items-center gap-1 border-r border-gray-200 text-center">
                   <span className="text-[8px] font-black text-gray-400 uppercase">حجم الشاشة</span>
-                  <span className="text-xs font-black text-[#021D24]">{product.screenSize}</span>
+                  <span className="text-xs font-black text-[#0F172A]">{product.screenSize}</span>
                </div>
             )}
          </div>
@@ -118,51 +160,7 @@ export default function ProductDetails({ product }: { product: Product }) {
         </div>
       )}
 
-      {/* Variant Selection (Amazon Style Chips) */}
-      <div className="space-y-12 pt-8 border-t border-gray-100">
-         {/* Color Selection */}
-         {product.colors && (
-           <div className="space-y-6">
-              <span className="text-xs font-black uppercase tracking-wide text-gray-400">النمط: <span className="text-[#021D24]">{selectedColor.name}</span></span>
-              <div className="flex gap-4">
-                 {product.colors.map((color) => (
-                   <button 
-                    key={color.name}
-                    onClick={() => setSelectedColor(color)}
-                    className={cn(
-                      "w-12 h-12 rounded-2xl border-2 transition-all p-1.5 bg-white",
-                      selectedColor.name === color.name ? "border-[#1089A4] shadow-lg scale-110" : "border-gray-100 hover:border-gray-200"
-                    )}
-                   >
-                      <div className="w-full h-full rounded-xl shadow-inner" style={{ backgroundColor: color.hex }} />
-                   </button>
-                 ))}
-              </div>
-           </div>
-         )}
 
-         {/* Size Selection (Amazon Style Table Selection) */}
-         {product.sizes && (
-           <div className="space-y-6">
-              <span className="text-xs font-black uppercase tracking-wide text-gray-400">الحجم المتاح:</span>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                 {product.sizes.map((size) => (
-                   <button 
-                    key={size}
-                    onClick={() => setSelectedSize(size)}
-                    className={cn(
-                      "px-6 py-4 rounded-2xl font-black text-[10px] transition-all border-2 text-center flex flex-col items-center gap-1",
-                      selectedSize === size ? "bg-white text-[#1089A4] border-[#1089A4] shadow-xl" : "bg-white text-gray-400 border-gray-100 hover:bg-gray-50"
-                    )}
-                   >
-                      <span className="uppercase">{size}</span>
-                      <span className="text-[8px] opacity-50">{discountedPrice.toLocaleString()} ج.س</span>
-                   </button>
-                 ))}
-              </div>
-           </div>
-         )}
-      </div>
 
       {/* Comparisons Tier (Static Placeholder) */}
       <div className="pt-12">
@@ -172,7 +170,7 @@ export default function ProductDetails({ product }: { product: Product }) {
                   <span className="material-symbols-rounded text-3xl text-gray-400">compare</span>
                </div>
                <div className="flex flex-col">
-                  <span className="text-sm font-black text-[#021D24]">مقارنة مع سلع مماثلة</span>
+                  <span className="text-sm font-black text-[#0F172A]">مقارنة مع سلع مماثلة</span>
                   <p className="text-[10px] text-gray-400 font-bold underline cursor-pointer">انظر جدول الفوارق الفنية</p>
                </div>
             </div>
@@ -185,12 +183,12 @@ export default function ProductDetails({ product }: { product: Product }) {
       {/* Price Comparison (Other Offers) */}
       {product.otherOffers && (
         <div className="space-y-6 pt-10 border-t border-gray-100">
-           <h3 className="text-xl font-black text-[#021D24]">عروض أخرى لهذا المنتج 🏷️</h3>
+           <h3 className="text-xl font-black text-[#0F172A]">عروض أخرى لهذا المنتج 🏷️</h3>
            <div className="space-y-3">
               {product.otherOffers.map((offer, idx) => (
                 <div key={idx} className="flex items-center justify-between p-4 bg-white border border-gray-100 rounded-2xl hover:shadow-md transition-all group">
                    <div className="flex flex-col">
-                      <span className="text-sm font-black text-[#021D24] group-hover:text-[#1089A4] transition-colors">{offer.vendor}</span>
+                      <span className="text-sm font-black text-[#0F172A] group-hover:text-[#C5A021] transition-colors">{offer.vendor}</span>
                       <div className="flex items-center gap-1">
                          <span className="material-symbols-rounded text-[#F29124] text-[10px] fill-1">star</span>
                          <span className="text-[10px] font-bold text-gray-400">{offer.rating} تقييم التاجر</span>
@@ -201,7 +199,7 @@ export default function ProductDetails({ product }: { product: Product }) {
                          <p className="text-lg font-black text-[#CB2E26]">{offer.price.toLocaleString()} ج.س</p>
                          <p className="text-[9px] text-green-600 font-bold">متوفر للتوصيل</p>
                       </div>
-                      <button className="bg-[#1089A4]/10 text-[#1089A4] hover:bg-[#1089A4] hover:text-white px-5 py-2.5 rounded-xl text-[10px] font-black transition-all">
+                      <button className="bg-[#C5A021]/10 text-[#C5A021] hover:bg-[#C5A021] hover:text-white px-5 py-2.5 rounded-xl text-[10px] font-black transition-all">
                          عرض العرض
                       </button>
                    </div>

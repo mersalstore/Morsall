@@ -26,7 +26,7 @@ export default function ReturnsPage() {
                    نحن في مرسال نثق بجودة المنتجات التي يقدمها شركاؤنا، ولكننا نعلم أن الأمور قد لا تسير دائماً كما هو مخطط لها. لذا، وضعنا سياسة إرجاع مرنة تضمن حقك في المقام الأول.
                 </p>
                 <div className="p-8 bg-accent/5 rounded-[2.5rem] border border-accent/10">
-                   <h4 className="text-[#1089A4] font-black text-sm mb-2 flex items-center gap-2">
+                   <h4 className="text-[#C5A021] font-black text-sm mb-2 flex items-center gap-2">
                       <span className="material-symbols-rounded">verified</span>
                       ضمان مرسال الـ 7 أيام
                    </h4>
@@ -80,7 +80,7 @@ export default function ReturnsPage() {
           </section>
 
           {/* Contact Support CTA */}
-          <section className="bg-[#021D24] p-12 md:p-20 rounded-[4rem] text-center text-white relative overflow-hidden">
+          <section className="bg-[#0F172A] p-12 md:p-20 rounded-[4rem] text-center text-white relative overflow-hidden">
              <div className="absolute top-0 right-0 w-64 h-64 bg-accent/10 blur-[100px] rounded-full" />
              <div className="relative z-10 space-y-8">
                 <h2 className="text-3xl md:text-5xl font-black tracking-tighter">هل تواجه مشكلة في الإرجاع؟</h2>

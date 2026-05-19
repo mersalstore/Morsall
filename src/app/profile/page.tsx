@@ -2,395 +2,450 @@
 
 import { useSession, signOut } from "next-auth/react";
 import Image from "next/image";
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { useState, useEffect } from "react";
+import { format } from "date-fns";
+import { ar } from "date-fns/locale";
 
-const CATEGORIES = [
-  { id: "electronics", name: "إلكترونيات", icon: "devices" },
-  { id: "fashion", name: "أزياء", icon: "apparel" },
-  { id: "home", name: "منزل", icon: "home_remodel" },
-  { id: "beauty", name: "جمال", icon: "content_cut" },
-  { id: "sports", name: "رياضة", icon: "fitness_center" },
-  { id: "kids", name: "أطفال", icon: "child_care" },
-];
+type Tab = "orders" | "profile" | "security";
+
+const STATUS_STYLE: Record<string, string> = {
+  PENDING_APPROVAL: "bg-yellow-50 text-yellow-600 border-yellow-200",
+  PROCESSING:       "bg-blue-50 text-blue-600 border-blue-200",
+  SHIPPED:          "bg-purple-50 text-purple-600 border-purple-200",
+  DELIVERED:        "bg-green-50 text-green-600 border-green-200",
+  CANCELLED:        "bg-red-50 text-red-500 border-red-200",
+};
+const STATUS_LABEL: Record<string, string> = {
+  PENDING_APPROVAL: "قيد المراجعة",
+  PROCESSING:       "جاري التجهيز",
+  SHIPPED:          "في الطريق",
+  DELIVERED:        "تم التوصيل",
+  CANCELLED:        "ملغي",
+};
 
 export default function ProfilePage() {
   const { data: session, update: updateSession, status } = useSession();
+  const [tab, setTab]           = useState<Tab>("orders");
+  const [orders, setOrders]     = useState<any[]>([]);
+  const [ordersLoading, setOrdersLoading] = useState(false);
+  const [ordersError, setOrdersError]     = useState<string | null>(null);
+
   const [isEditing, setIsEditing] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isSaving,  setIsSaving]  = useState(false);
+  const [saved,     setSaved]     = useState(false);
+  const [formData, setFormData]   = useState({ name: "", phone: "" });
 
-  const [formData, setFormData] = useState({
-    name: "",
-    age: "",
-    phone: "",
-    interests: [] as string[],
-  });
-
+  /* ── Load user data ── */
   useEffect(() => {
     if (session?.user) {
       setFormData({
-        name: session.user.name || "",
-        age: (session.user as any).age?.toString() || "",
+        name:  session.user.name  || "",
         phone: (session.user as any).phone || "",
-        interests: (session.user as any).interests?.split(',') || [],
       });
     }
   }, [session]);
 
+  /* ── Load orders when tab changes ── */
+  useEffect(() => {
+    if (tab === "orders" && status === "authenticated" && orders.length === 0) {
+      setOrdersLoading(true);
+      fetch("/api/orders")
+        .then(r => r.json())
+        .then(d => { setOrders(Array.isArray(d) ? d : []); })
+        .catch(() => setOrdersError("فشل تحميل الطلبات"))
+        .finally(() => setOrdersLoading(false));
+    }
+  }, [tab, status]);
+
+  /* ── Save profile ── */
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      const res = await fetch("/api/user/update", {
+      await fetch("/api/user/update", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: formData.name,
-          age: formData.age,
-          phone: formData.phone,
-          interests: formData.interests.join(','),
-        }),
+        body: JSON.stringify(formData),
       });
-
-      if (res.ok) {
-        await updateSession({ 
-          ...session, 
-          user: { 
-            ...session?.user, 
-            name: formData.name,
-            age: parseInt(formData.age),
-            phone: formData.phone,
-            interests: formData.interests.join(',')
-          } 
-        });
-        setIsEditing(false);
-      }
-    } catch (error) {
-      console.error("Failed to update profile", error);
-    } finally {
-      setIsSaving(false);
-    }
+      await updateSession({ ...session, user: { ...session?.user, ...formData } });
+      setIsEditing(false);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+    } finally { setIsSaving(false); }
   };
 
-  const toggleInterest = (id: string) => {
-    if (!isEditing) return;
-    setFormData(prev => ({
-      ...prev,
-      interests: prev.interests.includes(id) 
-        ? prev.interests.filter(i => i !== id) 
-        : [...prev.interests, id]
-    }));
-  };
-
-  const handleDeleteAccount = async () => {
-    try {
-      const res = await fetch("/api/user/delete", { method: "POST" });
-      if (res.ok) {
-        signOut({ callbackUrl: "/" });
-      }
-    } catch (error) {
-      console.error("Failed to delete account", error);
-    }
-  };
-
+  /* ── Guards ── */
   if (status === "loading") return (
-    <div className="min-h-screen flex items-center justify-center bg-[#01090C]">
-       <motion.div 
-         animate={{ rotate: 360 }}
-         transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-         className="w-16 h-16 border-4 border-[#1089A4] border-t-transparent rounded-full"
-       />
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="w-10 h-10 border-4 border-[#C5A021] border-t-transparent rounded-full animate-spin" />
     </div>
   );
 
-  if (!session) {
-    return (
-      <div className="min-h-screen pt-32 md:pt-40 flex flex-col items-center justify-center gap-8 md:gap-12 bg-[#01090C] px-6 text-center">
-         <motion.div 
-           initial={{ scale: 0 }} animate={{ scale: 1 }}
-           className="w-32 h-32 md:w-40 md:h-40 bg-white/5 rounded-full flex items-center justify-center border-2 border-white/10 shadow-2xl relative"
-         >
-            <span className="material-symbols-rounded text-[#1089A4] text-5xl md:text-7xl">security</span>
-            <div className="absolute inset-0 rounded-full border-4 border-[#1089A4]/20 animate-ping" />
-         </motion.div>
-         <div className="space-y-4">
-            <h1 className="text-3xl md:text-5xl font-black text-white tracking-tighter italic">بـوابة الـسـيادة مـغـلـقـة</h1>
-            <p className="text-white/40 font-bold max-w-sm mx-auto text-xs md:text-base">الرداء الأحمر للنخبة لا يُمنح إلا لمن يملك مفاتيح العبور السيادية.</p>
-         </div>
-         <Link href="/login" className="px-12 py-5 md:px-16 md:py-7 rounded-[2rem] md:rounded-[2.5rem] bg-[#1089A4] text-white font-black uppercase tracking-[0.3em] md:tracking-[0.4em] shadow-2xl hover:bg-secondary transition-all text-xs md:text-base">
-           إظـهار الـهويـة
-         </Link>
-      </div>
-    );
-  }
+  if (!session) return (
+    <div className="min-h-screen flex flex-col items-center justify-center gap-6 px-6 text-center">
+      <span className="material-symbols-rounded text-[#C5A021] text-7xl">lock_person</span>
+      <h1 className="text-3xl font-black text-[#0F172A]">يجب تسجيل الدخول أولاً</h1>
+      <Link href="/login" className="bg-[#C5A021] text-white px-10 py-4 rounded-2xl font-bold">
+        تسجيل الدخول
+      </Link>
+    </div>
+  );
+
+  const user = session.user as any;
+
+  /* ── Active / done orders ── */
+  const activeOrders = orders.filter(o => !["DELIVERED","CANCELLED"].includes(o.status));
+  const doneOrders   = orders.filter(o =>  ["DELIVERED","CANCELLED"].includes(o.status));
 
   return (
-    <div className="min-h-screen bg-[#010103] pt-32 pb-32 px-4 md:px-12 relative overflow-hidden font-sans rtl selection:bg-secondary selection:text-white" dir="rtl">
-      
-      {/* Mesh Ambience */}
-      <div className="absolute top-[-20%] right-[-10%] w-[1000px] h-[1000px] bg-primary/10 blur-[200px] rounded-full pointer-events-none" />
-      <div className="absolute bottom-[-10%] left-[-10%] w-[800px] h-[800px] bg-secondary/5 blur-[150px] rounded-full pointer-events-none" />
+    <div className="min-h-screen bg-gray-50 pt-28 pb-20 px-4 md:px-8" dir="rtl">
+      <div className="max-w-5xl mx-auto space-y-8">
 
-      <motion.div 
-        initial="hidden" animate="visible"
-        variants={{
-          hidden: { opacity: 0 },
-          visible: { opacity: 1, transition: { staggerChildren: 0.15 } }
-        }}
-        className="max-w-7xl mx-auto space-y-12 relative z-10"
-      >
-        
-        {/* ── Sovereign ID Card ── */}
-        <motion.div 
-           variants={{ hidden: { y: 50, opacity: 0 }, visible: { y: 0, opacity: 1 } }}
-           className="w-full relative bg-white/5 backdrop-blur-3xl rounded-[2rem] p-8 md:p-20 shadow-[0_80px_160px_rgba(0,0,0,0.5)] border border-white/10 overflow-hidden"
-        >
-           <div className="absolute top-0 left-0 w-full h-[30%] bg-gradient-to-b from-[#1089A4]/20 to-transparent" />
-           <div className="flex flex-col lg:flex-row items-center justify-between gap-10 md:gap-16 relative z-10">
-              
-              <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12 text-center md:text-right">
-                 <motion.div 
-                    whileHover={{ scale: 1.05, rotate: 2 }}
-                    className="relative shrink-0"
-                 >
-                    <div className="w-40 h-40 md:w-56 md:h-56 rounded-full border-[8px] md:border-[12px] border-white/10 shadow-2xl overflow-hidden relative z-20">
-                       <Image src={session.user?.image || "/logo.png"} alt={session.user?.name || ""} fill className="object-cover" />
-                    </div>
-                    <div className="absolute -bottom-2 right-1/2 translate-x-1/2 md:translate-x-0 md:right-0 bg-secondary text-white p-3 md:p-5 rounded-2xl md:rounded-3xl shadow-2xl z-30 border-4 border-[#010103]">
-                       <span className="material-symbols-rounded text-xl md:text-3xl">workspace_premium</span>
-                    </div>
-                    <div className="absolute inset-0 bg-[#1089A4]/30 rounded-full blur-[40px] md:blur-[60px] -z-10 animate-pulse" />
-                 </motion.div>
-
-                 <div className="space-y-4 md:space-y-6">
-                    <div className="inline-flex items-center gap-2 md:gap-3 bg-[#1089A4]/10 px-4 md:px-6 py-1.5 md:py-2 rounded-full border border-[#1089A4]/20 text-[8px] md:text-[10px] font-black text-[#1089A4] uppercase tracking-[0.3em] md:tracking-[0.5em]">
-                       <span className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-secondary animate-pulse" /> حـساب نـخـبوي مـوثـق
-                    </div>
-                    <div>
-                       {isEditing ? (
-                         <input 
-                           value={formData.name}
-                           onChange={(e) => setFormData({...formData, name: e.target.value})}
-                           className="text-3xl md:text-7xl font-black text-white tracking-tighter bg-white/5 border-2 border-white/10 rounded-2xl md:rounded-3xl px-6 md:px-8 py-3 md:py-4 outline-none focus:border-[#1089A4] transition-all"
-                         />
-                       ) : (
-                         <h1 className="text-4xl md:text-8xl font-black text-white tracking-tighter leading-none italic uppercase">
-                           {session.user?.name}
-                         </h1>
-                       )}
-                       <p className="text-sm md:text-lg font-bold text-white/30 uppercase tracking-[0.4em] md:tracking-[0.5em] mt-3 md:mt-4 block truncate max-w-[300px] md:max-w-none">{session.user?.email}</p>
-                    </div>
-                 </div>
-              </div>
-
-              <div className="flex flex-col items-center lg:items-end gap-6 md:gap-8 w-full md:w-auto">
-                 <div className="flex gap-3 md:gap-4 justify-center lg:justify-end w-full">
-                    <div className="bg-white/5 px-6 py-4 md:px-10 md:py-6 rounded-2xl md:rounded-3xl border border-white/10 text-center min-w-[120px] md:min-w-[140px] flex-1 md:flex-none">
-                       <span className="block text-[8px] md:text-[10px] font-black text-white/20 uppercase tracking-[0.3em] mb-1.5 md:mb-2">رتبة النخبة</span>
-                       <span className="text-lg md:text-xl font-black text-white">بـلاتيني</span>
-                    </div>
-                    <div className="bg-white/5 px-6 py-4 md:px-10 md:py-6 rounded-2xl md:rounded-3xl border border-white/10 text-center min-w-[120px] md:min-w-[140px] flex-1 md:flex-none">
-                       <span className="block text-[8px] md:text-[10px] font-black text-white/20 uppercase tracking-[0.3em] mb-1.5 md:mb-2">نقاط السيادة</span>
-                       <span className="text-lg md:text-xl font-black text-[#F29124]">2,450</span>
-                    </div>
-                 </div>
-                 <div className="w-full h-1.5 md:h-2 bg-white/5 rounded-full overflow-hidden border border-white/5">
-                    <motion.div initial={{ width: 0 }} animate={{ width: "75%" }} className="h-full bg-gradient-to-r from-[#1089A4] to-secondary" />
-                 </div>
-              </div>
-
-           </div>
-        </motion.div>
-
-
-        {/* ── Dashboard Grid ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-            
-            {/* Identity Coordinates */}
-            <motion.div 
-               variants={{ hidden: { y: 30, opacity: 0 }, visible: { y: 0, opacity: 1 } }}
-               className="lg:col-span-2 bg-white/5 backdrop-blur-3xl rounded-[2rem] p-12 md:p-16 border border-white/10 shadow-3xl space-y-12 pb-20"
-            >
-               <div className="flex items-center gap-6 border-b border-white/5 pb-10">
-                  <div className="w-16 h-16 bg-[#1089A4] rounded-2xl flex items-center justify-center shadow-elite-xl">
-                     <span className="material-symbols-rounded text-white text-3xl">fingerprint</span>
-                  </div>
-                  <div>
-                     <h2 className="text-3xl font-black text-white italic uppercase tracking-tighter">إحداثيات السيادة</h2>
-                     <p className="text-xs text-white/30 font-bold uppercase tracking-[0.2em] mt-1">تـشفير الـبيانات الـشـخصـيـة</p>
-                  </div>
-               </div>
-
-               <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                  <div className="space-y-4 group">
-                     <label className="text-[11px] font-black text-white/20 uppercase tracking-[0.5em] pr-6 transition-colors group-focus-within:text-[#1089A4]">الـعـمر الـمـعـتمـد</label>
-                     {isEditing ? (
-                       <input type="number" value={formData.age} onChange={(e) => setFormData({...formData, age: e.target.value})} className="dashboard-input" placeholder="00" />
-                     ) : (
-                       <div className="dashboard-static">{formData.age ? `${formData.age} عاماً` : "لم يحدد"}</div>
-                     )}
-                  </div>
-                  <div className="space-y-4 group">
-                     <label className="text-[11px] font-black text-white/20 uppercase tracking-[0.5em] pr-6 transition-colors group-focus-within:text-[#1089A4]">شـفـرة الاتـصـال</label>
-                     {isEditing ? (
-                       <input type="tel" value={formData.phone} onChange={(e) => setFormData({...formData, phone: e.target.value})} className="dashboard-input" placeholder="+249..." />
-                     ) : (
-                       <div className="dashboard-static" dir="ltr">{formData.phone || "— — — — —"}</div>
-                     )}
-                  </div>
-               </div>
-
-               <div className="space-y-8 pt-8">
-                  <label className="text-[11px] font-black text-white/20 uppercase tracking-[0.5em] pr-6">الـنـطـاقـات الـمفـضـلة</label>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                     {CATEGORIES.map(cat => (
-                        <button 
-                          key={cat.id} 
-                          onClick={() => toggleInterest(cat.id)}
-                          className={cn(
-                            "group p-8 rounded-[2.5rem] border-2 transition-all duration-500 flex flex-col items-center justify-center gap-5 relative overflow-hidden",
-                            formData.interests.includes(cat.id) 
-                              ? "bg-secondary border-transparent text-white shadow-2xl shadow-secondary/20 scale-[1.05]" 
-                              : "bg-white/5 border-white/5 hover:border-[#1089A4]/30",
-                            !isEditing && "cursor-default"
-                          )}
-                        >
-                           <span className={cn(
-                              "material-symbols-rounded text-4xl transition-all duration-700",
-                              formData.interests.includes(cat.id) ? "scale-110 rotate-[15deg]" : "text-white/10 group-hover:text-white/40 group-hover:scale-125"
-                           )}>{cat.icon}</span>
-                           <span className="text-[12px] font-black uppercase tracking-[0.3em]">{cat.name}</span>
-                           {formData.interests.includes(cat.id) && <motion.div layoutId="spark" className="absolute top-4 right-4 w-2 h-2 bg-white rounded-full shadow-[0_0_10px_white]" />}
-                        </button>
-                     ))}
-                  </div>
-               </div>
-
-               <div className="pt-10 flex gap-4">
-                  {isEditing ? (
-                    <>
-                      <button onClick={handleSave} disabled={isSaving} className="flex-1 bg-secondary text-white py-7 rounded-3xl font-black text-sm uppercase tracking-[0.5em] shadow-2xl hover:bg-[#d67b14] transition-all flex items-center justify-center gap-3">
-                         {isSaving ? "جاري الـتحـويل..." : "حـفظ الـتغيـيرات"} <span className="material-symbols-rounded">check_circle</span>
-                      </button>
-                      <button onClick={() => setIsEditing(false)} className="px-12 bg-white/5 text-white/50 py-7 rounded-3xl font-black text-sm uppercase tracking-[0.5em] border border-white/5 hover:bg-white/10 transition-all">إلغاء</button>
-                    </>
-                  ) : (
-                    <button onClick={() => setIsEditing(true)} className="w-full bg-[#1089A4] text-white py-7 rounded-3xl font-black text-sm uppercase tracking-[0.5em] shadow-xl hover:shadow-[#1089A4]/20 transition-all flex items-center justify-center gap-3 group">
-                       تـعديل الـمعـلومات <span className="material-symbols-rounded transition-transform group-hover:rotate-45">edit_square</span>
-                    </button>
-                  )}
-               </div>
-            </motion.div>
-
-            {/* Sidebar Controls */}
-            <div className="space-y-12">
-               
-               {/* Security Card */}
-               <motion.div 
-                 variants={{ hidden: { x: 30, opacity: 0 }, visible: { x: 0, opacity: 1 } }}
-                 className="bg-white/5 backdrop-blur-3xl rounded-[2rem] p-12 border border-white/10 space-y-8 pb-14"
-               >
-                  <div className="flex items-center gap-4">
-                     <span className="material-symbols-rounded text-[#1089A4] text-3xl">verified_user</span>
-                     <h3 className="text-xl font-black text-white italic">الأمان السيادي</h3>
-                  </div>
-                  <div className="space-y-4">
-                     <div className="p-5 bg-white/5 rounded-2xl flex items-center justify-between border border-white/5">
-                        <span className="text-[10px] font-black text-white/30 uppercase tracking-widest">المصادقة الثنائية</span>
-                        <span className="bg-green-500/20 text-green-500 px-3 py-1 rounded-full text-[9px] font-black uppercase">نـشط</span>
-                     </div>
-                     <div className="p-5 bg-white/5 rounded-2xl flex items-center justify-between border border-white/5">
-                        <span className="text-[10px] font-black text-white/30 uppercase tracking-widest">تـشفير الجلسة</span>
-                        <span className="bg-[#1089A4]/20 text-[#1089A4] px-3 py-1 rounded-full text-[9px] font-black uppercase">AES-256</span>
-                     </div>
-                  </div>
-               </motion.div>
-
-               {/* Danger Zone */}
-               <motion.div 
-                 variants={{ hidden: { x: 30, opacity: 0 }, visible: { x: 0, opacity: 1 } }}
-                 className="bg-red-500/5 rounded-[2rem] p-12 border border-red-500/20 space-y-8 relative overflow-hidden group pb-14"
-               >
-                  <div className="absolute top-0 right-0 w-2 h-full bg-red-500 opacity-20" />
-                  <div className="flex items-center gap-4">
-                     <span className="material-symbols-rounded text-red-500 text-3xl">dangerous</span>
-                     <h3 className="text-xl font-black text-red-500 italic">بـروتوكـول الـفناء</h3>
-                  </div>
-                  <p className="text-[11px] font-bold text-red-500/40 leading-relaxed uppercase tracking-tighter">حـذف الـحساب سـيـؤدي لإلـغاء كـافة الامـتـيازات الـسيادية بشكل نـهائي.</p>
-                  
-                  {showDeleteConfirm ? (
-                    <div className="flex flex-col gap-3">
-                       <button onClick={handleDeleteAccount} className="w-full bg-red-600 text-white py-5 rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] shadow-2xl">إلـغاء الـهويـة</button>
-                       <button onClick={() => setShowDeleteConfirm(false)} className="w-full bg-white/5 text-white/40 py-5 rounded-2xl font-black text-[10px] uppercase tracking-[0.3em]">تراجع</button>
-                    </div>
-                  ) : (
-                    <button onClick={() => setShowDeleteConfirm(true)} className="w-full py-5 border-2 border-red-500/20 text-red-500 rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] hover:bg-red-500 hover:text-white transition-all">تـفعيل بـروتوكول الـحـذف</button>
-                  )}
-               </motion.div>
-
-               {/* Power Actions */}
-               <motion.div 
-                 variants={{ hidden: { y: 30, opacity: 0 }, visible: { y: 0, opacity: 1 } }}
-                 className="pt-4"
-               >
-                  <button onClick={() => signOut({ callbackUrl: '/' })} className="w-full py-7 rounded-[2.5rem] bg-white text-[#021D24] font-black text-xs uppercase tracking-[0.4em] flex items-center justify-center gap-5 shadow-2xl hover:bg-secondary hover:text-white transition-all group">
-                     تـسـجـيل الـخـروج <span className="material-symbols-rounded transition-transform group-hover:-translate-y-1">logout</span>
-                  </button>
-               </motion.div>
-
+        {/* ── Profile Card ── */}
+        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 md:p-8 flex flex-col md:flex-row items-center md:items-start gap-6">
+          <div className="relative shrink-0">
+            <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-[#C5A021]/20 shadow-lg">
+              <Image src={user?.image || "/logo.png"} alt={user?.name || ""} fill className="object-cover" />
             </div>
-
+            <div className="absolute -bottom-1 -left-1 w-8 h-8 bg-[#C5A021] rounded-full flex items-center justify-center shadow-md">
+              <span className="material-symbols-rounded text-white text-sm">verified</span>
+            </div>
+          </div>
+          <div className="flex-1 text-center md:text-right">
+            <h1 className="text-2xl font-black text-[#0F172A]">{user?.name || "مستخدم مرسال"}</h1>
+            <p className="text-sm text-gray-400 mt-1">{user?.email}</p>
+            <div className="flex flex-wrap justify-center md:justify-start gap-3 mt-4">
+              <span className="bg-[#C5A021]/10 text-[#C5A021] text-xs font-bold px-3 py-1 rounded-full">
+                {orders.length} طلب
+              </span>
+              <span className="bg-green-50 text-green-600 text-xs font-bold px-3 py-1 rounded-full">
+                عميل نشط
+              </span>
+            </div>
+          </div>
+          <button
+            onClick={() => signOut({ callbackUrl: "/" })}
+            className="flex items-center gap-2 text-sm text-gray-400 hover:text-red-500 transition-colors font-semibold mt-2 md:mt-0"
+          >
+            <span className="material-symbols-rounded text-base">logout</span>
+            خروج
+          </button>
         </div>
 
-      </motion.div>
+        {/* ── Tabs ── */}
+        <div className="flex gap-2 bg-white rounded-2xl p-1.5 border border-gray-100 shadow-sm w-fit">
+          {([
+            { id: "orders",  label: "طلباتي",       icon: "shopping_bag" },
+            { id: "profile", label: "بياناتي",       icon: "person" },
+            { id: "security",label: "الأمان",        icon: "lock" },
+          ] as { id: Tab; label: string; icon: string }[]).map(t => (
+            <button
+              key={t.id}
+              onClick={() => setTab(t.id)}
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all ${
+                tab === t.id
+                  ? "bg-[#0F172A] text-white shadow-md"
+                  : "text-gray-400 hover:text-[#0F172A]"
+              }`}
+            >
+              <span className="material-symbols-rounded text-base">{t.icon}</span>
+              {t.label}
+            </button>
+          ))}
+        </div>
+
+        {/* ══════════ ORDERS TAB ══════════ */}
+        {tab === "orders" && (
+          <div className="space-y-6">
+            {ordersLoading && (
+              <div className="space-y-4">
+                {[1,2,3].map(i => <div key={i} className="bg-white h-32 rounded-2xl border border-gray-100 animate-pulse" />)}
+              </div>
+            )}
+
+            {ordersError && (
+              <div className="bg-red-50 text-red-600 p-8 rounded-2xl border border-red-100 text-center font-bold">
+                {ordersError}
+              </div>
+            )}
+
+            {!ordersLoading && !ordersError && orders.length === 0 && (
+              <div className="bg-white rounded-3xl border border-gray-100 p-16 text-center space-y-4">
+                <span className="material-symbols-rounded text-gray-200 text-7xl">shopping_bag</span>
+                <h3 className="text-xl font-black text-[#0F172A]">لا يوجد طلبات بعد</h3>
+                <p className="text-gray-400 text-sm">ابدأ التسوق واستكشف آلاف المنتجات</p>
+                <Link href="/shop" className="inline-block mt-4 bg-[#C5A021] text-white px-10 py-3 rounded-xl font-bold text-sm hover:bg-[#0F172A] transition-colors">
+                  تسوق الآن
+                </Link>
+              </div>
+            )}
+
+            {/* Active Orders */}
+            {activeOrders.length > 0 && (
+              <div className="space-y-3">
+                <h2 className="text-lg font-black text-[#0F172A] flex items-center gap-2">
+                  <span className="w-3 h-3 bg-[#C5A021] rounded-full animate-pulse" />
+                  الطلبات الجارية ({activeOrders.length})
+                </h2>
+                {activeOrders.map(order => <OrderCard key={order.id} order={order} />)}
+              </div>
+            )}
+
+            {/* Done Orders */}
+            {doneOrders.length > 0 && (
+              <div className="space-y-3">
+                <h2 className="text-lg font-black text-[#0F172A] flex items-center gap-2">
+                  <span className="material-symbols-rounded text-gray-400 text-lg">history</span>
+                  سجل المشتريات ({doneOrders.length})
+                </h2>
+                {doneOrders.map(order => <OrderCard key={order.id} order={order} />)}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ══════════ PROFILE TAB ══════════ */}
+        {tab === "profile" && (
+          <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-8 space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-black text-[#0F172A]">بياناتي الشخصية</h2>
+              {!isEditing && (
+                <button
+                  onClick={() => setIsEditing(true)}
+                  className="flex items-center gap-2 text-sm font-bold text-[#C5A021] hover:text-[#0F172A] transition-colors"
+                >
+                  <span className="material-symbols-rounded text-base">edit</span>
+                  تعديل
+                </button>
+              )}
+            </div>
+
+            {saved && (
+              <div className="bg-green-50 text-green-600 text-sm font-bold p-4 rounded-xl border border-green-100 flex items-center gap-2">
+                <span className="material-symbols-rounded">check_circle</span>
+                تم حفظ البيانات بنجاح
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <Field label="الاسم الكامل" icon="person">
+                {isEditing
+                  ? <input value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})}
+                      className="profile-input" placeholder="اكتب اسمك" />
+                  : <p className="profile-value">{formData.name || "—"}</p>
+                }
+              </Field>
+
+              <Field label="رقم الهاتف" icon="phone">
+                {isEditing
+                  ? <input value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})}
+                      type="tel" dir="ltr" className="profile-input text-right" placeholder="+249..." />
+                  : <p className="profile-value" dir="ltr">{formData.phone || "—"}</p>
+                }
+              </Field>
+
+              <Field label="البريد الإلكتروني" icon="mail">
+                <p className="profile-value text-gray-400">{user?.email}</p>
+              </Field>
+
+              <Field label="طريقة الدخول" icon="key">
+                <p className="profile-value">
+                  {user?.image?.includes("google") ? "حساب جوجل" : "بريد + كلمة مرور"}
+                </p>
+              </Field>
+            </div>
+
+            {isEditing && (
+              <div className="flex gap-3 pt-2">
+                <button
+                  onClick={handleSave}
+                  disabled={isSaving}
+                  className="flex-1 bg-[#0F172A] text-white py-3.5 rounded-xl font-bold text-sm hover:bg-[#C5A021] transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+                >
+                  {isSaving
+                    ? <><span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />جاري الحفظ...</>
+                    : <><span className="material-symbols-rounded text-base">save</span>حفظ التغييرات</>
+                  }
+                </button>
+                <button
+                  onClick={() => { setIsEditing(false); setFormData({ name: user?.name || "", phone: user?.phone || "" }); }}
+                  className="px-6 py-3.5 rounded-xl font-bold text-sm border border-gray-200 text-gray-500 hover:bg-gray-50 transition-colors"
+                >
+                  إلغاء
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ══════════ SECURITY TAB ══════════ */}
+        {tab === "security" && (
+          <div className="space-y-4">
+            <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-8 space-y-4">
+              <h2 className="text-xl font-black text-[#0F172A]">أمان الحساب</h2>
+              <div className="divide-y divide-gray-50">
+                <InfoRow label="حالة الحساب" value="نشط ومحمي" badge="green" />
+                <InfoRow label="نوع الجلسة" value="JWT مشفّر" />
+                <InfoRow label="آخر دخول" value={user?.name ? "اليوم" : "—"} />
+              </div>
+            </div>
+
+            <div className="bg-red-50 rounded-3xl border border-red-100 p-8 space-y-4">
+              <div className="flex items-center gap-3">
+                <span className="material-symbols-rounded text-red-500">warning</span>
+                <h3 className="text-base font-black text-red-600">منطقة الخطر</h3>
+              </div>
+              <p className="text-sm text-red-400">حذف الحساب سيؤدي لفقدان جميع بياناتك وطلباتك نهائياً.</p>
+              <button
+                onClick={() => signOut({ callbackUrl: "/" })}
+                className="w-full py-3 rounded-xl border-2 border-red-200 text-red-500 font-bold text-sm hover:bg-red-500 hover:text-white transition-all"
+              >
+                تسجيل الخروج الآن
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
 
       <style jsx global>{`
-        .dashboard-input {
+        .profile-input {
           width: 100%;
-          padding: 1.2rem 1.4rem;
-          background: rgba(255,255,255,0.03);
-          border: 2px solid rgba(255,255,255,0.05);
-          border-radius: 1.2rem;
-          color: white;
-          font-weight: 900;
-          font-size: 0.95rem;
-          text-align: right;
-          transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
-        }
-        @media (min-width: 768px) {
-          .dashboard-input {
-            padding: 1.6rem 2rem;
-            border-radius: 2rem;
-            font-size: 1.1rem;
-          }
-        }
-        .dashboard-input:focus {
-          background: rgba(255,255,255,0.07);
-          border-color: #1089A4;
+          padding: 0.75rem 1rem;
+          background: #f9fafb;
+          border: 2px solid #e5e7eb;
+          border-radius: 0.75rem;
+          font-size: 0.875rem;
+          font-weight: 600;
+          color: #0F172A;
           outline: none;
-          box-shadow: 0 0 40px rgba(16, 137, 164, 0.1);
-          transform: translateY(-2px);
-        }
-        .dashboard-static {
-          padding: 1.2rem 1.4rem;
-          background: rgba(255,255,255,0.02);
-          border: 2px solid rgba(255,255,255,0.03);
-          border-radius: 1.2rem;
-          color: white;
-          font-size: 1rem;
-          font-weight: 900;
+          transition: border-color 0.2s;
           text-align: right;
         }
-        @media (min-width: 768px) {
-          .dashboard-static {
-            padding: 1.6rem 2rem;
-            border-radius: 2rem;
-            font-size: 1.2rem;
-          }
+        .profile-input:focus { border-color: #C5A021; background: white; }
+        .profile-value {
+          padding: 0.75rem 1rem;
+          background: #f9fafb;
+          border: 2px solid #f3f4f6;
+          border-radius: 0.75rem;
+          font-size: 0.875rem;
+          font-weight: 600;
+          color: #0F172A;
         }
       `}</style>
+    </div>
+  );
+}
+
+/* ── Sub-components ── */
+function OrderCard({ order }: { order: any }) {
+  const [open, setOpen] = useState(false);
+  const images: string[] = (() => {
+    try { return JSON.parse(order.items?.[0]?.product?.images || "[]"); } catch { return []; }
+  })();
+  const thumb = images[0] || null;
+
+  return (
+    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+      {/* Header */}
+      <button
+        onClick={() => setOpen(!open)}
+        className="w-full flex flex-wrap items-center justify-between gap-4 p-5 text-right hover:bg-gray-50 transition-colors"
+      >
+        <div className="flex items-center gap-4">
+          <div className="w-14 h-14 rounded-xl overflow-hidden bg-gray-100 relative shrink-0">
+            {thumb
+              ? <Image src={thumb} alt="" fill className="object-cover" />
+              : <span className="material-symbols-rounded text-gray-300 text-3xl absolute inset-0 flex items-center justify-center">shopping_bag</span>
+            }
+          </div>
+          <div className="text-right">
+            <p className="text-xs text-gray-400 font-bold">
+              {order.createdAt ? format(new Date(order.createdAt), "d MMMM yyyy", { locale: ar }) : ""}
+            </p>
+            <p className="text-sm font-black text-[#0F172A] mt-0.5">
+              {order.items?.length || 0} منتج{order.items?.length > 1 ? "ات" : ""}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <span className={`text-xs font-bold px-3 py-1 rounded-full border ${STATUS_STYLE[order.status] || "bg-gray-50 text-gray-500 border-gray-200"}`}>
+            {STATUS_LABEL[order.status] || order.status}
+          </span>
+          <span className="text-base font-black text-[#0F172A]">
+            {order.totalAmount?.toLocaleString()} ج.س
+          </span>
+          <span className={`material-symbols-rounded text-gray-400 text-sm transition-transform ${open ? "rotate-180" : ""}`}>
+            expand_more
+          </span>
+        </div>
+      </button>
+
+      {/* Expanded items */}
+      {open && (
+        <div className="border-t border-gray-50 p-5 space-y-4 bg-gray-50/50">
+          {order.items?.map((item: any, i: number) => {
+            const imgs: string[] = (() => {
+              try { return JSON.parse(item.product?.images || "[]"); } catch { return []; }
+            })();
+            return (
+              <div key={i} className="flex items-center gap-4 bg-white rounded-xl p-4 border border-gray-100">
+                <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 relative shrink-0">
+                  {imgs[0]
+                    ? <Image src={imgs[0]} alt="" fill className="object-cover" />
+                    : <span className="material-symbols-rounded text-gray-300 text-xl absolute inset-0 flex items-center justify-center">image</span>
+                  }
+                </div>
+                <div className="flex-1 text-right">
+                  <p className="text-sm font-bold text-[#0F172A] line-clamp-1">{item.product?.title}</p>
+                  <p className="text-xs text-gray-400 mt-0.5">{item.vendor?.storeName} · الكمية: {item.quantity}</p>
+                </div>
+                <p className="text-sm font-black text-[#C5A021] shrink-0">{item.priceAtTime?.toLocaleString()} ج.س</p>
+              </div>
+            );
+          })}
+
+          <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-gray-100">
+            <div className="flex items-center gap-2 text-xs text-gray-400">
+              <span className="material-symbols-rounded text-sm">location_on</span>
+              {order.city}، {order.street}
+            </div>
+            {!["DELIVERED","CANCELLED"].includes(order.status) && (
+              <Link
+                href={`/track?id=${order.id}`}
+                className="flex items-center gap-2 bg-[#C5A021] text-white text-xs font-bold px-5 py-2.5 rounded-xl hover:bg-[#0F172A] transition-colors"
+              >
+                <span className="material-symbols-rounded text-sm">local_shipping</span>
+                تتبع الشحنة
+              </Link>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function Field({ label, icon, children }: { label: string; icon: string; children: React.ReactNode }) {
+  return (
+    <div className="space-y-2">
+      <label className="flex items-center gap-2 text-xs font-black text-gray-400 uppercase tracking-widest">
+        <span className="material-symbols-rounded text-sm text-[#C5A021]">{icon}</span>
+        {label}
+      </label>
+      {children}
+    </div>
+  );
+}
+
+function InfoRow({ label, value, badge }: { label: string; value: string; badge?: string }) {
+  return (
+    <div className="flex justify-between items-center py-4">
+      <span className="text-sm font-bold text-gray-400">{label}</span>
+      {badge === "green"
+        ? <span className="bg-green-50 text-green-600 text-xs font-bold px-3 py-1 rounded-full border border-green-100">{value}</span>
+        : <span className="text-sm font-bold text-[#0F172A]">{value}</span>
+      }
     </div>
   );
 }

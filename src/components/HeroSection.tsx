@@ -20,7 +20,7 @@ const SLIDES = [
     badge: "مميز",
   },
   {
-    bg: "from-[#0C3547] to-[#021D24]",
+    bg: "from-[#0C3547] to-[#0F172A]",
     tag: "📦 توصيل خلال 24 ساعة",
     title: "إلكترونيات",
     subtitle: "بأفضل الأسعار في السودان",
@@ -33,7 +33,7 @@ const SLIDES = [
     badge: "خصم يصل 40%",
   },
   {
-    bg: "from-[#2C1810] to-[#021D24]",
+    bg: "from-[#2C1810] to-[#0F172A]",
     tag: "👗 أزياء السودان",
     title: "الموضة الجديدة",
     subtitle: "وصلت لمرسال",
@@ -90,7 +90,7 @@ export default function HeroSection() {
 
   return (
     <section className="w-full pt-[80px]" dir="rtl">
-      <div className="relative h-[550px] md:h-[600px] lg:h-[700px] w-full overflow-hidden bg-[#021D24]">
+      <div className="relative h-[450px] md:h-[500px] lg:h-[550px] w-full overflow-hidden bg-[#0F172A]">
         
         {/* Slide Content */}
         <div className="absolute inset-0">
@@ -105,8 +105,8 @@ export default function HeroSection() {
             priority
           />
           {/* Enhanced Gradients for Readability */}
-          <div className="absolute inset-0 bg-gradient-to-r from-[#021D24]/90 via-[#021D24]/40 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#021D24]/60 via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#0F172A]/90 via-[#0F172A]/40 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0F172A]/60 via-transparent to-transparent" />
         </div>
 
         {/* Text Overlay - Positioned for Premium Look */}
@@ -131,7 +131,7 @@ export default function HeroSection() {
             <div className="pt-4 md:pt-6 flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
               <Link
                 href={s.ctaHref}
-                className="group relative px-6 md:px-12 py-3.5 md:py-5 bg-[#1089A4] text-white rounded-xl md:rounded-2xl font-black text-xs md:text-sm overflow-hidden shadow-2xl shadow-[#1089A4]/30 hover:shadow-[#F29124]/40 transition-all active:scale-95 w-full sm:w-auto flex items-center justify-center"
+                className="group relative px-6 md:px-12 py-3.5 md:py-5 bg-[#C5A021] text-white rounded-xl md:rounded-2xl font-black text-xs md:text-sm overflow-hidden shadow-2xl shadow-[#C5A021]/30 hover:shadow-[#F29124]/40 transition-all active:scale-95 w-full sm:w-auto flex items-center justify-center"
               >
                 <div className="absolute inset-0 bg-[#F29124] translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
                 <span className="relative flex items-center gap-2 md:gap-3">
@@ -156,9 +156,9 @@ export default function HeroSection() {
           transitioning ? "opacity-0 translate-y-10" : "opacity-100 translate-y-0"
         )}>
           <div className="flex flex-col items-center gap-2">
-            <span className="text-[10px] font-black text-[#021D24] uppercase tracking-widest">متوفر الآن</span>
+            <span className="text-[10px] font-black text-[#0F172A] uppercase tracking-widest">متوفر الآن</span>
             <div className="h-px w-8 bg-gray-200" />
-            <span className="text-[#1089A4] text-xs font-black">{s.badge}</span>
+            <span className="text-[#C5A021] text-xs font-black">{s.badge}</span>
           </div>
         </div>
 
@@ -166,32 +166,38 @@ export default function HeroSection() {
         {currentSlides.length > 1 && (
           <>
             {/* Dots */}
-            <div className="absolute bottom-6 md:bottom-10 right-0 left-0 flex justify-center md:justify-start md:right-24 gap-2 md:gap-3">
+            <div className="absolute bottom-6 md:bottom-10 right-0 left-0 flex justify-center md:justify-start md:right-24 gap-3 md:gap-4 z-50">
               {currentSlides.map((_, i) => (
                 <button
                   key={i}
+                  type="button"
                   onClick={() => changeSlide(i)}
-                  className={cn(
+                  className="p-2 transition-all"
+                  aria-label={`Go to slide ${i + 1}`}
+                >
+                  <div className={cn(
                     "h-1.5 rounded-full transition-all duration-500",
-                    i === active ? "w-8 md:w-12 bg-[#F29124]" : "w-3 md:w-4 bg-white/20 hover:bg-white/40"
-                  )}
-                />
+                    i === active ? "w-8 md:w-16 bg-[#F29124]" : "w-4 md:w-6 bg-white/30 hover:bg-white/50"
+                  )} />
+                </button>
               ))}
             </div>
 
-            {/* Arrows - Minimalist */}
-            <div className="hidden md:flex absolute bottom-10 left-6 lg:left-24 gap-4">
+            {/* Arrows - Premium Minimalist */}
+            <div className="hidden md:flex absolute bottom-10 left-6 lg:left-24 gap-6 z-50">
               <button 
+                type="button"
                 onClick={() => changeSlide((active - 1 + currentSlides.length) % currentSlides.length)}
-                className="w-14 h-14 rounded-full border border-white/10 bg-white/5 backdrop-blur-sm text-white flex items-center justify-center hover:bg-white hover:text-[#021D24] transition-all"
+                className="w-16 h-16 rounded-full border border-white/20 bg-black/20 backdrop-blur-md text-white flex items-center justify-center hover:bg-white hover:text-[#0F172A] transition-all cursor-pointer hover:scale-110 active:scale-95"
               >
-                <span className="material-symbols-rounded">chevron_right</span>
+                <span className="material-symbols-rounded text-2xl font-bold">chevron_right</span>
               </button>
               <button 
+                type="button"
                 onClick={() => changeSlide((active + 1) % currentSlides.length)}
-                className="w-14 h-14 rounded-full border border-white/10 bg-white/5 backdrop-blur-sm text-white flex items-center justify-center hover:bg-white hover:text-[#021D24] transition-all"
+                className="w-16 h-16 rounded-full border border-white/20 bg-black/20 backdrop-blur-md text-white flex items-center justify-center hover:bg-white hover:text-[#0F172A] transition-all cursor-pointer hover:scale-110 active:scale-95"
               >
-                <span className="material-symbols-rounded">chevron_left</span>
+                <span className="material-symbols-rounded text-2xl font-bold">chevron_left</span>
               </button>
             </div>
           </>

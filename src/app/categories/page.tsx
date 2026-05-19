@@ -21,18 +21,18 @@ export default function CategoriesPage() {
       {/* 1. Categories Hero */}
       <section className="bg-white pt-44 pb-20 px-12 border-b border-border/50 relative overflow-hidden">
          <div className="max-w-[1920px] mx-auto flex flex-col items-center text-center space-y-8 relative z-10">
-            <div className="flex items-center gap-4 text-[10px] font-black uppercase tracking-[0.6em] text-[#1089A4]">
+            <div className="flex items-center gap-4 text-[10px] font-black uppercase tracking-[0.6em] text-[#C5A021]">
                <span className="w-12 h-1 bg-[#F29124] rounded-full" /> BROWSE BY DEPARTMENT
             </div>
-            <h1 className="text-7xl md:text-9xl font-black text-[#021D24] tracking-tighter leading-none font-heading">
-               اخـتر <span className="text-[#1089A4]">تـصنيفك</span> المـفضل
+            <h1 className="text-7xl md:text-9xl font-black text-[#0F172A] tracking-tighter leading-none font-heading">
+               اخـتر <span className="text-[#C5A021]">تـصنيفك</span> المـفضل
             </h1>
-            <p className="text-[#021D24]/40 text-2xl font-medium max-w-2xl leading-relaxed">
+            <p className="text-[#0F172A]/40 text-2xl font-medium max-w-2xl leading-relaxed">
                نحن نقوم بتنظيم آلاف المنتجات العالمية والمحلية في أقسام دقيقة لتسهيل رحلة تسوقك في مرسال.
             </p>
          </div>
          {/* Background washer */}
-         <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-[#1089A4]/5 blur-[200px] rounded-full pointer-events-none" />
+         <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-[#C5A021]/5 blur-[200px] rounded-full pointer-events-none" />
       </section>
 
       {/* 2. Full Categories Grid */}
@@ -48,10 +48,10 @@ export default function CategoriesPage() {
               >
                 <Link href={`/category/${cat.id}`} className="group relative block aspect-[4/5] rounded-[3.5rem] overflow-hidden bg-white shadow-xl hover:shadow-4xl transition-all duration-700 hover:-translate-y-4">
                    <Image src={cat.image} alt={cat.name} fill className="object-cover transition-transform duration-1000 group-hover:scale-110" />
-                   <div className="absolute inset-0 bg-gradient-to-t from-[#021D24] via-black/20 to-transparent" />
+                   <div className="absolute inset-0 bg-gradient-to-t from-[#0F172A] via-black/20 to-transparent" />
                    
                    <div className="absolute inset-0 p-12 flex flex-col justify-end text-right space-y-4">
-                      <div className="w-16 h-16 bg-white/20 backdrop-blur-xl rounded-2xl flex items-center justify-center text-white mb-6 group-hover:bg-[#1089A4] group-hover:rotate-[-10deg] transition-all">
+                      <div className="w-16 h-16 bg-white/20 backdrop-blur-xl rounded-2xl flex items-center justify-center text-white mb-6 group-hover:bg-[#C5A021] group-hover:rotate-[-10deg] transition-all">
                          <span className="material-symbols-rounded text-3xl">{cat.icon}</span>
                       </div>
                       <h3 className="text-3xl font-black text-white tracking-tight leading-none font-heading">{cat.name}</h3>

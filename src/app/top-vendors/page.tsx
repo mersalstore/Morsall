@@ -64,14 +64,14 @@ export default function TopVendorsPage() {
   return (
     <div className="min-h-screen bg-[#F8F9FA] pb-32">
       {/* 1. Elite Hero Hub */}
-      <section className="bg-[#021D24] pt-44 pb-24 px-12 relative overflow-hidden">
+      <section className="bg-[#0F172A] pt-44 pb-24 px-12 relative overflow-hidden">
          <div className="max-w-[1920px] mx-auto flex flex-col md:flex-row items-center justify-between gap-16 relative z-10">
             <div className="space-y-8 text-right">
-               <div className="flex items-center justify-end gap-3 text-[10px] font-black uppercase tracking-[0.6em] text-[#1089A4]">
+               <div className="flex items-center justify-end gap-3 text-[10px] font-black uppercase tracking-[0.6em] text-[#C5A021]">
                   ELITE PARTNER NETWORK <span className="w-12 h-1 bg-[#F29124] rounded-full" />
                </div>
                <h1 className="text-7xl md:text-9xl font-black text-white tracking-tighter leading-[0.9] font-heading">
-                  اكتشف أقوى <br /> <span className="text-[#1089A4]">المـواردين</span> فـي الـسـودان
+                  اكتشف أقوى <br /> <span className="text-[#C5A021]">المـواردين</span> فـي الـسـودان
                </h1>
                <p className="text-white/40 text-xl font-medium max-w-xl leading-relaxed">
                   نخبة من أفضل المتاجر والماركات العالمية والمحلية الموثقة لدينا، نمنحك تجربة تسوق آمنة وموثوقة بنسبة 100%.
@@ -84,9 +84,9 @@ export default function TopVendorsPage() {
                   <input 
                     type="text" 
                     placeholder="اسم المتجر أو التخصص..." 
-                    className="w-full bg-white px-12 py-7 rounded-[2.5rem] outline-none text-[#021D24] font-black text-sm shadow-2xl focus:ring-4 ring-[#1089A4]/30 transition-all placeholder:text-[#021D24]/20"
+                    className="w-full bg-white px-12 py-7 rounded-[2.5rem] outline-none text-[#0F172A] font-black text-sm shadow-2xl focus:ring-4 ring-[#C5A021]/30 transition-all placeholder:text-[#0F172A]/20"
                   />
-                  <span className="material-symbols-rounded absolute left-8 top-1/2 -translate-y-1/2 text-3xl text-[#1089A4] group-focus-within:rotate-[-45deg] transition-transform">search</span>
+                  <span className="material-symbols-rounded absolute left-8 top-1/2 -translate-y-1/2 text-3xl text-[#C5A021] group-focus-within:rotate-[-45deg] transition-transform">search</span>
                </div>
                <div className="mt-10 flex flex-wrap gap-3">
                   {["إلكترونيات", "أزياء", "أثاث", "ساعات"].map((tag) => (
@@ -96,7 +96,7 @@ export default function TopVendorsPage() {
             </div>
          </div>
          {/* Background Visuals */}
-         <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-[#1089A4]/10 blur-[200px] rounded-full animate-pulse" />
+         <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-[#C5A021]/10 blur-[200px] rounded-full animate-pulse" />
       </section>
 
       {/* 2. Main Vendor Grid */}
@@ -109,7 +109,7 @@ export default function TopVendorsPage() {
          
          {/* Load More Button */}
          <div className="flex justify-center mt-24">
-            <button className="flex items-center gap-6 bg-white border-4 border-muted/50 px-16 py-7 rounded-[3rem] font-black text-xs uppercase tracking-[0.4em] text-[#021D24] shadow-2xl hover:bg-[#1089A4] hover:text-white hover:border-[#1089A4] transition-all group active:scale-95">
+            <button className="flex items-center gap-6 bg-white border-4 border-muted/50 px-16 py-7 rounded-[3rem] font-black text-xs uppercase tracking-[0.4em] text-[#0F172A] shadow-2xl hover:bg-[#C5A021] hover:text-white hover:border-[#C5A021] transition-all group active:scale-95">
                تحميل المزيد من المتاجر <span className="material-symbols-rounded group-hover:rotate-45 transition-transform">refresh</span>
             </button>
          </div>
@@ -151,7 +151,7 @@ function VendorCard({ vendor, index }: any) {
              <div className="flex items-center justify-center gap-2 text-[#F29124] text-[9px] font-black uppercase tracking-[0.4em]">
                 {vendor.badge}
              </div>
-             <h2 className="text-3xl font-black text-[#021D24] tracking-tight group-hover:text-[#1089A4] transition-colors font-heading">{vendor.name}</h2>
+             <h2 className="text-3xl font-black text-[#0F172A] tracking-tight group-hover:text-[#C5A021] transition-colors font-heading">{vendor.name}</h2>
              <div className="flex items-center justify-center gap-4">
                 <div className="flex items-center gap-1.5 bg-[#F29124]/5 px-3 py-1.5 rounded-xl">
                    <span className="material-symbols-rounded text-base text-[#F29124]">star</span>
@@ -164,18 +164,18 @@ function VendorCard({ vendor, index }: any) {
           {/* Key Stats Grid */}
           <div className="grid grid-cols-2 w-full gap-4 mb-10">
              <div className="bg-muted/30 p-6 rounded-3xl text-center space-y-1">
-                <p className="text-[#021D24] font-black text-xl leading-none">{vendor.products}</p>
-                <p className="text-[9px] font-black uppercase tracking-widest text-[#021D24]/30">منتج معروض</p>
+                <p className="text-[#0F172A] font-black text-xl leading-none">{vendor.products}</p>
+                <p className="text-[9px] font-black uppercase tracking-widest text-[#0F172A]/30">منتج معروض</p>
              </div>
              <div className="bg-muted/30 p-6 rounded-3xl text-center space-y-1">
-                <p className="text-[#021D24] font-black text-xl leading-none">{vendor.since}</p>
-                <p className="text-[9px] font-black uppercase tracking-widest text-[#021D24]/30">عضو منذ</p>
+                <p className="text-[#0F172A] font-black text-xl leading-none">{vendor.since}</p>
+                <p className="text-[9px] font-black uppercase tracking-widest text-[#0F172A]/30">عضو منذ</p>
              </div>
           </div>
 
           <Link 
             href={`/shop?vendor=${vendor.id}`}
-            className="w-full bg-[#1089A4] text-white py-6 rounded-2xl font-black text-xs uppercase tracking-[0.4em] flex items-center justify-center gap-4 hover:bg-[#021D24] transition-all shadow-xl shadow-[#1089A4]/20 group/btn"
+            className="w-full bg-[#C5A021] text-white py-6 rounded-2xl font-black text-xs uppercase tracking-[0.4em] flex items-center justify-center gap-4 hover:bg-[#0F172A] transition-all shadow-xl shadow-[#C5A021]/20 group/btn"
           >
              زيارة المتجر <span className="material-symbols-rounded group-hover/btn:translate-x-[-10px] transition-transform">trending_flat</span>
           </Link>

@@ -41,8 +41,8 @@ const defaultConfig: OfferConfig = {
 
 const defaultAdLinks: AdLink[] = [
   { id: "1", label: "العروض 🔥", href: "/offers", color: "#F29124", emoji: "bolt", isActive: true },
-  { id: "2", label: "كبار المتاجر", href: "/top-vendors", color: "#1089A4", emoji: "storefront", isActive: true },
-  { id: "3", label: "ابدأ تجارتك", href: "/vendor/register", color: "#021D24", emoji: "add_business", isActive: true },
+  { id: "2", label: "كبار المتاجر", href: "/top-vendors", color: "#C5A021", emoji: "storefront", isActive: true },
+  { id: "3", label: "ابدأ تجارتك", href: "/vendor/register", color: "#0F172A", emoji: "add_business", isActive: true },
 ];
 
 const STORAGE_KEY_CONFIG = "mersal_offers_config";
@@ -53,7 +53,7 @@ export default function OffersAdsTab() {
   const [adLinks, setAdLinks] = useState<AdLink[]>(defaultAdLinks);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [newLink, setNewLink] = useState({ label: "", href: "", color: "#1089A4", emoji: "link", isActive: true });
+  const [newLink, setNewLink] = useState({ label: "", href: "", color: "#C5A021", emoji: "link", isActive: true });
 
   useEffect(() => {
     // Load from database
@@ -93,7 +93,7 @@ export default function OffersAdsTab() {
   const handleAddLink = () => {
     if (!newLink.label || !newLink.href) return;
     setAdLinks(prev => [...prev, { ...newLink, id: Date.now().toString() }]);
-    setNewLink({ label: "", href: "", color: "#1089A4", emoji: "link", isActive: true });
+    setNewLink({ label: "", href: "", color: "#C5A021", emoji: "link", isActive: true });
   };
 
   const handleRemoveLink = (id: string) => {
@@ -110,13 +110,13 @@ export default function OffersAdsTab() {
       {/* Header */}
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-black text-[#021D24]">إدارة العروض والإعلانات</h2>
+          <h2 className="text-2xl font-black text-[#0F172A]">إدارة العروض والإعلانات</h2>
           <p className="text-xs text-gray-400 font-bold mt-1 uppercase tracking-widest">تحكم في الشريط الإعلاني وصفحة العروض وروابط التنقل</p>
         </div>
         <button
           onClick={handleSave}
           disabled={saving}
-          className="flex items-center gap-3 bg-[#1089A4] text-white px-8 py-4 rounded-2xl font-black text-sm shadow-xl shadow-[#1089A4]/20 hover:scale-105 active:scale-95 transition-all disabled:opacity-50"
+          className="flex items-center gap-3 bg-[#C5A021] text-white px-8 py-4 rounded-2xl font-black text-sm shadow-xl shadow-[#C5A021]/20 hover:scale-105 active:scale-95 transition-all disabled:opacity-50"
         >
           {saving ? (
             <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -136,7 +136,7 @@ export default function OffersAdsTab() {
             <span className="material-symbols-rounded text-2xl">campaign</span>
           </div>
           <div>
-            <h3 className="text-lg font-black text-[#021D24]">شريط العروض المتحرك (Campaign Bar)</h3>
+            <h3 className="text-lg font-black text-[#0F172A]">شريط العروض المتحرك (Campaign Bar)</h3>
             <p className="text-xs text-gray-400 font-bold">الشريط الذي يظهر أعلى الصفحة الرئيسية</p>
           </div>
           <div className="mr-auto">
@@ -155,16 +155,16 @@ export default function OffersAdsTab() {
         </div>
 
         {/* Live Preview */}
-        <div className="bg-[#1089A4] rounded-2xl px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="bg-[#C5A021] rounded-2xl px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <span className="bg-[#F29124] text-[#021D24] px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest">
+            <span className="bg-[#F29124] text-[#0F172A] px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest">
               عروض مرسـال
             </span>
             <p className="text-white text-sm font-black">
               {config.campaignTitle || "خصومات كبرى تصل إلى 60%"}
             </p>
           </div>
-          <button className="bg-white text-[#1089A4] px-6 py-2 rounded-full text-xs font-black">
+          <button className="bg-white text-[#C5A021] px-6 py-2 rounded-full text-xs font-black">
             {config.campaignButtonText || "تـسـوق"}
           </button>
         </div>
@@ -175,7 +175,7 @@ export default function OffersAdsTab() {
             <input
               value={config.campaignTitle}
               onChange={e => setConfig(c => ({ ...c, campaignTitle: e.target.value }))}
-              className="w-full bg-gray-50 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:ring-2 focus:ring-[#1089A4] transition-all"
+              className="w-full bg-gray-50 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:ring-2 focus:ring-[#C5A021] transition-all"
               placeholder="خصومات كبرى تصل إلى 60%"
             />
           </div>
@@ -184,7 +184,7 @@ export default function OffersAdsTab() {
             <input
               value={config.campaignSubtitle}
               onChange={e => setConfig(c => ({ ...c, campaignSubtitle: e.target.value }))}
-              className="w-full bg-gray-50 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:ring-2 focus:ring-[#1089A4] transition-all"
+              className="w-full bg-gray-50 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:ring-2 focus:ring-[#C5A021] transition-all"
               placeholder="على كافة الأجهزة والإلكترونيات"
             />
           </div>
@@ -193,7 +193,7 @@ export default function OffersAdsTab() {
             <input
               value={config.campaignButtonText}
               onChange={e => setConfig(c => ({ ...c, campaignButtonText: e.target.value }))}
-              className="w-full bg-gray-50 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:ring-2 focus:ring-[#1089A4] transition-all"
+              className="w-full bg-gray-50 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:ring-2 focus:ring-[#C5A021] transition-all"
               placeholder="تـسـوق"
             />
           </div>
@@ -202,7 +202,7 @@ export default function OffersAdsTab() {
             <input
               value={config.campaignButtonLink}
               onChange={e => setConfig(c => ({ ...c, campaignButtonLink: e.target.value }))}
-              className="w-full bg-gray-50 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:ring-2 focus:ring-[#1089A4] transition-all"
+              className="w-full bg-gray-50 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:ring-2 focus:ring-[#C5A021] transition-all"
               placeholder="/shop أو /offers"
             />
           </div>
@@ -212,7 +212,7 @@ export default function OffersAdsTab() {
               type="number" min={0} max={99}
               value={config.campaignHoursLeft}
               onChange={e => setConfig(c => ({ ...c, campaignHoursLeft: Number(e.target.value) }))}
-              className="w-full bg-gray-50 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:ring-2 focus:ring-[#1089A4] transition-all"
+              className="w-full bg-gray-50 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:ring-2 focus:ring-[#C5A021] transition-all"
             />
           </div>
           <div className="space-y-2">
@@ -221,7 +221,7 @@ export default function OffersAdsTab() {
               type="number" min={0} max={59}
               value={config.campaignMinutesLeft}
               onChange={e => setConfig(c => ({ ...c, campaignMinutesLeft: Number(e.target.value) }))}
-              className="w-full bg-gray-50 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:ring-2 focus:ring-[#1089A4] transition-all"
+              className="w-full bg-gray-50 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:ring-2 focus:ring-[#C5A021] transition-all"
             />
           </div>
         </div>
@@ -230,11 +230,11 @@ export default function OffersAdsTab() {
       {/* ===== SECTION 2: Offers Page ===== */}
       <section className="bg-white rounded-[2.5rem] p-10 border border-gray-100 shadow-xl space-y-8">
         <div className="flex items-center gap-4 border-b border-gray-100 pb-6">
-          <div className="w-14 h-14 rounded-[1.5rem] bg-[#1089A4]/10 text-[#1089A4] flex items-center justify-center">
+          <div className="w-14 h-14 rounded-[1.5rem] bg-[#C5A021]/10 text-[#C5A021] flex items-center justify-center">
             <span className="material-symbols-rounded text-2xl">local_offer</span>
           </div>
           <div>
-            <h3 className="text-lg font-black text-[#021D24]">صفحة العروض (/offers)</h3>
+            <h3 className="text-lg font-black text-[#0F172A]">صفحة العروض (/offers)</h3>
             <p className="text-xs text-gray-400 font-bold">تخصيص هيدر صفحة العروض الرئيسية</p>
           </div>
         </div>
@@ -245,7 +245,7 @@ export default function OffersAdsTab() {
             <input
               value={config.offersHeroBadge}
               onChange={e => setConfig(c => ({ ...c, offersHeroBadge: e.target.value }))}
-              className="w-full bg-gray-50 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:ring-2 focus:ring-[#1089A4] transition-all"
+              className="w-full bg-gray-50 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:ring-2 focus:ring-[#C5A021] transition-all"
               placeholder="خصومات اليوم المحدودة"
             />
           </div>
@@ -254,7 +254,7 @@ export default function OffersAdsTab() {
             <input
               value={config.offersHeroTitle}
               onChange={e => setConfig(c => ({ ...c, offersHeroTitle: e.target.value }))}
-              className="w-full bg-gray-50 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:ring-2 focus:ring-[#1089A4] transition-all"
+              className="w-full bg-gray-50 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:ring-2 focus:ring-[#C5A021] transition-all"
               placeholder="صفقات كبرى لا تتكرر"
             />
           </div>
@@ -263,13 +263,13 @@ export default function OffersAdsTab() {
         {/* Quick Link to Offers Page */}
         <div className="bg-gray-50 rounded-2xl p-5 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <span className="material-symbols-rounded text-[#1089A4]">open_in_new</span>
-            <p className="text-sm font-black text-[#021D24]">معاينة صفحة العروض</p>
+            <span className="material-symbols-rounded text-[#C5A021]">open_in_new</span>
+            <p className="text-sm font-black text-[#0F172A]">معاينة صفحة العروض</p>
           </div>
           <a
             href="/offers"
             target="_blank"
-            className="flex items-center gap-2 bg-[#1089A4] text-white px-6 py-2.5 rounded-xl text-xs font-black hover:bg-[#021D24] transition-all"
+            className="flex items-center gap-2 bg-[#C5A021] text-white px-6 py-2.5 rounded-xl text-xs font-black hover:bg-[#0F172A] transition-all"
           >
             فتح الصفحة
             <span className="material-symbols-rounded text-sm">arrow_outward</span>
@@ -280,11 +280,11 @@ export default function OffersAdsTab() {
       {/* ===== SECTION 3: Nav Ad Links ===== */}
       <section className="bg-white rounded-[2.5rem] p-10 border border-gray-100 shadow-xl space-y-8">
         <div className="flex items-center gap-4 border-b border-gray-100 pb-6">
-          <div className="w-14 h-14 rounded-[1.5rem] bg-[#021D24]/10 text-[#021D24] flex items-center justify-center">
+          <div className="w-14 h-14 rounded-[1.5rem] bg-[#0F172A]/10 text-[#0F172A] flex items-center justify-center">
             <span className="material-symbols-rounded text-2xl">link</span>
           </div>
           <div>
-            <h3 className="text-lg font-black text-[#021D24]">روابط شريط التنقل الإعلاني</h3>
+            <h3 className="text-lg font-black text-[#0F172A]">روابط شريط التنقل الإعلاني</h3>
             <p className="text-xs text-gray-400 font-bold">الروابط التي تظهر في شريط التنقل السفلي للموقع</p>
           </div>
         </div>
@@ -300,7 +300,7 @@ export default function OffersAdsTab() {
                 <span className="material-symbols-rounded text-sm">{link.emoji}</span>
               </div>
               <div className="flex-grow min-w-0">
-                <p className="text-sm font-black text-[#021D24] truncate">{link.label}</p>
+                <p className="text-sm font-black text-[#0F172A] truncate">{link.label}</p>
                 <p className="text-[11px] text-gray-400 font-mono truncate">{link.href}</p>
               </div>
               <button
@@ -329,19 +329,19 @@ export default function OffersAdsTab() {
               value={newLink.label}
               onChange={e => setNewLink(l => ({ ...l, label: e.target.value }))}
               placeholder="اسم الرابط"
-              className="bg-gray-50 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:ring-2 focus:ring-[#1089A4]"
+              className="bg-gray-50 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:ring-2 focus:ring-[#C5A021]"
             />
             <input
               value={newLink.href}
               onChange={e => setNewLink(l => ({ ...l, href: e.target.value }))}
               placeholder="/offers أو /shop"
-              className="bg-gray-50 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:ring-2 focus:ring-[#1089A4]"
+              className="bg-gray-50 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:ring-2 focus:ring-[#C5A021]"
             />
             <input
               value={newLink.emoji}
               onChange={e => setNewLink(l => ({ ...l, emoji: e.target.value }))}
               placeholder="اسم الأيقونة"
-              className="bg-gray-50 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:ring-2 focus:ring-[#1089A4]"
+              className="bg-gray-50 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:ring-2 focus:ring-[#C5A021]"
             />
             <div className="flex items-center gap-2 bg-gray-50 rounded-xl px-4">
               <label className="text-[10px] font-black text-gray-400">اللون:</label>
@@ -355,7 +355,7 @@ export default function OffersAdsTab() {
           </div>
           <button
             onClick={handleAddLink}
-            className="w-full py-3 bg-[#021D24] text-white rounded-2xl font-black text-sm hover:bg-[#1089A4] transition-all flex items-center justify-center gap-2"
+            className="w-full py-3 bg-[#0F172A] text-white rounded-2xl font-black text-sm hover:bg-[#C5A021] transition-all flex items-center justify-center gap-2"
           >
             <span className="material-symbols-rounded text-lg">add_circle</span>
             إضافة الرابط
@@ -364,10 +364,10 @@ export default function OffersAdsTab() {
       </section>
 
       {/* Info Note */}
-      <div className="bg-[#1089A4]/5 border border-[#1089A4]/20 rounded-2xl p-6 flex items-start gap-4">
-        <span className="material-symbols-rounded text-[#1089A4] text-2xl mt-0.5">info</span>
+      <div className="bg-[#C5A021]/5 border border-[#C5A021]/20 rounded-2xl p-6 flex items-start gap-4">
+        <span className="material-symbols-rounded text-[#C5A021] text-2xl mt-0.5">info</span>
         <div>
-          <p className="text-sm font-black text-[#021D24] mb-1">ملاحظة مهمة</p>
+          <p className="text-sm font-black text-[#0F172A] mb-1">ملاحظة مهمة</p>
           <p className="text-xs text-gray-500 font-medium leading-relaxed">
             التغييرات يتم حفظها في المتصفح حالياً. لتفعيلها بشكل كامل على الموقع، يحتاج المطور لربط هذه الإعدادات بـ API. 
             يمكنك استخدام <strong>صفحة العروض (/offers)</strong> للتخصيص الكامل من الكود.

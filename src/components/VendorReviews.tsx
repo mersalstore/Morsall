@@ -25,7 +25,7 @@ export default function VendorReviews() {
     <div className="space-y-12">
       <div className="flex items-center justify-between">
         <div className="space-y-1">
-          <h2 className="text-3xl font-black text-[#021D24]">تقييمات العملاء</h2>
+          <h2 className="text-3xl font-black text-[#0F172A]">تقييمات العملاء</h2>
           <p className="text-gray-400 font-bold">راقب آراء العملاء حول منتجاتك لتحسين الجودة.</p>
         </div>
       </div>
@@ -46,7 +46,7 @@ export default function VendorReviews() {
                     )}
                   </div>
                   <div>
-                    <h4 className="font-black text-[#021D24] text-xs">{review.user?.name || "عميل مجهول"}</h4>
+                    <h4 className="font-black text-[#0F172A] text-xs">{review.user?.name || "عميل مجهول"}</h4>
                     <p className="text-[10px] text-gray-400 font-bold">{new Date(review.createdAt).toLocaleDateString("ar-EG")}</p>
                   </div>
                 </div>
@@ -65,7 +65,7 @@ export default function VendorReviews() {
                  </div>
                  <div className="flex flex-col">
                     <span className="text-[9px] font-black text-gray-300 uppercase tracking-widest">المنتج</span>
-                    <span className="text-xs font-black text-[#021D24] line-clamp-1">{review.product?.title}</span>
+                    <span className="text-xs font-black text-[#0F172A] line-clamp-1">{review.product?.title}</span>
                  </div>
               </div>
             </div>

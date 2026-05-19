@@ -9,7 +9,7 @@ export default function TermsPage() {
         icon="gavel" 
       />
       <div className="responsive-container py-24 max-w-4xl">
-         <article className="prose prose-lg max-w-none text-primary/80 prose-headings:text-primary prose-a:text-[#1089A4]">
+         <article className="prose prose-lg max-w-none text-primary/80 prose-headings:text-primary prose-a:text-[#C5A021]">
             <h2>قبول الشروط</h2>
             <p>
                دخولك إلى منصة "مرسال" (Mersal Elite Market) واستخدامك لخدماتها يعني موافقتك الكاملة والخالصة على جميع البنود والشروط المذكورة هنا. تُعتبر هذه الشروط عقداً مُلزماً بينك وبين إدارة المنصة.

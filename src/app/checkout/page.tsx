@@ -42,25 +42,54 @@ export default function CheckoutPage() {
       .then(data => setSettings(data))
       .catch(err => console.error("Settings fetch error:", err));
 
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("morsall_saved_address");
-      if (saved) {
-        try {
-          const parsed = JSON.parse(saved);
+    // Fetch Database Saved Address (الباب الرابع - المتطلب الثامن)
+    fetch("/api/saved-address")
+      .then(res => res.ok ? res.json() : null)
+      .then(dbAddress => {
+        if (dbAddress && dbAddress.city) {
           setForm(prev => ({
             ...prev,
-            phone: parsed.phone || prev.phone,
-            city: parsed.city || prev.city,
-            district: parsed.district || prev.district,
-            street: parsed.street || prev.street,
+            city: dbAddress.city,
+            district: dbAddress.district || "",
+            street: dbAddress.street || "",
           }));
-        } catch (e) { }
-      }
-    }
+        } else {
+          // Fallback to localStorage
+          if (typeof window !== "undefined") {
+            const saved = localStorage.getItem("morsall_saved_address");
+            if (saved) {
+              try {
+                const parsed = JSON.parse(saved);
+                setForm(prev => ({
+                  ...prev,
+                  phone: parsed.phone || prev.phone,
+                  city: parsed.city || prev.city,
+                  district: parsed.district || prev.district,
+                  street: parsed.street || prev.street,
+                }));
+              } catch (e) { }
+            }
+          }
+        }
+      })
+      .catch(err => console.error("Saved address fetch error:", err));
   }, []);
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) {
-    setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
+    const { name, value } = e.target;
+    setForm(prev => {
+      const next = { ...prev, [name]: value };
+      // Auto-save to localStorage
+      if (typeof window !== "undefined" && ["phone", "city", "district", "street"].includes(name)) {
+        const saved = localStorage.getItem("morsall_saved_address");
+        const parsed = saved ? JSON.parse(saved) : {};
+        localStorage.setItem("morsall_saved_address", JSON.stringify({
+          ...parsed,
+          [name]: value
+        }));
+      }
+      return next;
+    });
   }
 
   async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
@@ -167,20 +196,26 @@ export default function CheckoutPage() {
             <span className="material-symbols-rounded text-4xl text-green-600">check_circle</span>
           </div>
           <div>
-            <h1 className="text-2xl font-black text-[#021D24] mb-2">ممتاز! طلبك قيد التجهيز الآن 🎉</h1>
+            <h1 className="text-2xl font-black text-[#0F172A] mb-2">ممتاز! طلبك قيد التجهيز الآن 🎉</h1>
             <p className="text-sm text-gray-500">سيتواصل فريق مرسال معك قريباً على رقم <strong>{form.phone}</strong></p>
           </div>
           {orderId && (
             <div className="bg-[#F3F4F6] rounded-lg p-4 text-right">
               <p className="text-xs text-gray-400 font-bold">رقم الطلب</p>
-              <p className="font-black text-[#1089A4] text-lg font-mono">#{orderId.slice(-8).toUpperCase()}</p>
+              <p className="font-black text-[#C5A021] text-lg font-mono">#{orderId.slice(-8).toUpperCase()}</p>
             </div>
           )}
           <div className="bg-gray-50 rounded-lg p-4 text-right space-y-2 text-sm">
             <div className="flex justify-between">
-              <span className="font-black text-[#021D24]">{total.toLocaleString()} ج.س</span>
+              <span className="font-black text-[#0F172A]">{total.toLocaleString()} ج.س</span>
               <span className="text-gray-400">الإجمالي</span>
             </div>
+            {codFee > 0 && (
+              <div className="flex justify-between text-[#F29124] font-bold">
+                <span>{codFee.toLocaleString()} ج.س</span>
+                <span>رسوم الدفع عند الاستلام</span>
+              </div>
+            )}
             <div className="flex justify-between">
               <span className="font-bold">{form.city} — {form.street}</span>
               <span className="text-gray-400">العنوان</span>
@@ -194,7 +229,7 @@ export default function CheckoutPage() {
             <Link href="/shop" className="flex-1 bg-[#F29124] hover:bg-[#D97B10] text-white py-3 rounded-lg font-black text-sm transition-colors">
               متابعة التسوق
             </Link>
-            <Link href="/orders" className="flex-1 bg-[#021D24] text-white py-3 rounded-lg font-black text-sm hover:bg-[#1A3340] transition-colors">
+            <Link href="/orders" className="flex-1 bg-[#0F172A] text-white py-3 rounded-lg font-black text-sm hover:bg-[#1A3340] transition-colors">
               طلباتي
             </Link>
           </div>
@@ -211,13 +246,13 @@ export default function CheckoutPage() {
       <div className="bg-white border-b border-gray-200 pt-24 pb-4">
         <div className="max-w-[1200px] mx-auto px-4 lg:px-6">
           <nav className="text-xs text-gray-400 font-bold flex items-center gap-2 mb-2">
-            <Link href="/" className="hover:text-[#1089A4]">الرئيسية</Link>
+            <Link href="/" className="hover:text-[#C5A021]">الرئيسية</Link>
             <span>/</span>
-            <Link href="/cart" className="hover:text-[#1089A4]">السلة</Link>
+            <Link href="/cart" className="hover:text-[#C5A021]">السلة</Link>
             <span>/</span>
-            <span className="text-[#021D24]">إتمام الطلب</span>
+            <span className="text-[#0F172A]">إتمام الطلب</span>
           </nav>
-          <h1 className="text-xl font-black text-[#021D24]">احجز طلبك وانتظر التوصيل لبابك 📦</h1>
+          <h1 className="text-xl font-black text-[#0F172A]">احجز طلبك وانتظر التوصيل لبابك 📦</h1>
         </div>
       </div>
 
@@ -238,60 +273,60 @@ export default function CheckoutPage() {
 
             {/* Personal Info */}
             <div className="bg-white rounded-lg border border-gray-200 p-5 shadow-sm">
-              <h2 className="font-black text-[#021D24] mb-4 flex items-center gap-2">
-                <span className="w-6 h-6 bg-[#1089A4] text-white rounded text-xs flex items-center justify-center font-black">١</span>
+              <h2 className="font-black text-[#0F172A] mb-4 flex items-center gap-2">
+                <span className="w-6 h-6 bg-[#C5A021] text-white rounded text-xs flex items-center justify-center font-black">١</span>
                 البيانات الشخصية
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="text-xs font-bold text-gray-500 block mb-1">الاسم الكامل *</label>
                   <input name="name" value={form.name} onChange={handleChange} required placeholder="محمد أحمد..."
-                    className="w-full border border-gray-300 rounded px-3 py-2.5 text-sm font-bold text-right outline-none focus:border-[#1089A4] focus:ring-2 focus:ring-[#1089A4]/10 transition-all" />
+                    className="w-full border border-gray-300 rounded px-3 py-2.5 text-sm font-bold text-right outline-none focus:border-[#C5A021] focus:ring-2 focus:ring-[#C5A021]/10 transition-all" />
                 </div>
                 <div>
                   <label className="text-xs font-bold text-gray-500 block mb-1">رقم الهاتف *</label>
                   <input name="phone" value={form.phone} onChange={handleChange} required placeholder="09X XXXX XXXX" type="tel"
-                    className="w-full border border-gray-300 rounded px-3 py-2.5 text-sm font-bold text-right outline-none focus:border-[#1089A4] focus:ring-2 focus:ring-[#1089A4]/10 transition-all" dir="ltr" />
+                    className="w-full border border-gray-300 rounded px-3 py-2.5 text-sm font-bold text-right outline-none focus:border-[#C5A021] focus:ring-2 focus:ring-[#C5A021]/10 transition-all" dir="ltr" />
                 </div>
               </div>
             </div>
 
             {/* Address */}
             <div className="bg-white rounded-lg border border-gray-200 p-5 shadow-sm">
-              <h2 className="font-black text-[#021D24] mb-4 flex items-center gap-2">
-                <span className="w-6 h-6 bg-[#1089A4] text-white rounded text-xs flex items-center justify-center font-black">٢</span>
+              <h2 className="font-black text-[#0F172A] mb-4 flex items-center gap-2">
+                <span className="w-6 h-6 bg-[#C5A021] text-white rounded text-xs flex items-center justify-center font-black">٢</span>
                 عنوان التوصيل
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="text-xs font-bold text-gray-500 block mb-1">المدينة *</label>
                   <select name="city" value={form.city} onChange={handleChange}
-                    className="w-full border border-gray-300 rounded px-3 py-2.5 text-sm font-bold text-right outline-none focus:border-[#1089A4] transition-all bg-white">
+                    className="w-full border border-gray-300 rounded px-3 py-2.5 text-sm font-bold text-right outline-none focus:border-[#C5A021] transition-all bg-white">
                     {CITIES.map(c => <option key={c} value={c}>{c}</option>)}
                   </select>
                 </div>
                 <div>
                   <label className="text-xs font-bold text-gray-500 block mb-1">الحي / المنطقة</label>
                   <input name="district" value={form.district} onChange={handleChange} placeholder="شمبات، بحري..."
-                    className="w-full border border-gray-300 rounded px-3 py-2.5 text-sm font-bold text-right outline-none focus:border-[#1089A4] transition-all" />
+                    className="w-full border border-gray-300 rounded px-3 py-2.5 text-sm font-bold text-right outline-none focus:border-[#C5A021] transition-all" />
                 </div>
                 <div className="sm:col-span-2">
                   <label className="text-xs font-bold text-gray-500 block mb-1">الشارع والعنوان التفصيلي *</label>
                   <input name="street" value={form.street} onChange={handleChange} required placeholder="شارع النيل، أمام البنك، بجانب المسجد..."
-                    className="w-full border border-gray-300 rounded px-3 py-2.5 text-sm font-bold text-right outline-none focus:border-[#1089A4] transition-all" />
+                    className="w-full border border-gray-300 rounded px-3 py-2.5 text-sm font-bold text-right outline-none focus:border-[#C5A021] transition-all" />
                 </div>
                 <div className="sm:col-span-2">
                   <label className="text-xs font-bold text-gray-500 block mb-1">ملاحظات للمندوب (اختياري)</label>
                   <textarea name="notes" value={form.notes} onChange={handleChange} rows={2} placeholder="أي تفاصيل إضافية..."
-                    className="w-full border border-gray-300 rounded px-3 py-2.5 text-sm font-bold text-right outline-none focus:border-[#1089A4] transition-all resize-none" />
+                    className="w-full border border-gray-300 rounded px-3 py-2.5 text-sm font-bold text-right outline-none focus:border-[#C5A021] transition-all resize-none" />
                 </div>
               </div>
             </div>
 
             {/* Payment Method */}
             <div className="bg-white rounded-lg border border-gray-200 p-5 shadow-sm">
-              <h2 className="font-black text-[#021D24] mb-4 flex items-center gap-2">
-                <span className="w-6 h-6 bg-[#1089A4] text-white rounded text-xs flex items-center justify-center font-black">٣</span>
+              <h2 className="font-black text-[#0F172A] mb-4 flex items-center gap-2">
+                <span className="w-6 h-6 bg-[#C5A021] text-white rounded text-xs flex items-center justify-center font-black">٣</span>
                 طريقة الدفع
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
@@ -300,17 +335,20 @@ export default function CheckoutPage() {
                   { value: "BANK_TRANSFER", icon: "account_balance", label: "تحويل بنكي", sub: "حوّل المبلغ وارفع الإيصال", disabled: settings?.bankTransferEnabled === false },
                 ].filter(m => !m.disabled).map(m => (
                   <label key={m.value}
-                    className={`flex items-center gap-3 p-4 rounded-lg border-2 cursor-pointer transition-all ${form.paymentMethod === m.value ? "border-[#1089A4] bg-[#1089A4]/5" : "border-gray-200 hover:border-gray-300"}`}>
+                    className={`flex items-center gap-3 p-4 rounded-lg border-2 cursor-pointer transition-all ${form.paymentMethod === m.value ? "border-[#C5A021] bg-[#C5A021]/5" : "border-gray-200 hover:border-gray-300"}`}>
                     <input type="radio" name="paymentMethod" value={m.value} checked={form.paymentMethod === m.value} onChange={handleChange} className="hidden" />
-                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${form.paymentMethod === m.value ? "bg-[#1089A4] text-white" : "bg-gray-100 text-gray-400"}`}>
+                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${form.paymentMethod === m.value ? "bg-[#C5A021] text-white" : "bg-gray-100 text-gray-400"}`}>
                       <span className="material-symbols-rounded text-xl">{m.icon}</span>
                     </div>
                     <div>
-                      <p className="font-black text-sm text-[#021D24]">{m.label}</p>
+                      <p className="font-black text-sm text-[#0F172A]">{m.label}</p>
                       <p className="text-xs text-gray-400">{m.sub}</p>
+                      {m.value === "COD" && settings?.codExtraFee > 0 && (
+                        <p className="text-[10px] text-red-600 font-bold mt-0.5">⚠️ توجد رسوم {settings.codExtraFee.toLocaleString()} ج.س إضافية لهذه الخدمة</p>
+                      )}
                     </div>
                     {form.paymentMethod === m.value && (
-                      <span className="material-symbols-rounded text-[#1089A4] text-xl mr-auto">radio_button_checked</span>
+                      <span className="material-symbols-rounded text-[#C5A021] text-xl mr-auto">radio_button_checked</span>
                     )}
                   </label>
                 ))}
@@ -318,59 +356,91 @@ export default function CheckoutPage() {
 
               {/* Bank Transfer Details */}
               {form.paymentMethod === "BANK_TRANSFER" && settings && (
-                <div className="bg-[#F3F4F6] rounded-xl p-5 border border-gray-200 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
-                  <div className="flex items-start gap-3">
-                    <div className="w-8 h-8 bg-[#1089A4]/10 text-[#1089A4] rounded-full flex items-center justify-center flex-shrink-0">
-                      <span className="material-symbols-rounded text-lg">info</span>
+                <div className="bg-gradient-to-br from-[#0F172A]/5 to-[#C5A021]/5 rounded-2xl p-5 border border-[#C5A021]/20 space-y-5 animate-in fade-in slide-in-from-top-2 duration-300">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-[#C5A021] rounded-xl flex items-center justify-center flex-shrink-0">
+                      <span className="material-symbols-rounded text-white text-lg">account_balance</span>
                     </div>
                     <div>
-                      <p className="text-sm font-black text-[#021D24]">بيانات التحويل البنكي</p>
-                      <p className="text-xs text-gray-500">يرجى تحويل مبلغ <strong className="text-[#1089A4]">{total.toLocaleString()} ج.س</strong> إلى الحساب التالي:</p>
+                      <p className="text-sm font-black text-[#0F172A]">تفاصيل التحويل البنكي</p>
+                      <p className="text-xs text-gray-500">حوّل مبلغ <strong className="text-[#F29124]">{total.toLocaleString()} ج.س</strong> إلى أحد الحسابات التالية:</p>
                     </div>
                   </div>
 
-                  {settings.bankAccounts ? (
-                    <div className="bg-white p-5 rounded-lg border border-gray-100 shadow-sm whitespace-pre-wrap text-sm font-bold text-[#021D24]">
-                      {settings.bankAccounts}
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div className="bg-white p-3 rounded-lg border border-gray-100 shadow-sm">
-                        <p className="text-[10px] font-bold text-gray-400 uppercase">اسم البنك</p>
-                        <p className="font-black text-sm text-[#021D24]">{settings.bankName || "بنك الخرطوم"}</p>
+                  {(() => {
+                    let accountsList: any[] = [];
+                    try {
+                      if (settings.bankAccounts) {
+                        const parsed = JSON.parse(settings.bankAccounts);
+                        if (Array.isArray(parsed)) accountsList = parsed.filter((a: any) => a.isActive);
+                      }
+                    } catch {}
+                    if (accountsList.length === 0 && (settings.bankName || settings.bankAccountNumber)) {
+                      accountsList = [{ bankName: settings.bankName, accountName: settings.bankAccountName, accountNumber: settings.bankAccountNumber }];
+                    }
+                    return (
+                      <div className="space-y-3">
+                        {accountsList.map((acc: any, i: number) => (
+                          <div key={i} className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+                            <div className="bg-[#0F172A] px-4 py-2.5">
+                              <p className="text-white font-black text-sm">{acc.bankName || "حساب بنكي"}</p>
+                            </div>
+                            <div className="p-4 flex flex-col sm:flex-row gap-4">
+                              <div className="flex-1 space-y-3">
+                                <div className="grid grid-cols-2 gap-3">
+                                  <div className="bg-gray-50 p-3 rounded-lg">
+                                    <p className="text-[10px] font-bold text-gray-400 mb-1">اسم الحساب</p>
+                                    <p className="font-black text-sm text-[#0F172A]">{acc.accountName || "—"}</p>
+                                  </div>
+                                  <div className="bg-gray-50 p-3 rounded-lg">
+                                    <p className="text-[10px] font-bold text-gray-400 mb-1">رقم الحساب</p>
+                                    <div className="flex items-center gap-2">
+                                      <p className="font-black text-sm text-[#C5A021] flex-1 truncate">{acc.accountNumber || "—"}</p>
+                                      {acc.accountNumber && (
+                                        <button type="button" onClick={() => navigator.clipboard.writeText(acc.accountNumber)}
+                                          className="w-7 h-7 bg-gray-200 rounded flex items-center justify-center hover:bg-[#C5A021] hover:text-white transition-all flex-shrink-0">
+                                          <span className="material-symbols-rounded text-sm">content_copy</span>
+                                        </button>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                                {acc.instructions && (
+                                  <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+                                    <p className="text-xs font-bold text-amber-700">ℹ️ {acc.instructions}</p>
+                                  </div>
+                                )}
+                              </div>
+                              {acc.qrCode && (
+                                <div className="flex flex-col items-center gap-2 flex-shrink-0">
+                                  <p className="text-[10px] font-black text-gray-400">امسح للدفع الفوري</p>
+                                  <div className="w-28 h-28 border-2 border-[#C5A021]/30 rounded-xl overflow-hidden bg-white">
+                                    <Image src={acc.qrCode} alt="QR" width={112} height={112} className="w-full h-full object-contain p-1" />
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                      <div className="bg-white p-3 rounded-lg border border-gray-100 shadow-sm">
-                        <p className="text-[10px] font-bold text-gray-400 uppercase">اسم الحساب</p>
-                        <p className="font-black text-sm text-[#021D24]">{settings.bankAccountName || "شركة مرسال للتجارة"}</p>
-                      </div>
-                      <div className="bg-white p-3 rounded-lg border border-gray-100 shadow-sm sm:col-span-2 flex justify-between items-center">
-                        <div>
-                          <p className="text-[10px] font-bold text-gray-400 uppercase">رقم الحساب / IBAN</p>
-                          <p className="font-black text-lg text-[#1089A4] tracking-wider">{settings.bankAccountNumber || "XXXX-XXXX-XXXX"}</p>
-                        </div>
-                        <button type="button" onClick={() => navigator.clipboard.writeText(settings.bankAccountNumber)}
-                          className="w-10 h-10 bg-gray-100 text-gray-500 rounded-lg flex items-center justify-center hover:bg-gray-200 transition-colors">
-                          <span className="material-symbols-rounded text-lg">content_copy</span>
-                        </button>
-                      </div>
-                    </div>
-                  )}
+                    );
+                  })()}
 
-                  <div className="pt-2">
-                    <p className="text-xs font-black text-[#021D24] mb-3 flex items-center gap-2">
+                  <div className="pt-1">
+                    <p className="text-xs font-black text-[#0F172A] mb-3 flex items-center gap-2">
                       <span className="material-symbols-rounded text-base text-[#F29124]">upload_file</span>
-                      ارفع صورة إيصال التحويل (سكرين شوت)
+                      ارفع صورة إيصال التحويل <span className="text-red-500">*</span>
                     </p>
-                    <label className={`relative flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-xl cursor-pointer transition-all ${form.paymentScreenshot ? "border-green-400 bg-green-50" : "border-gray-300 bg-white hover:border-[#1089A4] hover:bg-gray-50"}`}>
+                    <label className={`relative flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-xl cursor-pointer transition-all ${form.paymentScreenshot ? "border-green-400 bg-green-50" : "border-gray-300 bg-white hover:border-[#C5A021] hover:bg-gray-50"}`}>
                       {uploading ? (
                         <div className="flex flex-col items-center">
-                          <span className="w-8 h-8 border-3 border-[#1089A4] border-t-transparent rounded-full animate-spin mb-2" />
-                          <p className="text-xs font-bold text-[#1089A4]">جاري الرفع...</p>
+                          <span className="w-8 h-8 border-3 border-[#C5A021] border-t-transparent rounded-full animate-spin mb-2" />
+                          <p className="text-xs font-bold text-[#C5A021]">جاري الرفع...</p>
                         </div>
                       ) : form.paymentScreenshot ? (
                         <div className="flex flex-col items-center">
                           <span className="material-symbols-rounded text-3xl text-green-500 mb-1">check_circle</span>
-                          <p className="text-xs font-bold text-green-600">تم رفع الإيصال بنجاح</p>
+                          <p className="text-xs font-bold text-green-600">تم رفع الإيصال ✅</p>
                           <button type="button" onClick={(e) => { e.preventDefault(); setForm(p => ({ ...p, paymentScreenshot: "" })) }} className="text-[10px] text-red-500 font-bold mt-1 underline">تغيير الصورة</button>
                         </div>
                       ) : (
@@ -412,8 +482,9 @@ export default function CheckoutPage() {
         <aside className="lg:col-span-4">
           <div className="sticky top-28">
             <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-              <div className="bg-[#021D24] text-white p-4">
+              <div className="bg-[#0F172A] text-white p-4">
                 <h3 className="font-black text-sm">ملخص الطلب ({cart.length} منتج)</h3>
+                <p className="text-[10px] text-white/40 font-bold mt-1">الرقم المرجعي: سيظهر بعد تأكيد الطلب</p>
               </div>
               <div className="p-4 space-y-3 max-h-64 overflow-y-auto">
                 {cart.map(item => (
@@ -422,15 +493,15 @@ export default function CheckoutPage() {
                       {item.image && <Image src={item.image} alt={item.title} fill className="object-cover" />}
                     </div>
                     <div className="flex-grow min-w-0">
-                      <p className="font-bold text-[#021D24] truncate text-xs">{item.title}</p>
+                      <p className="font-bold text-[#0F172A] truncate text-xs">{item.title}</p>
                       {item.selectedOptions && Object.entries(item.selectedOptions).map(([name, val]) => (
                         <p key={name} className="text-[10px] text-gray-400">
-                          {name}: <span className="text-[#021D24]">{val}</span>
+                          {name}: <span className="text-[#0F172A]">{val}</span>
                         </p>
                       ))}
                       <p className="text-gray-400 text-xs">× {item.quantity}</p>
                     </div>
-                    <span className="font-black text-[#1089A4] text-xs flex-shrink-0">
+                    <span className="font-black text-[#C5A021] text-xs flex-shrink-0">
                       {(item.price * item.quantity).toLocaleString()} ج.س
                     </span>
                   </div>
@@ -454,7 +525,7 @@ export default function CheckoutPage() {
                     <span>رسوم الدفع عند الاستلام</span>
                   </div>
                 )}
-                <div className="border-t pt-3 flex justify-between font-black text-[#021D24]">
+                <div className="border-t pt-3 flex justify-between font-black text-[#0F172A]">
                   <span className="text-lg">{total.toLocaleString()} ج.س</span>
                   <span>الإجمالي</span>
                 </div>

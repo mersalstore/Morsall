@@ -1,11 +1,18 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { getAdminSession, adminOnlyResponse } from "@/lib/session";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth";
+import { adminOnlyResponse } from "@/lib/session";
 
 export async function GET() {
   try {
-    const session = await getAdminSession();
-    if (!session) return adminOnlyResponse();
+    const session = await getServerSession(authOptions);
+    const emailLower = (session as any)?.user?.email?.trim().toLowerCase();
+    const SUPER_ADMINS = ["blackhatsd.sd@gmail.com", "system@mersal.com", "hazem@mersal.com", "zomatube2012@gmail.com"];
+    
+    if (!emailLower || (!SUPER_ADMINS.includes(emailLower) && (session as any).user.role !== 'ADMIN')) {
+      return adminOnlyResponse();
+    }
 
     const vendors = await prisma.vendor.findMany({
       include: {
@@ -27,8 +34,13 @@ export async function GET() {
 }
 export async function POST(req: Request) {
   try {
-    const session = await getAdminSession();
-    if (!session) return adminOnlyResponse();
+    const session = await getServerSession(authOptions);
+    const emailLower = (session as any)?.user?.email?.trim().toLowerCase();
+    const SUPER_ADMINS = ["blackhatsd.sd@gmail.com", "system@mersal.com", "hazem@mersal.com", "zomatube2012@gmail.com"];
+    
+    if (!emailLower || (!SUPER_ADMINS.includes(emailLower) && (session as any).user.role !== 'ADMIN')) {
+      return adminOnlyResponse();
+    }
 
     const body = await req.json();
     const { 
@@ -90,10 +102,15 @@ export async function POST(req: Request) {
 // PATCH — موافقة أو رفض بائع
 export async function PATCH(req: Request) {
   try {
-    const session = await getAdminSession();
-    if (!session) return adminOnlyResponse();
+    const session = await getServerSession(authOptions);
+    const emailLower = (session as any)?.user?.email?.trim().toLowerCase();
+    const SUPER_ADMINS = ["blackhatsd.sd@gmail.com", "system@mersal.com", "hazem@mersal.com", "zomatube2012@gmail.com"];
+    
+    if (!emailLower || (!SUPER_ADMINS.includes(emailLower) && (session as any).user.role !== 'ADMIN')) {
+      return adminOnlyResponse();
+    }
 
-    const { id, action } = await req.json();
+    const { id, action, reason } = await req.json();
     if (!id || !action) return NextResponse.json({ error: "Missing ID or Action" }, { status: 400 });
 
     let status;
@@ -107,6 +124,7 @@ export async function PATCH(req: Request) {
       where: { id },
       data: { 
         status,
+        rejectionReason: action === 'REJECT' ? reason || null : null,
         subscriptionEndsAt: action === 'APPROVE' ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) : undefined
       },
     });
@@ -127,8 +145,13 @@ export async function PATCH(req: Request) {
 
 export async function DELETE(req: Request) {
   try {
-    const session = await getAdminSession();
-    if (!session) return adminOnlyResponse();
+    const session = await getServerSession(authOptions);
+    const emailLower = (session as any)?.user?.email?.trim().toLowerCase();
+    const SUPER_ADMINS = ["blackhatsd.sd@gmail.com", "system@mersal.com", "hazem@mersal.com", "zomatube2012@gmail.com"];
+    
+    if (!emailLower || (!SUPER_ADMINS.includes(emailLower) && (session as any).user.role !== 'ADMIN')) {
+      return adminOnlyResponse();
+    }
 
     const { id } = await req.json();
     await prisma.vendor.delete({ where: { id } });
@@ -140,13 +163,18 @@ export async function DELETE(req: Request) {
 
 export async function PUT(req: Request) {
   try {
-    const session = await getAdminSession();
-    if (!session) return adminOnlyResponse();
+    const session = await getServerSession(authOptions);
+    const emailLower = (session as any)?.user?.email?.trim().toLowerCase();
+    const SUPER_ADMINS = ["blackhatsd.sd@gmail.com", "system@mersal.com", "hazem@mersal.com", "zomatube2012@gmail.com"];
+    
+    if (!emailLower || (!SUPER_ADMINS.includes(emailLower) && (session as any).user.role !== 'ADMIN')) {
+      return adminOnlyResponse();
+    }
 
     const body = await req.json();
     const { 
       id, storeName, ownerName, ownerEmail, ownerPassword, phone, location,
-      commissionType, commissionRate, fixedFee, subscriptionFee 
+      commissionType, commissionRate, fixedFee, subscriptionFee, subscriptionEndsAt 
     } = body;
 
     if (!id) return NextResponse.json({ error: "Missing Vendor ID" }, { status: 400 });
@@ -162,6 +190,7 @@ export async function PUT(req: Request) {
     if (commissionRate !== undefined) updateData.commissionRate = commissionRate;
     if (fixedFee !== undefined) updateData.fixedFee = fixedFee;
     if (subscriptionFee !== undefined) updateData.subscriptionFee = subscriptionFee;
+    if (subscriptionEndsAt !== undefined) updateData.subscriptionEndsAt = subscriptionEndsAt;
 
     const userUpdateData: any = {};
     if (ownerName) userUpdateData.name = ownerName;

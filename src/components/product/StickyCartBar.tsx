@@ -12,10 +12,19 @@ export default function StickyCartBar({ product }: { product: Product }) {
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsVisible(window.scrollY > 800);
+      if (window.innerWidth < 1024) {
+        setIsVisible(true);
+      } else {
+        setIsVisible(window.scrollY > 800);
+      }
     };
+    handleScroll();
     window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
+    window.addEventListener("resize", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", handleScroll);
+    };
   }, []);
 
   const discountedPrice = product.discount ? Math.floor(product.price * (1 - product.discount / 100)) : product.price;
@@ -33,7 +42,7 @@ export default function StickyCartBar({ product }: { product: Product }) {
               <Image src={product.image} alt={product.title} fill className="object-cover" />
            </div>
            <div className="flex flex-col">
-              <span className="font-black text-xs text-[#021D24] line-clamp-1 max-w-[200px] lg:max-w-sm">{product.title}</span>
+              <span className="font-black text-xs text-[#0F172A] line-clamp-1 max-w-[200px] lg:max-w-sm">{product.title}</span>
               <span className="text-[#CB2E26] font-black text-sm">{discountedPrice.toLocaleString()} ج.س</span>
            </div>
         </div>
@@ -42,7 +51,7 @@ export default function StickyCartBar({ product }: { product: Product }) {
         <div className="hidden lg:flex items-center gap-6 border-r border-gray-100 pr-6 ml-0 mr-auto">
            <div className="flex items-center gap-2">
               <span className="text-[10px] font-black text-gray-400 uppercase tracking-tight">البائع:</span>
-              <span className="text-[10px] font-black text-[#1089A4] hover:underline cursor-pointer">{product.vendor}</span>
+              <span className="text-[10px] font-black text-[#C5A021] hover:underline cursor-pointer">{product.vendor}</span>
            </div>
            <div className="flex items-center gap-2 border-r border-gray-100 pr-6">
               <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
@@ -51,7 +60,7 @@ export default function StickyCartBar({ product }: { product: Product }) {
         </div>
 
         {/* Actions */}
-        <div className="flex items-center gap-4 flex-grow md:flex-grow-0 justify-end">
+        <div className="flex items-center gap-4 w-full md:w-auto justify-center md:justify-end">
            <div className="hidden sm:flex items-center gap-4 border-l border-gray-100 pl-6 ml-0">
               <button 
                 onClick={() => toggleFavorite(product.id)}
@@ -61,7 +70,7 @@ export default function StickyCartBar({ product }: { product: Product }) {
               </button>
               <button 
                 onClick={() => toggleCompare(product.id)}
-                className={cn("transition-all hover:scale-110", isInCompare(product.id) ? "text-[#1089A4]" : "text-gray-300 hover:text-blue-400")}
+                className={cn("transition-all hover:scale-110", isInCompare(product.id) ? "text-[#C5A021]" : "text-gray-300 hover:text-blue-400")}
               >
                  <span className="material-symbols-rounded text-xl">compare_arrows</span>
               </button>
@@ -69,7 +78,7 @@ export default function StickyCartBar({ product }: { product: Product }) {
            
            <button 
              onClick={() => addItem({ id: product.id, title: product.title, price: discountedPrice, quantity: 1, vendor: product.vendor, image: product.image })}
-             className="bg-[#1089A4] text-white px-8 lg:px-12 py-4 rounded-2xl font-black text-[10px] lg:text-xs uppercase tracking-widest shadow-xl shadow-[#1089A4]/20 hover:bg-[#0D708E] hover:-translate-y-0.5 active:scale-95 transition-all flex items-center justify-center gap-3 border-2 border-white/10"
+             className="bg-[#C5A021] text-white w-full md:w-auto px-8 lg:px-12 py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-[#C5A021]/20 hover:bg-[#0D708E] hover:-translate-y-0.5 active:scale-95 transition-all flex items-center justify-center gap-3 border-2 border-white/10"
            >
               <span className="material-symbols-rounded !text-lg">shopping_basket</span> أضف للسلة
            </button>

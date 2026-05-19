@@ -10,13 +10,17 @@ export async function GET(req: Request) {
 
     const { searchParams } = new URL(req.url);
     const search = searchParams.get("search") || "";
+    const vendorId = searchParams.get("vendorId");
 
     const whereClause: any = {};
     if (search) {
       whereClause.OR = [
-        { title: { contains: search, mode: "insensitive" } },
-        { vendor: { storeName: { contains: search, mode: "insensitive" } } },
+        { title: { contains: search } },
+        { vendor: { storeName: { contains: search } } },
       ];
+    }
+    if (vendorId) {
+      whereClause.vendorId = vendorId;
     }
 
     const products = await prisma.product.findMany({
@@ -147,7 +151,8 @@ export async function PATCH(req: Request) {
       where: { id },
       data: {
         ...(title !== undefined && { title }),
-        ...(description !== undefined && { description }),
+        // الباب السادس: السماح بتعديل السعر والخصم دون إلزام الوصف
+        ...(description !== undefined && description !== "" && { description }),
         ...(shortDescription !== undefined && { shortDescription }),
         ...(price !== undefined && { price: parseFloat(price) }),
         ...(stock !== undefined && { stock: parseInt(stock) }),
@@ -155,6 +160,7 @@ export async function PATCH(req: Request) {
         ...(vendorId !== undefined && { vendorId }),
         ...(images !== undefined && { images }),
         ...(sku !== undefined && { sku }),
+        // إصلاح الخصم: السماح بحفظ مباشر
         ...(discountPrice !== undefined && { discountPrice: discountPrice ? parseFloat(discountPrice) : null }),
         ...(discountType !== undefined && { discountType }),
         ...(status !== undefined && { status })

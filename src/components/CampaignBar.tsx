@@ -36,13 +36,13 @@ export default function CampaignBar() {
   if (!isVisible || (config && !config.campaignEnabled)) return null;
 
   return (
-    <div className="bg-[#1089A4] text-white py-3 md:py-6 relative overflow-hidden group">
+    <div className="bg-[#C5A021] text-white py-3 md:py-6 relative overflow-hidden group">
       {/* Background Animated Pulse */}
       <div className="absolute inset-0 bg-gradient-to-r from-white/10 via-transparent to-white/10 animate-shimmer pointer-events-none" />
       
       <div className="responsive-container kill-scroll flex flex-col md:flex-row items-center justify-center gap-6 md:gap-[clamp(2rem,10vw,8rem)] relative z-10">
         <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-10 text-center sm:text-right">
-           <span className="bg-[#F29124] text-[#021D24] px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-widest shadow-2xl border-2 border-white/10 flex-shrink-0">عروض مرسـال</span>
+           <span className="bg-[#F29124] text-[#0F172A] px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-widest shadow-2xl border-2 border-white/10 flex-shrink-0">عروض مرسـال</span>
            <div className="text-[clamp(11px,4vw,18px)] font-black leading-tight text-center md:text-right">
               {config?.campaignTitle || "خصومات كبرى تصل إلى 60%"} <span className="hidden sm:inline text-[9px] md:text-sm text-white/50">{config?.campaignSubtitle || "على كافة الأجهزة والإلكترونيات"}</span>
            </div>
@@ -60,7 +60,7 @@ export default function CampaignBar() {
               </div>
            </div>
 
-           <Link href={config?.campaignButtonLink || "/shop"} className="bg-white text-[#1089A4] px-5 md:px-12 py-2 md:py-4 rounded-full text-[9px] md:text-xs font-black uppercase hover:bg-[#F29124] hover:text-[#021D24] transition-all shadow-2xl hover:scale-105 active:scale-95 border-b-2 border-black/10">
+           <Link href={config?.campaignButtonLink || "/shop"} className="bg-white text-[#C5A021] px-5 md:px-12 py-2 md:py-4 rounded-full text-[9px] md:text-xs font-black uppercase hover:bg-[#F29124] hover:text-[#0F172A] transition-all shadow-2xl hover:scale-105 active:scale-95 border-b-2 border-black/10">
               {config?.campaignButtonText || "تـسـوق"}
            </Link>
         </div>

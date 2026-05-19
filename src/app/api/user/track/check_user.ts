@@ -6,7 +6,6 @@ async function main() {
     where: {
       email: {
         contains: "blackhatsd",
-        mode: 'insensitive'
       }
     }
   })

@@ -20,7 +20,8 @@ export async function POST(req: Request) {
       storeCity, 
       bankStatementUrl, 
       commercialRegUrl,
-      shippingModel
+      shippingModel,
+      subscriptionPlanId
     } = body;
 
     // 1. Find the existing user
@@ -38,6 +39,56 @@ export async function POST(req: Request) {
       return NextResponse.json({ 
         error: "أنت مسجل كبائع بالفعل. يرجى التوجه للوحة التحكم." 
       }, { status: 400 });
+    }
+
+    // Find the plan or get/create a default one
+    let targetPlanId = subscriptionPlanId || body.subscriptionPlan;
+    let durationDays = 30;
+    if (targetPlanId) {
+      // First try to find by ID
+      let plan = await prisma.subscriptionPlan.findFirst({
+        where: {
+          OR: [
+            { id: targetPlanId },
+            { name: { contains: targetPlanId } }
+          ]
+        }
+      });
+      if (plan) {
+        targetPlanId = plan.id;
+        durationDays = plan.durationDays;
+      } else {
+        // Create the plan with that name if it doesn't exist
+        const newPlan = await prisma.subscriptionPlan.create({
+          data: {
+            name: targetPlanId === "ELITE" ? "باقة النخبة الفاخرة (Elite)" : targetPlanId === "PRO" ? "الباقة الاحترافية (Pro)" : "الباقة التجريبية (Free Trial)",
+            price: targetPlanId === "ELITE" ? 75000 : targetPlanId === "PRO" ? 25000 : 0,
+            durationDays: 30,
+            isTrial: targetPlanId !== "ELITE" && targetPlanId !== "PRO"
+          }
+        });
+        targetPlanId = newPlan.id;
+        durationDays = 30;
+      }
+    } else {
+      // Look for any trial plan
+      const existingTrial = await prisma.subscriptionPlan.findFirst({ where: { isTrial: true } });
+      if (existingTrial) {
+        targetPlanId = existingTrial.id;
+        durationDays = existingTrial.durationDays;
+      } else {
+        // Create a default trial plan
+        const newTrial = await prisma.subscriptionPlan.create({
+          data: {
+            name: "الباقة التجريبية المجانية",
+            price: 0,
+            durationDays: 30,
+            isTrial: true
+          }
+        });
+        targetPlanId = newTrial.id;
+        durationDays = 30;
+      }
     }
 
     // 3. Create Vendor Profile and update User Role
@@ -71,7 +122,8 @@ export async function POST(req: Request) {
           shippingModel: shippingModel || "VENDOR_PACKS",
           status: "PENDING",
           commissionRate: 10.0,
-          subscriptionEndsAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days trial
+          planId: targetPlanId,
+          subscriptionEndsAt: new Date(Date.now() + durationDays * 24 * 60 * 60 * 1000),
         },
       });
     });

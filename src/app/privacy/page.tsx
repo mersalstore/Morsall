@@ -9,7 +9,7 @@ export default function PrivacyPage() {
         icon="shield_lock" 
       />
       <div className="responsive-container py-24 max-w-4xl">
-         <article className="prose prose-lg max-w-none text-primary/80 prose-headings:text-primary prose-a:text-[#1089A4]">
+         <article className="prose prose-lg max-w-none text-primary/80 prose-headings:text-primary prose-a:text-[#C5A021]">
             <h2>مقدمة</h2>
             <p>
                في مرسال (Mersal Elite Market)، ندرك تماماً قيمة البيانات والخصوصية لعملائنا النخبة. تم تصميم سياسة الخصوصية هذه لتوضيح كيفية جمعن، استخدامنا، وحمايتنا لبياناتكم الشخصية وفقاً لأعلى معايير التشفير والأمان العالمية.

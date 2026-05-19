@@ -72,7 +72,7 @@ export default function UsersVendorsTab({ type, data, onAction, classes, fetchDa
       {/* Toolbar */}
       <div className="p-5 md:p-10 flex flex-col md:flex-row gap-4 justify-between items-stretch md:items-center bg-white/50 border-b border-gray-100/50">
         <div className="relative flex-grow">
-          <span className="absolute right-5 top-1/2 -translate-y-1/2 material-symbols-rounded text-[#1089A4]">search</span>
+          <span className="absolute right-5 top-1/2 -translate-y-1/2 material-symbols-rounded text-[#C5A021]">search</span>
           <input
             value={search}
             onChange={e => setSearch(e.target.value)}
@@ -95,11 +95,11 @@ export default function UsersVendorsTab({ type, data, onAction, classes, fetchDa
       <div className="md:hidden divide-y divide-gray-100">
         {filtered.map((item) => (
           <div key={item.id} className="p-4 flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#1089A4]/10 to-[#021D24]/10 text-[#021D24] flex items-center justify-center font-black text-xl shrink-0">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#C5A021]/10 to-[#0F172A]/10 text-[#0F172A] flex items-center justify-center font-black text-xl shrink-0">
               {(item.name || item.storeName || "?")[0].toUpperCase()}
             </div>
             <div className="flex-grow min-w-0">
-              <p className="font-black text-[#021D24] text-sm truncate">{item.name || item.storeName}</p>
+              <p className="font-black text-[#0F172A] text-sm truncate">{item.name || item.storeName}</p>
               <p className="text-xs text-gray-400 truncate mt-0.5">{item.email || item.user?.email}</p>
               {isBlocked(item) && (
                 <span className="text-[10px] font-black text-red-500 bg-red-50 px-2 py-0.5 rounded-lg mt-1 inline-block">محظور</span>
@@ -108,7 +108,7 @@ export default function UsersVendorsTab({ type, data, onAction, classes, fetchDa
             <div className="flex gap-2 shrink-0">
               <button
                 onClick={() => setViewingItem(item)}
-                className="w-9 h-9 rounded-xl bg-[#1089A4]/10 text-[#1089A4] flex items-center justify-center hover:bg-[#1089A4] hover:text-white transition-all"
+                className="w-9 h-9 rounded-xl bg-[#C5A021]/10 text-[#C5A021] flex items-center justify-center hover:bg-[#C5A021] hover:text-white transition-all"
                 title="عرض التفاصيل"
               >
                 <span className="material-symbols-rounded text-base">person_search</span>
@@ -170,11 +170,11 @@ export default function UsersVendorsTab({ type, data, onAction, classes, fetchDa
               <tr key={item.id} className={classes.tableRow}>
                 <td className="px-8 py-8">
                   <div className="flex items-center gap-6">
-                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#1089A4]/10 to-[#021D24]/10 text-[#021D24] flex items-center justify-center font-black text-xl shadow-inner border border-white">
+                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#C5A021]/10 to-[#0F172A]/10 text-[#0F172A] flex items-center justify-center font-black text-xl shadow-inner border border-white">
                       {(item.name || item.storeName || "?")[0].toUpperCase()}
                     </div>
                     <div className="flex flex-col">
-                      <span className="font-black text-[#021D24] text-lg leading-tight mb-1">{item.name || item.storeName}</span>
+                      <span className="font-black text-[#0F172A] text-lg leading-tight mb-1">{item.name || item.storeName}</span>
                       <div className="flex items-center gap-2">
                         <span className="w-2 h-2 rounded-full bg-[#F29124]" />
                         <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
@@ -187,11 +187,11 @@ export default function UsersVendorsTab({ type, data, onAction, classes, fetchDa
                 <td className="px-8 py-8">
                   <div className="flex flex-col gap-2">
                     <div className="flex items-center gap-2">
-                      <span className="material-symbols-rounded text-sm text-[#1089A4]">alternate_email</span>
-                      <span className="font-bold text-[#021D24] text-xs">{item.email}</span>
+                      <span className="material-symbols-rounded text-sm text-[#C5A021]">alternate_email</span>
+                      <span className="font-bold text-[#0F172A] text-xs">{item.email}</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="material-symbols-rounded text-sm text-[#1089A4]">smartphone</span>
+                      <span className="material-symbols-rounded text-sm text-[#C5A021]">smartphone</span>
                       <span className="text-gray-400 text-[11px] font-black" dir="ltr">{item.phone}</span>
                     </div>
                   </div>
@@ -199,13 +199,13 @@ export default function UsersVendorsTab({ type, data, onAction, classes, fetchDa
                 <td className="px-8 py-8">
                   {type === "users" ? (
                     <div className="flex flex-col">
-                      <span className="text-xs font-black text-[#021D24]">{new Date(item.createdAt).toLocaleDateString("ar-EG")}</span>
+                      <span className="text-xs font-black text-[#0F172A]">{item.createdAt ? new Date(item.createdAt).toLocaleDateString("ar-EG") : "غير محدد"}</span>
                       <span className="text-[9px] font-bold text-gray-400 mt-1 uppercase tracking-widest">تاريخ الانضمام</span>
                     </div>
                   ) : (
                     <span className={cn(
                       classes.badge,
-                      item.status === 'APPROVED' ? 'bg-[#1089A4]/10 text-[#1089A4]' : 'bg-orange-50 text-orange-500'
+                      item.status === 'APPROVED' ? 'bg-[#C5A021]/10 text-[#C5A021]' : 'bg-orange-50 text-orange-500'
                     )}>
                       {item.status === 'APPROVED' ? 'متجر معتمد' : item.status === 'SUSPENDED' ? 'موقوف' : 'في الانتظار'}
                     </span>
@@ -215,7 +215,7 @@ export default function UsersVendorsTab({ type, data, onAction, classes, fetchDa
                   <div className="flex items-center justify-center gap-3">
                     <button
                       onClick={() => setViewingItem(item)}
-                      className="w-12 h-12 rounded-[1.2rem] bg-white border border-gray-100 text-[#021D24] flex items-center justify-center hover:bg-[#021D24] hover:text-white transition-all shadow-xl"
+                      className="w-12 h-12 rounded-[1.2rem] bg-white border border-gray-100 text-[#0F172A] flex items-center justify-center hover:bg-[#0F172A] hover:text-white transition-all shadow-xl"
                       title="عرض التفاصيل"
                     >
                       <span className="material-symbols-rounded text-xl">person_search</span>

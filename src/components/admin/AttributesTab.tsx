@@ -79,10 +79,10 @@ export default function AttributesTab() {
   return (
     <div className="space-y-8">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-black text-[#021D24]">سمات المنتجات</h2>
+        <h2 className="text-2xl font-black text-[#0F172A]">سمات المنتجات</h2>
         <button 
           onClick={() => { setEditingAttr(null); setFormData({ name: "", type: "TEXT", values: "" }); setIsModalOpen(true); }}
-          className="bg-[#1089A4] text-white px-8 py-4 rounded-2xl font-black text-sm shadow-xl hover:bg-[#021D24] transition-all"
+          className="bg-[#C5A021] text-white px-8 py-4 rounded-2xl font-black text-sm shadow-xl hover:bg-[#0F172A] transition-all"
         >
           <Plus size={20} className="inline-block ml-2" />
           إضافة سمة جديدة
@@ -93,7 +93,7 @@ export default function AttributesTab() {
         {attributes.map((attr) => (
           <div key={attr.id} className="bg-white p-8 rounded-[2.5rem] shadow-2xl shadow-gray-200/40 border border-gray-100 group">
             <div className="flex justify-between items-start mb-6">
-              <div className="w-12 h-12 rounded-2xl bg-[#1089A4]/10 text-[#1089A4] flex items-center justify-center">
+              <div className="w-12 h-12 rounded-2xl bg-[#C5A021]/10 text-[#C5A021] flex items-center justify-center">
                 <Settings2 size={24} />
               </div>
               <div className="flex gap-2">
@@ -101,11 +101,11 @@ export default function AttributesTab() {
                   setEditingAttr(attr);
                   setFormData({ name: attr.name, type: attr.type, values: attr.values.join(", ") });
                   setIsModalOpen(true);
-                }} className="w-10 h-10 rounded-xl bg-gray-50 text-gray-400 flex items-center justify-center hover:bg-[#1089A4] hover:text-white transition-all"><Edit2 size={16} /></button>
+                }} className="w-10 h-10 rounded-xl bg-gray-50 text-gray-400 flex items-center justify-center hover:bg-[#C5A021] hover:text-white transition-all"><Edit2 size={16} /></button>
                 <button onClick={() => handleDelete(attr.id)} className="w-10 h-10 rounded-xl bg-gray-50 text-gray-400 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all"><Trash2 size={16} /></button>
               </div>
             </div>
-            <h3 className="text-lg font-black text-[#021D24] mb-2">{attr.name}</h3>
+            <h3 className="text-lg font-black text-[#0F172A] mb-2">{attr.name}</h3>
             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4">النوع: {attr.type}</p>
             <div className="flex flex-wrap gap-2">
               {(attr.options || attr.values || []).map((v: any, i: number) => (
@@ -120,7 +120,7 @@ export default function AttributesTab() {
       <AnimatePresence>
         {isModalOpen && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
-            <div className="absolute inset-0 bg-[#021D24]/80 backdrop-blur-md" onClick={() => setIsModalOpen(false)} />
+            <div className="absolute inset-0 bg-[#0F172A]/80 backdrop-blur-md" onClick={() => setIsModalOpen(false)} />
             <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="relative w-full max-w-lg bg-white rounded-[3rem] p-10 shadow-3xl">
                <h3 className="text-2xl font-black mb-8">{editingAttr ? "تعديل سمة" : "إضافة سمة"}</h3>
                <form onSubmit={handleSubmit} className="space-y-6">
@@ -128,7 +128,7 @@ export default function AttributesTab() {
                     placeholder="اسم السمة (مثلاً: اللون، المقاس)" 
                     value={formData.name} 
                     onChange={e => setFormData({...formData, name: e.target.value})} 
-                    className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-6 py-4 outline-none focus:border-[#1089A4]"
+                    className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-6 py-4 outline-none focus:border-[#C5A021]"
                     required
                   />
                   <select 
@@ -146,7 +146,7 @@ export default function AttributesTab() {
                     onChange={e => setFormData({...formData, values: e.target.value})}
                     className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-6 py-4 min-h-[100px] outline-none"
                   />
-                  <button className="w-full py-5 bg-[#1089A4] text-white rounded-2xl font-black shadow-xl">حفظ</button>
+                  <button className="w-full py-5 bg-[#C5A021] text-white rounded-2xl font-black shadow-xl">حفظ</button>
                </form>
             </motion.div>
           </div>

@@ -23,6 +23,20 @@ function LoginContent() {
     if (tab === "register") {
       setIsLogin(false);
     }
+    
+    // Handle NextAuth URL errors
+    const urlError = searchParams.get("error");
+    if (urlError) {
+      if (urlError === "OAuthCallback" || urlError === "OAuthSignin" || urlError === "OAuthCreateAccount") {
+        setError("حدث خطأ أثناء تسجيل الدخول بواسطة جوجل. ربما يكون البريد مسجلاً مسبقاً بطريقة أخرى. الرجاء استخدام البريد وكلمة المرور أو المحاولة مرة أخرى.");
+      } else if (urlError === "CredentialsSignin") {
+        setError("بيانات الدخول غير صحيحة. يرجى التأكد من البريد الإلكتروني وكلمة المرور.");
+      } else if (urlError === "AccessDenied") {
+        setError("تم رفض الوصول. لا تملك الصلاحيات الكافية.");
+      } else {
+        setError(`حدث خطأ أثناء تسجيل الدخول (${urlError}). يرجى المحاولة مرة أخرى.`);
+      }
+    }
   }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -31,9 +45,19 @@ function LoginContent() {
     setError(null);
     try {
       if (isLogin) {
-        const result = await signIn("credentials", { email, password, redirect: false });
-        if (result?.error) setError("بيانات الدخول غير صحيحة. يرجى المحاولة مرة أخرى.");
-        else { 
+        const result = await signIn("credentials", { 
+          email, 
+          password, 
+          redirect: false 
+        });
+        
+        if (result?.error) {
+          // Use the actual error from NextAuth if it's not a generic one
+          const errorMsg = result.error === "CredentialsSignin" 
+            ? "بيانات الدخول غير صحيحة. يرجى التأكد من البريد الإلكتروني وكلمة المرور."
+            : result.error;
+          setError(errorMsg);
+        } else { 
           router.push("/"); 
           router.refresh(); 
         }
@@ -45,7 +69,7 @@ function LoginContent() {
         });
         const data = await res.json();
         if (!res.ok) setError(data.error || "فشل إنشاء الحساب. يرجى المحاولة لاحقاً.");
-        else await signIn("credentials", { email, password, callbackUrl: "/onboarding" });
+        else await signIn("credentials", { email, password, callbackUrl: "/" });
       }
     } catch (err) {
       setError("حدث خطأ في النظام. يرجى المحاولة مرة أخرى.");
@@ -53,7 +77,7 @@ function LoginContent() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4 md:p-8 font-sans rtl selection:bg-[#1089A4] selection:text-white" dir="rtl">
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4 md:p-8 font-sans rtl selection:bg-[#C5A021] selection:text-white" dir="rtl">
       
       <motion.div 
         initial={{ opacity: 0, y: 30 }}
@@ -62,11 +86,11 @@ function LoginContent() {
         className="max-w-5xl w-full grid grid-cols-1 lg:grid-cols-2 bg-white rounded-3xl shadow-2xl overflow-hidden border border-gray-100"
       >
         {/* ── Brand Sidebar ── */}
-        <div className="bg-[#021D24] p-10 md:p-16 hidden lg:flex flex-col justify-between relative overflow-hidden order-2">
-           <div className="absolute inset-0 bg-gradient-to-br from-[#021D24] via-[#011419] to-[#01090C] z-0" />
+        <div className="bg-[#0F172A] p-10 md:p-16 hidden lg:flex flex-col justify-between relative overflow-hidden order-2">
+           <div className="absolute inset-0 bg-gradient-to-br from-[#0F172A] via-[#011419] to-[#01090C] z-0" />
            
            {/* Abstract decorative shapes */}
-           <div className="absolute -top-32 -right-32 w-80 h-80 bg-[#1089A4]/20 blur-[80px] rounded-full" />
+           <div className="absolute -top-32 -right-32 w-80 h-80 bg-[#C5A021]/20 blur-[80px] rounded-full" />
            <div className="absolute -bottom-32 -left-32 w-80 h-80 bg-blue-500/10 blur-[80px] rounded-full" />
            
            <div className="relative z-10 w-full flex items-center justify-start">
@@ -138,7 +162,7 @@ function LoginContent() {
                            required 
                            type="text" 
                            placeholder="أحمد محمد" 
-                           className="w-full px-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#1089A4] focus:border-transparent transition-all" 
+                           className="w-full px-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#C5A021] focus:border-transparent transition-all" 
                         />
                      </div>
                    )}
@@ -151,13 +175,13 @@ function LoginContent() {
                          type="email" 
                          placeholder="name@example.com" 
                          dir="ltr"
-                         className="w-full px-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#1089A4] focus:border-transparent transition-all text-right" 
+                         className="w-full px-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#C5A021] focus:border-transparent transition-all text-right" 
                       />
                    </div>
                    <div className="space-y-2">
                       <div className="flex justify-between items-center">
                          <label className="text-sm font-semibold text-gray-700">كلمة المرور</label>
-                         {isLogin && <Link href="/forgot-password" className="text-xs font-medium text-[#1089A4] hover:text-[#021D24] transition-colors">هل نسيت كلمة المرور؟</Link>}
+                         {isLogin && <Link href="/forgot-password" className="text-xs font-medium text-[#C5A021] hover:text-[#0F172A] transition-colors">هل نسيت كلمة المرور؟</Link>}
                       </div>
                       <input 
                          value={password} 
@@ -166,7 +190,7 @@ function LoginContent() {
                          type="password" 
                          placeholder="••••••••" 
                          dir="ltr"
-                         className="w-full px-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#1089A4] focus:border-transparent transition-all text-right" 
+                         className="w-full px-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#C5A021] focus:border-transparent transition-all text-right" 
                       />
                    </div>
 
@@ -174,7 +198,7 @@ function LoginContent() {
                       <button 
                          disabled={loading} 
                          type="submit" 
-                         className="w-full bg-[#021D24] hover:bg-[#032a35] text-white py-4 rounded-xl font-bold text-base shadow-lg shadow-[#021D24]/20 transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                         className="w-full bg-[#0F172A] hover:bg-[#032a35] text-white py-4 rounded-xl font-bold text-base shadow-lg shadow-[#0F172A]/20 transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                       >
                          {loading ? (
                            <>
@@ -207,7 +231,7 @@ function LoginContent() {
 
                 <p className="text-center text-sm font-medium mt-10 text-gray-600">
                    {isLogin ? "ليس لديك حساب؟" : "لديك حساب بالفعل؟"}
-                   <button onClick={() => setIsLogin(!isLogin)} className="mr-2 text-[#1089A4] font-bold hover:underline transition-colors">
+                   <button onClick={() => setIsLogin(!isLogin)} className="mr-2 text-[#C5A021] font-bold hover:underline transition-colors">
                       {isLogin ? "إنشاء حساب جديد" : "تسجيل الدخول"}
                    </button>
                 </p>
@@ -223,7 +247,7 @@ export default function LoginPage() {
   return (
     <Suspense fallback={
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="w-10 h-10 border-4 border-[#1089A4] border-t-transparent rounded-full animate-spin"></div>
+        <div className="w-10 h-10 border-4 border-[#C5A021] border-t-transparent rounded-full animate-spin"></div>
       </div>
     }>
       <LoginContent />

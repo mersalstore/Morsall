@@ -53,33 +53,40 @@ export async function PATCH(req: Request) {
     }
 
     // Global settings update - construct update object
+    const payload = body.settings || data;
     const updateSettings: any = {};
-    if (data.siteTitle !== undefined) updateSettings.siteTitle = data.siteTitle;
-    if (data.siteDescription !== undefined) updateSettings.siteDescription = data.siteDescription;
-    if (data.logo !== undefined) updateSettings.logo = data.logo;
-    if (data.primaryColor !== undefined) updateSettings.primaryColor = data.primaryColor;
-    if (data.secondaryColor !== undefined) updateSettings.secondaryColor = data.secondaryColor;
-    if (data.whatsappNumber !== undefined) updateSettings.whatsappNumber = data.whatsappNumber;
-    if (data.facebookUrl !== undefined) updateSettings.facebookUrl = data.facebookUrl;
-    if (data.instagramUrl !== undefined) updateSettings.instagramUrl = data.instagramUrl;
-    if (data.codExtraFee !== undefined) updateSettings.codExtraFee = data.codExtraFee;
-    if (data.bankAccounts !== undefined) updateSettings.bankAccounts = data.bankAccounts;
+    if (payload.siteTitle !== undefined) updateSettings.siteTitle = payload.siteTitle;
+    if (payload.siteDescription !== undefined) updateSettings.siteDescription = payload.siteDescription;
+    if (payload.logo !== undefined) updateSettings.logo = payload.logo;
+    if (payload.primaryColor !== undefined) updateSettings.primaryColor = payload.primaryColor;
+    if (payload.secondaryColor !== undefined) updateSettings.secondaryColor = payload.secondaryColor;
+    if (payload.whatsappNumber !== undefined) updateSettings.whatsappNumber = payload.whatsappNumber;
+    if (payload.facebookUrl !== undefined) updateSettings.facebookUrl = payload.facebookUrl;
+    if (payload.instagramUrl !== undefined) updateSettings.instagramUrl = payload.instagramUrl;
+    if (payload.codExtraFee !== undefined) updateSettings.codExtraFee = payload.codExtraFee;
+    if (payload.bankAccounts !== undefined) updateSettings.bankAccounts = payload.bankAccounts;
+    if (payload.platformCommission !== undefined) updateSettings.platformCommission = payload.platformCommission;
+    if (payload.commissionType !== undefined) updateSettings.commissionType = payload.commissionType;
+    if (payload.fixedCommission !== undefined) updateSettings.fixedCommission = payload.fixedCommission;
 
     const settings = await prisma.settings.upsert({
       where: { id: "global" },
       update: updateSettings,
       create: { 
         id: "global",
-        siteTitle: data.siteTitle || "مرسال",
-        siteDescription: data.siteDescription || "",
-        logo: data.logo,
-        primaryColor: data.primaryColor || "#1089A4",
-        secondaryColor: data.secondaryColor || "#F29124",
-        whatsappNumber: data.whatsappNumber,
-        facebookUrl: data.facebookUrl,
-        instagramUrl: data.instagramUrl,
-        codExtraFee: data.codExtraFee || 0,
-        bankAccounts: data.bankAccounts || "",
+        siteTitle: payload.siteTitle || "مرسال",
+        siteDescription: payload.siteDescription || "",
+        logo: payload.logo,
+        primaryColor: payload.primaryColor || "#1089A4",
+        secondaryColor: payload.secondaryColor || "#F29124",
+        whatsappNumber: payload.whatsappNumber,
+        facebookUrl: payload.facebookUrl,
+        instagramUrl: payload.instagramUrl,
+        codExtraFee: payload.codExtraFee || 0,
+        bankAccounts: payload.bankAccounts || "",
+        platformCommission: payload.platformCommission || 10.0,
+        commissionType: payload.commissionType || "PERCENTAGE",
+        fixedCommission: payload.fixedCommission || 0.0,
       },
     });
     return NextResponse.json(settings);

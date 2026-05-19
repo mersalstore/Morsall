@@ -43,7 +43,7 @@ export default function ProductPage() {
 
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center pt-32">
-       <div className="animate-spin w-10 h-10 border-4 border-[#1089A4] border-t-transparent rounded-full" />
+       <div className="animate-spin w-10 h-10 border-4 border-[#C5A021] border-t-transparent rounded-full" />
     </div>
   );
 
@@ -56,33 +56,33 @@ export default function ProductPage() {
   return (
     <div className="min-h-screen bg-white pb-44" dir="rtl">
       {/* Breadcrumbs - Dynamic */}
-      <div className="max-w-[1600px] mx-auto px-6 md:px-12 py-10 flex items-center gap-4 text-[10px] font-black uppercase tracking-[0.4em] text-[#021D24]/20 pt-44">
-         <Link href="/" className="hover:text-[#1089A4] transition-colors cursor-pointer">الرئيسية</Link>
+      <div className="max-w-[1600px] mx-auto px-6 md:px-12 py-10 flex items-center gap-4 text-[10px] font-black uppercase tracking-[0.4em] text-[#0F172A]/20 pt-44">
+         <Link href="/" className="hover:text-[#C5A021] transition-colors cursor-pointer">الرئيسية</Link>
          <span className="material-symbols-rounded text-sm">chevron_left</span>
-         <Link href={`/category/${product.categoryId}`} className="hover:text-[#1089A4] transition-colors cursor-pointer">{product.category}</Link>
+         <Link href={`/category/${product.categoryId}`} className="hover:text-[#C5A021] transition-colors cursor-pointer">{product.category}</Link>
          <span className="material-symbols-rounded text-sm">chevron_left</span>
-         <span className="text-[#021D24]">{product.title}</span>
+         <span className="text-[#0F172A]">{product.title}</span>
       </div>
 
-      <div className="max-w-[1600px] mx-auto px-6 md:px-12 grid grid-cols-1 lg:grid-cols-12 gap-10">
+      <div className="max-w-[1600px] mx-auto px-6 md:px-12 grid grid-cols-1 lg:grid-cols-[35%_1fr_20%] gap-10">
         
-        {/* Pillar 1: Purchase Box (Left/Sticky) */}
-        <div className="lg:col-span-3 order-3 lg:order-1">
-           <PurchaseBox product={product} />
-        </div>
-
-        {/* Pillar 2: Info Deep-Dive (Middle) */}
-        <div className="lg:col-span-5 lg:order-2 order-2">
-           <ProductDetails product={product} />
-        </div>
-
-        {/* Pillar 3: Gallery (Right) */}
-        <div className="lg:col-span-4 lg:order-3 order-1">
+        {/* Pillar 1: Gallery (Right visually in RTL - Column 1) */}
+        <div className="order-1 lg:order-1">
            <ProductGallery images={
              typeof product.images === "string" && product.images.trim()
                ? product.images.split(",").map((s: any) => s.trim())
                : (product.image ? [product.image] : [])
            } />
+        </div>
+
+        {/* Pillar 2: Info Deep-Dive (Middle visually in RTL - Column 2) */}
+        <div className="order-2 lg:order-2">
+           <ProductDetails product={product} />
+        </div>
+
+        {/* Pillar 3: Purchase Box (Left visually in RTL - Column 3) */}
+        <div className="order-3 lg:order-3">
+           <PurchaseBox product={product} />
         </div>
       </div>
 

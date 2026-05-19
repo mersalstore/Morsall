@@ -32,6 +32,9 @@ export async function POST(req: Request) {
       items,
       subtotal,
       shippingCost,
+      source = "STORE",
+      status = "PENDING_APPROVAL",
+      vendorId
     } = body;
 
     // ── Validation ────────────────────────────────────────
@@ -41,80 +44,127 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
-    if (paymentMethod === "BANK_TRANSFER" && !paymentScreenshot) {
+    if (source !== "EXTERNAL_IMPORT" && paymentMethod === "BANK_TRANSFER" && !paymentScreenshot) {
       return NextResponse.json(
         { error: "يرجى رفع صورة إيصال التحويل لإتمام الطلب" },
         { status: 400 }
       );
     }
-    if (!items || !Array.isArray(items) || items.length === 0) {
-      return NextResponse.json(
-        { error: "السلة فارغة — يجب إضافة منتج واحد على الأقل" },
-        { status: 400 }
-      );
-    }
 
-    // ── Validate & enrich items from DB ──────────────────
-    // Fetch real product data to get vendorId and verify price
-    const productIds = items.map((i: any) => i.productId).filter(Boolean);
-    const dbProducts = productIds.length > 0
-      ? await prisma.product.findMany({
-        where: { id: { in: productIds } },
-        select: { id: true, vendorId: true, price: true, title: true, stock: true },
-      })
-      : [];
+    const isExternalImport = source === "EXTERNAL_IMPORT";
+    let finalItems: any[] = [];
+    const totalAmount = isExternalImport ? (parseFloat(body.totalAmount) || 0) : ((subtotal || 0) + (shippingCost || 0));
 
-    const productMap = Object.fromEntries(dbProducts.map((p: any) => [p.id, p]));
+    if (isExternalImport) {
+      // For external imports, we dynamically find or generate a product to link
+      let selectedProduct = await prisma.product.findFirst({
+        where: vendorId ? { vendorId } : {},
+        select: { id: true, vendorId: true }
+      });
 
-    // Fetch a fallback product in case of demo items added from frontend
-    let fallbackProduct = await prisma.product.findFirst({ select: { id: true, vendorId: true } });
-
-    // If completely empty DB, dynamically generate a fallback product to satisfy foreign key constraints
-    if (!fallbackProduct) {
-      const someVendor = await prisma.vendor.findFirst({ select: { id: true } });
-      if (someVendor) {
-        fallbackProduct = await prisma.product.create({
-          data: {
-            title: "منتج تجريبي للطلبات",
-            description: "تم إنشاؤه تلقائياً لدعم الطلبات التجريبية",
-            price: items?.[0]?.price || 15000,
-            stock: 999,
-            vendorId: someVendor.id,
-            status: "APPROVED"
-          },
-          select: { id: true, vendorId: true }
-        });
+      if (!selectedProduct) {
+        // Fallback to any vendor product
+        selectedProduct = await prisma.product.findFirst({ select: { id: true, vendorId: true } });
       }
-    }
 
-    const finalItems = items.map((item: any) => {
-      const dbProduct = productMap[item.productId];
+      if (!selectedProduct) {
+        // If absolutely no product exists, find a vendor to create one
+        let targetVendorId = vendorId;
+        if (!targetVendorId) {
+          const firstVendor = await prisma.vendor.findFirst({ select: { id: true } });
+          targetVendorId = firstVendor?.id;
+        }
 
-      if (!dbProduct && fallbackProduct) {
-        // Replace demo product with a real one
+        if (targetVendorId) {
+          selectedProduct = await prisma.product.create({
+            data: {
+              title: "شحنة خارجية مستوردة",
+              description: "تم إنشاؤه تلقائياً لدعم نظام الاستيراد اللوجستي",
+              price: totalAmount,
+              stock: 9999,
+              vendorId: targetVendorId,
+              status: "APPROVED"
+            },
+            select: { id: true, vendorId: true }
+          });
+        }
+      }
+
+      if (selectedProduct) {
+        finalItems.push({
+          productId: selectedProduct.id,
+          vendorId: selectedProduct.vendorId,
+          quantity: 1,
+          priceAtTime: totalAmount,
+          size: null,
+          color: null,
+        });
+      } else {
+        return NextResponse.json(
+          { error: "لا يمكن إتمام الاستيراد لعدم وجود أي مورد نشط في النظام" },
+          { status: 422 }
+        );
+      }
+    } else {
+      if (!items || !Array.isArray(items) || items.length === 0) {
+        return NextResponse.json(
+          { error: "السلة فارغة — يجب إضافة منتج واحد على الأقل" },
+          { status: 400 }
+        );
+      }
+
+      // ── Validate & enrich items from DB ──────────────────
+      const productIds = items.map((i: any) => i.productId).filter(Boolean);
+      const dbProducts = productIds.length > 0
+        ? await prisma.product.findMany({
+          where: { id: { in: productIds } },
+          select: { id: true, vendorId: true, price: true, title: true, stock: true },
+        })
+        : [];
+
+      const productMap = Object.fromEntries(dbProducts.map((p: any) => [p.id, p]));
+      let fallbackProduct = await prisma.product.findFirst({ select: { id: true, vendorId: true } });
+
+      if (!fallbackProduct) {
+        const someVendor = await prisma.vendor.findFirst({ select: { id: true } });
+        if (someVendor) {
+          fallbackProduct = await prisma.product.create({
+            data: {
+              title: "منتج تجريبي للطلبات",
+              description: "تم إنشاؤه تلقائياً لدعم الطلبات التجريبية",
+              price: items?.[0]?.price || 15000,
+              stock: 999,
+              vendorId: someVendor.id,
+              status: "APPROVED"
+            },
+            select: { id: true, vendorId: true }
+          });
+        }
+      }
+
+      finalItems = items.map((item: any) => {
+        const dbProduct = productMap[item.productId];
+        if (!dbProduct && fallbackProduct) {
+          return {
+            productId: fallbackProduct.id,
+            vendorId: fallbackProduct.vendorId,
+            quantity: Math.max(1, parseInt(item.quantity) || 1),
+            priceAtTime: item.price || 0,
+            size: item.size || null,
+            color: item.color || null,
+          };
+        }
+        if (!dbProduct && !fallbackProduct) return null;
         return {
-          productId: fallbackProduct.id,
-          vendorId: fallbackProduct.vendorId,
+          productId: dbProduct!.id,
+          vendorId: dbProduct!.vendorId,
           quantity: Math.max(1, parseInt(item.quantity) || 1),
-          priceAtTime: item.price || 0,
+          priceAtTime: dbProduct!.price || item.price || 0,
           size: item.size || null,
           color: item.color || null,
         };
-      }
-
-      if (!dbProduct && !fallbackProduct) {
-        return null;
-      }
-
-      return {
-        productId: dbProduct!.id,
-        vendorId: dbProduct!.vendorId,
-        quantity: Math.max(1, parseInt(item.quantity) || 1),
-        priceAtTime: dbProduct!.price || item.price || 0,
-        size: item.size || null,
-        color: item.color || null,
-      };
-    }).filter(Boolean) as any[];
+      }).filter(Boolean) as any[];
+    }
 
     if (finalItems.length === 0) {
       return NextResponse.json(
@@ -122,8 +172,6 @@ export async function POST(req: Request) {
         { status: 422 }
       );
     }
-
-    const totalAmount = (subtotal || 0) + (shippingCost || 0);
 
     // ── Create the order ─────────────────────────────────
     const order = await (prisma.order as any).create({
@@ -139,8 +187,9 @@ export async function POST(req: Request) {
         paymentMethod,
         paymentScreenshot: paymentScreenshot || null,
         totalAmount,
-        shippingCost: shippingCost || 0,
-        status: "PENDING_APPROVAL",
+        shippingCost: isExternalImport ? 0 : (shippingCost || 0),
+        status: isExternalImport ? status : "PENDING_APPROVAL",
+        source,
         items: {
           create: finalItems,
         },
@@ -154,6 +203,29 @@ export async function POST(req: Request) {
         },
       },
     });
+
+    // ── Save address in platform database if not already saved (الباب الرابع - المتطلب الثامن) ──
+    if (customerId && !isExternalImport) {
+      try {
+        const existingAddress = await (prisma as any).savedAddress.findFirst({
+          where: { userId: customerId }
+        });
+        if (!existingAddress) {
+          await (prisma as any).savedAddress.create({
+            data: {
+              userId: customerId,
+              city: city.trim(),
+              district: (district || city).trim(),
+              street: street.trim(),
+              isDefault: true,
+              label: "المنزل"
+            }
+          });
+        }
+      } catch (addrErr) {
+        console.error("Failed to automatically save address:", addrErr);
+      }
+    }
 
     return NextResponse.json({
       success: true,

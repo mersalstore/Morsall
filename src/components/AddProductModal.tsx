@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { cn } from "@/lib/utils";
+import { cn } from "../lib/utils";
 import { useRouter } from "next/navigation";
 
 interface AddProductModalProps {
@@ -45,6 +45,9 @@ export default function AddProductModal({ isOpen, onClose }: AddProductModalProp
   // Advanced Variations State
   const [selectedAttributes, setSelectedAttributes] = useState<{ name: string, values: string[] }[]>([]);
   const [variations, setVariations] = useState<any[]>([]);
+  const [activeAttributeId, setActiveAttributeId] = useState<string | null>(null);
+  const [attrSearch, setAttrSearch] = useState("");
+  const [isAttrDropdownOpen, setIsAttrDropdownOpen] = useState(false);
 
   const [localFiles, setLocalFiles] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
@@ -55,16 +58,33 @@ export default function AddProductModal({ isOpen, onClose }: AddProductModalProp
       // Fetch Categories
       fetch("/api/categories")
         .then(res => res.json())
-        .then(data => setCategories(data))
+        .then(data => {
+          if (Array.isArray(data)) setCategories(data);
+          else setCategories([]);
+        })
         .catch(err => console.error("Failed to fetch categories", err));
 
       // Fetch Global Attributes
       fetch("/api/attributes")
         .then(res => res.json())
-        .then(data => setAvailableAttributes(data))
+        .then(data => {
+          if (Array.isArray(data)) setAvailableAttributes(data);
+          else setAvailableAttributes([]);
+        })
         .catch(err => console.error("Failed to fetch attributes", err));
     }
   }, [isOpen]);
+
+  useEffect(() => {
+    const handleOutsideClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest(".attribute-select-container")) {
+        setIsAttrDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleOutsideClick);
+    return () => document.removeEventListener("mousedown", handleOutsideClick);
+  }, []);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
@@ -171,7 +191,7 @@ export default function AddProductModal({ isOpen, onClose }: AddProductModalProp
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
-          className="absolute inset-0 bg-[#021D24]/40 backdrop-blur-sm"
+          className="absolute inset-0 bg-[#0F172A]/40 backdrop-blur-sm"
         />
 
         <motion.div
@@ -183,16 +203,16 @@ export default function AddProductModal({ isOpen, onClose }: AddProductModalProp
           {/* Header with Steps */}
           <div className="px-12 py-8 border-b border-border flex items-center justify-between flex-shrink-0 bg-white">
             <div className="flex items-center gap-6">
-              <div className="w-16 h-16 bg-[#1089A4]/10 text-[#1089A4] rounded-[1.5rem] flex items-center justify-center shadow-lg shadow-[#1089A4]/5 border border-[#1089A4]/10 font-black text-xl">
+              <div className="w-16 h-16 bg-[#C5A021]/10 text-[#C5A021] rounded-[1.5rem] flex items-center justify-center shadow-lg shadow-[#C5A021]/5 border border-[#C5A021]/10 font-black text-xl">
                 {step}
               </div>
               <div>
-                <h2 className="text-2xl font-black tracking-tight text-[#021D24]">
+                <h2 className="text-2xl font-black tracking-tight text-[#0F172A]">
                   {step === 1 ? "اختيار النوع والتصنيف" : step === 2 ? "بيانات المنتج والسمات" : "التسعير والمخزون والصور"}
                 </h2>
                 <div className="flex gap-2 mt-2">
                   {[1, 2, 3].map(s => (
-                    <div key={s} className={cn("h-1 rounded-full transition-all", step >= s ? "w-8 bg-[#1089A4]" : "w-4 bg-gray-100")} />
+                    <div key={s} className={cn("h-1 rounded-full transition-all", step >= s ? "w-8 bg-[#C5A021]" : "w-4 bg-gray-100")} />
                   ))}
                 </div>
               </div>
@@ -213,7 +233,7 @@ export default function AddProductModal({ isOpen, onClose }: AddProductModalProp
                   className="space-y-12"
                 >
                   <div className="space-y-6">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-[#1089A4] px-2">1. حدد نوع المنتج</label>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-[#C5A021] px-2">1. حدد نوع المنتج</label>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                       {[
                         { id: "SIMPLE", name: "منتج ثابت", icon: "inventory", desc: "بدون خيارات (مثل كتاب)" },
@@ -226,11 +246,11 @@ export default function AddProductModal({ isOpen, onClose }: AddProductModalProp
                           className={cn(
                             "flex flex-col items-center text-center gap-4 p-8 rounded-[2.5rem] border-2 transition-all group",
                             formData.type === t.id
-                              ? "bg-[#021D24] border-[#021D24] text-white shadow-2xl scale-105"
-                              : "bg-white border-gray-100 hover:border-[#1089A4]/30"
+                              ? "bg-[#0F172A] border-[#0F172A] text-white shadow-2xl scale-105"
+                              : "bg-white border-gray-100 hover:border-[#C5A021]/30"
                           )}
                         >
-                          <span className={cn("material-symbols-rounded text-4xl", formData.type === t.id ? "text-white" : "text-[#1089A4]")}>{t.icon}</span>
+                          <span className={cn("material-symbols-rounded text-4xl", formData.type === t.id ? "text-white" : "text-[#C5A021]")}>{t.icon}</span>
                           <div>
                             <span className="text-sm font-black block mb-1">{t.name}</span>
                             <span className={cn("text-[10px] font-bold opacity-60", formData.type === t.id ? "text-white/60" : "text-gray-400")}>{t.desc}</span>
@@ -241,7 +261,7 @@ export default function AddProductModal({ isOpen, onClose }: AddProductModalProp
                   </div>
 
                   <div className="space-y-6">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-[#1089A4] px-2">2. اختر القسم المناسب</label>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-[#C5A021] px-2">2. اختر القسم المناسب</label>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                       {categories.map(cat => (
                         <button
@@ -250,7 +270,7 @@ export default function AddProductModal({ isOpen, onClose }: AddProductModalProp
                           className={cn(
                             "p-4 rounded-2xl border-2 transition-all text-center",
                             formData.categoryId === cat.id
-                              ? "bg-[#1089A4] border-[#1089A4] text-white shadow-lg"
+                              ? "bg-[#C5A021] border-[#C5A021] text-white shadow-lg"
                               : "bg-gray-50 border-transparent text-gray-500 hover:bg-gray-100"
                           )}
                         >
@@ -278,7 +298,7 @@ export default function AddProductModal({ isOpen, onClose }: AddProductModalProp
                         value={formData.title}
                         onChange={e => setFormData({ ...formData, title: e.target.value })}
                         placeholder="مثلاً: قميص بولو قطني"
-                        className="w-full bg-gray-50 border-2 border-transparent rounded-2xl px-6 py-4 focus:border-[#1089A4] focus:bg-white outline-none transition-all font-bold"
+                        className="w-full bg-gray-50 border-2 border-transparent rounded-2xl px-6 py-4 focus:border-[#C5A021] focus:bg-white outline-none transition-all font-bold"
                       />
                     </div>
                     <div className="space-y-2">
@@ -288,7 +308,7 @@ export default function AddProductModal({ isOpen, onClose }: AddProductModalProp
                         value={formData.brand}
                         onChange={e => setFormData({ ...formData, brand: e.target.value })}
                         placeholder="مثلاً: نايك"
-                        className="w-full bg-gray-50 border-2 border-transparent rounded-2xl px-6 py-4 focus:border-[#1089A4] focus:bg-white outline-none transition-all font-bold"
+                        className="w-full bg-gray-50 border-2 border-transparent rounded-2xl px-6 py-4 focus:border-[#C5A021] focus:bg-white outline-none transition-all font-bold"
                       />
                     </div>
                   </div>
@@ -299,15 +319,15 @@ export default function AddProductModal({ isOpen, onClose }: AddProductModalProp
                       value={formData.shortDescription}
                       onChange={e => setFormData({ ...formData, shortDescription: e.target.value })}
                       placeholder="وصف سريع يظهر في قائمة المنتجات..."
-                      className="w-full bg-gray-50 border-2 border-transparent rounded-2xl px-6 py-4 focus:border-[#1089A4] focus:bg-white outline-none transition-all font-bold min-h-[100px]"
+                      className="w-full bg-gray-50 border-2 border-transparent rounded-2xl px-6 py-4 focus:border-[#C5A021] focus:bg-white outline-none transition-all font-bold min-h-[100px]"
                     />
                   </div>
 
                   {/* Dynamic Attributes Manager */}
                   {formData.type === "VARIABLE" && (
-                    <div className="space-y-8 p-8 bg-[#1089A4]/5 rounded-[2.5rem] border-2 border-dashed border-[#1089A4]/20">
+                    <div className="space-y-8 p-8 bg-[#C5A021]/5 rounded-[2.5rem] border-2 border-dashed border-[#C5A021]/20">
                       <div className="flex items-center justify-between">
-                        <h4 className="font-black text-[#021D24]">تحديد الخيارات (المقاسات، الألوان، الخ)</h4>
+                        <h4 className="font-black text-[#0F172A]">تحديد الخيارات (المقاسات، الألوان، الخ)</h4>
                         <button
                           onClick={() => {
                             const name = prompt("اسم السمة:");
@@ -320,48 +340,127 @@ export default function AddProductModal({ isOpen, onClose }: AddProductModalProp
                               }]);
                             }
                           }}
-                          className="text-[10px] font-black text-[#1089A4] underline"
+                          className="text-[10px] font-black text-[#C5A021] underline"
                         >
                           إضافة سمة مخصصة +
                         </button>
                       </div>
 
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {availableAttributes.map(attr => (
-                          <div key={attr.id} className="bg-white p-6 rounded-2xl shadow-sm space-y-4">
-                            <label className="text-[10px] font-black uppercase text-gray-400">{attr.name}</label>
-                            <div className="flex flex-wrap gap-2">
-                              {attr.options?.map((opt: any) => {
-                                const current = selectedAttributes.find(a => a.name === attr.name);
-                                const isSelected = current?.values.includes(opt.value);
-                                return (
+                      <div className="space-y-4 relative attribute-select-container">
+                        <div className="relative">
+                          <input
+                            type="text"
+                            placeholder="ابحث عن سمة (مثال: لون، مقاس، خامة)..."
+                            value={attrSearch}
+                            onChange={(e) => {
+                              setAttrSearch(e.target.value);
+                              setIsAttrDropdownOpen(true);
+                            }}
+                            onFocus={() => setIsAttrDropdownOpen(true)}
+                            className="w-full bg-white border-2 border-gray-100 rounded-2xl px-6 py-4 pr-12 focus:border-[#C5A021] outline-none font-bold transition-all text-right"
+                          />
+                          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 material-symbols-rounded">
+                            search
+                          </span>
+                          {attrSearch && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setAttrSearch("");
+                                setActiveAttributeId(null);
+                              }}
+                              className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                            >
+                              <span className="material-symbols-rounded text-sm">close</span>
+                            </button>
+                          )}
+                        </div>
+
+                        {isAttrDropdownOpen && (
+                          <div className="absolute z-[110] w-full mt-2 max-h-60 overflow-y-auto bg-white border border-gray-100 rounded-2xl shadow-xl p-2 space-y-1">
+                            {availableAttributes.filter(attr => 
+                              attr.name.toLowerCase().includes(attrSearch.toLowerCase())
+                            ).length > 0 ? (
+                              availableAttributes
+                                .filter(attr => attr.name.toLowerCase().includes(attrSearch.toLowerCase()))
+                                .map(attr => (
                                   <button
-                                    key={opt.id}
+                                    type="button"
+                                    key={attr.id}
                                     onClick={() => {
-                                      setSelectedAttributes(prev => {
-                                        const existing = prev.find(a => a.name === attr.name);
-                                        if (existing) {
-                                          if (existing.values.includes(opt.value)) {
-                                            const filtered = existing.values.filter(v => v !== opt.value);
-                                            return filtered.length ? prev.map(a => a.name === attr.name ? { ...a, values: filtered } : a) : prev.filter(a => a.name !== attr.name);
-                                          }
-                                          return prev.map(a => a.name === attr.name ? { ...a, values: [...a.values, opt.value] } : a);
-                                        }
-                                        return [...prev, { name: attr.name, values: [opt.value] }];
-                                      });
+                                      setActiveAttributeId(attr.id);
+                                      setAttrSearch(attr.name);
+                                      setIsAttrDropdownOpen(false);
                                     }}
                                     className={cn(
-                                      "px-4 py-2 rounded-xl text-[10px] font-black transition-all border-2",
-                                      isSelected ? "bg-[#021D24] border-[#021D24] text-white" : "bg-gray-50 border-transparent text-gray-400"
+                                      "w-full text-right px-4 py-3 rounded-xl text-sm font-bold transition-all block",
+                                      activeAttributeId === attr.id
+                                        ? "bg-[#C5A021]/10 text-[#C5A021]"
+                                        : "hover:bg-gray-50 text-gray-700"
                                     )}
                                   >
-                                    {opt.value}
+                                    {attr.name}
                                   </button>
-                                );
-                              })}
+                                ))
+                            ) : (
+                              <div className="p-4 text-center text-xs text-gray-400">
+                                لا توجد سمات مطابقة. يمكنك إضافة سمة مخصصة أعلاه.
+                              </div>
+                            )}
+                          </div>
+                        )}
+                        
+                        {activeAttributeId && availableAttributes.find(a => a.id === activeAttributeId) && (() => {
+                          const attr = availableAttributes.find(a => a.id === activeAttributeId);
+                          return (
+                            <div className="bg-white p-6 rounded-2xl shadow-sm space-y-4 mt-4 animate-in fade-in slide-in-from-top-4">
+                              <label className="text-[10px] font-black uppercase text-gray-400">خيارات {attr.name}</label>
+                              <div className="flex flex-wrap gap-2">
+                                {attr.options?.map((opt: any) => {
+                                  const current = selectedAttributes.find(a => a.name === attr.name);
+                                  const isSelected = current?.values.includes(opt.value);
+                                  return (
+                                    <button
+                                      key={opt.id}
+                                      onClick={() => {
+                                        setSelectedAttributes(prev => {
+                                          const existing = prev.find(a => a.name === attr.name);
+                                          if (existing) {
+                                            if (existing.values.includes(opt.value)) {
+                                              const filtered = existing.values.filter(v => v !== opt.value);
+                                              return filtered.length ? prev.map(a => a.name === attr.name ? { ...a, values: filtered } : a) : prev.filter(a => a.name !== attr.name);
+                                            }
+                                            return prev.map(a => a.name === attr.name ? { ...a, values: [...a.values, opt.value] } : a);
+                                          }
+                                          return [...prev, { name: attr.name, values: [opt.value] }];
+                                        });
+                                      }}
+                                      className={cn(
+                                        "px-4 py-2 rounded-xl text-[10px] font-black transition-all border-2",
+                                        isSelected ? "bg-[#0F172A] border-[#0F172A] text-white" : "bg-gray-50 border-transparent text-gray-400 hover:border-gray-200"
+                                      )}
+                                    >
+                                      {opt.value}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          );
+                        })()}
+
+                        {selectedAttributes.length > 0 && (
+                          <div className="mt-6 p-4 bg-white rounded-2xl">
+                            <label className="text-[10px] font-black uppercase text-[#C5A021] mb-2 block">السمات المحددة للمنتج</label>
+                            <div className="flex flex-wrap gap-2">
+                              {selectedAttributes.map((sa, i) => (
+                                <div key={i} className="bg-gray-50 px-3 py-1 rounded-lg border text-[10px] font-bold">
+                                  {sa.name}: {sa.values.join("، ")}
+                                </div>
+                              ))}
                             </div>
                           </div>
-                        ))}
+                        )}
                       </div>
                     </div>
                   )}
@@ -407,7 +506,7 @@ export default function AddProductModal({ isOpen, onClose }: AddProductModalProp
                         type="number"
                         value={formData.price}
                         onChange={e => setFormData({ ...formData, price: e.target.value })}
-                        className="w-full bg-gray-50 border-2 border-transparent rounded-2xl px-6 py-4 focus:border-[#1089A4] focus:bg-white outline-none transition-all font-black text-lg text-[#1089A4]"
+                        className="w-full bg-gray-50 border-2 border-transparent rounded-2xl px-6 py-4 focus:border-[#C5A021] focus:bg-white outline-none transition-all font-black text-lg text-[#C5A021]"
                       />
                     </div>
                     <div className="space-y-2">
@@ -416,7 +515,7 @@ export default function AddProductModal({ isOpen, onClose }: AddProductModalProp
                         type="number"
                         value={formData.stock}
                         onChange={e => setFormData({ ...formData, stock: e.target.value })}
-                        className="w-full bg-gray-50 border-2 border-transparent rounded-2xl px-6 py-4 focus:border-[#1089A4] focus:bg-white outline-none transition-all font-black text-lg text-[#021D24]"
+                        className="w-full bg-gray-50 border-2 border-transparent rounded-2xl px-6 py-4 focus:border-[#C5A021] focus:bg-white outline-none transition-all font-black text-lg text-[#0F172A]"
                       />
                     </div>
                     <div className="space-y-2">
@@ -425,7 +524,7 @@ export default function AddProductModal({ isOpen, onClose }: AddProductModalProp
                         type="text"
                         value={formData.sku}
                         onChange={e => setFormData({ ...formData, sku: e.target.value })}
-                        className="w-full bg-gray-50 border-2 border-transparent rounded-2xl px-6 py-4 focus:border-[#1089A4] focus:bg-white outline-none transition-all font-bold text-gray-400"
+                        className="w-full bg-gray-50 border-2 border-transparent rounded-2xl px-6 py-4 focus:border-[#C5A021] focus:bg-white outline-none transition-all font-bold text-gray-400"
                       />
                     </div>
                   </div>
@@ -439,9 +538,9 @@ export default function AddProductModal({ isOpen, onClose }: AddProductModalProp
                           <button onClick={() => removeFile(idx)} className="absolute top-2 right-2 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"><span className="material-symbols-rounded text-sm">close</span></button>
                         </div>
                       ))}
-                      <label className="aspect-square border-4 border-dashed border-[#1089A4]/20 rounded-3xl flex flex-col items-center justify-center bg-[#1089A4]/5 hover:bg-[#1089A4]/10 transition-all cursor-pointer">
+                      <label className="aspect-square border-4 border-dashed border-[#C5A021]/20 rounded-3xl flex flex-col items-center justify-center bg-[#C5A021]/5 hover:bg-[#C5A021]/10 transition-all cursor-pointer">
                         <input type="file" multiple accept="image/*" onChange={handleFileChange} className="hidden" />
-                        <span className="material-symbols-rounded text-3xl text-[#1089A4]">add_photo_alternate</span>
+                        <span className="material-symbols-rounded text-3xl text-[#C5A021]">add_photo_alternate</span>
                         <span className="text-[10px] font-black mt-2">رفع صور</span>
                       </label>
                     </div>
@@ -470,7 +569,7 @@ export default function AddProductModal({ isOpen, onClose }: AddProductModalProp
                           sku: `${formData.sku || 'SKU'}-${Object.values(c).join('-').toUpperCase()}`
                         })));
                       }}
-                      className="w-full py-4 bg-[#021D24] text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl"
+                      className="w-full py-4 bg-[#0F172A] text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl"
                     >
                       توليد خيارات المنتج (Variations)
                     </button>
@@ -478,7 +577,7 @@ export default function AddProductModal({ isOpen, onClose }: AddProductModalProp
 
                   {variations.length > 0 && (
                     <div className="space-y-4 max-h-[300px] overflow-y-auto no-scrollbar border-t pt-6">
-                      <p className="text-[10px] font-black uppercase text-[#1089A4]">قائمة الخيارات المولدة</p>
+                      <p className="text-[10px] font-black uppercase text-[#C5A021]">قائمة الخيارات المولدة</p>
                       {variations.map((v, idx) => (
                         <div key={idx} className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border border-gray-100">
                           <span className="text-[10px] font-black">{Object.values(v.combination).join(" / ")}</span>
@@ -510,7 +609,7 @@ export default function AddProductModal({ isOpen, onClose }: AddProductModalProp
                     if (step === 1 && !formData.categoryId) return alert("اختر القسم");
                     setStep(step + 1);
                   }}
-                  className="px-14 py-4 rounded-2xl font-black text-xs uppercase tracking-widest bg-[#1089A4] text-white shadow-2xl shadow-[#1089A4]/30 hover:scale-105 active:scale-95 transition-all"
+                  className="px-14 py-4 rounded-2xl font-black text-xs uppercase tracking-widest bg-[#C5A021] text-white shadow-2xl shadow-[#C5A021]/30 hover:scale-105 active:scale-95 transition-all"
                 >
                   التالي
                 </button>
@@ -518,7 +617,7 @@ export default function AddProductModal({ isOpen, onClose }: AddProductModalProp
                 <button
                   onClick={handleSubmit}
                   disabled={loading}
-                  className="px-14 py-4 rounded-2xl font-black text-xs uppercase tracking-widest bg-[#021D24] text-white shadow-2xl shadow-[#021D24]/30 hover:scale-105 active:scale-95 transition-all flex items-center gap-3 disabled:opacity-50"
+                  className="px-14 py-4 rounded-2xl font-black text-xs uppercase tracking-widest bg-[#0F172A] text-white shadow-2xl shadow-[#0F172A]/30 hover:scale-105 active:scale-95 transition-all flex items-center gap-3 disabled:opacity-50"
                 >
                   {loading ? <span className="animate-spin material-symbols-rounded">sync</span> : <span className="material-symbols-rounded">check_circle</span>}
                   {loading ? "جاري الحفظ..." : "حفظ المنتج"}

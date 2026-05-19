@@ -74,7 +74,7 @@ export default function TrackOrderPage() {
           {/* Results Display */}
           {trackingResult && (
             <div className="animate-in fade-in slide-in-from-bottom-12 duration-700">
-               <div className="bg-[#021D24] text-white p-12 rounded-[3rem] border border-white/5 relative overflow-hidden mb-8">
+               <div className="bg-[#0F172A] text-white p-12 rounded-[3rem] border border-white/5 relative overflow-hidden mb-8">
                   <div className="absolute top-0 right-0 w-64 h-64 bg-accent/10 blur-[100px] rounded-full" />
                   <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-8">
                      <div className="text-center md:text-right">

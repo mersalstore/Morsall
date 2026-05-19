@@ -59,7 +59,7 @@ export default function Footer() {
       </button>
 
       {/* ── Main footer ── */}
-      <div className="bg-[#021D24] text-white pt-10 pb-6">
+      <div className="bg-[#0F172A] text-white pt-10 pb-6">
         <div className="max-w-[1600px] mx-auto px-6 lg:px-12">
 
           {/* Footer Identity Block */}

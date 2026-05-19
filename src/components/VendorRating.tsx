@@ -17,7 +17,7 @@ export default function VendorRating({ vendorId }: { vendorId: string }) {
       <div className="bg-gray-50 p-6 rounded-[2.5rem] mt-8 text-center">
         <h3 className="font-black mb-2">قيم تجربتك مع هذا المتجر</h3>
         <p className="text-xs text-gray-500 mb-4 font-bold">يجب تسجيل الدخول لتتمكن من التقييم</p>
-        <Link href="/login" className="inline-block bg-[#021D24] text-white px-6 py-2 rounded-xl text-xs font-bold hover:bg-[#1089A4] transition-colors">
+        <Link href="/login" className="inline-block bg-[#0F172A] text-white px-6 py-2 rounded-xl text-xs font-bold hover:bg-[#C5A021] transition-colors">
           تسجيل الدخول
         </Link>
       </div>
@@ -55,7 +55,7 @@ export default function VendorRating({ vendorId }: { vendorId: string }) {
 
   return (
     <div className="bg-white border border-gray-100 p-6 rounded-[2.5rem] mt-8 shadow-xl shadow-gray-200/20">
-      <h3 className="font-black mb-4 text-[#021D24]">قيم تجربتك مع هذا المتجر</h3>
+      <h3 className="font-black mb-4 text-[#0F172A]">قيم تجربتك مع هذا المتجر</h3>
       <div className="flex gap-2 mb-4" dir="ltr">
         {[1, 2, 3, 4, 5].map((star) => (
           <button
@@ -78,13 +78,13 @@ export default function VendorRating({ vendorId }: { vendorId: string }) {
         value={comment}
         onChange={(e) => setComment(e.target.value)}
         placeholder="أضف تعليقك هنا (اختياري)..."
-        className="w-full p-4 rounded-xl border border-gray-100 bg-gray-50 outline-none focus:border-[#1089A4] text-sm resize-none mb-4 font-medium transition-colors"
+        className="w-full p-4 rounded-xl border border-gray-100 bg-gray-50 outline-none focus:border-[#C5A021] text-sm resize-none mb-4 font-medium transition-colors"
         rows={3}
       />
       <button 
         onClick={handleSubmit} 
         disabled={loading || rating === 0}
-        className="w-full bg-[#1089A4] text-white px-6 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-[#021D24] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-[#1089A4]/20"
+        className="w-full bg-[#C5A021] text-white px-6 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-[#0F172A] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-[#C5A021]/20"
       >
         {loading ? "جاري الإرسال..." : "إرسال التقييم"}
       </button>

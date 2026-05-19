@@ -9,7 +9,7 @@ interface PageHeaderProps {
 export default function PageHeader({ title, subtitle, icon }: PageHeaderProps) {
   return (
     <div className="relative h-[300px] md:h-[400px] bg-[#011116] overflow-hidden flex flex-col items-center justify-center p-12 text-center border-b border-white/5">
-       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#1089A4]/10 blur-[150px] rounded-full pointer-events-none" />
+       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#C5A021]/10 blur-[150px] rounded-full pointer-events-none" />
        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[#F29124]/5 blur-[120px] rounded-full pointer-events-none" />
        
        <div className="relative z-10 space-y-8 animate-in fade-in slide-in-from-top-12 duration-1000">

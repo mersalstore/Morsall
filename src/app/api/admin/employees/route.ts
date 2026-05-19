@@ -23,7 +23,7 @@ export async function POST(req: Request) {
     const session = await getAdminSession();
     if (!session) return adminOnlyResponse();
 
-    const { name, email, role } = await req.json();
+    const { name, email, role, password, permissions } = await req.json();
     if (!name || !email || !role) {
       return NextResponse.json({ error: "الاسم والبريد والدور مطلوبة" }, { status: 400 });
     }
@@ -36,16 +36,45 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "هذا البريد الإلكتروني مسجل كموظف بالفعل" }, { status: 400 });
     }
 
-    // 2. إنشاء الموظف في جدول الموظفين
-    const employee = await db.employee.create({ data: { name, email: lowerEmail, role } });
+    // 2. التحقق من وجود حساب User — إذا لم يكن موجوداً نصنعه
+    const bcrypt = await import("bcryptjs");
+    const tempPassword = password || `Morsall@${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
+    const hashedPassword = await bcrypt.hash(tempPassword, 12);
 
-    // 3. مزامنة الدور مع جدول المستخدمين إذا كان الحساب موجوداً
-    await db.user.updateMany({
-      where: { email: lowerEmail },
-      data: { role: role }
+    const existingUser = await db.user.findUnique({ where: { email: lowerEmail } });
+
+    if (!existingUser) {
+      await db.user.create({
+        data: {
+          name,
+          email: lowerEmail,
+          password: hashedPassword,
+          role,
+          permissions: permissions || null,
+          isOnboarded: true,
+        },
+      });
+    } else {
+      // تحديث الدور فقط إذا كان الحساب موجوداً
+      await db.user.update({
+        where: { email: lowerEmail },
+        data: {
+          role,
+          permissions: permissions || null,
+          name: existingUser.name || name,
+          ...(password ? { password: hashedPassword } : {}),
+        },
+      });
+    }
+
+    // 3. إنشاء الموظف في جدول الموظفين
+    const employee = await db.employee.create({ data: { name, email: lowerEmail, role, permissions: permissions || null } });
+
+    return NextResponse.json({
+      ...employee,
+      tempPassword: existingUser ? null : tempPassword, // نرسل الباسورد المؤقتة للعرض
+      userCreated: !existingUser,
     });
-
-    return NextResponse.json(employee);
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
@@ -57,7 +86,7 @@ export async function PATCH(req: Request) {
     const session = await getAdminSession();
     if (!session) return adminOnlyResponse();
 
-    const { id, name, role, isActive } = await req.json();
+    const { id, name, role, isActive, permissions } = await req.json();
     if (!id) return NextResponse.json({ error: "ID مطلوب" }, { status: 400 });
 
     const employee = await db.employee.update({
@@ -65,15 +94,19 @@ export async function PATCH(req: Request) {
       data: { 
         ...(name && { name }), 
         ...(role && { role }), 
-        ...(isActive !== undefined && { isActive }) 
+        ...(isActive !== undefined && { isActive }),
+        ...(permissions !== undefined && { permissions })
       },
     });
 
-    // مزامنة الدور الجديد مع جدول المستخدمين
-    if (role && employee.email) {
+    // مزامنة الدور والخصوصيات الجديد مع جدول المستخدمين
+    if (employee.email) {
       await db.user.updateMany({
         where: { email: employee.email.toLowerCase() },
-        data: { role: role }
+        data: { 
+          ...(role && { role }),
+          ...(permissions !== undefined && { permissions })
+        }
       });
     }
 

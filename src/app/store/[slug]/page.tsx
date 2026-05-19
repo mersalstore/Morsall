@@ -6,6 +6,8 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import VendorRating from "@/components/VendorRating";
 
+export const dynamic = "force-dynamic";
+
 export default async function VendorStorePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
 
@@ -40,7 +42,7 @@ export default async function VendorStorePage({ params }: { params: Promise<{ sl
           {vendor.storeBanner ? (
             <img src={vendor.storeBanner} alt={vendor.storeName} className="w-full h-full object-cover opacity-60" />
           ) : (
-            <div className="w-full h-full bg-gradient-to-br from-[#021D24] to-[#1089A4] opacity-80" />
+            <div className="w-full h-full bg-gradient-to-br from-[#0F172A] to-[#C5A021] opacity-80" />
           )}
           
           {/* Overlay Content */}
@@ -52,7 +54,7 @@ export default async function VendorStorePage({ params }: { params: Promise<{ sl
                      {vendor.storeLogo ? (
                        <img src={vendor.storeLogo} alt="Logo" className="w-full h-full object-contain" />
                      ) : (
-                       <div className="text-6xl font-black text-[#021D24]">{vendor.storeName[0].toUpperCase()}</div>
+                       <div className="text-6xl font-black text-[#0F172A]">{vendor.storeName[0].toUpperCase()}</div>
                      )}
                   </div>
                   
@@ -136,7 +138,7 @@ export default async function VendorStorePage({ params }: { params: Promise<{ sl
             <div className="lg:col-span-3">
                <div className="flex items-center justify-between mb-12 border-b border-gray-100 pb-8">
                   <div className="flex items-center gap-6">
-                    <h2 className="text-3xl font-black text-[#021D24] tracking-tighter">المنتجات <span style={{ color: secondaryColor }}>المتوفرة</span></h2>
+                    <h2 className="text-3xl font-black text-[#0F172A] tracking-tighter">المنتجات <span style={{ color: secondaryColor }}>المتوفرة</span></h2>
                     <span className="bg-gray-100 px-4 py-1.5 rounded-full text-[10px] font-black text-gray-400 uppercase tracking-widest">{vendor.products.length} منتج</span>
                   </div>
                </div>

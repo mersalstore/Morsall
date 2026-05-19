@@ -49,8 +49,13 @@ export default function ProductCard({ id, title, price, image, vendor, vendorLoc
     setTimeout(() => setAdded(false), 1500);
   };
 
+  // Deterministic "fake" rating from product id to avoid hydration mismatch
+  const idHash = id.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0);
+  const fakeRating = 4 + (idHash % 10) / 10;
+  const fakeCount = 50 + (idHash % 251);
+
   return (
-    <div className="bg-white/80 backdrop-blur-xl border border-gray-100/50 rounded-[2rem] overflow-hidden hover:shadow-[0_20px_50px_rgba(16,137,164,0.15)] hover:border-[#1089A4]/40 transition-all duration-500 group flex flex-col h-full relative">
+    <div className="bg-white/80 backdrop-blur-xl border border-gray-100/50 rounded-[2rem] overflow-hidden hover:shadow-[0_20px_50px_rgba(16,137,164,0.15)] hover:border-[#C5A021]/40 transition-all duration-500 group flex flex-col h-full relative">
 
       {/* Badges Overlay */}
       <div className="absolute top-4 right-4 z-10 flex flex-col gap-2">
@@ -60,7 +65,7 @@ export default function ProductCard({ id, title, price, image, vendor, vendorLoc
           </span>
         )}
         {badge && (
-          <span className="bg-[#021D24] text-white text-[10px] font-black px-3 py-1 rounded-xl shadow-lg shadow-[#021D24]/30 uppercase tracking-[0.2em]">
+          <span className="bg-[#0F172A] text-white text-[10px] font-black px-3 py-1 rounded-xl shadow-lg shadow-[#0F172A]/30 uppercase tracking-[0.2em]">
             {badge}
           </span>
         )}
@@ -79,10 +84,10 @@ export default function ProductCard({ id, title, price, image, vendor, vendorLoc
         </button>
         <button
           onClick={(e) => { e.preventDefault(); toggleCompare(id); }}
-          className="w-10 h-10 bg-white shadow-xl rounded-2xl flex items-center justify-center hover:bg-[#1089A4] hover:text-white transition-all transform active:scale-90"
+          className="w-10 h-10 bg-white shadow-xl rounded-2xl flex items-center justify-center hover:bg-[#C5A021] hover:text-white transition-all transform active:scale-90"
           title="مقارنة المنتج"
         >
-          <span className={`material-symbols-rounded text-xl ${isInCompare(id) ? "text-[#1089A4] font-bold" : "text-gray-400"}`}>
+          <span className={`material-symbols-rounded text-xl ${isInCompare(id) ? "text-[#C5A021] font-bold" : "text-gray-400"}`}>
             compare_arrows
           </span>
         </button>
@@ -105,18 +110,18 @@ export default function ProductCard({ id, title, price, image, vendor, vendorLoc
            {/* Vendor Line */}
            <div className="flex items-center gap-2 mb-2">
              <span className="w-1.5 h-1.5 rounded-full bg-[#F29124]" />
-             <span className="text-[10px] text-[#1089A4] font-black uppercase tracking-widest hover:underline cursor-pointer">{vendor}</span>
+             <span className="text-[10px] text-[#C5A021] font-black uppercase tracking-widest hover:underline cursor-pointer">{vendor}</span>
            </div>
 
            <Link href={`/product/${id}`} className="block">
-             <h3 className="text-sm font-black text-[#021D24] leading-relaxed line-clamp-2 min-h-[2.8em] group-hover:text-[#1089A4] transition-colors">
+             <h3 className="text-sm font-black text-[#0F172A] leading-relaxed line-clamp-2 min-h-[2.8em] group-hover:text-[#C5A021] transition-colors">
                {title}
              </h3>
            </Link>
         </div>
 
         <div className="mt-auto">
-          <Stars rating={4 + Math.random() * 0.9} count={Math.floor(50 + Math.random() * 300)} />
+          <Stars rating={fakeRating} count={fakeCount} />
 
           <div className="mt-6 flex flex-col gap-4">
             <div className="flex items-end justify-between">
@@ -125,8 +130,8 @@ export default function ProductCard({ id, title, price, image, vendor, vendorLoc
                     <span className="text-[11px] text-gray-400 line-through mb-1 opacity-50">{price.toLocaleString()} ج.س</span>
                   )}
                   <div className="flex items-baseline gap-1.5">
-                    <span className="text-2xl font-black text-[#021D24] tracking-tighter">{discountedPrice.toLocaleString()}</span>
-                    <span className="text-[10px] text-[#1089A4] font-black uppercase tracking-widest">ج.س</span>
+                    <span className="text-2xl font-black text-[#0F172A] tracking-tighter">{discountedPrice.toLocaleString()}</span>
+                    <span className="text-[10px] text-[#C5A021] font-black uppercase tracking-widest">ج.س</span>
                   </div>
                </div>
                
@@ -141,7 +146,7 @@ export default function ProductCard({ id, title, price, image, vendor, vendorLoc
               className={`relative overflow-hidden group/btn flex items-center justify-center h-14 rounded-2xl font-black text-xs transition-all duration-500 shadow-xl ${
                 added
                   ? "bg-green-600 text-white shadow-green-500/20"
-                  : "bg-[#021D24] text-white shadow-gray-200/50 hover:bg-[#1089A4] hover:shadow-[#1089A4]/30 hover:scale-[1.02]"
+                  : "bg-[#0F172A] text-white shadow-gray-200/50 hover:bg-[#C5A021] hover:shadow-[#C5A021]/30 hover:scale-[1.02]"
               }`}
             >
               {added ? (

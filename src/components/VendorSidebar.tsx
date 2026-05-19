@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { cn } from "@/lib/utils";
+import { cn } from "../lib/utils";
 import { 
   LayoutDashboard, 
   BarChart3, 
@@ -14,7 +14,12 @@ import {
   Settings, 
   Store,
   LogOut,
-  ChevronRight
+  ChevronRight,
+  Truck,
+  Palette,
+  Layers,
+  Zap,
+  MapPin
 } from "lucide-react";
 import Image from "next/image";
 import { signOut } from "next-auth/react";
@@ -33,7 +38,12 @@ const NAV_ITEMS = [
   
   { id: "products",  icon: Box,              label: "المنتجات", group: "إدارة" },
   { id: "orders",    icon: ShoppingBasket,   label: "الطلبات", group: "إدارة" },
-  { id: "coupons",   icon: Tag,             label: "الكوبونات", group: "إدارة" },
+  { id: "wms",       icon: Layers,           label: "طلبات التوريد (WMS)", group: "إدارة" },
+  { id: "logistics", icon: Truck,            label: "تتبع التوصيل", group: "إدارة" },
+  { id: "shipping",  icon: MapPin,           label: "إعدادات الشحن", group: "إدارة" },
+  
+  { id: "design",    icon: Palette,          label: "تصميم المتجر", group: "المتجر" },
+  { id: "coupons",   icon: Tag,             label: "الكوبونات", group: "المتجر" },
   
   { id: "reviews",   icon: MessageSquare,       label: "التقييمات", group: "تواصل" },
   { id: "promotion", icon: Megaphone,         label: "الترويج", group: "تواصل" },
@@ -56,24 +66,24 @@ export default function VendorSidebar({ activeTab, setActiveTab, slug, isOpen, o
       )}
 
       <aside className={cn(
-        "fixed inset-y-0 right-0 w-72 bg-[#0F1629] text-white flex flex-col h-screen shadow-2xl z-[60] overflow-y-auto custom-scrollbar transition-transform duration-300 lg:translate-x-0 lg:sticky lg:top-0 lg:flex",
+        "fixed inset-y-0 right-0 w-72 bg-[#0F1629] text-white flex flex-col h-screen shadow-2xl z-[60] transition-transform duration-300 lg:translate-x-0 lg:sticky lg:top-0 lg:flex",
         isOpen ? "translate-x-0" : "translate-x-full"
       )} dir="rtl">
-      {/* Brand Section */}
-      <div className="p-8 border-b border-white/5">
+      {/* Brand Section - Fixed Top */}
+      <div className="p-8 border-b border-white/5 shrink-0">
         <div className="flex items-center gap-3">
           <div className="relative w-10 h-10 rounded-xl overflow-hidden bg-white/10 p-1 border border-white/10">
              <Image src="/logo.png" alt="Logo" fill className="object-contain" />
           </div>
           <div>
             <p className="font-black text-white text-lg leading-none">مرسال</p>
-            <p className="text-[10px] font-bold text-[#1089A4] mt-1 uppercase tracking-widest">لوحة التاجر</p>
+            <p className="text-[10px] font-bold text-[#C5A021] mt-1 uppercase tracking-widest">لوحة التاجر</p>
           </div>
         </div>
       </div>
 
-      {/* Navigation */}
-      <div className="flex-grow py-6 px-4 space-y-8">
+      {/* Navigation - Scrollable Middle */}
+      <div className="flex-grow py-6 px-4 space-y-8 overflow-y-auto custom-scrollbar">
         {groups.map(group => (
           <div key={group} className="space-y-2">
             <h4 className="px-4 text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">{group}</h4>
@@ -85,13 +95,13 @@ export default function VendorSidebar({ activeTab, setActiveTab, slug, isOpen, o
                   className={cn(
                     "w-full flex items-center gap-3 px-4 py-2.5 rounded-xl font-bold text-sm transition-all group relative",
                     activeTab === item.id
-                      ? "bg-[#1089A4] text-white shadow-lg shadow-[#1089A4]/20"
+                      ? "bg-[#C5A021] text-white shadow-lg shadow-[#C5A021]/20"
                       : "text-white/40 hover:bg-white/5 hover:text-white/80"
                   )}
                 >
                   <item.icon size={18} className={cn(
                     "transition-colors",
-                    activeTab === item.id ? "text-white" : "text-[#1089A4]/60 group-hover:text-[#1089A4]"
+                    activeTab === item.id ? "text-white" : "text-[#C5A021]/60 group-hover:text-[#C5A021]"
                   )} />
                   {item.label}
                   {activeTab === item.id && (
@@ -104,15 +114,15 @@ export default function VendorSidebar({ activeTab, setActiveTab, slug, isOpen, o
         ))}
       </div>
 
-      {/* Bottom Actions */}
-      <div className="p-6 border-t border-white/5 bg-black/20 space-y-3">
+      {/* Bottom Actions - Fixed Bottom */}
+      <div className="p-6 border-t border-white/5 bg-black/20 space-y-3 shrink-0">
         <a 
           href={`/store/${slug}`} 
           target="_blank" 
           className="flex items-center justify-between p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-all border border-white/5 group"
         >
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-[#1089A4]/20 text-[#1089A4] flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-[#C5A021]/20 text-[#C5A021] flex items-center justify-center">
               <Store size={16} />
             </div>
             <span className="text-xs font-black">زيارة متجرك</span>

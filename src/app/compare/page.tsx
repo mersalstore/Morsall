@@ -59,7 +59,7 @@ export default function ComparePage() {
   const allSpecs = Array.from(new Set(products.flatMap(p => Object.keys(p.specs || {}))));
 
   if (loading) {
-    return <div className="min-h-screen pt-44 flex justify-center"><div className="w-10 h-10 border-4 border-[#1089A4] border-t-transparent rounded-full animate-spin" /></div>;
+    return <div className="min-h-screen pt-44 flex justify-center"><div className="w-10 h-10 border-4 border-[#C5A021] border-t-transparent rounded-full animate-spin" /></div>;
   }
 
   if (compareList.length === 0) {
@@ -69,10 +69,10 @@ export default function ComparePage() {
             <span className="material-symbols-rounded text-6xl text-gray-300">compare_arrows</span>
          </div>
          <div className="space-y-2">
-            <h1 className="text-3xl font-black text-[#021D24]">قائمة المقارنة فارغة</h1>
+            <h1 className="text-3xl font-black text-[#0F172A]">قائمة المقارنة فارغة</h1>
             <p className="text-gray-400 font-bold">أضف منتجات من المتجر لتقارن بينها وبين مواصفاتها</p>
          </div>
-         <Link href="/shop" className="bg-[#1089A4] text-white px-10 py-4 rounded-2xl font-black text-sm hover:shadow-xl transition-all">
+         <Link href="/shop" className="bg-[#C5A021] text-white px-10 py-4 rounded-2xl font-black text-sm hover:shadow-xl transition-all">
             ابدأ التسـوق
          </Link>
       </div>
@@ -84,10 +84,10 @@ export default function ComparePage() {
       <div className="max-w-[1600px] mx-auto space-y-12">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b-2 border-gray-100 pb-8">
            <div className="space-y-2">
-              <h1 className="text-4xl font-black text-[#021D24]">مقارنة <span className="text-[#1089A4]">المنتجات</span></h1>
+              <h1 className="text-4xl font-black text-[#0F172A]">مقارنة <span className="text-[#C5A021]">المنتجات</span></h1>
               <p className="text-gray-400 text-sm font-bold">قارن بين المواصفات والأسعار لتختار الأفضل لك</p>
            </div>
-           <span className="text-xs font-black bg-white px-4 py-2 rounded-xl border border-gray-100 text-[#1089A4]">
+           <span className="text-xs font-black bg-white px-4 py-2 rounded-xl border border-gray-100 text-[#C5A021]">
               {products.length} منتجات في المقارنة
            </span>
         </div>
@@ -121,12 +121,12 @@ export default function ComparePage() {
                        </div>
                        <div className="text-right space-y-1">
                           <p className="text-xs font-bold text-gray-400 uppercase tracking-tighter">{product.category}</p>
-                          <h3 className="text-sm font-black text-[#021D24] line-clamp-2 h-10">{product.title}</h3>
+                          <h3 className="text-sm font-black text-[#0F172A] line-clamp-2 h-10">{product.title}</h3>
                           <p className="text-lg font-black text-[#CB2E26]">{product.price.toLocaleString()} ج.س</p>
                        </div>
                        <button 
                          onClick={() => addItem({ ...product, quantity: 1 })}
-                         className="w-full bg-[#1089A4] text-white py-3 rounded-xl text-[10px] font-black hover:bg-[#0D708E] transition-all"
+                         className="w-full bg-[#C5A021] text-white py-3 rounded-xl text-[10px] font-black hover:bg-[#0D708E] transition-all"
                        >
                           أضف للسلة
                        </button>
@@ -140,7 +140,7 @@ export default function ComparePage() {
               <tr>
                  <td className="p-6 text-xs font-black text-gray-400 border-b border-gray-50">المتجر</td>
                  {products.map(p => (
-                   <td key={p.id} className="p-6 border-b border-gray-50 text-sm font-black text-[#1089A4]">{p.vendor}</td>
+                   <td key={p.id} className="p-6 border-b border-gray-50 text-sm font-black text-[#C5A021]">{p.vendor}</td>
                  ))}
               </tr>
               <tr>
@@ -149,7 +149,7 @@ export default function ComparePage() {
                    <td key={p.id} className="p-6 border-b border-gray-50">
                       <div className="flex items-center gap-1">
                          <span className="material-symbols-rounded text-[#F29124] text-sm fill-1">star</span>
-                         <span className="text-sm font-black text-[#021D24]">{p.rating}</span>
+                         <span className="text-sm font-black text-[#0F172A]">{p.rating}</span>
                       </div>
                    </td>
                  ))}

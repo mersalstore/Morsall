@@ -7,8 +7,8 @@ const signals = [
     icon: "local_shipping",
     title: "توصيل لكل السودان",
     desc: "شحن سريع وآمن للولايات",
-    color: "bg-[#1089A4]/10",
-    iconColor: "text-[#1089A4]"
+    color: "bg-[#C5A021]/10",
+    iconColor: "text-[#C5A021]"
   },
   {
     icon: "verified_user",
@@ -21,8 +21,8 @@ const signals = [
     icon: "payments",
     title: "دفع آمن",
     desc: "تعدد في خيارات الدفع",
-    color: "bg-[#1089A4]/10",
-    iconColor: "text-[#1089A4]"
+    color: "bg-[#C5A021]/10",
+    iconColor: "text-[#C5A021]"
   },
   {
     icon: "support_agent",

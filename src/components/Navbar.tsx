@@ -18,6 +18,7 @@ export default function Navbar() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showCategories, setShowCategories] = useState(false);
+  const [expandedCat, setExpandedCat] = useState<string | null>(null);
   const [isScrolled, setIsScrolled] = useState(false);
   const [userCity, setUserCity] = useState("جاري التحديد...");
   const [availableCities, setAvailableCities] = useState<string[]>(["الخرطوم", "أم درمان", "بحري", "شندي", "مدني", "بورتسودان", "عطبرة", "كسلا", "الأبيض"]);
@@ -81,7 +82,8 @@ export default function Navbar() {
     ...navCategories.map(c => ({
       label: c.name,
       href: `/category/${c.id}`,
-      icon: c.icon || "category"
+      icon: c.icon || "category",
+      children: c.children
     })),
     ...(adLinks.length > 0 ? adLinks : [
       { label: "العروض 🔥", href: "/offers", icon: "bolt" },
@@ -263,7 +265,7 @@ export default function Navbar() {
                   <div className="absolute top-0 right-0 w-1.5 h-1.5 md:w-2 md:h-2 bg-[#C5A021] rounded-full border border-black shadow-[0_0_10px_rgba(197,160,33,0.5)]" />
                 </div>
                 <span className="hidden md:block text-[9px] font-black text-white/40 group-hover:text-white transition-colors uppercase tracking-widest leading-none mt-1">
-                  {isAuthenticated ? (session?.user?.name?.split(' ')[0] || "حسابي") : "حسابي"}
+                  {isAuthenticated ? ((session?.user as any)?.name ? (session?.user as any).name.split(' ')[0] : "حسابي") : "حسابي"}
                 </span>
               </motion.button>
 
@@ -314,7 +316,7 @@ export default function Navbar() {
                         )}
 
                         {(session?.user as any)?.role === 'ADMIN' && (
-                          <Link href="/admin/dashboard" className="flex items-center justify-between px-4 py-3 rounded-xl bg-[#1089A4]/10 hover:bg-[#1089A4]/20 text-xs font-black text-[#1089A4] transition-all group/item border border-[#1089A4]/10">
+                          <Link href="/admin/dashboard" className="flex items-center justify-between px-4 py-3 rounded-xl bg-[#C5A021]/10 hover:bg-[#C5A021]/20 text-xs font-black text-[#C5A021] transition-all group/item border border-[#C5A021]/10">
                             لوحة الإدارة
                             <span className="material-symbols-rounded text-lg group-hover/item:scale-110 transition-transform">admin_panel_settings</span>
                           </Link>
@@ -339,7 +341,7 @@ export default function Navbar() {
                           <p className="text-[10px] text-white/30 font-bold uppercase tracking-widest">سجل دخولك لتتمتع بكافة المزايا</p>
                         </div>
                         <div className="flex flex-col gap-2">
-                          <Link href="/login" className="flex items-center justify-center h-12 bg-[#F29124] text-[#021D24] rounded-2xl font-black text-xs uppercase tracking-widest hover:brightness-110 transition-all shadow-lg shadow-[#F29124]/20 active:scale-95">
+                          <Link href="/login" className="flex items-center justify-center h-12 bg-[#F29124] text-[#0F172A] rounded-2xl font-black text-xs uppercase tracking-widest hover:brightness-110 transition-all shadow-lg shadow-[#F29124]/20 active:scale-95">
                             تسجيل الدخول
                           </Link>
                           <Link href="/login?tab=register" className="flex items-center justify-center h-12 bg-white/5 border border-white/10 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-white/10 transition-all active:scale-95">
@@ -447,21 +449,61 @@ export default function Navbar() {
                   <span className="material-symbols-rounded">close</span>
                 </button>
               </div>
-              <div className="space-y-2">
-                {ALL_NAV_LINKS.map(link => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    onClick={() => setShowCategories(false)}
-                    className="flex items-center justify-between px-4 py-4 rounded-2xl hover:bg-white/5 border border-white/5 transition-all group"
-                  >
-                    <div className="flex items-center gap-4">
-                      <span className="material-symbols-rounded text-[#F29124] group-hover:scale-110 transition-transform">{link.icon}</span>
-                      <span className="font-bold">{link.label}</span>
+              <div className="space-y-2 overflow-y-auto max-h-[calc(100vh-120px)] scrollbar-none">
+                {ALL_NAV_LINKS.map(link => {
+                  const hasChildren = (link as any).children && (link as any).children.length > 0;
+                  const isExpanded = expandedCat === link.label;
+
+                  return (
+                    <div key={link.href} className="space-y-1">
+                      <div
+                        className="flex items-center justify-between px-4 py-4 rounded-2xl hover:bg-white/5 border border-white/5 transition-all group cursor-pointer"
+                        onClick={() => {
+                          if (hasChildren) {
+                            setExpandedCat(isExpanded ? null : link.label);
+                          } else {
+                            router.push(link.href);
+                            setShowCategories(false);
+                          }
+                        }}
+                      >
+                        <div className="flex items-center gap-4">
+                          <span className="material-symbols-rounded text-[#F29124] group-hover:scale-110 transition-transform">{link.icon}</span>
+                          <span className="font-bold text-sm">{link.label}</span>
+                        </div>
+                        {hasChildren ? (
+                          <span className={cn("material-symbols-rounded text-sm transition-transform duration-300", isExpanded ? "rotate-180" : "rotate-0")}>expand_more</span>
+                        ) : (
+                          <span className="material-symbols-rounded text-sm opacity-20">chevron_left</span>
+                        )}
+                      </div>
+
+                      {/* Subcategories */}
+                      <AnimatePresence>
+                        {hasChildren && isExpanded && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: "auto", opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            className="overflow-hidden bg-white/5 rounded-2xl mr-4"
+                          >
+                            {(link as any).children.map((child: any) => (
+                              <Link
+                                key={child.id}
+                                href={`/category/${child.id}`}
+                                onClick={() => setShowCategories(false)}
+                                className="flex items-center gap-3 px-6 py-3 text-xs text-white/60 hover:text-white hover:bg-white/5 transition-all"
+                              >
+                                <span className="w-1.5 h-1.5 rounded-full bg-[#F29124]/40" />
+                                {child.name}
+                              </Link>
+                            ))}
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </div>
-                    <span className="material-symbols-rounded text-sm opacity-20">chevron_left</span>
-                  </Link>
-                ))}
+                  );
+                })}
               </div>
             </motion.div>
           </>

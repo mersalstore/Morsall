@@ -7,9 +7,11 @@ export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.email) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const vendor = await prisma.vendor.findFirst({
-    where: { ownerEmail: session.user.email }
+  const user = await prisma.user.findUnique({
+    where: { email: session.user.email },
+    include: { vendorProfile: true }
   });
+  const vendor = user?.vendorProfile;
 
   if (!vendor) return NextResponse.json({ error: "Vendor not found" }, { status: 404 });
 
@@ -25,6 +27,7 @@ export async function POST(req: Request) {
           return await prisma.product.create({
             data: {
               title: p.title,
+              description: p.description || p.shortDescription || p.title || "",
               price: parseFloat(p.price),
               stock: parseInt(p.stock),
               images: p.images || "",

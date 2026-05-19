@@ -1,17 +1,25 @@
 "use client"
 
 import { useState, useEffect } from "react";
-import { cn } from "@/lib/utils";
+import { cn } from "../../../lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
-import AddProductModal from "@/components/AddProductModal";
+import AddProductModal from "../../../components/AddProductModal";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
-import VendorStoreSettings from "@/components/VendorStoreSettings";
-import StoreAnalytics from "@/components/StoreAnalytics";
-import VendorCoupons from "@/components/VendorCoupons";
-import VendorReviews from "@/components/VendorReviews";
-import VendorSidebar from "@/components/VendorSidebar";
+import VendorStoreSettings from "../../../components/VendorStoreSettings";
+import StoreAnalytics from "../../../components/StoreAnalytics";
+import VendorCoupons from "../../../components/VendorCoupons";
+import VendorReviews from "../../../components/VendorReviews";
+import VendorSidebar from "../../../components/VendorSidebar";
+import VendorLogisticsTab from "../../../components/VendorLogisticsTab";
+import VendorOrderModal from "../../../components/VendorOrderModal";
+import VendorInvoiceModal from "../../../components/VendorInvoiceModal";
+import VendorDesignTab from "../../../components/VendorDesignTab";
+import VendorShippingSettings from "../../../components/VendorShippingSettings";
+import VendorShippingPolicyModal from "../../../components/VendorShippingPolicyModal";
+import VendorWMSTab from "../../../components/vendor/VendorWMSTab";
+
 
 export default function VendorDashboard() {
   const router = useRouter();
@@ -31,6 +39,14 @@ export default function VendorDashboard() {
   const [selectedProducts, setSelectedProducts] = useState<Set<string>>(new Set());
   const [selectedOrders, setSelectedOrders] = useState<Set<string>>(new Set());
   const [withdrawals, setWithdrawals] = useState<any[]>([]);
+
+  // Modals state
+  const [selectedOrder, setSelectedOrder] = useState<any>(null);
+  const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
+  const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false);
+  const [isPolicyModalOpen, setIsPolicyModalOpen] = useState(false);
+  const [ordersToPrint, setOrdersToPrint] = useState<any[]>([]);
+
 
   const toggleProductSelection = (id: string) => {
     const newSelected = new Set(selectedProducts);
@@ -261,31 +277,31 @@ export default function VendorDashboard() {
       />
 
       {/* Main Content */}
-      <main className="flex-grow p-3 md:p-10 w-full overflow-hidden">
-        <div className="max-w-7xl mx-auto space-y-6 md:space-y-12">
-          
-          <header className="flex flex-row items-center justify-between gap-3">
-             <div className="flex items-center gap-3">
-                <button 
-                  onClick={() => setIsSidebarOpen(true)}
-                  className="lg:hidden w-10 h-10 rounded-xl bg-white border border-gray-100 flex items-center justify-center text-[#021D24] shadow-sm shrink-0"
-                >
-                   <span className="material-symbols-rounded text-xl">menu</span>
-                </button>
-                <div className="min-w-0">
-                   <h1 className="text-lg md:text-3xl font-black text-[#021D24] truncate">مرحباً 👋</h1>
-                   <p className="text-[9px] md:text-sm text-gray-400 font-bold mt-0.5 truncate">ملخص أداء متجرك اليوم.</p>
-                </div>
-             </div>
-             <button onClick={() => setIsModalOpen(true)} className="bg-[#1089A4] text-white px-4 md:px-8 py-2 md:py-3 rounded-xl font-black text-[10px] md:text-sm shadow-lg shadow-[#1089A4]/20 hover:scale-105 transition-all shrink-0">
-                إضافة منتج
-             </button>
-          </header>
+      <main className="flex-grow w-full overflow-y-auto h-screen custom-scrollbar relative">
+        <header className="sticky top-0 z-40 bg-[#F8FAFC]/80 backdrop-blur-xl px-4 md:px-10 py-4 md:py-6 border-b border-gray-100 flex flex-row items-center justify-between gap-3">
+           <div className="flex items-center gap-3">
+              <button 
+                onClick={() => setIsSidebarOpen(true)}
+                className="lg:hidden w-10 h-10 rounded-xl bg-white border border-gray-100 flex items-center justify-center text-[#0F172A] shadow-sm shrink-0 hover:bg-gray-50 transition-all"
+              >
+                 <span className="material-symbols-rounded text-xl">menu</span>
+              </button>
+              <div className="min-w-0">
+                 <h1 className="text-lg md:text-2xl font-black text-[#0F172A] truncate">مرحباً 👋</h1>
+                 <p className="text-[9px] md:text-xs text-gray-400 font-bold mt-0.5 truncate">لوحة تحكم المتجر</p>
+              </div>
+           </div>
+           <button onClick={() => setIsModalOpen(true)} className="bg-[#C5A021] text-white px-4 md:px-8 py-2 md:py-3 rounded-xl font-black text-[10px] md:text-sm shadow-lg shadow-[#C5A021]/20 hover:scale-105 transition-all shrink-0">
+              إضافة منتج
+           </button>
+        </header>
+
+        <div className="max-w-7xl mx-auto p-4 md:p-10 space-y-6 md:space-y-12">
 
           {activeTab === "overview" && (
             <>
               {/* Plan Info Card */}
-              <div className="bg-[#021D24] p-6 md:p-10 rounded-[2.5rem] text-white flex flex-col md:flex-row items-center justify-between gap-8 relative overflow-hidden shadow-2xl">
+              <div className="bg-[#0F172A] p-6 md:p-10 rounded-[2.5rem] text-white flex flex-col md:flex-row items-center justify-between gap-8 relative overflow-hidden shadow-2xl">
                  <div className="relative z-10 flex flex-col items-center md:items-start text-center md:text-right gap-4">
                     <div className="bg-white/10 px-4 py-1.5 rounded-full border border-white/10 flex items-center gap-2">
                        <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
@@ -308,24 +324,24 @@ export default function VendorDashboard() {
                           <p className="text-sm font-black text-white">{new Date(statsData.subscriptionEndsAt).toLocaleDateString("ar-EG")}</p>
                        </div>
                     )}
-                    <button onClick={() => setActiveTab("promotion")} className="bg-[#1089A4] hover:bg-[#0d6e84] text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-xl shadow-black/20 hover:scale-105">
+                    <button onClick={() => setActiveTab("promotion")} className="bg-[#C5A021] hover:bg-[#0d6e84] text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-xl shadow-black/20 hover:scale-105">
                        ترقية المتجر 🚀
                     </button>
                  </div>
                  
-                 <div className="absolute -left-20 -bottom-20 w-80 h-80 bg-[#1089A4]/20 rounded-full blur-[100px]" />
+                 <div className="absolute -left-20 -bottom-20 w-80 h-80 bg-[#C5A021]/20 rounded-full blur-[100px]" />
                  <div className="absolute -right-20 -top-20 w-80 h-80 bg-white/5 rounded-full blur-[100px]" />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
                 {stats.map((stat, i) => (
-                  <div key={i} className="bg-white p-5 md:p-8 rounded-2xl md:rounded-3xl border border-border shadow-sm flex items-center gap-4 md:gap-6 group hover:border-[#1089A4] transition-all">
+                  <div key={i} className="bg-white p-5 md:p-8 rounded-2xl md:rounded-3xl border border-border shadow-sm flex items-center gap-4 md:gap-6 group hover:border-[#C5A021] transition-all">
                     <div className={cn("w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-2xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-110", stat.color)}>
                        <span className="material-symbols-rounded text-2xl md:text-3xl">{stat.icon}</span>
                     </div>
                     <div className="min-w-0">
                        <p className="text-[10px] md:text-xs font-bold text-gray-400 uppercase tracking-widest truncate">{stat.label}</p>
-                       <p className="text-lg md:text-2xl font-black text-[#021D24] mt-0.5 truncate">{loading ? "..." : stat.value}</p>
+                       <p className="text-lg md:text-2xl font-black text-[#0F172A] mt-0.5 truncate">{loading ? "..." : stat.value}</p>
                     </div>
                   </div>
                 ))}
@@ -333,8 +349,8 @@ export default function VendorDashboard() {
 
               <div className="bg-white rounded-2xl md:rounded-3xl border border-border overflow-hidden shadow-sm">
                 <div className="px-5 py-4 md:px-8 md:py-6 border-b flex items-center justify-between">
-                   <h3 className="font-black text-[#021D24] text-base md:text-xl">آخر المبيعات</h3>
-                   <button onClick={() => setActiveTab("orders")} className="text-[10px] md:text-sm font-bold text-[#1089A4] hover:underline">عرض الكل</button>
+                   <h3 className="font-black text-[#0F172A] text-base md:text-xl">آخر المبيعات</h3>
+                   <button onClick={() => setActiveTab("orders")} className="text-[10px] md:text-sm font-bold text-[#C5A021] hover:underline">عرض الكل</button>
                 </div>
                 <div className="overflow-x-auto no-scrollbar">
                    <table className="w-full text-right min-w-[600px] md:min-w-0">
@@ -350,8 +366,8 @@ export default function VendorDashboard() {
                       <tbody>
                          {orders.length > 0 ? orders.slice(0, 5).map(order => (
                             <tr key={order.id} className="border-b last:border-0 hover:bg-gray-50/50 transition-colors">
-                               <td className="px-5 py-4 md:px-8 md:py-5 font-black text-[#1089A4] text-xs md:text-sm">#{order.id.slice(-6)}</td>
-                               <td className="px-5 py-4 md:px-8 md:py-5 font-black text-[#021D24] text-xs md:text-sm">{order.customerName}</td>
+                               <td className="px-5 py-4 md:px-8 md:py-5 font-black text-[#C5A021] text-xs md:text-sm">#{order.id.slice(-6)}</td>
+                               <td className="px-5 py-4 md:px-8 md:py-5 font-black text-[#0F172A] text-xs md:text-sm">{order.customerName}</td>
                                <td className="px-5 py-4 md:px-8 md:py-5 text-gray-400 text-[10px] md:text-sm">{new Date(order.createdAt).toLocaleDateString("ar-EG")}</td>
                                <td className="px-5 py-4 md:px-8 md:py-5 font-black text-xs md:text-sm">{order.totalAmount.toLocaleString()} ج.س</td>
                                <td className="px-5 py-4 md:px-8 md:py-5 text-center">
@@ -376,6 +392,10 @@ export default function VendorDashboard() {
           )}
 
           {activeTab === "analytics" && <StoreAnalytics stats={statsData} />}
+          {activeTab === "logistics" && <VendorLogisticsTab orders={orders} />}
+          {activeTab === "wms" && <VendorWMSTab products={products} />}
+          {activeTab === "shipping" && <VendorShippingSettings />}
+          {activeTab === "design" && <VendorDesignTab />}
           {activeTab === "coupons" && <VendorCoupons />}
           {activeTab === "reviews" && <VendorReviews />}
           {activeTab === "settings" && <VendorStoreSettings />}
@@ -384,7 +404,7 @@ export default function VendorDashboard() {
             <div className="space-y-6">
                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                   <div>
-                    <h3 className="text-lg md:text-2xl font-black text-[#021D24]">إدارة المنتجات</h3>
+                    <h3 className="text-lg md:text-2xl font-black text-[#0F172A]">إدارة المنتجات</h3>
                     <p className="text-[10px] md:text-sm text-gray-400 font-bold mt-1">عرض وتعديل مخزون متجرك</p>
                   </div>
                   <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
@@ -397,7 +417,7 @@ export default function VendorDashboard() {
                         استيراد Excel
                         <input type="file" className="hidden" accept=".xlsx,.xls" onChange={handleImportExcel} disabled={actionLoading === "import"} />
                      </label>
-                     <button onClick={() => setIsModalOpen(true)} className="w-full sm:w-auto justify-center bg-[#1089A4] text-white px-4 py-2 rounded-xl text-[10px] md:text-sm font-bold shadow-lg shadow-[#1089A4]/20 hover:scale-105 transition-all flex items-center gap-2">
+                     <button onClick={() => setIsModalOpen(true)} className="w-full sm:w-auto justify-center bg-[#C5A021] text-white px-4 py-2 rounded-xl text-[10px] md:text-sm font-bold shadow-lg shadow-[#C5A021]/20 hover:scale-105 transition-all flex items-center gap-2">
                         <span className="material-symbols-rounded text-base">add</span>
                         أضف منتج
                      </button>
@@ -418,17 +438,17 @@ export default function VendorDashboard() {
                             onClick={() => setProductStatusFilter(tab.id)}
                             className={cn(
                               "px-4 md:px-6 py-2 rounded-lg text-[10px] md:text-xs font-black transition-all flex items-center gap-2 whitespace-nowrap",
-                              productStatusFilter === tab.id ? "bg-white text-[#1089A4] shadow-sm" : "text-gray-400 hover:text-gray-600"
+                              productStatusFilter === tab.id ? "bg-white text-[#C5A021] shadow-sm" : "text-gray-400 hover:text-gray-600"
                             )}
                           >
                             {tab.label}
-                            <span className={cn("px-1.5 py-0.5 rounded-md text-[8px]", productStatusFilter === tab.id ? "bg-[#1089A4]/10 text-[#1089A4]" : "bg-gray-200 text-gray-400")}>
+                            <span className={cn("px-1.5 py-0.5 rounded-md text-[8px]", productStatusFilter === tab.id ? "bg-[#C5A021]/10 text-[#C5A021]" : "bg-gray-200 text-gray-400")}>
                                {tab.count}
                             </span>
                           </button>
                         ))}
                      </div>
-                     <div className="bg-gray-50 border border-gray-100 rounded-xl px-4 py-2 flex items-center gap-3 w-full md:w-80 focus-within:bg-white focus-within:border-[#1089A4] transition-all">
+                     <div className="bg-gray-50 border border-gray-100 rounded-xl px-4 py-2 flex items-center gap-3 w-full md:w-80 focus-within:bg-white focus-within:border-[#C5A021] transition-all">
                         <span className="material-symbols-rounded text-gray-400 text-lg">search</span>
                         <input
                           type="text"
@@ -460,7 +480,7 @@ export default function VendorDashboard() {
                                        <Image src={p.images?.split(",")[0] || "/placeholder.png"} alt={p.title} fill className="object-cover" />
                                     </div>
                                     <div className="min-w-0">
-                                       <p className="font-black text-[#021D24] text-xs leading-none group-hover:text-[#1089A4] transition-colors truncate">{p.title}</p>
+                                       <p className="font-black text-[#0F172A] text-xs leading-none group-hover:text-[#C5A021] transition-colors truncate">{p.title}</p>
                                        <p className="text-[9px] text-gray-400 mt-1 font-bold">ID: {p.id.slice(-6).toUpperCase()}</p>
                                     </div>
                                  </td>
@@ -473,7 +493,7 @@ export default function VendorDashboard() {
                                     </span>
                                  </td>
                                  <td className="py-4">
-                                    <p className="font-black text-xs text-[#021D24]">{p.price.toLocaleString()} <span className="text-[9px]">ج.س</span></p>
+                                    <p className="font-black text-xs text-[#0F172A]">{p.price.toLocaleString()} <span className="text-[9px]">ج.س</span></p>
                                  </td>
                                  <td className="py-4 text-center">
                                     <span className={cn(
@@ -485,7 +505,7 @@ export default function VendorDashboard() {
                                  </td>
                                  <td className="py-4 text-center">
                                     <div className="flex items-center justify-center gap-1.5">
-                                       <button className="w-7 h-7 rounded-lg bg-gray-50 text-gray-400 flex items-center justify-center hover:bg-[#1089A4]/10 hover:text-[#1089A4] transition-all">
+                                       <button className="w-7 h-7 rounded-lg bg-gray-50 text-gray-400 flex items-center justify-center hover:bg-[#C5A021]/10 hover:text-[#C5A021] transition-all">
                                           <span className="material-symbols-rounded text-sm">visibility</span>
                                        </button>
                                        <button className="w-7 h-7 rounded-lg bg-gray-50 text-gray-400 flex items-center justify-center hover:bg-blue-500/10 hover:text-blue-500 transition-all">
@@ -509,12 +529,26 @@ export default function VendorDashboard() {
             <div className="space-y-6">
                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                   <div>
-                    <h3 className="text-lg md:text-2xl font-black text-[#021D24]">إدارة الطلبات</h3>
+                    <h3 className="text-lg md:text-2xl font-black text-[#0F172A]">إدارة الطلبات</h3>
                     <p className="text-[10px] md:text-sm text-gray-400 font-bold mt-1">تتبع وتنفيذ طلبات عملائك</p>
                   </div>
                   <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
                      <button className="w-full sm:w-auto justify-center bg-white border border-border px-6 py-2.5 rounded-xl text-[10px] md:text-sm font-bold text-gray-600 hover:bg-gray-50 transition-colors">تصدير التقارير</button>
-                     <button className="w-full sm:w-auto justify-center bg-[#021D24] text-white px-6 py-2.5 rounded-xl text-[10px] md:text-sm font-bold shadow-lg shadow-[#021D24]/20 hover:scale-105 transition-all">طباعة البوليصات</button>
+                     <button 
+                        onClick={() => {
+                          const selected = orders.filter(o => selectedOrders.has(o.id));
+                          if (selected.length === 0) return alert("يرجى تحديد طلبات أولاً");
+                          setOrdersToPrint(selected);
+                          setIsPolicyModalOpen(true);
+                        }}
+                        className={cn(
+                          "w-full sm:w-auto justify-center px-6 py-2.5 rounded-xl text-[10px] md:text-sm font-bold shadow-lg transition-all flex items-center gap-2",
+                          selectedOrders.size > 0 ? "bg-[#0F172A] text-white shadow-[#0F172A]/20 hover:scale-105" : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                        )}
+                      >
+                         <span className="material-symbols-rounded text-base">print</span>
+                         طباعة البوليصات {selectedOrders.size > 0 && `(${selectedOrders.size})`}
+                      </button>
                   </div>
                </div>
 
@@ -534,17 +568,17 @@ export default function VendorDashboard() {
                             onClick={() => setOrderStatusFilter(tab.id)}
                             className={cn(
                               "px-4 md:px-6 py-2 rounded-lg text-[10px] md:text-xs font-black transition-all flex items-center gap-2 whitespace-nowrap",
-                              orderStatusFilter === tab.id ? "bg-white text-[#1089A4] shadow-sm" : "text-gray-400 hover:text-gray-600"
+                              orderStatusFilter === tab.id ? "bg-white text-[#C5A021] shadow-sm" : "text-gray-400 hover:text-gray-600"
                             )}
                           >
                             {tab.label}
-                            <span className={cn("px-1.5 py-0.5 rounded-md text-[8px]", orderStatusFilter === tab.id ? "bg-[#1089A4]/10 text-[#1089A4]" : "bg-gray-200 text-gray-400")}>
+                            <span className={cn("px-1.5 py-0.5 rounded-md text-[8px]", orderStatusFilter === tab.id ? "bg-[#C5A021]/10 text-[#C5A021]" : "bg-gray-200 text-gray-400")}>
                                {tab.count}
                             </span>
                           </button>
                         ))}
                      </div>
-                     <div className="bg-gray-50 border border-gray-100 rounded-xl px-4 py-2 flex items-center gap-3 w-full md:w-80 focus-within:bg-white focus-within:border-[#1089A4] transition-all">
+                     <div className="bg-gray-50 border border-gray-100 rounded-xl px-4 py-2 flex items-center gap-3 w-full md:w-80 focus-within:bg-white focus-within:border-[#C5A021] transition-all">
                         <span className="material-symbols-rounded text-gray-400 text-lg">search</span>
                         <input
                           type="text"
@@ -560,7 +594,16 @@ export default function VendorDashboard() {
                      <table className="w-full text-right min-w-[800px] md:min-w-0">
                         <thead>
                            <tr className="text-[10px] font-black text-gray-400 uppercase tracking-widest border-b">
-                              <th className="pb-4 pr-2">رقم الطلب</th>
+                              <th className="pb-4 pr-2 w-10">
+                                 <input 
+                                   type="checkbox" 
+                                   className="w-4 h-4 rounded-md border-gray-300 text-[#C5A021] focus:ring-[#C5A021]"
+                                   checked={selectedOrders.size === filteredOrders.length && filteredOrders.length > 0}
+                                   onChange={toggleAllOrders}
+                                 />
+                              </th>
+                              <th className="pb-4">رقم الطلب</th>
+
                               <th className="pb-4">العميل</th>
                               <th className="pb-4">التاريخ</th>
                               <th className="pb-4">الصافي</th>
@@ -575,20 +618,32 @@ export default function VendorDashboard() {
                                            order.status === "PENDING" ? "bg-yellow-50 text-yellow-600 border-yellow-100" :
                                            "bg-orange-50 text-orange-600 border-orange-100";
                              return (
-                               <tr key={order.id} className="border-b last:border-0 hover:bg-gray-50/30 transition-colors group">
+                               <tr key={order.id} className={cn(
+                                 "border-b last:border-0 hover:bg-gray-50/30 transition-colors group",
+                                 selectedOrders.has(order.id) && "bg-[#C5A021]/5"
+                               )}>
                                   <td className="py-4 pr-2">
-                                     <p className="font-black text-[#1089A4] text-xs md:text-sm leading-none">#{order.id.slice(-6).toUpperCase()}</p>
+                                     <input 
+                                       type="checkbox" 
+                                       className="w-4 h-4 rounded-md border-gray-300 text-[#C5A021] focus:ring-[#C5A021]"
+                                       checked={selectedOrders.has(order.id)}
+                                       onChange={() => toggleOrderSelection(order.id)}
+                                     />
+                                  </td>
+                                  <td className="py-4">
+
+                                     <p className="font-black text-[#C5A021] text-xs md:text-sm leading-none">#{order.id.slice(-6).toUpperCase()}</p>
                                      <p className="text-[9px] text-gray-400 mt-1 font-bold">ID: {order.id.slice(0, 6)}</p>
                                   </td>
                                   <td className="py-4">
-                                     <p className="font-black text-[#021D24] text-xs leading-none">{order.customerName}</p>
+                                     <p className="font-black text-[#0F172A] text-xs leading-none">{order.customerName}</p>
                                      <p className="text-[9px] text-gray-400 mt-1 font-bold">{order.city}</p>
                                   </td>
                                   <td className="py-4">
                                      <span className="text-[10px] font-bold text-gray-500">{new Date(order.createdAt).toLocaleDateString("ar-EG")}</span>
                                   </td>
                                   <td className="py-4">
-                                     <p className="font-black text-xs text-[#021D24]">{order.totalAmount.toLocaleString()} <span className="text-[9px]">ج.س</span></p>
+                                     <p className="font-black text-xs text-[#0F172A]">{order.totalAmount.toLocaleString()} <span className="text-[9px]">ج.س</span></p>
                                   </td>
                                   <td className="py-4 text-center">
                                      <span className={cn("px-2.5 py-1 rounded-full text-[8px] md:text-[9px] font-black uppercase border", sColor)}>
@@ -597,12 +652,35 @@ export default function VendorDashboard() {
                                   </td>
                                   <td className="py-4 text-center">
                                      <div className="flex items-center justify-center gap-1.5">
-                                        <button className="w-7 h-7 rounded-lg bg-gray-50 text-gray-400 flex items-center justify-center hover:bg-[#1089A4]/10 hover:text-[#1089A4] transition-all">
+                                        <button 
+                                          onClick={() => {
+                                            setSelectedOrder(order);
+                                            setIsOrderModalOpen(true);
+                                          }}
+                                          className="w-7 h-7 rounded-lg bg-gray-50 text-gray-400 flex items-center justify-center hover:bg-[#C5A021]/10 hover:text-[#C5A021] transition-all"
+                                        >
                                            <span className="material-symbols-rounded text-sm">visibility</span>
                                         </button>
-                                        <button className="w-7 h-7 rounded-lg bg-gray-50 text-gray-400 flex items-center justify-center hover:bg-green-500/10 hover:text-green-600 transition-all">
-                                           <span className="material-symbols-rounded text-sm">download</span>
-                                        </button>
+                                         <button 
+                                            onClick={() => {
+                                              setOrdersToPrint([order]);
+                                              setIsPolicyModalOpen(true);
+                                            }}
+                                            className="w-7 h-7 rounded-lg bg-gray-50 text-gray-400 flex items-center justify-center hover:bg-[#0F172A]/10 hover:text-[#0F172A] transition-all"
+                                            title="طباعة البوليصة"
+                                         >
+                                            <span className="material-symbols-rounded text-sm">print</span>
+                                         </button>
+                                         <button 
+                                            onClick={() => {
+                                              setSelectedOrder(order);
+                                              setIsInvoiceModalOpen(true);
+                                            }}
+                                            className="w-7 h-7 rounded-lg bg-gray-50 text-gray-400 flex items-center justify-center hover:bg-green-500/10 hover:text-green-600 transition-all"
+                                            title="تحميل الفاتورة"
+                                         >
+                                            <span className="material-symbols-rounded text-sm">description</span>
+                                         </button>
                                      </div>
                                   </td>
                                </tr>
@@ -618,14 +696,14 @@ export default function VendorDashboard() {
           {activeTab === "finance" && (
             <div className="space-y-8">
                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="bg-[#021D24] p-8 rounded-[2rem] text-white shadow-2xl relative overflow-hidden">
+                  <div className="bg-[#0F172A] p-8 rounded-[2rem] text-white shadow-2xl relative overflow-hidden">
                      <div className="relative z-10">
                         <p className="text-white/60 text-xs font-bold uppercase tracking-widest mb-2">الرصيد القابل للسحب</p>
                         <p className="text-4xl font-black">{statsData?.netProfit?.toLocaleString() || 0} <span className="text-sm">ج.س</span></p>
                         <button 
                            onClick={handleWithdrawalRequest}
                            disabled={actionLoading === "withdrawal"}
-                           className="mt-8 bg-[#1089A4] text-white w-full py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-[#0d6e84] transition-all shadow-xl shadow-[#1089A4]/20 disabled:opacity-50"
+                           className="mt-8 bg-[#C5A021] text-white w-full py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-[#0d6e84] transition-all shadow-xl shadow-[#C5A021]/20 disabled:opacity-50"
                         >
                            {actionLoading === "withdrawal" ? "جاري الإرسال..." : "طلب سحب الأرباح"}
                         </button>
@@ -635,7 +713,7 @@ export default function VendorDashboard() {
                   
                   <div className="bg-white p-8 rounded-[2rem] border shadow-sm flex flex-col justify-center">
                      <p className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-2">إجمالي المبيعات</p>
-                     <p className="text-3xl font-black text-[#021D24]">{statsData?.totalSales?.toLocaleString() || 0} <span className="text-sm font-bold opacity-40">ج.س</span></p>
+                     <p className="text-3xl font-black text-[#0F172A]">{statsData?.totalSales?.toLocaleString() || 0} <span className="text-sm font-bold opacity-40">ج.س</span></p>
                      <div className="mt-4 flex items-center gap-2 text-green-500 bg-green-50 w-fit px-2 py-1 rounded-lg">
                         <span className="material-symbols-rounded text-sm">trending_up</span>
                         <span className="text-[10px] font-black">+12% هذا الشهر</span>
@@ -651,7 +729,7 @@ export default function VendorDashboard() {
 
                <div className="bg-white rounded-3xl border border-border overflow-hidden shadow-sm">
                   <div className="px-8 py-6 border-b flex items-center justify-between">
-                     <h3 className="font-black text-[#021D24] text-xl">سجل السحوبات</h3>
+                     <h3 className="font-black text-[#0F172A] text-xl">سجل السحوبات</h3>
                      <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">آخر 10 عمليات</span>
                   </div>
                   
@@ -669,10 +747,10 @@ export default function VendorDashboard() {
                              {withdrawals.map((w) => (
                                 <tr key={w.id} className="border-b hover:bg-gray-50/50 transition-colors">
                                    <td className="px-8 py-6">
-                                      <p className="text-sm font-bold text-[#021D24]">{new Date(w.createdAt).toLocaleDateString("ar-EG")}</p>
+                                      <p className="text-sm font-bold text-[#0F172A]">{new Date(w.createdAt).toLocaleDateString("ar-EG")}</p>
                                    </td>
                                    <td className="px-8 py-6">
-                                      <p className="text-sm font-black text-[#1089A4]">{w.amount.toLocaleString()} ج.س</p>
+                                      <p className="text-sm font-black text-[#C5A021]">{w.amount.toLocaleString()} ج.س</p>
                                    </td>
                                    <td className="px-8 py-6">
                                       <span className={cn(
@@ -706,18 +784,18 @@ export default function VendorDashboard() {
           {activeTab === "promotion" && (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {[
-                { title: "الباقة الأساسية", desc: "ظهور في أعلى قسم 'وصل حديثاً' لمدة 3 أيام", price: "5,000 ج.س", color: "from-[#1089A4] to-[#086F85]" },
+                { title: "الباقة الأساسية", desc: "ظهور في أعلى قسم 'وصل حديثاً' لمدة 3 أيام", price: "5,000 ج.س", color: "from-[#C5A021] to-[#086F85]" },
                 { title: "الباقة الفضية", desc: "ظهور في قسم 'الأكثر مبيعاً' مع شريط مميز لمدة أسبوع", price: "12,000 ج.س", color: "from-[#F29124] to-[#D47B1E]" },
-                { title: "الباقة الذهبية", desc: "إعلان بانر في الصفحة الرئيسية وظهور مميز لمدة شهر", price: "35,000 ج.س", color: "from-[#021D24] to-[#010E12]" },
+                { title: "الباقة الذهبية", desc: "إعلان بانر في الصفحة الرئيسية وظهور مميز لمدة شهر", price: "35,000 ج.س", color: "from-[#0F172A] to-[#010E12]" },
               ].map((pkg, i) => (
-                <div key={i} className="bg-white p-8 rounded-3xl border border-border shadow-sm flex flex-col justify-between gap-8 group hover:border-[#1089A4] transition-all">
+                <div key={i} className="bg-white p-8 rounded-3xl border border-border shadow-sm flex flex-col justify-between gap-8 group hover:border-[#C5A021] transition-all">
                   <div>
-                    <h4 className="text-xl font-black text-[#021D24] mb-2">{pkg.title}</h4>
+                    <h4 className="text-xl font-black text-[#0F172A] mb-2">{pkg.title}</h4>
                     <p className="text-gray-400 font-bold text-sm leading-relaxed">{pkg.desc}</p>
                   </div>
                   <div>
-                    <p className="text-2xl font-black text-[#1089A4] mb-4">{pkg.price}</p>
-                    <button className="w-full bg-[#021D24] text-white py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-[#1089A4] transition-colors">طلب الباقة</button>
+                    <p className="text-2xl font-black text-[#C5A021] mb-4">{pkg.price}</p>
+                    <button className="w-full bg-[#0F172A] text-white py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-[#C5A021] transition-colors">طلب الباقة</button>
                   </div>
                 </div>
               ))}
@@ -727,12 +805,36 @@ export default function VendorDashboard() {
         </div>
       </main>
 
+      <VendorOrderModal 
+        isOpen={isOrderModalOpen} 
+        order={selectedOrder} 
+        onClose={() => setIsOrderModalOpen(false)}
+        onSuccess={() => {
+          // Refresh orders after status change
+          fetch("/api/vendor/orders").then(res => res.json()).then(setOrders);
+        }}
+      />
+
+      <VendorInvoiceModal
+        isOpen={isInvoiceModalOpen}
+        order={selectedOrder}
+        onClose={() => setIsInvoiceModalOpen(false)}
+        storeName={statsData?.storeName}
+      />
+
+      <VendorShippingPolicyModal
+        isOpen={isPolicyModalOpen}
+        orders={ordersToPrint}
+        onClose={() => setIsPolicyModalOpen(false)}
+        storeName={statsData?.storeName}
+      />
+      
       {/* ── Import Preview Modal ── */}
       {importPreview && (
         <div className="fixed inset-0 z-[600] flex items-center justify-center p-4" dir="rtl">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-md" onClick={() => setImportPreview(null)} />
           <div className="relative bg-white rounded-[2rem] shadow-2xl w-full max-w-4xl z-10 max-h-[85vh] overflow-hidden flex flex-col">
-            <div className="bg-[#1089A4] text-white p-6 flex items-center justify-between shrink-0">
+            <div className="bg-[#C5A021] text-white p-6 flex items-center justify-between shrink-0">
                <div>
                   <h3 className="text-xl font-black">معاينة استيراد المنتجات</h3>
                   <p className="text-white/60 text-[10px] font-bold uppercase tracking-widest mt-1">تأكد من صحة البيانات قبل التأكيد النهائي</p>
@@ -775,7 +877,7 @@ export default function VendorDashboard() {
                            return (
                               <tr key={i} className={cn(hasError ? "bg-red-50/50" : "")}>
                                  <td className="px-4 py-3 font-bold">{p.title}</td>
-                                 <td className="px-4 py-3 font-black text-[#1089A4]">{p.price} ج.س</td>
+                                 <td className="px-4 py-3 font-black text-[#C5A021]">{p.price} ج.س</td>
                                  <td className="px-4 py-3">{p.stock}</td>
                                  <td className="px-4 py-3 font-black text-[9px] uppercase">
                                     {hasError ? <span className="text-red-500">مرفوض</span> : <span className="text-green-600">جاهز</span>}
@@ -789,10 +891,10 @@ export default function VendorDashboard() {
             </div>
 
             <div className="p-6 border-t bg-gray-50 flex items-center justify-between shrink-0">
-               <p className="text-xs font-bold text-gray-400">الصفوف الصالحة: <span className="text-[#1089A4]">{importPreview.data.length - importPreview.errors.length}</span></p>
+               <p className="text-xs font-bold text-gray-400">الصفوف الصالحة: <span className="text-[#C5A021]">{importPreview.data.length - importPreview.errors.length}</span></p>
                <div className="flex gap-3">
                   <button onClick={() => setImportPreview(null)} className="px-6 py-2.5 bg-white border border-gray-200 rounded-xl font-bold text-xs">إلغاء</button>
-                  <button onClick={confirmImport} disabled={actionLoading === "import_confirm"} className="px-8 py-2.5 bg-[#1089A4] text-white rounded-xl font-black text-xs shadow-lg shadow-[#1089A4]/20 disabled:opacity-50">
+                  <button onClick={confirmImport} disabled={actionLoading === "import_confirm"} className="px-8 py-2.5 bg-[#C5A021] text-white rounded-xl font-black text-xs shadow-lg shadow-[#C5A021]/20 disabled:opacity-50">
                      {actionLoading === "import_confirm" ? "جاري الاستيراد..." : "✅ استيراد المنتجات الصالحة"}
                   </button>
                </div>

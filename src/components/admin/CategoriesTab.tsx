@@ -58,9 +58,15 @@ export default function CategoriesTab() {
     try {
       const res = await fetch("/api/admin/categories");
       const data = await res.json();
-      setCategories(data);
+      if (Array.isArray(data)) {
+        setCategories(data);
+      } else {
+        console.error("Categories data is not an array:", data);
+        setCategories([]);
+      }
     } catch (err) {
       console.error(err);
+      setCategories([]);
     }
     setLoading(false);
   };
@@ -169,7 +175,7 @@ export default function CategoriesTab() {
 
   if (loading) return (
     <div className="p-20 text-center">
-       <div className="w-12 h-12 border-4 border-[#1089A4] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+       <div className="w-12 h-12 border-4 border-[#C5A021] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
        <p className="text-gray-400 font-bold uppercase tracking-widest text-[10px]">جاري تحميل الهيكلية...</p>
     </div>
   );
@@ -185,12 +191,12 @@ export default function CategoriesTab() {
                placeholder="ابحث عن قسم..." 
                value={search}
                onChange={e => setSearch(e.target.value)}
-               className="w-full bg-white border border-gray-100 rounded-[1.5rem] pr-12 pl-6 py-4 text-sm font-bold shadow-2xl shadow-gray-200/20 outline-none focus:border-[#1089A4] transition-all"
+               className="w-full bg-white border border-gray-100 rounded-[1.5rem] pr-12 pl-6 py-4 text-sm font-bold shadow-2xl shadow-gray-200/20 outline-none focus:border-[#C5A021] transition-all"
             />
          </div>
          <button 
             onClick={() => { resetForm(); setIsModalOpen(true); }}
-            className="flex items-center gap-3 bg-[#021D24] text-white px-8 py-4 rounded-[1.5rem] font-black text-sm hover:bg-[#1089A4] transition-all shadow-2xl shadow-[#021D24]/20 active:scale-95"
+            className="flex items-center gap-3 bg-[#0F172A] text-white px-8 py-4 rounded-[1.5rem] font-black text-sm hover:bg-[#C5A021] transition-all shadow-2xl shadow-[#0F172A]/20 active:scale-95"
          >
             <Plus size={20} />
             إضافة قسم جديد
@@ -218,7 +224,7 @@ export default function CategoriesTab() {
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   onClick={() => setIsModalOpen(false)}
-                  className="absolute inset-0 bg-[#021D24]/80 backdrop-blur-md" 
+                  className="absolute inset-0 bg-[#0F172A]/80 backdrop-blur-md" 
                />
                <motion.div 
                   initial={{ opacity: 0, scale: 0.9, y: 20 }}
@@ -230,7 +236,7 @@ export default function CategoriesTab() {
                      <div className="w-12 h-12 rounded-2xl bg-[#F29124]/10 text-[#F29124] flex items-center justify-center">
                         <FolderTree size={24} />
                      </div>
-                     <h3 className="text-2xl font-black text-[#021D24]">
+                     <h3 className="text-2xl font-black text-[#0F172A]">
                         {editingCategory ? "تعديل القسم" : "إضافة قسم جديد"}
                      </h3>
                   </div>
@@ -242,7 +248,7 @@ export default function CategoriesTab() {
                            required
                            value={formData.name}
                            onChange={e => setFormData({...formData, name: e.target.value})}
-                           className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-6 py-4 text-sm font-bold outline-none focus:border-[#1089A4] transition-all"
+                           className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-6 py-4 text-sm font-bold outline-none focus:border-[#C5A021] transition-all"
                            placeholder="مثلاً: الإلكترونيات"
                         />
                      </div>
@@ -258,13 +264,13 @@ export default function CategoriesTab() {
                                >
                                  {formData.icon ? (
                                    <>
-                                     <span className="material-symbols-rounded text-[#1089A4]">{formData.icon}</span>
-                                     <span className="text-[10px] font-black text-[#021D24] uppercase">{formData.icon}</span>
+                                     <span className="material-symbols-rounded text-[#C5A021]">{formData.icon}</span>
+                                     <span className="text-[10px] font-black text-[#0F172A] uppercase">{formData.icon}</span>
                                    </>
                                  ) : formData.image ? (
                                    <>
                                       <img src={formData.image} alt="" className="w-6 h-6 rounded-md object-cover" />
-                                      <span className="text-[10px] font-black text-[#021D24] uppercase">صورة مخصصة</span>
+                                      <span className="text-[10px] font-black text-[#0F172A] uppercase">صورة مخصصة</span>
                                    </>
                                  ) : (
                                    <>
@@ -281,9 +287,9 @@ export default function CategoriesTab() {
                                     accept="image/*"
                                     onChange={handleImageUpload}
                                   />
-                                  <div className="w-14 h-14 bg-[#1089A4]/10 text-[#1089A4] rounded-2xl flex items-center justify-center hover:bg-[#1089A4]/20 transition-all">
+                                  <div className="w-14 h-14 bg-[#C5A021]/10 text-[#C5A021] rounded-2xl flex items-center justify-center hover:bg-[#C5A021]/20 transition-all">
                                      {uploading ? (
-                                       <div className="w-5 h-5 border-2 border-[#1089A4] border-t-transparent rounded-full animate-spin" />
+                                       <div className="w-5 h-5 border-2 border-[#C5A021] border-t-transparent rounded-full animate-spin" />
                                      ) : (
                                        <ImageIcon size={20} />
                                      )}
@@ -296,7 +302,7 @@ export default function CategoriesTab() {
                            <select 
                               value={formData.parentId}
                               onChange={e => setFormData({...formData, parentId: e.target.value})}
-                              className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-6 py-4 text-sm font-bold outline-none focus:border-[#1089A4] transition-all"
+                              className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-6 py-4 text-sm font-bold outline-none focus:border-[#C5A021] transition-all"
                            >
                               <option value="">لا يوجد (قسم رئيسي)</option>
                               {categories.filter(c => c.id !== editingCategory?.id).map(c => (
@@ -308,9 +314,9 @@ export default function CategoriesTab() {
 
                      <div className="p-6 bg-gray-50 rounded-3xl border border-gray-100 flex items-center justify-between">
                         <div className="flex items-center gap-4">
-                           <Monitor className="text-[#1089A4]" size={20} />
+                           <Monitor className="text-[#C5A021]" size={20} />
                            <div>
-                              <p className="text-xs font-black text-[#021D24]">العرض في الشريط العلوي</p>
+                              <p className="text-xs font-black text-[#0F172A]">العرض في الشريط العلوي</p>
                               <p className="text-[9px] text-gray-400 font-bold uppercase mt-1">Navbar Display Settings</p>
                            </div>
                         </div>
@@ -321,7 +327,7 @@ export default function CategoriesTab() {
                               checked={formData.showInNavbar}
                               onChange={e => setFormData({...formData, showInNavbar: e.target.checked})}
                            />
-                           <div className="w-12 h-6 bg-gray-200 rounded-full peer peer-checked:after:translate-x-[-1.5rem] after:content-[''] after:absolute after:top-[2px] after:right-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#1089A4]" />
+                           <div className="w-12 h-6 bg-gray-200 rounded-full peer peer-checked:after:translate-x-[-1.5rem] after:content-[''] after:absolute after:top-[2px] after:right-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#C5A021]" />
                         </label>
                      </div>
 
@@ -335,7 +341,7 @@ export default function CategoriesTab() {
                         </button>
                         <button 
                            type="submit"
-                           className="flex-[2] py-4 bg-[#1089A4] text-white rounded-2xl font-black text-sm hover:bg-[#021D24] transition-all shadow-xl shadow-[#1089A4]/20"
+                           className="flex-[2] py-4 bg-[#C5A021] text-white rounded-2xl font-black text-sm hover:bg-[#0F172A] transition-all shadow-xl shadow-[#C5A021]/20"
                         >
                            {editingCategory ? "حفظ التعديلات" : "إضافة القسم"}
                         </button>
@@ -368,7 +374,7 @@ function CategoryItem({ category, onEdit, onDelete }: { category: Category, onEd
         <div className="flex items-center gap-5">
             <div className={cn(
               "w-12 h-12 rounded-2xl flex items-center justify-center transition-all overflow-hidden",
-              category.showInNavbar ? "bg-[#1089A4]/10 text-[#1089A4]" : "bg-gray-100 text-gray-400"
+              category.showInNavbar ? "bg-[#C5A021]/10 text-[#C5A021]" : "bg-gray-100 text-gray-400"
             )}>
               {category.image ? (
                 <img src={category.image} alt={category.name} className="w-full h-full object-cover" />
@@ -378,7 +384,7 @@ function CategoryItem({ category, onEdit, onDelete }: { category: Category, onEd
             </div>
            <div>
               <div className="flex items-center gap-2">
-                 <h4 className="text-sm font-black text-[#021D24]">{category.name}</h4>
+                 <h4 className="text-sm font-black text-[#0F172A]">{category.name}</h4>
                  {category.showInNavbar && (
                    <div className="flex items-center gap-1 px-2 py-0.5 bg-green-50 text-green-500 rounded-lg text-[8px] font-black uppercase">
                       <Monitor size={8} />
@@ -393,10 +399,10 @@ function CategoryItem({ category, onEdit, onDelete }: { category: Category, onEd
         </div>
 
         <div className="flex items-center gap-2">
-           <button onClick={() => onEdit(category)} className="w-10 h-10 rounded-xl bg-gray-50 text-gray-400 flex items-center justify-center hover:bg-[#1089A4] hover:text-white transition-all"><Edit2 size={16} /></button>
+           <button onClick={() => onEdit(category)} className="w-10 h-10 rounded-xl bg-gray-50 text-gray-400 flex items-center justify-center hover:bg-[#C5A021] hover:text-white transition-all"><Edit2 size={16} /></button>
            <button onClick={() => onDelete(category.id)} className="w-10 h-10 rounded-xl bg-gray-50 text-gray-400 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all"><Trash2 size={16} /></button>
            {hasChildren && (
-             <button onClick={() => setIsExpanded(!isExpanded)} className="w-10 h-10 rounded-xl bg-[#021D24]/5 text-[#021D24] flex items-center justify-center hover:bg-[#021D24] hover:text-white transition-all">
+             <button onClick={() => setIsExpanded(!isExpanded)} className="w-10 h-10 rounded-xl bg-[#0F172A]/5 text-[#0F172A] flex items-center justify-center hover:bg-[#0F172A] hover:text-white transition-all">
                 {isExpanded ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
              </button>
            )}
@@ -422,10 +428,10 @@ function CategoryItem({ category, onEdit, onDelete }: { category: Category, onEd
                              <span className="material-symbols-rounded text-gray-400 text-sm">{child.icon || "subdirectory_arrow_right"}</span>
                            )}
                         </div>
-                        <span className="text-xs font-bold text-[#021D24]">{child.name}</span>
+                        <span className="text-xs font-bold text-[#0F172A]">{child.name}</span>
                      </div>
                      <div className="flex items-center gap-2">
-                        <button onClick={() => onEdit(child)} className="w-8 h-8 rounded-lg bg-white text-gray-300 flex items-center justify-center hover:text-[#1089A4] transition-all shadow-sm"><Edit2 size={14} /></button>
+                        <button onClick={() => onEdit(child)} className="w-8 h-8 rounded-lg bg-white text-gray-300 flex items-center justify-center hover:text-[#C5A021] transition-all shadow-sm"><Edit2 size={14} /></button>
                         <button onClick={() => onDelete(child.id)} className="w-8 h-8 rounded-lg bg-white text-gray-300 flex items-center justify-center hover:text-red-500 transition-all shadow-sm"><Trash2 size={14} /></button>
                      </div>
                   </div>

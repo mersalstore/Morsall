@@ -118,17 +118,17 @@ export default function OnboardingPage() {
                       className={cn(
                         "flex flex-col items-center justify-center p-6 rounded-2xl border-2 transition-all gap-2 group relative overflow-hidden",
                         selectedInterests.includes(cat.id) 
-                        ? "bg-[#021D24] border-[#021D24] text-white shadow-2xl shadow-primary/20" 
-                        : "bg-white border-gray-100 hover:border-[#1089A4]/30 hover:bg-gray-50"
+                        ? "bg-[#0F172A] border-[#0F172A] text-white shadow-2xl shadow-primary/20" 
+                        : "bg-white border-gray-100 hover:border-[#C5A021]/30 hover:bg-gray-50"
                       )}
                     >
                       <span className={cn(
                         "material-symbols-rounded text-2xl transition-transform group-hover:scale-110",
-                        selectedInterests.includes(cat.id) ? "text-[#C5A021]" : "text-[#021D24]/20"
+                        selectedInterests.includes(cat.id) ? "text-[#C5A021]" : "text-[#0F172A]/20"
                       )}>{cat.icon}</span>
                       <span className={cn(
                         "text-[10px] font-black transition-colors",
-                        selectedInterests.includes(cat.id) ? "text-white" : "text-[#021D24]"
+                        selectedInterests.includes(cat.id) ? "text-white" : "text-[#0F172A]"
                       )}>{cat.name}</span>
                     </button>
                  ))}
@@ -143,7 +143,7 @@ export default function OnboardingPage() {
                    "w-full py-5 rounded-2xl font-black text-sm uppercase tracking-widest transition-all active:scale-[0.98] shadow-xl",
                    (isSubmitting || !age || !phone || selectedInterests.length === 0)
                    ? "bg-gray-200 text-gray-400 cursor-not-allowed shadow-none"
-                   : "bg-[#021D24] text-white hover:bg-[#032a35] shadow-[#021D24]/20"
+                   : "bg-[#0F172A] text-white hover:bg-[#032a35] shadow-[#0F172A]/20"
                 )}
               >
                  {isSubmitting ? "جاري الحفظ..." : "بدء التسوق الآن"}
@@ -154,7 +154,7 @@ export default function OnboardingPage() {
               )}
 
               <div className="text-center pt-2">
-                 <Link href="/vendor/register" className="text-[10px] font-black text-[#1089A4] uppercase tracking-widest hover:underline flex items-center justify-center gap-2">
+                 <Link href="/vendor/register" className="text-[10px] font-black text-[#C5A021] uppercase tracking-widest hover:underline flex items-center justify-center gap-2">
                     <span className="material-symbols-rounded text-sm">storefront</span>
                     هل أنت تاجر؟ سجل متجرك الآن من هنا
                  </Link>

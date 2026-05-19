@@ -2,18 +2,13 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { writeFile, mkdir } from "fs/promises";
-import { isAbsolute, join } from "path";
+import { join, isAbsolute } from "path";
 import { existsSync } from "fs";
 
 export async function POST(req: Request) {
   try {
-    const HOSTINGER_IP = process.env.HOSTINGER_UPLOAD_HOST?.trim() || "82.198.228.182";
+    // ── Auth check ───────────────────────────────────────────
     const PROXY_SECRET = process.env.INTERNAL_UPLOAD_PROXY_SECRET?.trim() || "Mersal_Internal_Proxy_2026";
-    const MAX_FILE_SIZE = Number(process.env.MAX_UPLOAD_SIZE_MB || "10") * 1024 * 1024;
-    const PROXY_TIMEOUT_MS = Number(process.env.UPLOAD_PROXY_TIMEOUT_MS || "20000");
-    const INLINE_FALLBACK_ENABLED = (process.env.UPLOAD_INLINE_FALLBACK || "1") === "1";
-    const MAX_INLINE_SIZE = Number(process.env.MAX_INLINE_UPLOAD_SIZE_MB || "2") * 1024 * 1024;
-    const proxyHop = Number(req.headers.get("X-Upload-Proxy-Hop") || "0");
     const incomingSecret = req.headers.get("X-Proxy-Secret");
     const isTrustedProxy = incomingSecret === PROXY_SECRET;
 
@@ -22,7 +17,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Parse FormData
+    // ── Parse FormData ────────────────────────────────────────
     let data: FormData;
     try {
       data = await req.formData();
@@ -37,7 +32,9 @@ export async function POST(req: Request) {
     if (!file.type.startsWith("image/")) {
       return NextResponse.json({ error: "يسمح فقط برفع الصور" }, { status: 400 });
     }
-    if (file.size > MAX_FILE_SIZE) {
+
+    const MAX_SIZE = Number(process.env.MAX_UPLOAD_SIZE_MB || "10") * 1024 * 1024;
+    if (file.size > MAX_SIZE) {
       return NextResponse.json(
         { error: `حجم الصورة كبير جدًا. الحد الأقصى ${process.env.MAX_UPLOAD_SIZE_MB || "10"}MB` },
         { status: 400 }
@@ -47,109 +44,55 @@ export async function POST(req: Request) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Determine the upload directory
+    // ── Determine upload directory ────────────────────────────
+    // Priority: UPLOAD_DIR env → public/uploads (local fallback)
     const projectRoot = process.cwd();
-    const configuredUploadPath = process.env.UPLOAD_DIR?.trim();
-    let uploadDir = configuredUploadPath
-      ? (isAbsolute(configuredUploadPath)
-          ? configuredUploadPath
-          : join(projectRoot, configuredUploadPath))
-      : join(projectRoot, "public", "uploads");
+    const configuredPath = process.env.UPLOAD_DIR?.trim();
 
-    // --- TRY LOCAL WRITE FIRST (Works on Hostinger) ---
-    try {
-      if (!existsSync(uploadDir)) {
-        await mkdir(uploadDir, { recursive: true, mode: 0o755 });
-      }
-      
-      const timestamp = Date.now();
-      const cleanFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, "_");
-      const uniqueName = `${timestamp}-${cleanFileName}`;
-      const filePath = join(uploadDir, uniqueName);
-      
-      await writeFile(filePath, buffer);
-      
-      // If uploadDir is outside the project root, we still want to return a public URL.
-      // Usually /uploads/ is mapped to public/uploads or a symlink.
-      return NextResponse.json({ 
-        url: `/uploads/${uniqueName}`,
-        success: true
-      });
-    } catch (writeError: any) {
-      // Non read-only errors should fail immediately.
-      const isReadOnly =
-        writeError?.code === "EROFS" ||
-        projectRoot.includes("var/task") ||
-        String(writeError?.message || "").toLowerCase().includes("read-only");
-      if (!isReadOnly) {
-        throw writeError;
-      }
-      
-      console.log("Local write failed (Read-Only). Attempting Proxy to Hostinger...");
-      
-      // --- FALLBACK: PROXY TO HOSTINGER (Works on Vercel during propagation) ---
-      if (proxyHop > 0) {
-        return NextResponse.json({ error: "Recursion detected" }, { status: 508 });
-      }
-
-      const configuredTargets = process.env.HOSTINGER_UPLOAD_TARGETS?.trim();
-      const targets = configuredTargets
-        ? configuredTargets.split(",").map((t) => t.trim()).filter(Boolean)
-        : [`http://${HOSTINGER_IP}/api/upload`, "https://morsall.com/api/upload"];
-
-      let lastProxyError = "unknown";
-      for (const target of targets) {
-        try {
-        const forwardData = new FormData();
-        forwardData.append("file", file);
-
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), PROXY_TIMEOUT_MS);
-
-        const response = await fetch(target, {
-          method: "POST",
-          body: forwardData,
-          headers: {
-            "X-Proxy-Secret": PROXY_SECRET,
-            "X-Upload-Proxy-Hop": String(proxyHop + 1),
-            "Host": "morsall.com" // CRITICAL for Hostinger/LiteSpeed
-          },
-          signal: controller.signal,
-        });
-        clearTimeout(timeout);
-
-        if (response.ok) {
-          return NextResponse.json(await response.json());
-        }
-        
-        const errText = await response.text();
-        lastProxyError = `target=${target} status=${response.status} body=${errText.slice(0, 200)}`;
-      } catch (proxyError: any) {
-        lastProxyError = `target=${target} error=${proxyError?.message || String(proxyError)}`;
-      }
-      }
-
-      // --- LAST RESORT: INLINE DATA URL (temporary survival mode) ---
-      if (INLINE_FALLBACK_ENABLED && buffer.length <= MAX_INLINE_SIZE) {
-        const base64 = buffer.toString("base64");
-        const dataUrl = `data:${file.type};base64,${base64}`;
-        return NextResponse.json({
-          url: dataUrl,
-          storage: "inline",
-          warning: "Image stored inline temporarily until DNS fully points to Hostinger.",
-        });
-      }
-
-      return NextResponse.json(
-        {
-          error: "فشل الرفع: تعذر الكتابة محليًا وتعذر التحويل إلى Hostinger.",
-          details: lastProxyError,
-        },
-        { status: 500 }
-      );
+    let uploadDir: string;
+    if (configuredPath) {
+      uploadDir = isAbsolute(configuredPath) ? configuredPath : join(projectRoot, configuredPath);
+    } else {
+      uploadDir = join(projectRoot, "public", "uploads");
     }
 
+    console.log(`[UPLOAD] dir=${uploadDir}, file=${file.name}, size=${file.size}`);
+
+    // ── Ensure directory exists ───────────────────────────────
+    if (!existsSync(uploadDir)) {
+      console.log(`[UPLOAD] Creating directory: ${uploadDir}`);
+      await mkdir(uploadDir, { recursive: true, mode: 0o755 });
+    }
+
+    // ── Generate unique filename ──────────────────────────────
+    const timestamp = Date.now();
+    const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+    const safeName = file.name
+      .replace(/\.[^.]+$/, "")           // remove extension
+      .replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, "_") // keep Arabic + alphanumeric
+      .slice(0, 40);
+    const uniqueName = `${timestamp}-${safeName}.${ext}`;
+    const filePath = join(uploadDir, uniqueName);
+
+    // ── Write file ────────────────────────────────────────────
+    await writeFile(filePath, buffer);
+    console.log(`[UPLOAD] Success: ${filePath}`);
+
+    // ── Return public URL ─────────────────────────────────────
+    // Always return /uploads/<name> — the server or Next.js will serve it
+    return NextResponse.json({
+      url: `/uploads/${uniqueName}`,
+      success: true,
+    });
+
   } catch (error: any) {
-    return NextResponse.json({ error: error.message || "خطأ غير متوقع في رفع الملف" }, { status: 500 });
+    console.error("[UPLOAD] Error:", error);
+    return NextResponse.json(
+      {
+        error: "فشل رفع الصورة",
+        details: error?.message || "خطأ غير معروف",
+      },
+      { status: 500 }
+    );
   }
 }

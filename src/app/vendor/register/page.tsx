@@ -99,8 +99,8 @@ export default function VendorRegister() {
   if (status === "loading") {
     return (
       <div className="min-h-screen bg-muted/20 flex flex-col items-center justify-center gap-6">
-         <div className="w-16 h-16 border-4 border-[#1089A4] border-t-transparent rounded-full animate-spin" />
-         <span className="text-[10px] font-black uppercase tracking-[0.4em] text-[#1089A4]">جاري التحقق من الهوية السيادية...</span>
+         <div className="w-16 h-16 border-4 border-[#C5A021] border-t-transparent rounded-full animate-spin" />
+         <span className="text-[10px] font-black uppercase tracking-[0.4em] text-[#C5A021]">جاري التحقق من الهوية السيادية...</span>
       </div>
     );
   }
@@ -113,7 +113,7 @@ export default function VendorRegister() {
                <span className="material-symbols-rounded text-5xl">lock_person</span>
             </div>
             <div className="space-y-4">
-               <h1 className="text-3xl font-black text-[#021D24]">مطلوب تسجيل الدخول 🔐</h1>
+               <h1 className="text-3xl font-black text-[#0F172A]">مطلوب تسجيل الدخول 🔐</h1>
                <p className="text-gray-400 font-bold leading-relaxed">لبدء عملية تسجيل متجرك في مرسال، يجب أن تمتلك حساب مستخدم نشط أولاً لربط المتجر به.</p>
             </div>
             <Link 
@@ -134,20 +134,20 @@ export default function VendorRegister() {
         
         {/* Progress System */}
         <div className="flex items-center justify-between mb-16 px-4">
-           {[1, 2, 3].map((s) => (
+           {[1, 2, 3, 4].map((s) => (
              <div key={s} className="flex flex-col items-center gap-3">
                 <div className={cn(
                    "w-12 h-12 md:w-16 md:h-16 rounded-full flex items-center justify-center font-black transition-all border-4 shadow-2xl relative",
-                   step === s ? "bg-[#021D24] text-white border-[#1089A4] scale-110" : 
-                   step > s ? "bg-[#1089A4] text-white border-[#1089A4]" : "bg-white border-gray-100 text-[#021D24]/20"
+                   step === s ? "bg-[#0F172A] text-white border-[#C5A021] scale-110" : 
+                   step > s ? "bg-[#C5A021] text-white border-[#C5A021]" : "bg-white border-gray-100 text-[#0F172A]/20"
                 )}>
                    {step > s ? <CheckCircle2 className="w-6 h-6 md:w-8 md:h-8" /> : <span className="text-sm md:text-xl">{s}</span>}
                 </div>
                 <span className={cn(
                    "text-[9px] md:text-[10px] font-black uppercase tracking-[0.4em] leading-none mt-2",
-                   step === s ? "text-[#1089A4]" : "text-[#021D24]/20"
+                   step === s ? "text-[#C5A021]" : "text-[#0F172A]/20"
                 )}>
-                   {s === 1 ? "الحساب" : s === 2 ? "المتجر" : "التوثيق"}
+                   {s === 1 ? "الحساب" : s === 2 ? "المتجر" : s === 3 ? "الباقة" : "التوثيق"}
                 </span>
              </div>
            ))}
@@ -155,7 +155,7 @@ export default function VendorRegister() {
 
         <div className="bg-white rounded-[4rem] p-10 md:p-20 shadow-4xl border-white relative overflow-hidden ring-1 ring-black/5" dir="rtl">
           {/* Motta Accent */}
-          <div className="absolute top-0 left-0 w-32 h-32 bg-[#1089A4]/5 rounded-br-[5rem] pointer-events-none" />
+          <div className="absolute top-0 left-0 w-32 h-32 bg-[#C5A021]/5 rounded-br-[5rem] pointer-events-none" />
           
           {error && (
             <div className="bg-red-50 text-[#CB2E26] p-8 rounded-[2.5rem] border-4 border-red-100 flex flex-col gap-6 animate-shake mb-12">
@@ -165,7 +165,7 @@ export default function VendorRegister() {
                {error.includes("مسجل كبائع بالفعل") && (
                  <Link 
                    href="/vendor/dashboard"
-                   className="w-full bg-[#021D24] text-white py-4 rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] flex items-center justify-center gap-3 shadow-xl hover:bg-[#1089A4] transition-all"
+                   className="w-full bg-[#0F172A] text-white py-4 rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] flex items-center justify-center gap-3 shadow-xl hover:bg-[#C5A021] transition-all"
                  >
                     <span className="material-symbols-rounded text-lg">dashboard</span> توجه للوحة التحكم الآن
                  </Link>
@@ -177,28 +177,28 @@ export default function VendorRegister() {
             {step === 1 && (
               <div className="space-y-8 text-right">
                 <div className="text-center mb-16 space-y-3">
-                  <h2 className="text-3xl font-black text-[#021D24] tracking-tighter">معلومات حساب المالك</h2>
-                  <p className="text-[10px] font-black text-[#1089A4] uppercase tracking-[0.4em]">تأكيد الهوية الرقمية للتاجر</p>
+                  <h2 className="text-3xl font-black text-[#0F172A] tracking-tighter">معلومات حساب المالك</h2>
+                  <p className="text-[10px] font-black text-[#C5A021] uppercase tracking-[0.4em]">تأكيد الهوية الرقمية للتاجر</p>
                 </div>
                 <div className="space-y-6">
                   <div className="space-y-2">
-                     <label className="block text-[10px] font-black text-[#021D24]/30 uppercase tracking-[0.3em] pr-4">الاسم المسجل</label>
+                     <label className="block text-[10px] font-black text-[#0F172A]/30 uppercase tracking-[0.3em] pr-4">الاسم المسجل</label>
                      <input value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} type="text" placeholder="أدخل اسمك كما في الهوية" className="input-modern" readOnly={!!session?.user?.name} />
                   </div>
                   <div className="space-y-2">
-                     <label className="block text-[10px] font-black text-[#021D24]/30 uppercase tracking-[0.3em] pr-4">البريد الموثق</label>
+                     <label className="block text-[10px] font-black text-[#0F172A]/30 uppercase tracking-[0.3em] pr-4">البريد الموثق</label>
                      <input value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} type="email" placeholder="example@mersal.com" className="input-modern opacity-50 bg-muted/30" readOnly />
-                     <p className="text-[9px] text-[#1089A4] font-bold pr-4 mt-1">سيتم ربط المتجر بهذا الحساب تلقائياً ✨</p>
+                     <p className="text-[9px] text-[#C5A021] font-bold pr-4 mt-1">سيتم ربط المتجر بهذا الحساب تلقائياً ✨</p>
                   </div>
                   <div className="space-y-2">
-                     <label className="block text-[10px] font-black text-[#021D24]/30 uppercase tracking-[0.3em] pr-4">رقم الواتساب للتاجر</label>
+                     <label className="block text-[10px] font-black text-[#0F172A]/30 uppercase tracking-[0.3em] pr-4">رقم الواتساب للتاجر</label>
                      <input value={formData.phone} onChange={(e) => setFormData({...formData, phone: e.target.value})} type="tel" placeholder="09xxxx-xxxx" className="input-modern" />
                   </div>
                 </div>
                 <button 
                   onClick={nextStep}
                   disabled={!formData.name || !formData.email || !formData.phone}
-                  className="w-full bg-[#021D24] text-white py-6 rounded-3xl font-black text-xs uppercase tracking-[0.4em] shadow-2xl hover:bg-[#1089A4] transition-all flex items-center justify-center gap-4 disabled:opacity-20"
+                  className="w-full bg-[#0F172A] text-white py-6 rounded-3xl font-black text-xs uppercase tracking-[0.4em] shadow-2xl hover:bg-[#C5A021] transition-all flex items-center justify-center gap-4 disabled:opacity-20"
                 >
                   الخطوة التالية للمتجر <span className="material-symbols-rounded">trending_flat</span>
                 </button>
@@ -208,16 +208,16 @@ export default function VendorRegister() {
             {step === 2 && (
               <div className="space-y-8 text-right">
                 <div className="text-center mb-16 space-y-3">
-                  <h2 className="text-3xl font-black text-[#021D24] tracking-tighter">هوية المتجر التجاري</h2>
-                  <p className="text-[10px] font-black text-[#1089A4] uppercase tracking-[0.4em]">حدد بصمتك التجارية في السوق</p>
+                  <h2 className="text-3xl font-black text-[#0F172A] tracking-tighter">هوية المتجر التجاري</h2>
+                  <p className="text-[10px] font-black text-[#C5A021] uppercase tracking-[0.4em]">حدد بصمتك التجارية في السوق</p>
                 </div>
                 <div className="space-y-6">
                   <div className="space-y-2">
-                     <label className="block text-[10px] font-black text-[#021D24]/30 uppercase tracking-[0.3em] pr-4">اسم المتجر</label>
+                     <label className="block text-[10px] font-black text-[#0F172A]/30 uppercase tracking-[0.3em] pr-4">اسم المتجر</label>
                      <input value={formData.storeName} onChange={(e) => setFormData({...formData, storeName: e.target.value})} type="text" placeholder="مثلاً: عالم التكنولوجيا" className="input-modern" />
                   </div>
                   <div className="space-y-2">
-                     <label className="block text-[10px] font-black text-[#021D24]/30 uppercase tracking-[0.3em] pr-4">المقر الرئيسي</label>
+                     <label className="block text-[10px] font-black text-[#0F172A]/30 uppercase tracking-[0.3em] pr-4">المقر الرئيسي</label>
                      <select value={formData.storeCity} onChange={(e) => setFormData({...formData, storeCity: e.target.value})} className="input-modern cursor-pointer">
                         <option>الخرطوم</option>
                         <option>أمدرمان</option>
@@ -232,26 +232,26 @@ export default function VendorRegister() {
                         onClick={() => setFormData({...formData, shippingModel: "MERSAL_HANDLES"})}
                         className={cn("p-6 rounded-[2rem] border-4 text-right transition-all", formData.shippingModel === "MERSAL_HANDLES" ? "border-[#10B981] bg-sky-50 shadow-xl" : "border-gray-50 hover:border-gray-200")}
                      >
-                        <h4 className="text-sm font-black text-[#021D24] mb-2">تخزين مرسال</h4>
+                        <h4 className="text-sm font-black text-[#0F172A] mb-2">تخزين مرسال</h4>
                         <p className="text-[10px] text-gray-400 font-bold">نقوم بكافة العمليات اللوجستية نيابة عنك.</p>
                      </button>
                      <button 
                         onClick={() => setFormData({...formData, shippingModel: "VENDOR_PACKS"})}
                         className={cn("p-6 rounded-[2rem] border-4 text-right transition-all", formData.shippingModel === "VENDOR_PACKS" ? "border-[#F29124] bg-orange-50 shadow-xl" : "border-gray-50 hover:border-gray-200")}
                      >
-                        <h4 className="text-sm font-black text-[#021D24] mb-2">شحن مرسال</h4>
+                        <h4 className="text-sm font-black text-[#0F172A] mb-2">شحن مرسال</h4>
                         <p className="text-[10px] text-gray-400 font-bold">أنت تغلف ونحن نستلم الطلب الجاهز.</p>
                      </button>
                   </div>
                 </div>
                 <div className="flex gap-4 pt-8">
-                  <button onClick={prevStep} className="flex-1 py-6 text-[10px] font-black text-gray-300 uppercase tracking-widest hover:text-[#021D24] transition-colors">السابق</button>
+                  <button onClick={prevStep} className="flex-1 py-6 text-[10px] font-black text-gray-300 uppercase tracking-widest hover:text-[#0F172A] transition-colors">السابق</button>
                   <button 
                     onClick={nextStep}
                     disabled={!formData.storeName}
-                    className="flex-[2] bg-[#021D24] text-white py-6 rounded-3xl font-black text-xs uppercase tracking-[0.4em] shadow-xl hover:bg-[#1089A4] transition-all disabled:opacity-20 flex items-center justify-center gap-4"
+                    className="flex-[2] bg-[#0F172A] text-white py-6 rounded-3xl font-black text-xs uppercase tracking-[0.4em] shadow-xl hover:bg-[#C5A021] transition-all disabled:opacity-20 flex items-center justify-center gap-4"
                   >
-                    التالي: التوثيق <span className="material-symbols-rounded">check_circle</span>
+                    التالي: باقة الاشتراك <span className="material-symbols-rounded">gem</span>
                   </button>
                 </div>
               </div>
@@ -260,7 +260,57 @@ export default function VendorRegister() {
             {step === 3 && (
               <div className="space-y-8 text-right">
                 <div className="text-center mb-16 space-y-3">
-                  <h2 className="text-3xl font-black text-[#021D24] tracking-tighter">التوثيق والمصداقية</h2>
+                  <h2 className="text-3xl font-black text-[#0F172A] tracking-tighter">باقات اشتراك التجار</h2>
+                  <p className="text-[10px] font-black text-[#C5A021] uppercase tracking-[0.4em]">اختر الخطة المثالية لمتجرك لمباشرة رفع المنتجات</p>
+                </div>
+                <div className="space-y-4">
+                  {[
+                    { id: "BASIC", name: "الباقة التجريبية (Free Trial)", price: "مجاناً", desc: "باقة تجربة مجانية لكافة خدمات مرسال الفاخرة لمدة 30 يوم", features: ["أولوية شحن متوسطة", "رفع منتجات غير محدود", "دعم فني عادي"] },
+                    { id: "PRO", name: "الباقة الاحترافية (Pro)", price: "25,000 ج.س", desc: "مثالية للمحلات المتطورة والموردين الكبار", features: ["أولوية في تجهيز طلبات التوريد", "عمولات شحن تفضيلية", "تقارير وتحليلات مبيعات ذكية"] },
+                    { id: "ELITE", name: "باقة النخبة الفاخرة (Elite)", price: "75,000 ج.س", desc: "للشركات الكبرى والمستوردين المهيمنين", features: ["مدير حساب مخصص 24/7", "تأكيد فوري لواردات WMS", "أولوية قصوى للشحن اللوجستي"] },
+                  ].map((p) => (
+                    <div key={p.id}
+                      onClick={() => setFormData({...formData, subscriptionPlan: p.id})}
+                      className={cn(
+                        "p-6 rounded-[2rem] border-4 text-right transition-all cursor-pointer relative overflow-hidden flex flex-col md:flex-row justify-between items-center gap-4 hover:scale-[1.01]",
+                        formData.subscriptionPlan === p.id ? "border-[#C5A021] bg-[#C5A021]/5 shadow-xl" : "border-gray-50 hover:border-gray-200 bg-white"
+                      )}
+                    >
+                      <div className="space-y-2 min-w-0 flex-1">
+                        <h4 className="text-base font-black text-[#0F172A] flex items-center gap-2">
+                          {p.name}
+                          {formData.subscriptionPlan === p.id && <span className="text-[#C5A021] text-xs">● نشطة</span>}
+                        </h4>
+                        <p className="text-xs text-gray-400 font-medium leading-relaxed">{p.desc}</p>
+                        <div className="flex flex-wrap gap-2 pt-2">
+                          {p.features.map((f, i) => (
+                            <span key={i} className="text-[9px] bg-slate-100 text-[#0F172A]/60 px-2 py-0.5 rounded-full font-bold">✓ {f}</span>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="text-left shrink-0 self-end md:self-center">
+                        <p className="text-2xl font-black text-[#C5A021]">{p.price}</p>
+                        <p className="text-[9px] text-gray-400 font-bold mt-1">لكل 30 يوم</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex gap-4 pt-8">
+                  <button onClick={prevStep} className="flex-1 py-6 text-[10px] font-black text-gray-300 uppercase tracking-widest hover:text-[#0F172A] transition-colors">السابق</button>
+                  <button 
+                    onClick={nextStep}
+                    className="flex-[2] bg-[#0F172A] text-white py-6 rounded-3xl font-black text-xs uppercase tracking-[0.4em] shadow-xl hover:bg-[#C5A021] transition-all flex items-center justify-center gap-4"
+                  >
+                    التالي: التوثيق <span className="material-symbols-rounded">verified</span>
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {step === 4 && (
+              <div className="space-y-8 text-right">
+                <div className="text-center mb-16 space-y-3">
+                  <h2 className="text-3xl font-black text-[#0F172A] tracking-tighter">التوثيق والمصداقية</h2>
                   <p className="text-[10px] font-black text-[#CB2E26] uppercase tracking-[0.4em]">تحميل الأوراق الثبوتية للمتجر</p>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -268,7 +318,7 @@ export default function VendorRegister() {
                       onClick={() => document.getElementById('bank-upload')?.click()}
                       className={cn(
                         "p-10 border-4 border-dashed rounded-[3rem] text-center transition-all cursor-pointer group relative overflow-hidden",
-                        formData.bankStatementUrl && formData.bankStatementUrl !== "placeholder_url" ? "border-[#10B981] bg-green-50" : "border-gray-100 bg-muted/10 hover:border-[#1089A4] hover:bg-sky-50"
+                        formData.bankStatementUrl && formData.bankStatementUrl !== "placeholder_url" ? "border-[#10B981] bg-green-50" : "border-gray-100 bg-muted/10 hover:border-[#C5A021] hover:bg-sky-50"
                       )}
                     >
                       <input 
@@ -279,17 +329,17 @@ export default function VendorRegister() {
                         accept="image/*,.pdf"
                       />
                       {isUploading === "bankStatementUrl" ? (
-                        <div className="w-10 h-10 border-4 border-[#1089A4] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                        <div className="w-10 h-10 border-4 border-[#C5A021] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
                       ) : (
                         <span className={cn(
                           "material-symbols-rounded text-4xl mb-4 block group-hover:scale-125 transition-transform",
-                          formData.bankStatementUrl && formData.bankStatementUrl !== "placeholder_url" ? "text-[#10B981]" : "text-[#1089A4]"
+                          formData.bankStatementUrl && formData.bankStatementUrl !== "placeholder_url" ? "text-[#10B981]" : "text-[#C5A021]"
                         )}>
                           {formData.bankStatementUrl && formData.bankStatementUrl !== "placeholder_url" ? "check_circle" : "cloud_upload"}
                         </span>
                       )}
-                      <h4 className="text-[10px] font-black text-[#021D24] uppercase tracking-widest">
-                        {formData.bankStatementUrl && formData.bankStatementUrl !== "placeholder_url" ? "تم رفع كشف الحساب" : "كشف الحساب"}
+                      <h4 className="text-[10px] font-black text-[#0F172A] uppercase tracking-widest">
+                        {formData.bankStatementUrl && formData.bankStatementUrl !== "placeholder_url" ? "تم رفع كشف الحساب" : "كشف الحساب البنكي"}
                       </h4>
                     </div>
 
@@ -317,17 +367,17 @@ export default function VendorRegister() {
                           {formData.commercialRegUrl ? "verified" : "verified"}
                         </span>
                       )}
-                      <h4 className="text-[10px] font-black text-[#021D24] uppercase tracking-widest">
+                      <h4 className="text-[10px] font-black text-[#0F172A] uppercase tracking-widest">
                         {formData.commercialRegUrl ? "تم رفع السجل التجاري" : "السجل التجاري"}
                       </h4>
                     </div>
                 </div>
                 <div className="flex gap-4 pt-12">
-                  <button onClick={prevStep} className="flex-1 py-6 text-[10px] font-black text-gray-300 uppercase tracking-widest hover:text-[#021D24] transition-colors">السابق</button>
+                  <button onClick={prevStep} className="flex-1 py-6 text-[10px] font-black text-gray-300 uppercase tracking-widest hover:text-[#0F172A] transition-colors">السابق</button>
                   <button 
                     onClick={handleSubmit}
                     disabled={isSubmitting}
-                    className="flex-[2] bg-[#CB2E26] text-white py-6 rounded-3xl font-black text-xs uppercase tracking-[0.4em] shadow-2xl hover:bg-[#021D24] transition-all disabled:opacity-50 flex items-center justify-center gap-4"
+                    className="flex-[2] bg-[#CB2E26] text-white py-6 rounded-3xl font-black text-xs uppercase tracking-[0.4em] shadow-2xl hover:bg-[#0F172A] transition-all disabled:opacity-50 flex items-center justify-center gap-4"
                   >
                     {isSubmitting ? "جاري الإرسال..." : "إرسال طلب الانضمام"} <span className="material-symbols-rounded">send</span>
                   </button>
@@ -351,13 +401,13 @@ export default function VendorRegister() {
            border-radius: 1.5rem;
            font-weight: 900;
            font-size: 0.9rem;
-           color: #021D24;
+           color: #0F172A;
            transition: all 0.4s ease;
            outline: none;
         }
         .input-modern:focus {
            background: white;
-           border-color: #1089A4;
+           border-color: #C5A021;
            box-shadow: 0 20px 40px rgba(16, 137, 164, 0.05);
            transform: translateY(-2px);
         }

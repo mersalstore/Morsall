@@ -5,6 +5,8 @@ import ShopFilters from "@/components/ShopFilters";
 import ProductCard from "@/components/ProductCard";
 import ShopClientControls from "@/components/ShopClientControls";
 
+export const dynamic = "force-dynamic";
+
 export default async function ShopPage(props: {
   searchParams: Promise<{ q?: string; category?: string; sort?: string }>;
 }) {
@@ -24,10 +26,13 @@ export default async function ShopPage(props: {
   const dbProducts = await prisma.product.findMany({
     where: {
       status: "APPROVED",
+      vendor: {
+        status: "APPROVED"
+      },
       ...(query && {
         OR: [
-          { title: { contains: query, mode: "insensitive" } },
-          { description: { contains: query, mode: "insensitive" } },
+          { title: { contains: query } },
+          { description: { contains: query } },
         ],
       }),
     },
@@ -53,9 +58,9 @@ export default async function ShopPage(props: {
       <div className="bg-white border-b border-gray-200 pt-24 pb-3">
         <div className="max-w-[1400px] mx-auto px-4 lg:px-6">
           <nav className="text-xs text-gray-400 font-bold flex items-center gap-2">
-            <Link href="/" className="hover:text-[#1089A4]">الرئيسية</Link>
+            <Link href="/" className="hover:text-[#C5A021]">الرئيسية</Link>
             <span>/</span>
-            <span className="text-[#021D24]">{query ? `نتائج: "${query}"` : "كل المنتجات"}</span>
+            <span className="text-[#0F172A]">{query ? `نتائج: "${query}"` : "كل المنتجات"}</span>
           </nav>
         </div>
       </div>
@@ -80,7 +85,7 @@ export default async function ShopPage(props: {
           />
 
           {/* Delivery notice */}
-          <div className="bg-[#FFF8F0] border border-[#F29124]/30 rounded-lg p-3 flex items-center gap-2 text-sm text-[#021D24] font-bold">
+          <div className="bg-[#FFF8F0] border border-[#F29124]/30 rounded-lg p-3 flex items-center gap-2 text-sm text-[#0F172A] font-bold">
             <span className="material-symbols-rounded text-[#F29124]">local_shipping</span>
             توصيل مجاني للطلبات فوق 50,000 ج.س داخل الخرطوم 🚀
           </div>
@@ -95,7 +100,7 @@ export default async function ShopPage(props: {
           ) : (
             <div className="bg-white rounded-lg border border-gray-200 p-16 text-center">
               <span className="material-symbols-rounded text-6xl text-gray-200 block mb-4">search_off</span>
-              <h2 className="text-xl font-black text-[#021D24] mb-2">لم نجد نتائج</h2>
+              <h2 className="text-xl font-black text-[#0F172A] mb-2">لم نجد نتائج</h2>
               <p className="text-gray-400 text-sm mb-6">جرب كلمات بحث مختلفة</p>
               <Link href="/shop" className="inline-flex items-center gap-2 bg-[#F29124] text-white px-6 py-2.5 rounded font-bold text-sm hover:bg-[#D97B10] transition-colors">
                 عرض كل المنتجات

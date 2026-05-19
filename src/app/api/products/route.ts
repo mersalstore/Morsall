@@ -14,9 +14,14 @@ export async function GET(req: Request) {
     if (sort === "price_asc") orderBy = { price: "asc" };
     if (sort === "price_desc") orderBy = { price: "desc" };
 
-    const where: any = { status: "APPROVED" };
+    const where: any = { 
+      status: "APPROVED",
+      vendor: {
+        status: "APPROVED"
+      }
+    };
     if (category) where.categoryId = category;
-    if (search) where.title = { contains: search, mode: "insensitive" };
+    if (search) where.title = { contains: search };
     if (ids) {
       const idArray = ids.split(',').map(id => id.trim()).filter(Boolean);
       if (idArray.length > 0) {

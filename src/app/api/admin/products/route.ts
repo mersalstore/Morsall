@@ -13,7 +13,10 @@ const toNum = (v: any): number | null => {
 export async function GET(req: Request) {
   try {
     const session = await getServerSession(authOptions);
-    if (!(session as any)?.user?.email || (session as any).user.role !== 'ADMIN') {
+    const emailLower = (session as any)?.user?.email?.trim().toLowerCase();
+    const SUPER_ADMINS = ["blackhatsd.sd@gmail.com", "system@mersal.com", "hazem@mersal.com", "zomatube2012@gmail.com"];
+    
+    if (!emailLower || (!SUPER_ADMINS.includes(emailLower) && (session as any).user.role !== 'ADMIN')) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
@@ -41,7 +44,10 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions);
-    if (!(session as any)?.user?.email || (session as any).user.role !== 'ADMIN') {
+    const emailLower = (session as any)?.user?.email?.trim().toLowerCase();
+    const SUPER_ADMINS = ["blackhatsd.sd@gmail.com", "system@mersal.com", "hazem@mersal.com", "zomatube2012@gmail.com"];
+    
+    if (!emailLower || (!SUPER_ADMINS.includes(emailLower) && (session as any).user.role !== 'ADMIN')) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
@@ -54,6 +60,7 @@ export async function POST(req: Request) {
         where: { id },
         data: {
           status: action === 'APPROVE' ? 'APPROVED' : 'REJECTED',
+          rejectionReason: action === 'REJECT' ? body.reason || null : null,
           ...(body.price !== undefined && { price: toNum(body.price) || 0 }),
           ...(body.stock !== undefined && { stock: toNum(body.stock) || 0 }),
         } as any,
@@ -107,7 +114,10 @@ export async function POST(req: Request) {
 export async function PATCH(req: Request) {
   try {
     const session = await getServerSession(authOptions);
-    if (!(session as any)?.user?.email || (session as any).user.role !== 'ADMIN') {
+    const emailLower = (session as any)?.user?.email?.trim().toLowerCase();
+    const SUPER_ADMINS = ["blackhatsd.sd@gmail.com", "system@mersal.com", "hazem@mersal.com", "zomatube2012@gmail.com"];
+    
+    if (!emailLower || (!SUPER_ADMINS.includes(emailLower) && (session as any).user.role !== 'ADMIN')) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
@@ -155,7 +165,10 @@ export async function PATCH(req: Request) {
 export async function DELETE(req: Request) {
   try {
     const session = await getServerSession(authOptions);
-    if (!(session as any)?.user?.email || (session as any).user.role !== 'ADMIN') {
+    const emailLower = (session as any)?.user?.email?.trim().toLowerCase();
+    const SUPER_ADMINS = ["blackhatsd.sd@gmail.com", "system@mersal.com", "hazem@mersal.com", "zomatube2012@gmail.com"];
+    
+    if (!emailLower || (!SUPER_ADMINS.includes(emailLower) && (session as any).user.role !== 'ADMIN')) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 

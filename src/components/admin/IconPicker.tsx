@@ -48,7 +48,7 @@ export default function IconPicker({ onSelect, onClose }: IconPickerProps) {
       >
         <div className="p-8 border-b flex items-center justify-between shrink-0">
           <div>
-            <h3 className="text-xl font-black text-[#021D24]">اختر أيقونة</h3>
+            <h3 className="text-xl font-black text-[#0F172A]">اختر أيقونة</h3>
             <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">Select from Material Icons</p>
           </div>
           <button onClick={onClose} className="w-10 h-10 rounded-xl bg-gray-50 text-gray-400 flex items-center justify-center hover:bg-gray-100 transition-all">
@@ -64,7 +64,7 @@ export default function IconPicker({ onSelect, onClose }: IconPickerProps) {
                  placeholder="ابحث عن أيقونة (بالإنجليزي)..." 
                  value={search}
                  onChange={e => setSearch(e.target.value)}
-                 className="w-full bg-white border border-gray-100 rounded-2xl pr-12 pl-6 py-4 text-sm font-bold shadow-sm outline-none focus:border-[#1089A4] transition-all"
+                 className="w-full bg-white border border-gray-100 rounded-2xl pr-12 pl-6 py-4 text-sm font-bold shadow-sm outline-none focus:border-[#C5A021] transition-all"
               />
            </div>
         </div>
@@ -74,7 +74,7 @@ export default function IconPicker({ onSelect, onClose }: IconPickerProps) {
              <button
                 key={icon}
                 onClick={() => { onSelect(icon); onClose(); }}
-                className="group flex flex-col items-center gap-2 p-4 rounded-2xl hover:bg-[#1089A4] hover:text-white transition-all text-gray-400"
+                className="group flex flex-col items-center gap-2 p-4 rounded-2xl hover:bg-[#C5A021] hover:text-white transition-all text-gray-400"
              >
                 <span className="material-symbols-rounded text-2xl group-hover:scale-125 transition-transform">{icon}</span>
                 <span className="text-[8px] font-black uppercase truncate w-full text-center">{icon.replace('_', ' ')}</span>

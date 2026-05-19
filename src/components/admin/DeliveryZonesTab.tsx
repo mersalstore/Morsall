@@ -65,7 +65,7 @@ export default function DeliveryZonesTab() {
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
         <div>
-          <h2 className="text-3xl font-black text-[#021D24]">مناطق التوصيل</h2>
+          <h2 className="text-3xl font-black text-[#0F172A]">مناطق التوصيل</h2>
           <p className="text-gray-400 text-sm font-medium mt-1">إدارة رسوم ومدة التوصيل لمختلف المناطق والمدن</p>
         </div>
         <div className="bg-white px-6 py-3 rounded-2xl border border-gray-100 shadow-lg">
@@ -75,8 +75,8 @@ export default function DeliveryZonesTab() {
 
       {/* Add Form */}
       <div className="bg-white p-6 md:p-8 rounded-[2.5rem] border border-gray-100 shadow-2xl shadow-gray-200/40">
-        <h3 className="text-lg font-black text-[#021D24] mb-6 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-[#1089A4]/10 text-[#1089A4] flex items-center justify-center">
+        <h3 className="text-lg font-black text-[#0F172A] mb-6 flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-[#C5A021]/10 text-[#C5A021] flex items-center justify-center">
             <Plus size={20} />
           </div>
           إضافة منطقة توصيل جديدة
@@ -87,7 +87,7 @@ export default function DeliveryZonesTab() {
             <select
               value={formData.fromCity}
               onChange={e => setFormData({...formData, fromCity: e.target.value})}
-              className="w-full bg-gray-50 border border-transparent focus:border-[#1089A4] rounded-2xl px-4 py-3 text-sm font-bold outline-none transition-all"
+              className="w-full bg-gray-50 border border-transparent focus:border-[#C5A021] rounded-2xl px-4 py-3 text-sm font-bold outline-none transition-all"
             >
               {CITIES.map(c => <option key={c} value={c}>{c}</option>)}
             </select>
@@ -98,7 +98,7 @@ export default function DeliveryZonesTab() {
               placeholder="مثل: الخرطوم"
               value={formData.toCity}
               onChange={e => setFormData({...formData, toCity: e.target.value})}
-              className="w-full bg-gray-50 border border-transparent focus:border-[#1089A4] rounded-2xl px-4 py-3 text-sm font-bold outline-none transition-all"
+              className="w-full bg-gray-50 border border-transparent focus:border-[#C5A021] rounded-2xl px-4 py-3 text-sm font-bold outline-none transition-all"
               required
             />
           </div>
@@ -109,7 +109,7 @@ export default function DeliveryZonesTab() {
               placeholder="0"
               value={formData.fee}
               onChange={e => setFormData({...formData, fee: e.target.value})}
-              className="w-full bg-gray-50 border border-transparent focus:border-[#1089A4] rounded-2xl px-4 py-3 text-sm font-bold outline-none transition-all"
+              className="w-full bg-gray-50 border border-transparent focus:border-[#C5A021] rounded-2xl px-4 py-3 text-sm font-bold outline-none transition-all"
               required
               min="0"
             />
@@ -121,7 +121,7 @@ export default function DeliveryZonesTab() {
               placeholder="1"
               value={formData.deliveryDays}
               onChange={e => setFormData({...formData, deliveryDays: e.target.value})}
-              className="w-full bg-gray-50 border border-transparent focus:border-[#1089A4] rounded-2xl px-4 py-3 text-sm font-bold outline-none transition-all"
+              className="w-full bg-gray-50 border border-transparent focus:border-[#C5A021] rounded-2xl px-4 py-3 text-sm font-bold outline-none transition-all"
               min="1"
               max="30"
             />
@@ -131,7 +131,7 @@ export default function DeliveryZonesTab() {
             <button
               type="submit"
               disabled={submitting}
-              className="w-full bg-[#1089A4] text-white py-3 rounded-2xl font-black text-sm hover:bg-[#021D24] transition-all flex items-center justify-center gap-2 disabled:opacity-60"
+              className="w-full bg-[#C5A021] text-white py-3 rounded-2xl font-black text-sm hover:bg-[#0F172A] transition-all flex items-center justify-center gap-2 disabled:opacity-60"
             >
               {submitting ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <Plus size={16} />}
               إضافة
@@ -143,7 +143,7 @@ export default function DeliveryZonesTab() {
       {/* Zones Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {zones.map((zone: any) => (
-          <div key={zone.id} className="bg-white p-6 rounded-[2.5rem] border border-gray-100 shadow-xl group hover:shadow-2xl hover:border-[#1089A4]/20 transition-all">
+          <div key={zone.id} className="bg-white p-6 rounded-[2.5rem] border border-gray-100 shadow-xl group hover:shadow-2xl hover:border-[#C5A021]/20 transition-all">
             <div className="flex items-start justify-between mb-4">
               <div className="w-14 h-14 rounded-2xl bg-[#F29124]/10 text-[#F29124] flex items-center justify-center">
                 <MapPin size={24} />
@@ -155,15 +155,15 @@ export default function DeliveryZonesTab() {
                 <Trash2 size={16} />
               </button>
             </div>
-            <h4 className="font-black text-[#021D24] text-lg">{zone.fromCity} ← {zone.toCity}</h4>
+            <h4 className="font-black text-[#0F172A] text-lg">{zone.fromCity} ← {zone.toCity}</h4>
             <div className="flex items-center gap-4 mt-3">
-              <div className="flex items-center gap-2 bg-[#1089A4]/5 px-3 py-1.5 rounded-xl">
-                <span className="text-[10px] font-black text-[#1089A4]">رسوم التوصيل</span>
-                <span className="text-sm font-black text-[#021D24]">{zone.fee?.toLocaleString()} ج.س</span>
+              <div className="flex items-center gap-2 bg-[#C5A021]/5 px-3 py-1.5 rounded-xl">
+                <span className="text-[10px] font-black text-[#C5A021]">رسوم التوصيل</span>
+                <span className="text-sm font-black text-[#0F172A]">{zone.fee?.toLocaleString()} ج.س</span>
               </div>
               <div className="flex items-center gap-2 bg-[#F29124]/5 px-3 py-1.5 rounded-xl">
                 <Clock size={12} className="text-[#F29124]" />
-                <span className="text-sm font-black text-[#021D24]">{zone.deliveryDays || 1} يوم</span>
+                <span className="text-sm font-black text-[#0F172A]">{zone.deliveryDays || 1} يوم</span>
               </div>
             </div>
           </div>

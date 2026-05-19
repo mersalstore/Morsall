@@ -47,22 +47,23 @@ export default function PersonnelTab({ type }: PersonnelTabProps) {
       <EditPermissionsModal 
         isOpen={!!editingPerson}
         person={editingPerson}
+        type={type}
         onClose={() => setEditingPerson(null)}
         onSuccess={fetchData}
       />
       <div className="flex justify-between items-center">
          <div className="flex items-center gap-6">
-            <div className="w-16 h-16 rounded-[2rem] bg-[#021D24] text-white flex items-center justify-center shadow-2xl">
+            <div className="w-16 h-16 rounded-[2rem] bg-[#0F172A] text-white flex items-center justify-center shadow-2xl">
                {type === 'employees' ? <Users size={32} /> : <Truck size={32} />}
             </div>
             <div>
-               <h2 className="text-3xl font-black text-[#021D24]">إدارة {type === 'employees' ? 'الموظفين' : 'المناديب'}</h2>
+               <h2 className="text-3xl font-black text-[#0F172A]">إدارة {type === 'employees' ? 'الموظفين' : 'المناديب'}</h2>
                <p className="text-gray-400 text-xs font-bold uppercase tracking-widest mt-1">Personnel Management System</p>
             </div>
          </div>
          <button 
            onClick={() => setIsAddOpen(true)}
-           className="bg-[#1089A4] text-white px-10 py-5 rounded-[1.5rem] font-black text-sm shadow-xl hover:bg-[#021D24] transition-all flex items-center gap-3"
+           className="bg-[#C5A021] text-white px-10 py-5 rounded-[1.5rem] font-black text-sm shadow-xl hover:bg-[#0F172A] transition-all flex items-center gap-3"
          >
             <Plus size={20} />
             إضافة {type === 'employees' ? 'موظف' : 'مندوب'} جديد
@@ -74,16 +75,16 @@ export default function PersonnelTab({ type }: PersonnelTabProps) {
             <div key={person.id} className="bg-white p-8 rounded-[3rem] border border-gray-100 shadow-2xl shadow-gray-200/50 group relative overflow-hidden">
                <div className="relative z-10">
                   <div className="flex justify-between items-start mb-8">
-                     <div className="w-20 h-20 rounded-[2rem] bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center font-black text-2xl text-[#1089A4] border border-white shadow-xl">
+                     <div className="w-20 h-20 rounded-[2rem] bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center font-black text-2xl text-[#C5A021] border border-white shadow-xl">
                         {(person.name || person.user?.name || "?")[0].toUpperCase()}
                      </div>
                      <button onClick={() => handleDelete(person.id)} className="w-10 h-10 rounded-xl bg-red-50 text-red-500 flex items-center justify-center opacity-0 group-hover:opacity-100 hover:bg-red-500 hover:text-white transition-all"><Trash2 size={18} /></button>
                   </div>
                   
-                  <h3 className="text-xl font-black text-[#021D24] mb-1">{person.name || person.user?.name}</h3>
+                  <h3 className="text-xl font-black text-[#0F172A] mb-1">{person.name || person.user?.name}</h3>
                   <div className="flex items-center gap-2 mb-6">
                      <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                     <p className="text-[10px] font-black text-[#1089A4] uppercase tracking-[0.3em]">{person.role || type}</p>
+                     <p className="text-[10px] font-black text-[#C5A021] uppercase tracking-[0.3em]">{person.role || type}</p>
                   </div>
 
                   <div className="space-y-3">
@@ -99,13 +100,13 @@ export default function PersonnelTab({ type }: PersonnelTabProps) {
 
                   <div className="mt-8 pt-8 border-t border-gray-50 flex items-center justify-between">
                      <div className="flex items-center gap-3 px-4 py-2 bg-gray-50 rounded-xl border border-white">
-                        <ShieldCheck size={14} className="text-[#1089A4]" />
+                        <ShieldCheck size={14} className="text-[#C5A021]" />
                         <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">نشط</span>
                      </div>
-                     <button onClick={() => setEditingPerson(person)} className="text-[10px] font-black text-[#1089A4] hover:underline underline-offset-4">تعديل الصلاحيات</button>
+                     <button onClick={() => setEditingPerson(person)} className="text-[10px] font-black text-[#C5A021] hover:underline underline-offset-4">تعديل الصلاحيات</button>
                   </div>
                </div>
-               <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-gray-50/50 rounded-full blur-2xl group-hover:bg-[#1089A4]/5 transition-colors" />
+               <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-gray-50/50 rounded-full blur-2xl group-hover:bg-[#C5A021]/5 transition-colors" />
             </div>
          ))}
       </div>

@@ -8,13 +8,13 @@ export default function StoreAnalytics({ stats }: { stats: any }) {
     <div className="space-y-12">
       <div className="flex items-center justify-between">
         <div className="space-y-1">
-          <h2 className="text-3xl font-black text-[#021D24]">التحليلات المتقدمة</h2>
+          <h2 className="text-3xl font-black text-[#0F172A]">التحليلات المتقدمة</h2>
           <p className="text-gray-400 font-bold">مراقبة أداء المتجر، المبيعات، ونمو الأرباح بدقة.</p>
         </div>
         <div className="flex items-center gap-4">
            <div className="bg-white px-5 py-2.5 rounded-xl border flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-              <span className="text-[10px] font-black text-[#021D24] uppercase tracking-widest">تحديث مباشر</span>
+              <span className="text-[10px] font-black text-[#0F172A] uppercase tracking-widest">تحديث مباشر</span>
            </div>
         </div>
       </div>
@@ -25,11 +25,11 @@ export default function StoreAnalytics({ stats }: { stats: any }) {
             <div className="relative z-10 space-y-8">
               <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="text-lg font-black text-[#021D24]">منحنى المبيعات</h3>
+                    <h3 className="text-lg font-black text-[#0F172A]">منحنى المبيعات</h3>
                     <p className="text-gray-400 text-[10px] font-bold uppercase tracking-widest">آخر 30 يوم</p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full bg-[#1089A4]" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#C5A021]" />
                     <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">المبيعات</span>
                   </div>
               </div>
@@ -38,8 +38,8 @@ export default function StoreAnalytics({ stats }: { stats: any }) {
                   <svg className="w-full h-full" viewBox="0 0 1000 300" preserveAspectRatio="none">
                     <defs>
                        <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#1089A4" stopOpacity="0.2" />
-                          <stop offset="100%" stopColor="#1089A4" stopOpacity="0" />
+                          <stop offset="0%" stopColor="#C5A021" stopOpacity="0.2" />
+                          <stop offset="100%" stopColor="#C5A021" stopOpacity="0" />
                        </linearGradient>
                     </defs>
                     <path d="M0,250 Q150,180 300,220 T600,100 T1000,150 L1000,300 L0,300 Z" fill="url(#chartGradient)" />
@@ -49,7 +49,7 @@ export default function StoreAnalytics({ stats }: { stats: any }) {
                       transition={{ duration: 2, ease: "easeInOut" }}
                       d="M0,250 Q150,180 300,220 T600,100 T1000,150" 
                       fill="none" 
-                      stroke="#1089A4" 
+                      stroke="#C5A021" 
                       strokeWidth="4" 
                       strokeLinecap="round" 
                     />
@@ -67,14 +67,14 @@ export default function StoreAnalytics({ stats }: { stats: any }) {
         {/* Breakdown Stats */}
         <div className="space-y-6">
            <div className="bg-white p-8 rounded-3xl border shadow-sm space-y-6">
-              <h3 className="text-xs font-black uppercase tracking-widest text-[#021D24]">توزيع الأرباح</h3>
+              <h3 className="text-xs font-black uppercase tracking-widest text-[#0F172A]">توزيع الأرباح</h3>
               <div className="space-y-4">
                  <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-gray-400">إجمالي المبيعات</span>
-                    <span className="font-black text-[#021D24]">{stats?.totalSales?.toLocaleString()} ج.س</span>
+                    <span className="font-black text-[#0F172A]">{stats?.totalSales?.toLocaleString()} ج.س</span>
                  </div>
                  <div className="w-full h-1.5 bg-gray-50 rounded-full overflow-hidden">
-                    <div className="h-full bg-[#1089A4]" style={{ width: '100%' }} />
+                    <div className="h-full bg-[#C5A021]" style={{ width: '100%' }} />
                  </div>
                  <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-gray-400">
@@ -86,13 +86,13 @@ export default function StoreAnalytics({ stats }: { stats: any }) {
                     <div className="h-full bg-red-400" style={{ width: stats?.totalSales > 0 ? `${((stats?.totalSales - stats?.netProfit) / stats?.totalSales) * 100}%` : '0%' }} />
                  </div>
                  <div className="pt-4 border-t flex items-center justify-between">
-                    <span className="text-xs font-black text-[#021D24]">صافي الربح</span>
-                    <span className="text-xl font-black text-[#1089A4]">{stats?.netProfit?.toLocaleString()} ج.س</span>
+                    <span className="text-xs font-black text-[#0F172A]">صافي الربح</span>
+                    <span className="text-xl font-black text-[#C5A021]">{stats?.netProfit?.toLocaleString()} ج.س</span>
                  </div>
               </div>
            </div>
 
-           <div className="bg-[#021D24] p-8 rounded-3xl text-white space-y-3 shadow-lg">
+           <div className="bg-[#0F172A] p-8 rounded-3xl text-white space-y-3 shadow-lg">
               <div className="flex items-center gap-3">
                  <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center">
                     <span className="material-symbols-rounded text-xl text-[#F29124]">workspace_premium</span>
@@ -104,25 +104,6 @@ export default function StoreAnalytics({ stats }: { stats: any }) {
         </div>
       </div>
 
-      {/* Traffic Sources */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-         {[
-           { label: "مباشر", value: "45%", color: "bg-[#1089A4]", icon: "language" },
-           { label: "فيسبوك", value: "30%", color: "bg-blue-600", icon: "facebook" },
-           { label: "انستغرام", value: "20%", color: "bg-pink-500", icon: "photo_camera" },
-           { label: "واتساب", value: "5%", color: "bg-green-500", icon: "chat" },
-         ].map((source, i) => (
-           <div key={i} className="bg-white p-6 rounded-2xl border shadow-sm flex items-center gap-4">
-              <div className={cn("w-12 h-12 rounded-xl text-white flex items-center justify-center", source.color)}>
-                 <span className="material-symbols-rounded text-xl">{source.icon}</span>
-              </div>
-              <div>
-                 <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest">{source.label}</p>
-                 <p className="text-xl font-black text-[#021D24]">{source.value}</p>
-              </div>
-           </div>
-         ))}
-      </div>
     </div>
   );
 }

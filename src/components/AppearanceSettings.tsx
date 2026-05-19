@@ -11,7 +11,7 @@ export default function AppearanceSettings() {
     siteTitle: "مرسال",
     siteDescription: "منصة مرسال للتجارة الإلكترونية",
     logo: "",
-    primaryColor: "#1089A4",
+    primaryColor: "#C5A021",
     secondaryColor: "#F29124",
     whatsappNumber: "",
     facebookUrl: "",
@@ -168,8 +168,8 @@ export default function AppearanceSettings() {
 
   if (loading) return (
     <div className="p-20 text-center">
-       <div className="w-16 h-16 border-4 border-[#1089A4] border-t-transparent rounded-full animate-spin mx-auto mb-6 shadow-2xl" />
-       <p className="text-[#021D24] font-black uppercase tracking-[0.2em] text-xs">جاري تجهيز استوديو التصميم...</p>
+       <div className="w-16 h-16 border-4 border-[#C5A021] border-t-transparent rounded-full animate-spin mx-auto mb-6 shadow-2xl" />
+       <p className="text-[#0F172A] font-black uppercase tracking-[0.2em] text-xs">جاري تجهيز استوديو التصميم...</p>
     </div>
   );
 
@@ -177,7 +177,7 @@ export default function AppearanceSettings() {
     <div className="space-y-12 animate-in fade-in slide-in-from-bottom-6 duration-1000 pb-20">
       
       {/* Storage & Info Banner */}
-      <div className="bg-gradient-to-r from-[#1089A4] to-[#021D24] rounded-[2.5rem] p-10 text-white flex flex-col md:flex-row items-center justify-between gap-10 shadow-2xl shadow-[#1089A4]/20 relative overflow-hidden group">
+      <div className="bg-gradient-to-r from-[#C5A021] to-[#0F172A] rounded-[2.5rem] p-10 text-white flex flex-col md:flex-row items-center justify-between gap-10 shadow-2xl shadow-[#C5A021]/20 relative overflow-hidden group">
          <div className="relative z-10 max-w-xl">
             <div className="flex items-center gap-3 mb-4">
                <UploadCloud className="text-[#F29124] animate-bounce" size={24} />
@@ -207,11 +207,11 @@ export default function AppearanceSettings() {
         <div className="xl:col-span-3 space-y-8">
            <section className="bg-white rounded-[3rem] p-12 shadow-2xl shadow-gray-200/40 border border-white/50 relative overflow-hidden">
               <div className="flex items-center gap-6 mb-12">
-                 <div className="w-16 h-16 rounded-[1.5rem] bg-gradient-to-br from-[#1089A4] to-[#021D24] text-white flex items-center justify-center shadow-2xl shadow-[#1089A4]/20">
+                 <div className="w-16 h-16 rounded-[1.5rem] bg-gradient-to-br from-[#C5A021] to-[#0F172A] text-white flex items-center justify-center shadow-2xl shadow-[#C5A021]/20">
                     <Palette size={28} />
                  </div>
                  <div>
-                    <h3 className="text-2xl font-black text-[#021D24]">الهوية البصرية للمنصة</h3>
+                    <h3 className="text-2xl font-black text-[#0F172A]">الهوية البصرية للمنصة</h3>
                     <p className="text-[10px] text-gray-400 font-bold uppercase tracking-[0.3em] mt-1">إدارة العلامة التجارية وتجربة المستخدم</p>
                  </div>
               </div>
@@ -223,7 +223,7 @@ export default function AppearanceSettings() {
                        <input 
                           value={settings.siteTitle} 
                           onChange={e => setSettings({...settings, siteTitle: e.target.value})}
-                          className="w-full bg-gray-50 border border-gray-100 rounded-[1.5rem] px-8 py-5 text-sm font-bold outline-none focus:border-[#1089A4] focus:bg-white transition-all shadow-inner" 
+                          className="w-full bg-gray-50 border border-gray-100 rounded-[1.5rem] px-8 py-5 text-sm font-bold outline-none focus:border-[#C5A021] focus:bg-white transition-all shadow-inner" 
                        />
                     </div>
                     <div className="space-y-3">
@@ -232,7 +232,7 @@ export default function AppearanceSettings() {
                           rows={4}
                           value={settings.siteDescription} 
                           onChange={e => setSettings({...settings, siteDescription: e.target.value})}
-                          className="w-full bg-gray-50 border border-gray-100 rounded-[1.5rem] px-8 py-5 text-sm font-bold outline-none focus:border-[#1089A4] focus:bg-white transition-all shadow-inner resize-none" 
+                          className="w-full bg-gray-50 border border-gray-100 rounded-[1.5rem] px-8 py-5 text-sm font-bold outline-none focus:border-[#C5A021] focus:bg-white transition-all shadow-inner resize-none" 
                        />
                     </div>
                  </div>
@@ -248,7 +248,7 @@ export default function AppearanceSettings() {
                                 onChange={e => setSettings({...settings, primaryColor: e.target.value})}
                                 className="w-12 h-12 rounded-2xl cursor-pointer border-none p-0 overflow-hidden shadow-lg" 
                              />
-                             <span className="text-[10px] font-mono font-black text-[#021D24]">{settings.primaryColor}</span>
+                             <span className="text-[10px] font-mono font-black text-[#0F172A]">{settings.primaryColor}</span>
                           </div>
                        </div>
                        <div className="space-y-3">
@@ -260,7 +260,7 @@ export default function AppearanceSettings() {
                                 onChange={e => setSettings({...settings, secondaryColor: e.target.value})}
                                 className="w-12 h-12 rounded-2xl cursor-pointer border-none p-0 overflow-hidden shadow-lg" 
                              />
-                             <span className="text-[10px] font-mono font-black text-[#021D24]">{settings.secondaryColor}</span>
+                             <span className="text-[10px] font-mono font-black text-[#0F172A]">{settings.secondaryColor}</span>
                           </div>
                        </div>
                     </div>
@@ -271,14 +271,14 @@ export default function AppearanceSettings() {
                           value={settings.whatsappNumber} 
                           onChange={e => setSettings({...settings, whatsappNumber: e.target.value})}
                           placeholder="مثلاً: 249123456789"
-                          className="w-full bg-gray-50 border border-gray-100 rounded-[1.5rem] px-8 py-5 text-sm font-bold outline-none focus:border-[#1089A4] focus:bg-white transition-all shadow-inner" 
+                          className="w-full bg-gray-50 border border-gray-100 rounded-[1.5rem] px-8 py-5 text-sm font-bold outline-none focus:border-[#C5A021] focus:bg-white transition-all shadow-inner" 
                        />
                     </div>
                  </div>
               </div>
 
               {/* Logo Upload Section */}
-              <div className="mt-12 p-10 bg-gray-50/50 rounded-[3rem] border-2 border-dashed border-gray-100 flex flex-col md:flex-row items-center gap-12 group hover:border-[#1089A4]/30 transition-all">
+              <div className="mt-12 p-10 bg-gray-50/50 rounded-[3rem] border-2 border-dashed border-gray-100 flex flex-col md:flex-row items-center gap-12 group hover:border-[#C5A021]/30 transition-all">
                  <div className="relative w-40 h-40 bg-white rounded-[2.5rem] shadow-2xl flex items-center justify-center overflow-hidden border-8 border-white transform group-hover:scale-105 transition-all duration-700">
                     {settings.logo ? (
                        <Image src={settings.logo} alt="Logo" fill className="object-contain p-6" />
@@ -291,12 +291,12 @@ export default function AppearanceSettings() {
                  </div>
                  <div className="flex-1 space-y-6 text-center md:text-right">
                     <div>
-                       <h4 className="text-xl font-black text-[#021D24] mb-2">شعار المتجر الرسمي</h4>
+                       <h4 className="text-xl font-black text-[#0F172A] mb-2">شعار المتجر الرسمي</h4>
                        <p className="text-[11px] text-gray-400 font-medium leading-relaxed max-w-sm">
                           سيظهر هذا الشعار في الفاتورة، الموقع، ورسائل الواتساب. تأكد من رفعه بخلفية شفافة PNG.
                        </p>
                     </div>
-                    <label className="inline-flex items-center gap-4 px-10 py-4 bg-[#1089A4] text-white text-[10px] font-black rounded-2xl cursor-pointer hover:bg-[#021D24] transition-all shadow-xl shadow-[#1089A4]/20 active:scale-95">
+                    <label className="inline-flex items-center gap-4 px-10 py-4 bg-[#C5A021] text-white text-[10px] font-black rounded-2xl cursor-pointer hover:bg-[#0F172A] transition-all shadow-xl shadow-[#C5A021]/20 active:scale-95">
                        <UploadCloud size={18} />
                        تحديث شعار المنصة
                        <input type="file" className="hidden" onChange={async e => {
@@ -316,7 +316,7 @@ export default function AppearanceSettings() {
               <button 
                  onClick={handleSaveSettings}
                  disabled={actionLoading === "settings"}
-                 className="w-full mt-12 py-6 bg-[#021D24] text-white rounded-[1.8rem] font-black text-base flex items-center justify-center gap-4 hover:bg-[#1089A4] transition-all shadow-2xl shadow-[#021D24]/20 active:scale-95 disabled:opacity-50"
+                 className="w-full mt-12 py-6 bg-[#0F172A] text-white rounded-[1.8rem] font-black text-base flex items-center justify-center gap-4 hover:bg-[#C5A021] transition-all shadow-2xl shadow-[#0F172A]/20 active:scale-95 disabled:opacity-50"
               >
                  {actionLoading === "settings" ? (
                    <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -335,14 +335,14 @@ export default function AppearanceSettings() {
                        <Layout size={28} />
                     </div>
                     <div>
-                       <h3 className="text-2xl font-black text-[#021D24]">بانرات الواجهة</h3>
+                       <h3 className="text-2xl font-black text-[#0F172A]">بانرات الواجهة</h3>
                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-[0.3em] mt-1">إدارة العروض الترويجية</p>
                     </div>
                  </div>
                  <button 
                     onClick={handleAddBanner}
                     disabled={actionLoading === "banner_add"}
-                    className="w-14 h-14 rounded-2xl bg-[#F29124] text-white flex items-center justify-center hover:bg-[#021D24] hover:scale-110 transition-all shadow-2xl shadow-[#F29124]/20 active:scale-95"
+                    className="w-14 h-14 rounded-2xl bg-[#F29124] text-white flex items-center justify-center hover:bg-[#0F172A] hover:scale-110 transition-all shadow-2xl shadow-[#F29124]/20 active:scale-95"
                  >
                     {actionLoading === "banner_add" ? <div className="w-6 h-6 border-3 border-white border-t-transparent rounded-full animate-spin" /> : <Plus size={30} />}
                  </button>
@@ -354,7 +354,7 @@ export default function AppearanceSettings() {
                        key={banner.id} 
                        initial={{ opacity: 0, x: 20 }}
                        animate={{ opacity: 1, x: 0 }}
-                       className="bg-gray-50/50 rounded-[2.5rem] p-6 border border-gray-100 space-y-6 group hover:bg-white hover:border-[#1089A4]/20 transition-all duration-500"
+                       className="bg-gray-50/50 rounded-[2.5rem] p-6 border border-gray-100 space-y-6 group hover:bg-white hover:border-[#C5A021]/20 transition-all duration-500"
                     >
                        <div className="flex gap-6">
                           <div className="relative w-40 aspect-video rounded-2xl overflow-hidden bg-white border-4 border-white shadow-xl shrink-0 transform group-hover:scale-105 transition-transform duration-700">
@@ -368,13 +368,13 @@ export default function AppearanceSettings() {
                                 placeholder="عنوان العرض (Main Title)"
                                 value={banner.title || ""}
                                 onChange={e => handleUpdateBanner(banner.id, { title: e.target.value })}
-                                className="w-full bg-white border border-gray-100 rounded-xl px-5 py-3 text-xs font-black outline-none focus:border-[#1089A4] shadow-sm"
+                                className="w-full bg-white border border-gray-100 rounded-xl px-5 py-3 text-xs font-black outline-none focus:border-[#C5A021] shadow-sm"
                              />
                              <input 
                                 placeholder="نص توضيحي (Sub Title)"
                                 value={banner.subtitle || ""}
                                 onChange={e => handleUpdateBanner(banner.id, { subtitle: e.target.value })}
-                                className="w-full bg-white border border-gray-100 rounded-xl px-5 py-3 text-[10px] font-bold text-gray-400 outline-none focus:border-[#1089A4] shadow-sm"
+                                className="w-full bg-white border border-gray-100 rounded-xl px-5 py-3 text-[10px] font-bold text-gray-400 outline-none focus:border-[#C5A021] shadow-sm"
                              />
                           </div>
                        </div>
@@ -386,12 +386,12 @@ export default function AppearanceSettings() {
                                 placeholder="رابط التوجيه عند الضغط"
                                 value={banner.link || ""}
                                 onChange={e => handleUpdateBanner(banner.id, { link: e.target.value })}
-                                className="w-full bg-white border border-gray-100 rounded-xl pr-14 pl-5 py-3 text-[10px] font-mono text-[#1089A4] outline-none focus:border-[#1089A4] shadow-sm"
+                                className="w-full bg-white border border-gray-100 rounded-xl pr-14 pl-5 py-3 text-[10px] font-mono text-[#C5A021] outline-none focus:border-[#C5A021] shadow-sm"
                              />
                           </div>
                           <div className="flex gap-2">
-                             <button onClick={() => moveBanner(index, 'up')} className="w-10 h-10 bg-white rounded-xl border border-gray-100 text-[#021D24] flex items-center justify-center hover:bg-[#021D24] hover:text-white transition-all shadow-sm"><ArrowUp size={16} /></button>
-                             <button onClick={() => moveBanner(index, 'down')} className="w-10 h-10 bg-white rounded-xl border border-gray-100 text-[#021D24] flex items-center justify-center hover:bg-[#021D24] hover:text-white transition-all shadow-sm"><ArrowDown size={16} /></button>
+                             <button onClick={() => moveBanner(index, 'up')} className="w-10 h-10 bg-white rounded-xl border border-gray-100 text-[#0F172A] flex items-center justify-center hover:bg-[#0F172A] hover:text-white transition-all shadow-sm"><ArrowUp size={16} /></button>
+                             <button onClick={() => moveBanner(index, 'down')} className="w-10 h-10 bg-white rounded-xl border border-gray-100 text-[#0F172A] flex items-center justify-center hover:bg-[#0F172A] hover:text-white transition-all shadow-sm"><ArrowDown size={16} /></button>
                           </div>
                        </div>
                     </motion.div>

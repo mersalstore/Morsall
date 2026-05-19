@@ -14,6 +14,7 @@ export default function DriverPortal() {
   const [isTracking, setIsTracking] = useState(false);
   const [activeOrderId, setActiveOrderId] = useState<string | null>(null);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
+  const [isOnline, setIsOnline] = useState(false);
   
   const timerRef = useRef<any>(null);
 
@@ -24,6 +25,7 @@ export default function DriverPortal() {
       const data = await r.json();
       setDriver(data.driver);
       setOrders(data.orders);
+      setIsOnline(data.driver?.isOnline || false);
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -35,177 +37,256 @@ export default function DriverPortal() {
     fetchOrders();
   }, [driverId]);
 
-  // GPS Tracking Logic
-  const stopTracking = () => {
-    if (timerRef.current) clearInterval(timerRef.current);
-    setIsTracking(false);
-    setActiveOrderId(null);
+  const toggleDuty = async () => {
+    try {
+      const newStatus = !isOnline;
+      setIsOnline(newStatus);
+      await fetch(`/api/delivery/driver/${driverId}`, {
+        method: "PATCH",
+        body: JSON.stringify({ isOnline: newStatus })
+      });
+    } catch (err) {}
   };
 
+  // ── GPS Tracking & Delivery Handling ──
   const startTracking = (orderId: string) => {
-    if (isTracking && activeOrderId === orderId) {
-      stopTracking();
+    if (activeOrderId === orderId) {
+      // Stop tracking
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+      setActiveOrderId(null);
+      setIsTracking(false);
       return;
     }
-    
-    // Stop any previous
-    if (timerRef.current) clearInterval(timerRef.current);
-    
-    setIsTracking(true);
-    setActiveOrderId(orderId);
 
-    timerRef.current = setInterval(() => {
-      if (!navigator.geolocation) return;
-      
-      navigator.geolocation.getCurrentPosition(
-        async (pos) => {
-          const { latitude, longitude } = pos.coords;
-          try {
-            await fetch("/api/delivery/tracking", {
-              method: "PATCH",
-              body: JSON.stringify({ orderId, lat: latitude, lng: longitude })
-            });
-            setLastUpdate(new Date());
-          } catch (err) {}
-        },
-        (err) => console.error("GPS Error:", err),
-        { enableHighAccuracy: true }
-      );
-    }, 10000); // 10 seconds interval
+    // Start tracking
+    setActiveOrderId(orderId);
+    setIsTracking(true);
+
+    const updateLocation = () => {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          async (position) => {
+            const { latitude, longitude } = position.coords;
+            try {
+              const res = await fetch("/api/delivery/tracking", {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ orderId, lat: latitude, lng: longitude })
+              });
+              if (res.ok) {
+                setLastUpdate(new Date());
+              }
+            } catch (err) {
+              console.error("Location update failed:", err);
+            }
+          },
+          (error) => {
+            console.error("Geolocation error:", error);
+          },
+          { enableHighAccuracy: true }
+        );
+      } else {
+        console.warn("Geolocation not supported by this browser.");
+      }
+    };
+
+    // Run immediately and then every 10 seconds
+    updateLocation();
+    timerRef.current = setInterval(updateLocation, 10000);
   };
 
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+    };
+  }, []);
+
   const handleMarkDelivered = async (orderId: string) => {
-    if (!confirm("هل أنت متأكد من تسليم الطلب للعميل؟")) return;
-    
+    if (!confirm("هل أنت متأكد من تسليم هذا الطلب للعميل؟")) return;
+
     try {
-      // 1. Update status
-      await fetch("/api/admin/orders", {
+      setLoading(true);
+      const res = await fetch("/api/delivery/orders", {
         method: "PATCH",
-        body: JSON.stringify({ id: orderId, status: "DELIVERED" })
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId, status: "DELIVERED" })
       });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "فشل تحديث حالة الطلب");
+      }
+
+      alert("تم تأكيد تسليم الطلب بنجاح وتحديث حسابك المالي.");
       
-      // 2. Stop tracking if active
-      if (activeOrderId === orderId) stopTracking();
-      
-      // 3. Refresh list
-      fetchOrders();
-    } catch (err) {
-      alert("حدث خطأ أثناء تحديث الحالة");
+      // Stop tracking if this was the active tracking order
+      if (activeOrderId === orderId) {
+        if (timerRef.current) {
+          clearInterval(timerRef.current);
+          timerRef.current = null;
+        }
+        setActiveOrderId(null);
+        setIsTracking(false);
+      }
+
+      await fetchOrders();
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center font-bold text-[#1089A4]">جاري التحميل...</div>;
-  if (error) return <div className="min-h-screen flex items-center justify-center font-bold text-red-500">{error}</div>;
+
+  if (loading) return <div className="min-h-screen bg-[#0F172A] flex items-center justify-center font-bold text-[#C5A021]">جاري التحميل...</div>;
+  if (error) return <div className="min-h-screen bg-[#0F172A] flex items-center justify-center font-bold text-red-500">{error}</div>;
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-10" dir="rtl">
-      {/* Header */}
-      <header className="bg-[#021D24] text-white p-6 shadow-xl sticky top-0 z-10 rounded-b-[2rem]">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-xl font-black">{driver?.name}</h1>
-            <p className="text-white/60 text-xs mt-0.5">{driver?.vehicleType} • {driver?.phone}</p>
-          </div>
-          <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center">
-            <span className="material-symbols-rounded text-2xl">sports_motorsports</span>
-          </div>
-        </div>
-        
-        {isTracking && (
-          <motion.div 
-            initial={{ opacity: 0, y: -10 }} 
-            animate={{ opacity: 1, y: 0 }}
-            className="mt-4 p-3 bg-[#F29124]/20 border border-[#F29124]/30 rounded-xl flex items-center justify-between"
-          >
-            <div className="flex items-center gap-3">
-              <span className="relative flex h-3 w-3">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-3 w-3 bg-[#F29124]"></span>
-              </span>
-              <p className="text-xs font-bold text-[#F29124]">جاري بث الموقع الحي حالياً</p>
+    <div className="min-h-screen bg-[#F8FAFB] pb-10 font-black" dir="rtl">
+      {/* Driver Header Card */}
+      <header className="bg-[#0F172A] text-white p-8 shadow-2xl rounded-b-[3rem] relative overflow-hidden">
+         <div className="relative z-10">
+            <div className="flex items-center justify-between mb-8">
+               <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 rounded-2xl bg-[#C5A021] flex items-center justify-center text-2xl shadow-lg shadow-[#C5A021]/20">
+                     {driver?.name?.[0]}
+                  </div>
+                  <div>
+                     <h1 className="text-xl leading-none mb-1">{driver?.name}</h1>
+                     <p className="text-[10px] text-white/40 uppercase tracking-widest">{driver?.vehicleType} • {driver?.phone}</p>
+                  </div>
+               </div>
+               <button 
+                 onClick={toggleDuty}
+                 className={cn(
+                   "px-6 py-2.5 rounded-full text-[10px] transition-all border shadow-lg",
+                   isOnline 
+                    ? "bg-green-500/20 border-green-500 text-green-500 shadow-green-500/20" 
+                    : "bg-red-500/20 border-red-500 text-red-500 shadow-red-500/20"
+                 )}
+               >
+                 {isOnline ? "متصل - متاح" : "غير متصل - مشغول"}
+               </button>
             </div>
-            <p className="text-[10px] text-white/40">آخر تحديث: {lastUpdate?.toLocaleTimeString('ar-EG')}</p>
-          </motion.div>
-        )}
+
+            <div className="grid grid-cols-2 gap-4">
+               <div className="bg-white/5 backdrop-blur-xl p-4 rounded-3xl border border-white/10">
+                  <p className="text-[9px] text-white/40 uppercase tracking-widest mb-1">المحفظة الحالية</p>
+                  <p className="text-xl text-[#F29124]">{driver?.balance?.toLocaleString() || 0} <span className="text-[10px]">SDG</span></p>
+               </div>
+               <div className="bg-white/5 backdrop-blur-xl p-4 rounded-3xl border border-white/10">
+                  <p className="text-[9px] text-white/40 uppercase tracking-widest mb-1">الطلبات المكتملة</p>
+                  <p className="text-xl text-[#C5A021]">12</p>
+               </div>
+            </div>
+         </div>
+         <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-[#C5A021]/10 rounded-full blur-3xl" />
       </header>
 
-      <main className="p-4 space-y-4 max-w-lg mx-auto mt-4">
-        <div className="flex items-center justify-between px-2">
-          <h2 className="font-black text-[#021D24]">طلبات التوصيل النشطة</h2>
-          <span className="bg-[#1089A4] text-white text-[10px] px-2 py-1 rounded-full font-bold">{orders.length} طلب</span>
-        </div>
-
-        <div className="space-y-4">
-          {orders.map((order) => (
-            <div key={order.id} className="bg-white rounded-3xl p-5 shadow-sm border border-gray-100 space-y-4 overflow-hidden relative">
-              <div className="flex justify-between items-start">
-                <div>
-                  <p className="text-[10px] text-gray-400 font-mono">#{order.id.slice(-8)}</p>
-                  <h3 className="font-bold text-lg text-[#021D24]">{order.customerName || "عميل مرسال"}</h3>
-                </div>
-                <span className="badge badge-packing text-[10px]">{order.status}</span>
+      <main className="p-4 space-y-6 max-w-lg mx-auto -mt-6 relative z-20">
+         {/* Live Status Banner */}
+         {isTracking && (
+           <motion.div 
+             initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
+             className="bg-[#F29124] p-4 rounded-3xl text-white flex items-center justify-between shadow-xl shadow-[#F29124]/20"
+           >
+              <div className="flex items-center gap-3">
+                 <span className="w-2 h-2 bg-white rounded-full animate-ping" />
+                 <span className="text-xs">جاري بث موقعك للعميل الآن</span>
               </div>
+              <p className="text-[10px] opacity-60">تحديث تلقائي</p>
+           </motion.div>
+         )}
 
-              <div className="space-y-2 text-sm text-gray-600">
-                <div className="flex items-center gap-2">
-                  <span className="material-symbols-rounded text-base text-gray-400">location_on</span>
-                  <p>{order.city} - {order.district} - {order.street}</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="material-symbols-rounded text-base text-gray-400">phone</span>
-                  <a href={`tel:${order.phone}`} className="text-[#1089A4] font-bold underline">{order.phone}</a>
-                </div>
-              </div>
+         <div className="flex items-center justify-between px-2">
+           <h2 className="text-sm font-black text-[#0F172A] uppercase tracking-widest">المهام الجارية</h2>
+           <span className="bg-white px-3 py-1 rounded-full text-[10px] text-gray-400 border border-gray-100 shadow-sm">{orders.length} طلب</span>
+         </div>
 
-              <div className="grid grid-cols-2 gap-3 pt-2">
-                <button 
-                  onClick={() => startTracking(order.id)}
-                  className={cn(
-                    "flex flex-col items-center justify-center p-3 rounded-2xl border-2 transition-all",
-                    activeOrderId === order.id 
-                      ? "bg-[#F29124] border-[#F29124] text-white shadow-lg" 
-                      : "bg-white border-gray-100 text-gray-500"
-                  )}
+         <div className="space-y-4">
+           {orders.map((order) => (
+             <div key={order.id} className="bg-white rounded-[2.5rem] p-6 shadow-xl shadow-gray-200/40 border border-gray-100 space-y-6">
+                <div className="flex justify-between items-start">
+                   <div>
+                      <p className="text-[9px] text-gray-400 font-mono">ORDER #{order.id.slice(-6).toUpperCase()}</p>
+                      <h3 className="text-lg text-[#0F172A] mt-1">{order.customerName}</h3>
+                   </div>
+                   <div className="text-left">
+                      <p className="text-xs font-black text-[#C5A021]">{order.totalAmount.toLocaleString()} SDG</p>
+                      <p className="text-[9px] text-gray-400 mt-1 uppercase">الدفع: {order.paymentMethod}</p>
+                   </div>
+                </div>
+
+                <div className="space-y-3">
+                   <div className="flex gap-4">
+                      <div className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center text-gray-400 shrink-0">
+                         <span className="material-symbols-rounded text-lg">location_on</span>
+                      </div>
+                      <div className="min-w-0">
+                         <p className="text-[10px] text-gray-400 mb-0.5">عنوان التوصيل</p>
+                         <p className="text-xs text-[#0F172A] truncate">{order.city} - {order.district} - {order.street}</p>
+                      </div>
+                   </div>
+                   <div className="flex gap-4">
+                      <div className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center text-gray-400 shrink-0">
+                         <span className="material-symbols-rounded text-lg">phone_enabled</span>
+                      </div>
+                      <div>
+                         <p className="text-[10px] text-gray-400 mb-0.5">رقم التواصل</p>
+                         <a href={`tel:${order.phone}`} className="text-xs text-[#C5A021] font-black underline">{order.phone}</a>
+                      </div>
+                   </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 pt-2">
+                   <button 
+                     onClick={() => startTracking(order.id)}
+                     className={cn(
+                       "flex flex-col items-center justify-center p-5 rounded-[1.5rem] border-2 transition-all",
+                       activeOrderId === order.id 
+                         ? "bg-[#F29124] border-[#F29124] text-white shadow-xl shadow-[#F29124]/20" 
+                         : "bg-gray-50 border-transparent text-gray-400"
+                     )}
+                   >
+                      <span className="material-symbols-rounded mb-1">{activeOrderId === order.id ? "share_location" : "near_me"}</span>
+                      <span className="text-[10px]">{activeOrderId === order.id ? "إيقاف البث" : "بدء الرحلة"}</span>
+                   </button>
+                   <button 
+                     onClick={() => handleMarkDelivered(order.id)}
+                     className="flex flex-col items-center justify-center p-5 bg-[#0F172A] text-white rounded-[1.5rem] shadow-xl shadow-[#0F172A]/10"
+                   >
+                      <span className="material-symbols-rounded mb-1">task_alt</span>
+                      <span className="text-[10px]">تأكيد التسليم</span>
+                   </button>
+                </div>
+
+                <a 
+                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${order.city} ${order.district} ${order.street}`)}`}
+                  target="_blank"
+                  className="block text-center py-4 text-[10px] text-[#C5A021] hover:bg-gray-50 rounded-2xl transition-all border border-dashed border-gray-100"
                 >
-                  <span className="material-symbols-rounded mb-1">
-                    {activeOrderId === order.id ? "share_location" : "near_me"}
-                  </span>
-                  <span className="text-[10px] font-bold">
-                    {activeOrderId === order.id ? "إيقاف البث" : "بدء التوصيل"}
-                  </span>
-                </button>
+                  فتح في خرائط Google ↗
+                </a>
+             </div>
+           ))}
 
-                <button 
-                  onClick={() => handleMarkDelivered(order.id)}
-                  className="flex flex-col items-center justify-center p-3 bg-green-500 rounded-2xl text-white shadow-lg shadow-green-500/20 active:scale-95 transition"
-                >
-                  <span className="material-symbols-rounded mb-1">task_alt</span>
-                  <span className="text-[10px] font-bold">تم التسليم</span>
-                </button>
-              </div>
-
-              {/* External Map Link */}
-              <a 
-                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${order.city} ${order.district} ${order.street}`)}`}
-                target="_blank"
-                className="block text-center py-2 text-[10px] text-[#1089A4] font-bold hover:bg-gray-50 rounded-xl transition mt-2"
-              >
-                فتح خريطة العنوان ↗
-              </a>
-            </div>
-          ))}
-
-          {orders.length === 0 && (
-            <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-gray-200">
-              <span className="material-symbols-rounded text-6xl text-gray-100 mb-2">assignment_turned_in</span>
-              <p className="text-gray-400 font-bold">لا توجد طلبات في عهدتك حالياً</p>
-            </div>
-          )}
-        </div>
+           {orders.length === 0 && (
+             <div className="text-center py-32 bg-white rounded-[3rem] border border-dashed border-gray-200">
+                <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                   <span className="material-symbols-rounded text-4xl text-gray-200">delivery_dining</span>
+                </div>
+                <p className="text-gray-400">لا توجد مهام نشطة حالياً</p>
+                <p className="text-[10px] text-gray-300 mt-1 uppercase tracking-widest">تأكد من وضعية "متصل" لاستلام طلبات</p>
+             </div>
+           )}
+         </div>
       </main>
-
-      {/* Global CSS for Material Symbols if needed */}
-      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+      
     </div>
   );
 }

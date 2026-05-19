@@ -21,7 +21,7 @@ export default function ProductGallery({ images }: { images: string[] }) {
             onClick={() => setActiveImage(i)}
             className={cn(
               "w-20 h-20 md:w-24 md:h-24 flex-shrink-0 bg-white rounded-2xl border-2 transition-all p-1.5 overflow-hidden group/thumb",
-              activeImage === i ? "border-[#1089A4] shadow-lg shadow-[#1089A4]/10 scale-105" : "border-border/50 opacity-60 hover:opacity-100"
+              activeImage === i ? "border-[#C5A021] shadow-lg shadow-[#C5A021]/10 scale-105" : "border-border/50 opacity-60 hover:opacity-100"
             )}
           >
             <div className="relative w-full h-full rounded-xl overflow-hidden bg-muted font-heading">
@@ -49,7 +49,7 @@ export default function ProductGallery({ images }: { images: string[] }) {
         
         {/* Hover zoom decoration */}
         <div className="absolute bottom-6 left-6 md:bottom-10 md:left-10 bg-white/90 backdrop-blur-md px-5 py-2.5 md:px-6 md:py-3 rounded-2xl text-[11px] md:text-[12px] font-bold uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all shadow-xl shadow-black/5 border border-border/50 flex items-center gap-2 md:gap-3">
-           <span className="material-symbols-rounded text-md md:text-lg text-[#1089A4]">zoom_in</span> اضغط لمشاهدة التفاصيل
+           <span className="material-symbols-rounded text-md md:text-lg text-[#C5A021]">zoom_in</span> اضغط لمشاهدة التفاصيل
         </div>
       </div>
     </div>

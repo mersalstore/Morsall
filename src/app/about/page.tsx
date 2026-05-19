@@ -30,11 +30,11 @@ export default function AboutPage() {
             </p>
             <div className="flex gap-4">
                <div className="w-1.5 h-12 bg-accent rounded-full" />
-               <p className="text-[#1089A4] font-black text-xl italic">"نحو مستقبل تجاري ذكي، آمن، ومستدام."</p>
+               <p className="text-[#C5A021] font-black text-xl italic">"نحو مستقبل تجاري ذكي، آمن، ومستدام."</p>
             </div>
           </div>
           <div className="relative aspect-square bg-muted rounded-[3rem] overflow-hidden border border-border/10 shadow-2xl">
-            <div className="absolute inset-0 bg-gradient-to-br from-[#1089A4]/20 to-[#F29124]/10 z-10" />
+            <div className="absolute inset-0 bg-gradient-to-br from-[#C5A021]/20 to-[#F29124]/10 z-10" />
             <div className="absolute inset-0 flex items-center justify-center p-12">
                <div className="text-center space-y-4">
                   <span className="material-symbols-rounded text-8xl text-primary opacity-20">diversity_2</span>
@@ -68,7 +68,7 @@ export default function AboutPage() {
               { title: "الابتكار المستمر", desc: "نستخدم أحدث تقنيات الوجستيات لضمان أسرع وصول لشحنتك.", icon: "auto_awesome" },
               { title: "التمكين المحلي", desc: "ندعم المتاجر السودانية الصغيرة والمتوسطة للنمو والازدهار.", icon: "rocket_launch" },
             ].map((v, i) => (
-              <div key={i} className="p-12 bg-[#021D24] text-white rounded-[3rem] border border-white/5 relative overflow-hidden group">
+              <div key={i} className="p-12 bg-[#0F172A] text-white rounded-[3rem] border border-white/5 relative overflow-hidden group">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-accent/10 blur-[60px] rounded-full group-hover:bg-accent/20 transition-all" />
                 <span className="material-symbols-rounded text-accent text-4xl mb-6 block">{v.icon}</span>
                 <h4 className="text-xl font-black mb-4 tracking-tight">{v.title}</h4>

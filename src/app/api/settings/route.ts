@@ -19,6 +19,7 @@ export async function GET() {
         contactEmail: true,
         contactPhone: true,
         whatsappNumber: true,
+        bankAccounts: true,
       }
     });
 

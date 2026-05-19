@@ -388,61 +388,45 @@
 ::-webkit-scrollbar-thumb { background: var(--primary-light); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--primary); }
 
-/* ── Print — ورقة الشحن ──────────────────────────────── */
+/* ── Print — بوليصة الشحن ─────────────────────────────── */
 @media print {
-  /* إخفاء كل شيء بشكل افتراضي */
-  body {
+  @page { margin: 4mm; size: A4; }
+
+  /* إخفاء كل شيء على الصفحة بالكامل */
+  body * {
     visibility: hidden !important;
-    background: white !important;
   }
-  
-  /* إظهار حاوية المودال وتوسيعها */
-  .print-modal-container {
+
+  /* إظهار حاوية البوليصات ومحتوياتها فقط */
+  .print-area,
+  .print-area * {
     visibility: visible !important;
+  }
+
+  /* جعل حاوية البوليصات تبدأ من أقصى اليسار العلوي بكامل العرض */
+  .print-area {
     position: absolute !important;
     left: 0 !important;
     top: 0 !important;
     width: 100% !important;
-    height: auto !important;
-    display: block !important;
-    z-index: 9999 !important;
+    margin: 0 !important;
+    padding: 0 !important;
     background: white !important;
   }
 
-  /* إظهار ورقة الشحن وكل ما بداخلها */
-  #shipping-label-print,
-  #shipping-label-print * {
-    visibility: visible !important;
+  /* فاصل الصفحات التلقائي لكل بوليصة */
+  [class*="print:break-before-page"] {
+    break-before: page !important;
+    page-break-before: always !important;
   }
 
-  /* تخصيص حجم الورقة (اختياري، يمكن تركه للمتصفح) */
-  @page {
-    margin: 5mm !important;
-  }
-
-  /* تحديد موقع الورقة */
-  #shipping-label-print {
-    width: 100% !important;
-    max-width: 800px; /* ليناسب A4 بشكل جيد */
-    margin: 0 auto !important;
-    padding: 20px !important;
-    border: 1px solid #eee !important;
-    background: white !important;
-    box-shadow: none !important;
-    position: relative !important;
-  }
-
-  /* إخفاء أي أزرار أو هوامش إضافية */
-  .print-hidden, .print\:hidden, button {
-    display: none !important;
-  }
-
-  /* التأكد من طباعة الألوان والخلفيات */
+  /* ضمان الألوان والخطوط أثناء الطباعة */
   * {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
 }
+
 
 /* ── RTL Support ──────────────────────────────────────── */
 [dir="rtl"] .text-start { text-align: right; }

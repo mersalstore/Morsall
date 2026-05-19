@@ -52,12 +52,12 @@ export default function FAQPage() {
             
             <div className="space-y-6">
                {faqs.map((faq, index) => (
-                 <div key={index} className="bg-muted p-8 rounded-[2rem] border border-border/10 hover:border-[#1089A4]/30 transition-all group">
+                 <div key={index} className="bg-muted p-8 rounded-[2rem] border border-border/10 hover:border-[#C5A021]/30 transition-all group">
                     <h3 className="text-lg font-black text-primary mb-4 flex items-center gap-4">
                        <span className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-[#F29124] shadow-sm font-inter">Q{index + 1}</span>
                        {faq.q}
                     </h3>
-                    <p className="text-primary/60 leading-relaxed pr-14 border-r-2 border-[#1089A4]/20 mr-4">
+                    <p className="text-primary/60 leading-relaxed pr-14 border-r-2 border-[#C5A021]/20 mr-4">
                        {faq.a}
                     </p>
                  </div>

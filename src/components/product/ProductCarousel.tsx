@@ -29,8 +29,8 @@ export default function ProductCarousel({ title, products, subtitle }: ProductCa
       {/* Header with Navigation */}
       <div className="flex items-end justify-between border-b-4 border-border/30 pb-10">
         <div className="space-y-2">
-            <h3 className="text-4xl font-black text-[#021D24] tracking-tighter uppercase">
-                {title.split(' ').map((word, i) => i === 1 ? <span key={i} className="text-[#1089A4]">{word} </span> : word + ' ')}
+            <h3 className="text-4xl font-black text-[#0F172A] tracking-tighter uppercase">
+                {title.split(' ').map((word, i) => i === 1 ? <span key={i} className="text-[#C5A021]">{word} </span> : word + ' ')}
             </h3>
             {subtitle && <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{subtitle}</p>}
         </div>
@@ -38,13 +38,13 @@ export default function ProductCarousel({ title, products, subtitle }: ProductCa
         <div className="flex gap-3">
             <button 
                 onClick={() => scroll("right")}
-                className="w-14 h-14 rounded-full border-2 border-gray-100 flex items-center justify-center text-gray-400 hover:border-[#1089A4] hover:text-[#1089A4] transition-all bg-white shadow-sm hover:shadow-lg active:scale-95"
+                className="w-14 h-14 rounded-full border-2 border-gray-100 flex items-center justify-center text-gray-400 hover:border-[#C5A021] hover:text-[#C5A021] transition-all bg-white shadow-sm hover:shadow-lg active:scale-95"
             >
                 <span className="material-symbols-rounded">chevron_right</span>
             </button>
             <button 
                 onClick={() => scroll("left")}
-                className="w-14 h-14 rounded-full border-2 border-gray-100 flex items-center justify-center text-gray-400 hover:border-[#1089A4] hover:text-[#1089A4] transition-all bg-white shadow-sm hover:shadow-lg active:scale-95"
+                className="w-14 h-14 rounded-full border-2 border-gray-100 flex items-center justify-center text-gray-400 hover:border-[#C5A021] hover:text-[#C5A021] transition-all bg-white shadow-sm hover:shadow-lg active:scale-95"
             >
                 <span className="material-symbols-rounded">chevron_left</span>
             </button>

@@ -3,12 +3,13 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState, useRef } from "react";
+import { cn } from "@/lib/utils";
 
 export default function CategoryWall() {
   const [categories, setCategories] = useState<any[]>([]);
 
   useEffect(() => {
-    fetch("/api/admin/categories")
+    fetch("/api/categories")
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) {
@@ -80,7 +81,11 @@ export default function CategoryWall() {
                         className="object-cover"
                       />
                     ) : (
-                      <span>{cat.icon || "📦"}</span>
+                      <span className={cn(
+                        !cat.icon || cat.icon.length > 2 ? "material-symbols-rounded" : ""
+                      )}>
+                        {cat.icon || "category"}
+                      </span>
                     )}
                   </div>
                   <p className="text-sm font-bold text-[#333] group-hover:text-[#A89F91] transition-colors text-center w-full truncate px-2">
@@ -90,63 +95,6 @@ export default function CategoryWall() {
               )
             })}
           </div>
-        </div>
-
-        {/* ── 4-box deal grid (Amazon-style) ── */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
-          {[
-            {
-              title: "🔥 عروض اليوم",
-              sub: "لحق قبل ما تخلص",
-              bg: "bg-white",
-              accent: "#E53E3E",
-              img: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&q=80&w=400",
-              href: "/offers",
-              cta: "شوف كل العروض",
-            },
-            {
-              title: "ابدأ البيع الآن",
-              sub: "متجرك على بُعد دقيقتين",
-              bg: "bg-white",
-              accent: "#1089A4",
-              img: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&q=80&w=400",
-              href: "/vendor/register",
-              cta: "اعرض منتجاتك الآن",
-            },
-            {
-              title: "وصل جديد 🆕",
-              sub: "أحدث المنتجات في السودان",
-              bg: "bg-white",
-              accent: "#F29124",
-              img: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=400",
-              href: "/shop?sort=new",
-              cta: "اكتشف الجديد",
-            },
-            {
-              title: "المتاجر",
-              sub: "أكثر من متجر موثوق",
-              bg: "bg-white",
-              accent: "#6B46C1",
-              img: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&q=80&w=400",
-              href: "/top-vendors",
-              cta: "تعرّف عليهم",
-            },
-          ].map((box, i) => (
-            <div key={i} className={`${box.bg} rounded-lg p-4 border border-gray-200 hover:shadow-md transition-shadow overflow-hidden relative`}>
-              <h3 className="font-black text-sm text-[#021D24] mb-1 leading-tight">{box.title}</h3>
-              <p className="text-xs text-gray-500 mb-3">{box.sub}</p>
-              <div className="relative w-full h-48 rounded-lg overflow-hidden mb-3">
-                <Image src={box.img} alt={box.title} fill className="object-cover" />
-              </div>
-              <Link
-                href={box.href}
-                className="text-xs font-bold hover:underline"
-                style={{ color: box.accent }}
-              >
-                {box.cta}
-              </Link>
-            </div>
-          ))}
         </div>
 
       </div>

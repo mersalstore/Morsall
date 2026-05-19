@@ -31,9 +31,9 @@ export default function ShopClientControls({ resultCount, query, initialSort }: 
       <div className="bg-white rounded-lg border border-gray-200 p-3 flex flex-wrap items-center justify-between gap-4">
         <p className="text-sm text-gray-600">
           {query ? (
-            <><strong className="text-[#021D24]">{resultCount}</strong> نتيجة لـ &quot;<strong>{query}</strong>&quot;</>
+            <><strong className="text-[#0F172A]">{resultCount}</strong> نتيجة لـ &quot;<strong>{query}</strong>&quot;</>
           ) : (
-            <><strong className="text-[#021D24]">{resultCount}</strong> منتج متوفر</>
+            <><strong className="text-[#0F172A]">{resultCount}</strong> منتج متوفر</>
           )}
         </p>
         <div className="flex items-center gap-3">
@@ -49,7 +49,7 @@ export default function ShopClientControls({ resultCount, query, initialSort }: 
             <select 
               value={initialSort}
               onChange={handleSortChange}
-              className="border border-gray-300 rounded px-2 py-1 text-xs font-bold outline-none focus:border-[#1089A4] bg-white cursor-pointer"
+              className="border border-gray-300 rounded px-2 py-1 text-xs font-bold outline-none focus:border-[#C5A021] bg-white cursor-pointer"
             >
               <option value="">الأكثر مبيعاً</option>
               <option value="new">الأحدث</option>
@@ -69,7 +69,7 @@ export default function ShopClientControls({ resultCount, query, initialSort }: 
               animate={{ opacity: 1 }} 
               exit={{ opacity: 0 }} 
               onClick={() => setIsMobileFiltersOpen(false)}
-              className="absolute inset-0 bg-[#021D24]/60 backdrop-blur-sm"
+              className="absolute inset-0 bg-[#0F172A]/60 backdrop-blur-sm"
             />
             <motion.div 
               initial={{ x: "100%" }} 
@@ -80,7 +80,7 @@ export default function ShopClientControls({ resultCount, query, initialSort }: 
               dir="rtl"
             >
               <div className="p-6 border-b border-gray-100 flex items-center justify-between">
-                <h3 className="font-black text-lg text-[#021D24]">تصفية النتائج</h3>
+                <h3 className="font-black text-lg text-[#0F172A]">تصفية النتائج</h3>
                 <button 
                   onClick={() => setIsMobileFiltersOpen(false)}
                   className="w-8 h-8 flex items-center justify-center bg-gray-50 text-gray-400 rounded-lg hover:bg-red-50 hover:text-red-500 transition-colors"

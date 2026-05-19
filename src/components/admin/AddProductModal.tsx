@@ -33,8 +33,8 @@ export default function AddProductModal({ isOpen, onClose, onSuccess, editingPro
 
   useEffect(() => {
     if (isOpen) {
-      fetch("/api/admin/categories").then(r => r.json()).then(setCategories).catch(() => {});
-      fetch("/api/admin/vendors").then(r => r.json()).then(setVendors).catch(() => {});
+      fetch("/api/admin/categories").then(r => r.json()).then(data => setCategories(Array.isArray(data) ? data : [])).catch(() => {});
+      fetch("/api/admin/vendors").then(r => r.json()).then(data => setVendors(Array.isArray(data) ? data : [])).catch(() => {});
 
       if (editingProduct) {
         let imgs: string[] = [];
@@ -67,7 +67,9 @@ export default function AddProductModal({ isOpen, onClose, onSuccess, editingPro
     if (!files || files.length === 0) return;
     setUploading(true);
     const uploadedUrls: string[] = [];
-    const HOSTINGER_IP = "82.198.228.182";
+    
+    // Get the current origin to avoid protocol mismatches
+    const currentOrigin = typeof window !== "undefined" ? window.location.origin : "";
 
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
@@ -76,42 +78,44 @@ export default function AddProductModal({ isOpen, onClose, onSuccess, editingPro
       const fd = new FormData();
       fd.append("file", file);
       try {
-        // Try the main API first
-        let res = await fetch("/api/upload", { method: "POST", body: fd });
+        // Try the main API first (relative to current host)
+        let res = await fetch("/api/upload", { 
+          method: "POST", 
+          body: fd,
+          // Explicitly set cache to no-cache to avoid stale responses
+          cache: "no-cache"
+        });
         
-        // If it fails (likely due to Vercel/Hostinger bridge issue), try DIRECTLY to Hostinger IP
+        // If it fails, we provide a more helpful error
         if (!res.ok) {
-          console.warn("Main upload failed, trying direct upload to Hostinger...");
-          try {
-            const directRes = await fetch(`http://${HOSTINGER_IP}/api/upload`, { 
-              method: "POST", 
-              body: fd,
-              headers: {
-                "X-Proxy-Secret": "Mersal_Internal_Proxy_2026",
-                "Host": "morsall.com"
-              }
-            });
-            if (directRes.ok) res = directRes;
-          } catch (directErr) {
-            console.error("Direct upload failed too:", directErr);
+          const errData = await res.json().catch(() => ({}));
+          const errorMsg = errData.error || `Error ${res.status}: ${res.statusText}`;
+          console.error(`Upload failed for ${file.name}:`, errorMsg);
+          
+          if (res.status === 413) {
+            alert(`فشل رفع الصورة (${file.name}): حجم الملف كبير جداً بالنسبة للسيرفر.`);
+          } else {
+            alert(`فشل رفع الصورة (${file.name}): ${errorMsg}`);
+          }
+        } else {
+          const data = await res.json();
+          if (data.url) {
+            uploadedUrls.push(data.url);
+          } else {
+            console.error("No URL returned in response:", data);
+            alert(`فشل رفع الصورة (${file.name}): السيرفر لم يرجع رابط الصورة`);
           }
         }
-
-        if (res.ok) {
-          const data = await res.json();
-          uploadedUrls.push(data.url);
-        } else {
-          const errData = await res.json().catch(() => ({}));
-          alert(`فشل رفع الصورة (${file.name}): ${errData.error || "خطأ في السيرفر"}`);
-        }
-      } catch (err) {
-        console.error("Upload error:", err);
-        alert(`فشل رفع الصورة (${file.name}): تأكد من حجم الملف واتصالك بالإنترنت`);
+      } catch (err: any) {
+        console.error("Upload network error:", err);
+        alert(`فشل رفع الصورة (${file.name}): تأكد من اتصالك بالإنترنت. إذا كنت تستخدم VPN، حاول إغلاقه أو العكس.`);
       }
     }
+    
     if (uploadedUrls.length > 0) {
       setFormData(prev => ({ ...prev, images: [...prev.images, ...uploadedUrls] }));
     }
+    
     // Reset input so same file can be re-uploaded
     e.target.value = "";
     setUploading(false);
@@ -173,7 +177,7 @@ export default function AddProductModal({ isOpen, onClose, onSuccess, editingPro
 
   return (
     <div className="fixed inset-0 z-[1000] flex items-start md:items-center justify-center p-4 overflow-y-auto">
-      <div className="absolute inset-0 bg-[#021D24]/90 backdrop-blur-md" onClick={onClose} />
+      <div className="absolute inset-0 bg-[#0F172A]/90 backdrop-blur-md" onClick={onClose} />
       <motion.div
         initial={{ opacity: 0, scale: 0.9, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -184,11 +188,11 @@ export default function AddProductModal({ isOpen, onClose, onSuccess, editingPro
         </button>
 
         <div className="flex items-center gap-5 mb-10">
-          <div className="w-14 h-14 rounded-[1.5rem] bg-[#1089A4]/10 text-[#1089A4] flex items-center justify-center">
+          <div className="w-14 h-14 rounded-[1.5rem] bg-[#C5A021]/10 text-[#C5A021] flex items-center justify-center">
             <Package size={28} />
           </div>
           <div>
-            <h2 className="text-2xl md:text-3xl font-black text-[#021D24]">{editingProduct ? "تعديل بيانات المنتج" : "إضافة منتج جديد"}</h2>
+            <h2 className="text-2xl md:text-3xl font-black text-[#0F172A]">{editingProduct ? "تعديل بيانات المنتج" : "إضافة منتج جديد"}</h2>
             <p className="text-gray-400 text-xs font-bold uppercase tracking-widest mt-1">{editingProduct ? "Update Product" : "Add New Product"}</p>
           </div>
         </div>
@@ -212,13 +216,13 @@ export default function AddProductModal({ isOpen, onClose, onSuccess, editingPro
                     <Trash2 size={12} />
                   </button>
                   {i === 0 && (
-                    <div className="absolute bottom-1 left-1 bg-[#1089A4] text-white text-[8px] font-black px-2 py-0.5 rounded-lg">رئيسية</div>
+                    <div className="absolute bottom-1 left-1 bg-[#C5A021] text-white text-[8px] font-black px-2 py-0.5 rounded-lg">رئيسية</div>
                   )}
                 </div>
               ))}
-              <label className={`aspect-square rounded-2xl border-2 border-dashed flex flex-col items-center justify-center gap-2 cursor-pointer transition-all ${uploading ? "border-[#1089A4] bg-[#1089A4]/5" : "border-gray-200 hover:border-[#1089A4] hover:bg-gray-50"}`}>
+              <label className={`aspect-square rounded-2xl border-2 border-dashed flex flex-col items-center justify-center gap-2 cursor-pointer transition-all ${uploading ? "border-[#C5A021] bg-[#C5A021]/5" : "border-gray-200 hover:border-[#C5A021] hover:bg-gray-50"}`}>
                 {uploading ? (
-                  <div className="w-6 h-6 border-3 border-[#1089A4] border-t-transparent rounded-full animate-spin" />
+                  <div className="w-6 h-6 border-3 border-[#C5A021] border-t-transparent rounded-full animate-spin" />
                 ) : (
                   <>
                     <Upload size={22} className="text-gray-300" />
@@ -236,23 +240,23 @@ export default function AddProductModal({ isOpen, onClose, onSuccess, editingPro
               <div className="space-y-2">
                 <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2">اسم المنتج *</label>
                 <input value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})}
-                  className="w-full bg-gray-50 border border-transparent focus:border-[#1089A4] rounded-2xl px-5 py-4 outline-none font-bold transition-all" required />
+                  className="w-full bg-gray-50 border border-transparent focus:border-[#C5A021] rounded-2xl px-5 py-4 outline-none font-bold transition-all" required />
               </div>
               <div className="space-y-2">
                 <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2">وصف مختصر</label>
                 <input value={formData.shortDescription} onChange={e => setFormData({...formData, shortDescription: e.target.value})}
-                  className="w-full bg-gray-50 border border-transparent focus:border-[#1089A4] rounded-2xl px-5 py-4 outline-none font-bold transition-all" />
+                  className="w-full bg-gray-50 border border-transparent focus:border-[#C5A021] rounded-2xl px-5 py-4 outline-none font-bold transition-all" />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2">السعر (ج.س) *</label>
                   <input type="number" min="0" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})}
-                    className="w-full bg-gray-50 border border-transparent focus:border-[#1089A4] rounded-2xl px-5 py-4 outline-none font-bold transition-all" required />
+                    className="w-full bg-gray-50 border border-transparent focus:border-[#C5A021] rounded-2xl px-5 py-4 outline-none font-bold transition-all" required />
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2">الكمية *</label>
                   <input type="number" min="0" value={formData.stock} onChange={e => setFormData({...formData, stock: e.target.value})}
-                    className="w-full bg-gray-50 border border-transparent focus:border-[#1089A4] rounded-2xl px-5 py-4 outline-none font-bold transition-all" required />
+                    className="w-full bg-gray-50 border border-transparent focus:border-[#C5A021] rounded-2xl px-5 py-4 outline-none font-bold transition-all" required />
                 </div>
               </div>
               
@@ -263,7 +267,7 @@ export default function AddProductModal({ isOpen, onClose, onSuccess, editingPro
                 </label>
                 <div className="grid grid-cols-2 gap-3">
                   <select value={formData.discountType} onChange={e => setFormData({...formData, discountType: e.target.value})}
-                    className="bg-gray-50 border border-transparent focus:border-[#1089A4] rounded-2xl px-4 py-4 outline-none font-bold transition-all text-sm">
+                    className="bg-gray-50 border border-transparent focus:border-[#C5A021] rounded-2xl px-4 py-4 outline-none font-bold transition-all text-sm">
                     <option value="PERCENTAGE">نسبة مئوية %</option>
                     <option value="FIXED">مبلغ ثابت ج.س</option>
                   </select>
@@ -279,7 +283,7 @@ export default function AddProductModal({ isOpen, onClose, onSuccess, editingPro
               <div className="space-y-2">
                 <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2">القسم *</label>
                 <select value={formData.categoryId} onChange={e => setFormData({...formData, categoryId: e.target.value})}
-                  className="w-full bg-gray-50 border border-transparent focus:border-[#1089A4] rounded-2xl px-5 py-4 outline-none font-bold transition-all" required>
+                  className="w-full bg-gray-50 border border-transparent focus:border-[#C5A021] rounded-2xl px-5 py-4 outline-none font-bold transition-all" required>
                   <option value="">اختر القسم</option>
                   {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                 </select>
@@ -287,7 +291,7 @@ export default function AddProductModal({ isOpen, onClose, onSuccess, editingPro
               <div className="space-y-2">
                 <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2">المورد *</label>
                 <select value={formData.vendorId} onChange={e => setFormData({...formData, vendorId: e.target.value})}
-                  className="w-full bg-gray-50 border border-transparent focus:border-[#1089A4] rounded-2xl px-5 py-4 outline-none font-bold transition-all" required>
+                  className="w-full bg-gray-50 border border-transparent focus:border-[#C5A021] rounded-2xl px-5 py-4 outline-none font-bold transition-all" required>
                   <option value="">اختر المورد</option>
                   {vendors.map(v => <option key={v.id} value={v.id}>{v.storeName || v.name}</option>)}
                 </select>
@@ -295,13 +299,13 @@ export default function AddProductModal({ isOpen, onClose, onSuccess, editingPro
               <div className="space-y-2">
                 <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2">كود المنتج (SKU)</label>
                 <input value={formData.sku} onChange={e => setFormData({...formData, sku: e.target.value})}
-                  className="w-full bg-gray-50 border border-transparent focus:border-[#1089A4] rounded-2xl px-5 py-4 outline-none font-bold transition-all"
+                  className="w-full bg-gray-50 border border-transparent focus:border-[#C5A021] rounded-2xl px-5 py-4 outline-none font-bold transition-all"
                   placeholder="مثل: SKU-001" />
               </div>
               <div className="space-y-2">
                 <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2">وصف تفصيلي *</label>
                 <textarea value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})}
-                  className="w-full bg-gray-50 border border-transparent focus:border-[#1089A4] rounded-2xl px-5 py-4 outline-none font-medium min-h-[130px] resize-none transition-all" required />
+                  className="w-full bg-gray-50 border border-transparent focus:border-[#C5A021] rounded-2xl px-5 py-4 outline-none font-medium min-h-[130px] resize-none transition-all" required />
               </div>
             </div>
           </div>
@@ -311,7 +315,7 @@ export default function AddProductModal({ isOpen, onClose, onSuccess, editingPro
               إلغاء
             </button>
             <button type="submit" disabled={loading || uploading}
-              className="flex-[2] bg-[#1089A4] text-white py-5 rounded-2xl font-black shadow-xl hover:bg-[#021D24] transition-all flex items-center justify-center gap-3 active:scale-95 disabled:opacity-50"
+              className="flex-[2] bg-[#C5A021] text-white py-5 rounded-2xl font-black shadow-xl hover:bg-[#0F172A] transition-all flex items-center justify-center gap-3 active:scale-95 disabled:opacity-50"
             >
               {loading ? <div className="w-6 h-6 border-4 border-white border-t-transparent rounded-full animate-spin" /> : <Plus size={22} />}
               {editingProduct ? "حفظ التغييرات" : "إضافة المنتج"}
