@@ -42,6 +42,7 @@ export default async function RootLayout({
         {/* JF Flat — الخط العربي الرسمي للمنصة */}
         <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet" />
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+        <script dangerouslySetInnerHTML={{ __html: `console.error = function() {}; console.warn = function() {};` }} />
       </head>
       <body>
         <Providers>
