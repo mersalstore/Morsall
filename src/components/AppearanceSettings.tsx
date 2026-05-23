@@ -6,7 +6,7 @@ import { Palette, Image as ImageIcon, Layout, Plus, Trash2, Save, UploadCloud, A
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 
-export default function AppearanceSettings() {
+export default function AppearanceSettings({ showToast }: { showToast?: (msg: string, type?: "success" | "error" | "info") => void }) {
   const [settings, setSettings] = useState<any>({
     siteTitle: "مرسال",
     siteDescription: "منصة مرسال للتجارة الإلكترونية",
@@ -18,6 +18,7 @@ export default function AppearanceSettings() {
     instagramUrl: "",
   });
   const [banners, setBanners] = useState<any[]>([]);
+  const [heroImagePosition, setHeroImagePosition] = useState("center");
   const [loading, setLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
@@ -35,25 +36,50 @@ export default function AppearanceSettings() {
     } catch (err) {
       console.error(err);
     }
+    try {
+      const heroRes = await fetch("/api/site-config?key=heroImagePosition");
+      const heroVal = await heroRes.json();
+      if (heroVal) setHeroImagePosition(heroVal);
+    } catch (_) {}
     setLoading(false);
   };
 
   const handleSaveSettings = async () => {
     setActionLoading("settings");
     try {
-      const res = await fetch("/api/admin/settings/appearance", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(settings),
-      });
+      const [res] = await Promise.all([
+        fetch("/api/admin/settings/appearance", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(settings),
+        }),
+        fetch("/api/site-config", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ key: "heroImagePosition", value: heroImagePosition }),
+        }),
+      ]);
       if (res.ok) {
-        alert("تم حفظ إعدادات الهوية بنجاح! ✨");
+        if (showToast) {
+          showToast("تم حفظ إعدادات الهوية بنجاح! ✨", "success");
+        } else {
+          alert("تم حفظ إعدادات الهوية بنجاح! ✨");
+        }
       } else {
         const errorData = await res.json();
-        alert(`فشل الحفظ: ${errorData.error || "خطأ غير معروف"}`);
+        const errorMsg = `فشل الحفظ: ${errorData.error || "خطأ غير معروف"}`;
+        if (showToast) {
+          showToast(errorMsg, "error");
+        } else {
+          alert(errorMsg);
+        }
       }
     } catch (err) {
-      alert("حدث خطأ تقني أثناء محاولة الحفظ");
+      if (showToast) {
+        showToast("حدث خطأ تقني أثناء محاولة الحفظ", "error");
+      } else {
+        alert("حدث خطأ تقني أثناء محاولة الحفظ");
+      }
     }
     setActionLoading(null);
   };
@@ -65,9 +91,13 @@ export default function AppearanceSettings() {
       const res = await fetch("/api/upload", { method: "POST", body: fd });
       const data = await res.json();
       if (res.ok) return data.url;
-      else alert(`فشل الرفع: ${data.error}`);
+      else {
+        if (showToast) showToast(`فشل الرفع: ${data.error}`, "error");
+        else alert(`فشل الرفع: ${data.error}`);
+      }
     } catch (err) {
-      alert("حدث خطأ أثناء رفع الملف");
+      if (showToast) showToast("حدث خطأ أثناء رفع الملف", "error");
+      else alert("حدث خطأ أثناء رفع الملف");
     }
     return null;
   };
@@ -98,12 +128,15 @@ export default function AppearanceSettings() {
           if (res.ok) {
              const newBanner = await res.json();
              setBanners([...banners, newBanner]);
-             alert("تم إضافة البانر بنجاح! 🎉");
+             if (showToast) showToast("تم إضافة البانر بنجاح! 🎉", "success");
+             else alert("تم إضافة البانر بنجاح! 🎉");
           } else {
-            alert("فشل في إنشاء البانر في قاعدة البيانات");
+             if (showToast) showToast("فشل في إنشاء البانر في قاعدة البيانات", "error");
+             else alert("فشل في إنشاء البانر في قاعدة البيانات");
           }
         } catch (err) {
-          alert("خطأ في الاتصال بالخادم");
+           if (showToast) showToast("خطأ في الاتصال بالخادم", "error");
+           else alert("خطأ في الاتصال بالخادم");
         }
       }
       setActionLoading(null);
@@ -112,8 +145,6 @@ export default function AppearanceSettings() {
   };
 
   const handleUpdateBanner = async (id: string, data: any) => {
-    // Only proceed if it's a field we want to sync immediately or wait for save?
-    // Let's do immediate sync for better UX
     setActionLoading(id);
     try {
       const res = await fetch("/api/admin/settings/appearance", {
@@ -139,8 +170,10 @@ export default function AppearanceSettings() {
       const res = await fetch(`/api/admin/banners?id=${id}`, { method: "DELETE" });
       if (res.ok) {
         setBanners(banners.filter(b => b.id !== id));
+        if (showToast) showToast("تم حذف البانر بنجاح 🗑️", "success");
       } else {
-        alert("حدث خطأ أثناء حذف البانر");
+        if (showToast) showToast("حدث خطأ أثناء حذف البانر", "error");
+        else alert("حدث خطأ أثناء حذف البانر");
       }
     } catch (err) {
       console.error(err);
@@ -263,10 +296,30 @@ export default function AppearanceSettings() {
                              <span className="text-[10px] font-mono font-black text-[#0F172A]">{settings.secondaryColor}</span>
                           </div>
                        </div>
-                    </div>
-                    
-                    <div className="space-y-3">
-                       <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.4em] px-1">رقم خدمة العملاء (واتساب)</label>
+                     </div>
+
+                     <div className="space-y-3">
+                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.4em] px-1">وضع صورة الهيرو (رأسي)</label>
+                        <div className="flex items-center gap-4 bg-gray-50 p-3 rounded-[1.5rem] border border-gray-100 shadow-inner">
+                           <input 
+                              type="range" 
+                              min="0" max="100" value={(() => {
+                                const m = heroImagePosition.match(/center\s+(\d+)%/);
+                                return m ? parseInt(m[1]) : 50;
+                              })()}
+                              onChange={e => {
+                                const v = e.target.value;
+                                setHeroImagePosition(`center ${v}%`);
+                              }}
+                              className="w-full h-2 appearance-none cursor-pointer rounded-full bg-gray-200 accent-[#C5A021]" 
+                           />
+                           <span className="text-[10px] font-mono font-black text-[#0F172A] min-w-[60px] text-center">{heroImagePosition}</span>
+                        </div>
+                        <p className="text-[9px] text-gray-400 font-medium px-1">حرك لتعديل تمركز صورة الهيرو لأعلى أو أسفل</p>
+                     </div>
+                     
+                     <div className="space-y-3">
+                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.4em] px-1">رقم خدمة العملاء (واتساب)</label>
                        <input 
                           value={settings.whatsappNumber} 
                           onChange={e => setSettings({...settings, whatsappNumber: e.target.value})}
@@ -304,13 +357,14 @@ export default function AppearanceSettings() {
                           if (file) {
                              const url = await handleUpload(file);
                              if (url) {
-                               setSettings({...settings, logo: url});
-                               alert("تم تحديث الشعار بنجاح! 🎨");
+                                setSettings({...settings, logo: url});
+                                if (showToast) showToast("تم تحديث الشعار بنجاح! 🎨", "success");
+                                else alert("تم تحديث الشعار بنجاح! 🎨");
                              }
                           }
                        }} />
                     </label>
-                 </div>
+                  </div>
               </div>
 
               <button 
@@ -401,7 +455,7 @@ export default function AppearanceSettings() {
                     <div className="py-32 text-center border-4 border-dashed border-gray-50 rounded-[3rem] flex flex-col items-center gap-6">
                        <div className="w-24 h-24 rounded-full bg-gray-50 flex items-center justify-center">
                           <ImageIcon size={48} className="text-gray-100" />
-                       </div>
+                        </div>
                        <p className="text-xs font-black text-gray-300 uppercase tracking-[0.4em]">لا توجد بانرات ترويجية حالياً</p>
                     </div>
                  )}

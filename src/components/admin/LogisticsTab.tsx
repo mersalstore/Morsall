@@ -396,6 +396,7 @@ export default function LogisticsTab({ orders, users, vendors, fetchData: parent
            { id: "financials", label: "التسويات المالية", icon: <DollarSign size={16} /> },
            { id: "branches", label: "الفروع والمستودعات", icon: <Building2 size={16} /> },
            { id: "dispatch", label: "التوجيه والباركود", icon: <QrCode size={16} /> },
+           { id: "shipments", label: "سجل الشحنات", icon: <Package size={16} /> },
          ].map((tab: any) => (
            <button
              key={tab.id}
@@ -941,6 +942,98 @@ export default function LogisticsTab({ orders, users, vendors, fetchData: parent
               </div>
             </div>
           )}
+          {activeSubTab === "shipments" && (
+            <div className="space-y-8">
+              <div className="bg-white rounded-[3rem] border border-gray-100 shadow-2xl overflow-hidden">
+                <div className="p-8 border-b border-gray-50 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+                  <div>
+                    <h3 className="text-lg text-[#0F172A] font-black">سجل الشحنات المتوافق مع الإكسيل</h3>
+                    <p className="text-xs text-gray-400 font-bold mt-1">عرض ومطابقة بيانات الشحنات بتفاصيل اللوجستيك الكاملة</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <button className="flex items-center gap-2 bg-green-50 text-green-600 px-4 py-2 rounded-xl text-xs font-black border border-green-200 hover:bg-green-100 transition-all">
+                      <span className="material-symbols-rounded text-sm">download</span>
+                      تصدير إكسيل
+                    </button>
+                    <button className="flex items-center gap-2 bg-blue-50 text-blue-600 px-4 py-2 rounded-xl text-xs font-black border border-blue-200 hover:bg-blue-100 transition-all">
+                      <span className="material-symbols-rounded text-sm">upload</span>
+                      استيراد وتحديث
+                    </button>
+                  </div>
+                </div>
+                <div className="overflow-x-auto custom-scrollbar">
+                  <table className="w-full text-right text-xs whitespace-nowrap">
+                    <thead>
+                      <tr className="bg-gray-50/50 [&>th]:p-4 [&>th]:text-[10px] [&>th]:text-gray-400 [&>th]:font-black">
+                        <th>باركود الشحنة</th>
+                        <th>مصدر الطرد</th>
+                        <th>اسم المستلم</th>
+                        <th>هاتف المستلم</th>
+                        <th>المدينة</th>
+                        <th>الحي</th>
+                        <th>الشارع</th>
+                        <th>تاريخ الانشاء</th>
+                        <th>السعر (سعر التوصيل)</th>
+                        <th>رسوم أخرى</th>
+                        <th>قيمة الشحنة</th>
+                        <th>رقم الإرسالية</th>
+                        <th>الملاحظات</th>
+                        <th>طريقة الدفع</th>
+                        <th>الحالة</th>
+                        <th>محتوى الطرد</th>
+                        <th>الكمية</th>
+                        <th>إسم المرسل (المورد)</th>
+                        <th>الوزن</th>
+                        <th>رقم ارسالية المزود</th>
+                        <th>رقم المرجع للعميل</th>
+                        <th>عدد محاولات العالق</th>
+                        <th>نوع الشحنة</th>
+                        <th>رسوم إضافية</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-50 font-bold">
+                      {orders && orders.length > 0 ? orders.map((o) => (
+                        <tr key={o.id} className="hover:bg-gray-50/50 transition-all">
+                          <td className="p-4">{o.trackingNumber || o.id}</td>
+                          <td className="p-4">{o.source || "STORE"}</td>
+                          <td className="p-4">{o.customerName || o.customer?.name}</td>
+                          <td className="p-4">{o.phone}</td>
+                          <td className="p-4">{o.city}</td>
+                          <td className="p-4">{o.district}</td>
+                          <td className="p-4">{o.street}</td>
+                          <td className="p-4">{new Date(o.createdAt).toLocaleDateString("ar-EG")}</td>
+                          <td className="p-4 text-[#C5A021]">{o.shippingCost?.toLocaleString() || 0}</td>
+                          <td className="p-4">{o.otherFees?.toLocaleString() || 0}</td>
+                          <td className="p-4">{o.totalAmount?.toLocaleString()}</td>
+                          <td className="p-4">{o.consignmentNumber || "—"}</td>
+                          <td className="p-4 text-[10px] truncate max-w-[150px]">{o.notes || "—"}</td>
+                          <td className="p-4">{o.paymentMethod}</td>
+                          <td className="p-4">
+                            <span className="px-2 py-1 bg-gray-100 rounded-lg text-[9px]">{o.status}</span>
+                          </td>
+                          <td className="p-4">{o.packageContent || "—"}</td>
+                          <td className="p-4">{o.items?.length || 1}</td>
+                          <td className="p-4">{o.items?.[0]?.vendor?.storeName || "—"}</td>
+                          <td className="p-4">{o.weight || 0}</td>
+                          <td className="p-4">{o.providerConsignmentNumber || "—"}</td>
+                          <td className="p-4">{o.customerReference || "—"}</td>
+                          <td className="p-4">{o.pendingAttempts || 0}</td>
+                          <td className="p-4">{o.shipmentType || "—"}</td>
+                          <td className="p-4">{o.additionalFees?.toLocaleString() || 0}</td>
+                        </tr>
+                      )) : (
+                        <tr>
+                          <td colSpan={24} className="p-12 text-center text-gray-400 font-black">
+                            لا توجد شحنات لعرضها
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
         </motion.div>
       </AnimatePresence>
 
@@ -1105,6 +1198,7 @@ export default function LogisticsTab({ orders, users, vendors, fetchData: parent
             </motion.div>
           </div>
         )}
+
       </AnimatePresence>
 
       {/* Add Branch Modal */}
