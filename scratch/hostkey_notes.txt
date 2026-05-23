@@ -1,0 +1,10 @@
+$registryPath = "HKCU:\Software\SimonTatham\PuTTY\SshHostKeys"
+$keyName = "ed25519@65002:82.198.228.182"
+$keyValue = "0x123456789abcdef..." # I need the hex value of the fingerprint
+
+# Actually, it's easier to just run plink once and let it fail, then read the output to get the key.
+# But I already have the SHA256: LEMTGHJPbsNyMh+BVM/pAQmz7QMrntB9YlO9sMJsxQg
+
+# Let's try to use the -hostkey flag which plink supports!
+# -hostkey aa:bb:cc...
+# Wait, plink supports -hostkey with the fingerprint.

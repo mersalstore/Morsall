@@ -1,0 +1,12 @@
+/home/u754458241/domains/morsall.com/nodejs/.env:DATABASE_URL="mysql://u754458241_Kanan:Mersal2026@localhost/u754458241_Kanan"
+/home/u754458241/domains/morsall.com/nodejs/.env.production:DATABASE_URL="mysql://u754458241_Kanan:Mersal2026@localhost/u754458241_Kanan"
+/home/u754458241/domains/morsall.com/public_html/.env:DATABASE_URL="mysql://u754458241_Kanan:Code_2252@127.0.0.1/u754458241_Kanan"
+/home/u754458241/domains/morsall.com/public_html/app_new/.env:DATABASE_URL=mysql://u754458241_Kanan:Mersal2026@127.0.0.1/u754458241_Kanan
+/home/u754458241/domains/morsall.com/public_html/app_new/node_modules_prisma_only/prisma/build/index.js:    --url="mysql://root:root@localhost/mydb"
+/home/u754458241/domains/morsall.com/public_html/app_new/node_modules_prisma_only/prisma/build/index.js:`:"";return a+=`DATABASE_URL="${n}"`,a},KAn=n=>{switch(n){case"mysql":return 3306;case"sqlserver":return 1433;case"mongodb":return 27017;case"postgresql":return 5432;case"cockroachdb":return 26257}},ZAn=(n,i=KAn(n),a="public")=>{switch(n){case"postgresql":return`postgresql://johndoe:randompassword@localhost:${i}/mydb?schema=${a}`;case"cockroachdb":return`postgresql://johndoe:randompassword@localhost:${i}/mydb?schema=${a}`;case"mysql":return`mysql://johndoe:randompassword@localhost:${i}/mydb`;case"sqlserver":return`sqlserver://localhost:${i};database=mydb;user=SA;password=randompassword;`;case"mongodb":return"mongodb+srv://root:randompassword@cluster0.ab1cd.mongodb.net/mydb?retryWrites=true&w=majority";case"sqlite":return"file:./dev.db";default:return}},e4n=()=>`node_modules
+/home/u754458241/domains/morsall.com/public_html/app_new/node_modules_prisma_only/prisma/build/index.js:    ${pi("$")} prisma init --url mysql://user:password@localhost:3306/mydb
+/home/u754458241/domains/morsall.com/public_html/app_new/node_modules_prisma_only/keyv/README.md:const keyv = new Keyv('mysql://user:pass@localhost:3306/dbname');
+/home/u754458241/domains/morsall.com/public_html/app_new/.env.production:DATABASE_URL="mysql://u754458241_Kanan:Code_2252@127.0.0.1/u754458241_Kanan"
+/home/u754458241/domains/morsall.com/public_html/app_new/.env.local:DATABASE_URL=mysql://u754458241_Kanan:Mersal2026@127.0.0.1/u754458241_Kanan
+/home/u754458241/domains/morsall.com/public_html/.env.production:DATABASE_URL="mysql://u754458241_Kanan:Code_2252@127.0.0.1/u754458241_Kanan"
+/home/u754458241/domains/morsall.com/public_html/emergency_deploy.php:$envContent = 'DATABASE_URL="mysql://u754458241_Kanan:Code_2252@127.0.0.1/u754458241_Kanan"' . "\n";

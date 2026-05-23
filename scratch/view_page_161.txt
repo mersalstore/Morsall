@@ -1,0 +1,79 @@
+Created At: 2026-05-19T19:02:37Z
+Completed At: 2026-05-19T19:02:37Z
+File Path: `file:///C:/Users/hazem/Downloads/matger2/src/app/admin/dashboard/page.tsx`
+Total Lines: 508
+Total Bytes: 29268
+Showing lines 390 to 470
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+390: 
+391:                   <div className={cn(classes.card, "p-8")}>
+392:                     <h4 className="text-base font-black text-[#0F172A] mb-6 flex items-center gap-3">
+393:                       <span className="material-symbols-rounded text-[#C5A021]">delivery_dining</span>
+394:                       السائقون
+395:                     </h4>
+396:                     <div className="flex flex-col items-center justify-center h-32">
+397:                       <p className="text-6xl font-black text-[#0F172A]">{activeDrivers}</p>
+398:                       <p className="text-xs font-black text-slate-400 uppercase tracking-widest mt-2">سائق نشط</p>
+399:                     </div>
+400:                     <button onClick={() => setActiveTab("drivers")} className="w                 <OrdersTable 
+401:                   orders={orders}
+402:                   drivers={drivers}
+403:                   branches={branches}
+404:                   onEdit={setEditingOrder} 
+405:                   onPrint={(order) => {
+406:                     setPrintingOrders([order]);
+407:                     setIsPolicyModalOpen(true);
+408:                   }}
+409:                   onPrintBulk={(ords) => {
+410:                     setPrintingOrders(ords);
+411:                     setIsPolicyModalOpen(true);
+412:                   }}
+413:                   classes={classes} 
+414:                   ORDER_STATUSES={ORDER_STATUSES}
+415:                   defaultStatusFilter={statusFilter}
+416:                   onAssignDriver={async (orderId, driverId) => {
+417:            
+<truncated 704 bytes>
+                  });
+430:                     fetchData();
+431:                   }}
+432:                 />       }}
+433:                   classes={classes} 
+434:                   ORDER_STATUSES={ORDER_STATUSES}
+435:                   defaultStatusFilter={statusFilter}
+436:                   onAssignDriver={async (orderId, driverId) => {
+437:                     await fetch("/api/admin/orders", {
+438:                       method: "PATCH",
+439:                       headers: { "Content-Type": "application/json" },
+440:                       body: JSON.stringify({ id: orderId, action: "assign_driver", driverId })
+441:                     });
+442:                     fetchData();
+443:                   }}
+444:                 />
+445:                 <EditOrderModal
+446:                   isOpen={!!editingOrder}
+447:                   order={editingOrder}
+448:                   onClose={() => setEditingOrder(null)}
+449:                   onSuccess={fetchData}
+450:                   ORDER_STATUSES={ORDER_STATUSES}
+451:                 />
+452:                 <PrintPolicyModal
+453:                   isOpen={isPolicyModalOpen}
+454:                   orders={printingOrders}
+455:                   onClose={() => setIsPolicyModalOpen(false)}
+456:                 />
+457:                 <PrintInvoiceModal
+458:                   isOpen={!!printingOrder}
+459:                   order={printingOrder}
+460:                   onClose={() => setPrintingOrder(null)}
+461:                 />
+462:               </>
+463:             )}
+464:             {activeTab === "inventory" && (
+465:               <>
+466:                 <InventoryTable 
+467:                   products={inventoryProducts} 
+468:                   onEdit={setEditingProduct} 
+469:                   onAdd={() => setIsAddProductOpen(true)} 
+470:                   classes={classes} 
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.

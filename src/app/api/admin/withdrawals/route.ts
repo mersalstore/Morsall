@@ -38,6 +38,24 @@ export async function PATCH(req: Request) {
       data: { status }
     });
 
+    // Notify vendor
+    try {
+      const fullWithdrawal = await prisma.withdrawal.findUnique({
+        where: { id },
+        include: { vendor: { include: { user: true } } }
+      });
+      if (fullWithdrawal?.vendor?.user) {
+        const { notifyVendorByUserId } = await import("@/lib/notification");
+        await notifyVendorByUserId(
+          fullWithdrawal.vendor.user.id,
+          status === "APPROVED" ? "✅ تمت الموافقة على طلب السحب" : "❌ تم رفض طلب السحب",
+          `طلب السحب بمبلغ ${fullWithdrawal.amount.toLocaleString()} ج.س ${status === "APPROVED" ? "تمت الموافقة عليه" : "تم رفضه"}`,
+          "withdrawal",
+          "/vendor/dashboard"
+        );
+      }
+    } catch {}
+
     return NextResponse.json(updated);
 
   } catch (error) {

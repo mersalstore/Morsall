@@ -9,9 +9,10 @@ interface InventoryTableProps {
   onAdd: () => void;
   classes: any;
   onRefresh: () => void;
+  showToast?: (message: string, type?: "success" | "error" | "info") => void;
 }
 
-export default function InventoryTable({ products, onEdit, onAdd, classes, onRefresh }: InventoryTableProps) {
+export default function InventoryTable({ products, onEdit, onAdd, classes, onRefresh, showToast }: InventoryTableProps) {
   const [search, setSearch] = useState("");
   const [vendorFilter, setVendorFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
@@ -69,12 +70,22 @@ export default function InventoryTable({ products, onEdit, onAdd, classes, onRef
       });
       if (res.ok) {
         setSelectedIds(new Set());
+        if (showToast) {
+          showToast("تم حذف المنتجات بنجاح! 🗑️", "success");
+        }
         onRefresh();
       } else {
-        alert("فشل الحذف الجماعي");
+        if (showToast) {
+          showToast("فشل الحذف الجماعي", "error");
+        } else {
+          alert("فشل الحذف الجماعي");
+        }
       }
     } catch (err) {
       console.error(err);
+      if (showToast) {
+        showToast("حدث خطأ أثناء الحذف", "error");
+      }
     }
     setActionLoading(false);
   };
@@ -93,9 +104,15 @@ export default function InventoryTable({ products, onEdit, onAdd, classes, onRef
          });
       }
       setSelectedIds(new Set());
+      if (showToast) {
+        showToast("تم تحديث حالة المنتجات بنجاح! 🔄", "success");
+      }
       onRefresh();
     } catch (err) {
       console.error(err);
+      if (showToast) {
+        showToast("حدث خطأ أثناء تحديث حالة المنتجات", "error");
+      }
     }
     setActionLoading(false);
   };

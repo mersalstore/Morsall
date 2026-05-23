@@ -111,6 +111,10 @@ export default function PaymentMethodsTab() {
       });
       const data = await res.json();
       setVerifyResult(prev => ({ ...prev, [orderId]: data }));
+      // Auto-refresh if verified to remove from pending list
+      if (data.autoVerified) {
+        setTimeout(fetchData, 2000);
+      }
     } catch {}
     setVerifying(null);
   };
@@ -283,26 +287,34 @@ export default function PaymentMethodsTab() {
                           <Zap size={18} className="text-[#C5A021] animate-pulse" />
                           <div>
                             <p className="text-xs font-black text-[#0F172A]">مساعد مرسال الذكي للتحقق من الإيصالات (AI)</p>
-                            <p className="text-[9px] font-bold text-gray-400 mt-0.5">تطوير OCR ومعالجة الصور المتقدمة</p>
+                            <p className="text-[9px] font-bold text-gray-400 mt-0.5">محرك مرسال AI المخصص - تحليل دقيق ومستقل</p>
                           </div>
                         </div>
-                        <button
-                          onClick={() => verifyPayment(order.id, order.paymentScreenshot)}
-                          disabled={isVerifying}
-                          className="px-5 py-2.5 bg-[#C5A021] text-white rounded-xl font-black text-[10px] shadow-lg shadow-[#C5A021]/20 hover:scale-105 transition-all disabled:opacity-50 flex items-center gap-1.5 self-start"
-                        >
-                          {isVerifying ? (
-                            <>
-                              <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                              جاري الفحص...
-                            </>
-                          ) : (
-                            <>
-                              <Zap size={12} />
-                              التحقق الذكي بالذكاء الاصطناعي
-                            </>
+                        <div className="flex items-center gap-2">
+                          {result?.autoVerified && (
+                            <span className="px-3 py-1.5 bg-green-500 text-white rounded-xl font-black text-[8px] flex items-center gap-1 shadow-lg">
+                              <CheckCircle2 size={12} />
+                              تم الاعتماد تلقائياً
+                            </span>
                           )}
-                        </button>
+                          <button
+                            onClick={() => verifyPayment(order.id, order.paymentScreenshot)}
+                            disabled={isVerifying}
+                            className="px-5 py-2.5 bg-[#C5A021] text-white rounded-xl font-black text-[10px] shadow-lg shadow-[#C5A021]/20 hover:scale-105 transition-all disabled:opacity-50 flex items-center gap-1.5 self-start"
+                          >
+                            {isVerifying ? (
+                              <>
+                                <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                جاري الفحص...
+                              </>
+                            ) : (
+                              <>
+                                <Zap size={12} />
+                                التحقق الذكي بالذكاء الاصطناعي
+                              </>
+                            )}
+                          </button>
+                        </div>
                       </div>
 
                       {/* AI Result View */}
@@ -314,7 +326,7 @@ export default function PaymentMethodsTab() {
                               <svg className="w-full h-full transform -rotate-90">
                                 <circle cx="40" cy="40" r="34" className="stroke-gray-100 fill-none" strokeWidth="6" />
                                 <circle cx="40" cy="40" r="34" className="fill-none transition-all duration-1000" strokeWidth="6"
-                                  stroke={result.confidence >= 75 ? "#10B981" : result.confidence >= 40 ? "#F59E0B" : "#EF4444"}
+                                  stroke={result.confidence >= 85 ? "#10B981" : result.confidence >= 40 ? "#F59E0B" : "#EF4444"}
                                   strokeDasharray={2 * Math.PI * 34}
                                   strokeDashoffset={2 * Math.PI * 34 * (1 - result.confidence / 100)} />
                               </svg>
@@ -325,8 +337,11 @@ export default function PaymentMethodsTab() {
                               result.suggestion === "APPROVE" ? "bg-green-50 text-green-600 border border-green-100" :
                               result.suggestion === "REVIEW" ? "bg-amber-50 text-amber-600 border border-amber-100" : "bg-rose-50 text-rose-600 border border-rose-100"
                             }`}>
-                              {result.suggestion === "APPROVE" ? "موصى بالقبول" : result.suggestion === "REVIEW" ? "يتطلب مراجعة" : "مرفوض تلقائياً"}
+                              {result.autoVerified ? "معتمد تلقائياً ✓" : result.suggestion === "APPROVE" ? "موصى بالقبول" : result.suggestion === "REVIEW" ? "يتطلب مراجعة" : "مرفوض تلقائياً"}
                             </span>
+                            {result.autoVerified && (
+                              <span className="mt-1 text-[7px] font-bold text-green-500">تم اعتماد الدفع آلياً</span>
+                            )}
                           </div>
 
                           {/* Matching Flags & Extracted OCR */}
@@ -339,6 +354,25 @@ export default function PaymentMethodsTab() {
                                 </div>
                               ))}
                             </div>
+
+                            {/* Custom AI Details */}
+                            {result.analysis?.details && (
+                              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                                {[
+                                  { label: "المبلغ", found: result.analysis.details.amountMatch, text: "موجود" },
+                                  { label: "اسم المُرسِل", found: result.analysis.details.senderNameMatchesCustomer, text: "متطابق" },
+                                  { label: "الحساب", found: result.analysis.details.accountNameFound, text: "موجود" },
+                                  { label: "رقم الحساب", found: result.analysis.details.accountNumberFound, text: "موجود" },
+                                ].map((item) => (
+                                  <div key={item.label} className={`p-2 rounded-xl border text-center ${item.found ? "bg-green-50 border-green-100" : "bg-red-50 border-red-100"}`}>
+                                    <p className="text-[7px] font-black text-slate-400">{item.label}</p>
+                                    <p className={`text-[10px] font-black mt-0.5 ${item.found ? "text-green-600" : "text-red-500"}`}>
+                                      {item.found ? `✅ ${item.text}` : "❌ غير متطابق"}
+                                    </p>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
 
                             <div className="p-3 bg-slate-900 rounded-xl text-slate-300 font-mono text-[8px] max-h-24 overflow-y-auto leading-relaxed">
                               <p className="text-white/40 font-black text-[7px] mb-1">النص المستخرج من الإيصال (OCR):</p>

@@ -1,0 +1,74 @@
+Created At: 2026-05-19T19:44:30Z
+Completed At: 2026-05-19T19:44:30Z
+
+				The command completed successfully.
+				Output:
+				<truncated 1 lines>
+-                       <p className="text-[9px] md:text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-1">{s.label}</p>
+-                       <p className="text-2xl md:text-3xl font-black text-[#021D24] tracking-tighter">{s.value}</p>
+-                    </div>
+-                  ))}
+-                </div>
+-
+-                {/* Order Statuses Grid - Click to filter */}
+-                <div>
+-                  <h3 className="text-lg font-black text-[#021D24] mb-4 flex items-center gap-3">
+-                    <span className="w-8 h-1.5 bg-[#F29124] rounded-full"/>
+-                    حالات الطلبات
+-                    <button onClick={() => { setStatusFilter(null); setActiveTab("orders"); }} className="text-[10px] font-black text-[#1089A4] bg-[#1089A4]/10 px-3 py-1 rounded-xl mr-2">عرض الكل</button>
+-                  </h3>
+-                  <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
+-                    {Object.entries(ORDER_STATUSES).map(([key, s]: any) => (
+-                      <button
+-                        key={key}
+-                        onClick={() => { setStatusFilter(key); setActiveTab("orders"); }}
+-                        className="bg-white rounded-[1.5rem] p-4 border border-gray-100 shadow-md hover:shadow-xl hover:border-[#1089A4]/30 transition-all text-center group"
+-                      >
+-                        <div className={cn("w-10 h-10 rounded-2xl bg-gradient-to-br flex items-center justify-center text-white mx-auto mb-3 group-hover:scale-110 transition-transform", s.color)}>
+-                          <span className="material-symbols-rounded text-lg">{s.icon}</span>
+-                        </div>
+-                        <p className="text-[11px] font-black text-[#021D24] leading-tight">{s.label}</p>
+-                        <p className="text-xl font-black text-[#1089A4] mt-1">{orderS
+<truncated 4236 bytes>
+ products={inventoryProducts} 
+-                  onEdit={setEditingProduct} 
+-                  onAdd={() => setIsAddProductOpen(true)} 
+-                  classes={classes} 
+-                />
+-                <AddProductModal 
+-                  isOpen={isAddProductOpen || !!editingProduct} 
+-                  editingProduct={editingProduct}
+-                  initialVendorId={initialVendorId}
+-                  onClose={() => {
+-                    setIsAddProductOpen(false);
+-                    setEditingProduct(null);
+-                    setInitialVendorId(undefined);
+-                  }} 
+-                  onSuccess={fetchData} 
+-                />
+-              </>
+-            )}
+-            {activeTab === "attributes" && <AttributesTab />}
+-            {activeTab === "delivery" && <DeliveryZonesTab />}
+-            {activeTab === "finance" && <FinanceTab />}
+-            {activeTab === "payments" && <PaymentMethodsTab />}
+-            {activeTab === "logistics" && <LogisticsTab />}
+-            {activeTab === "employees" && <PersonnelTab type="employees" />}
+-            {activeTab === "drivers" && <PersonnelTab type="drivers" />}
+-            {activeTab === "subscriptions" && <SubscriptionsTab />}
+-            {activeTab === "globalSettings" && <GlobalSettingsTab />}
+-            {activeTab === "categories" && <CategoriesTab />}
+-            {activeTab === "users" && <UsersVendorsTab type="users" data={users} classes={classes} fetchData={fetchData} />}
+-            {activeTab === "vendors" && <UsersVendorsTab type="vendors" data={vendors} classes={classes} fetchData={fetchData} onAddProduct={(vId) => { setInitialVendorId(vId); setIsAddProductOpen(true); setActiveTab("inventory"); }} />}
+-            {activeTab === "appearance" && <AppearanceSettings />}
+-            {activeTab === "offersAds" && <OffersAdsTab />}
+-          </motion.div>
+-        </AnimatePresence>
+-        </div>
+-      </main>
+-    </div>
+-  );
++export default function AdminDashboardPage() {
++  return <DashboardClient />;
+ }
+

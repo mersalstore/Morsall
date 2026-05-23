@@ -1,0 +1,38 @@
+Created At: 2026-05-19T19:43:52Z
+Completed At: 2026-05-19T19:43:52Z
+File Path: `file:///C:/Users/hazem/Downloads/matger2/src/app/admin/dashboard/page.tsx`
+Total Lines: 506
+Total Bytes: 29273
+Showing lines 1 to 30
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+1: "use client";
+2: 
+3: import React, { useState, useEffect } from "react";
+4: import { motion, AnimatePresence } from "framer-motion";
+5: import Image from "next/image";
+6: import AdminSidebar from "../../../components/AdminSidebar";
+7: import AppearanceSettings from "../../../components/AppearanceSettings";
+8: import OrdersTable from "../../../components/admin/OrdersTable";
+9: import InventoryTable from "../../../components/admin/InventoryTable";
+10: import ApprovalsTab from "../../../components/admin/ApprovalsTab";
+11: import UsersVendorsTab from "../../../components/admin/UsersVendorsTab";
+12: import CategoriesTab from "../../../components/admin/CategoriesTab";
+13: import AttributesTab from "../../../components/admin/AttributesTab";
+14: import DeliveryZonesTab from "../../../components/admin/DeliveryZonesTab";
+15: import FinanceTab from "../../../components/admin/FinanceTab";
+16: import PaymentMethodsTab from "../../../components/admin/PaymentMethodsTab";
+17: import PersonnelTab from "../../../components/admin/PersonnelTab";
+18: import GlobalSettingsTab from "../../../components/admin/GlobalSettingsTab";
+19: import SubscriptionsTab from "../../../components/admin/SubscriptionsTab";
+20: import OffersAdsTab from "../../../components/admin/OffersAdsTab";
+21: import LogisticsTab from "../../../components/admin/LogisticsTab";
+22: import ImportedOrdersTab from "../../../components/admin/ImportedOrdersTab";
+23: import WarehouseTab from "../../../components/admin/WarehouseTab";
+24: import AddProductModal from "../../../components/admin/AddProductModal";
+25: import EditOrderModal from "../../../components/admin/EditOrderModal";
+26: import PrintInvoiceModal from "../../../components/admin/PrintInvoiceModal";
+27: import PrintPolicyModal from "../../../components/admin/PrintPolicyModal";
+28: import { cn } from "../../../lib/utils";
+29: import { useSession } from "next-auth/react";
+30: import { useRouter } from "next/navigation";
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.

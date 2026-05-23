@@ -16,11 +16,12 @@ interface OrdersTableProps {
   onAssignDriver?: (orderId: string, driverId: string) => void;
   branches?: any[];
   onAssignBranch?: (orderId: string, branchId: string) => Promise<void>;
+  showToast?: (message: string, type?: "success" | "error" | "info") => void;
 }
 
 export default function OrdersTable({
   orders, onEdit, onPrint, onPrintBulk, classes, ORDER_STATUSES, defaultStatusFilter,
-  drivers = [], onAssignDriver, branches = [], onAssignBranch
+  drivers = [], onAssignDriver, branches = [], onAssignBranch, showToast
 }: OrdersTableProps) {
 
   const [orderSearch, setOrderSearch] = useState("");
@@ -79,7 +80,11 @@ export default function OrdersTable({
     if (matchedDriver) {
       setActiveQuickDriverId(matchedDriver.id);
       setRoutingMode("DRIVER");
-      alert(`تم تعيين السائق النشط للتوجيه المباشر: ${matchedDriver.name}`);
+      if (showToast) {
+        showToast(`تم تعيين السائق النشط للتوجيه المباشر: ${matchedDriver.name} 🚗`, "success");
+      } else {
+        alert(`تم تعيين السائق النشط للتوجيه المباشر: ${matchedDriver.name}`);
+      }
       return;
     }
 
@@ -92,7 +97,11 @@ export default function OrdersTable({
     if (matchedBranch) {
       setActiveQuickBranchId(matchedBranch.id);
       setRoutingMode("BRANCH");
-      alert(`تم تعيين الفرع النشط للتوجيه المباشر: ${matchedBranch.name}`);
+      if (showToast) {
+        showToast(`تم تعيين الفرع النشط للتوجيه المباشر: ${matchedBranch.name} 🏢`, "success");
+      } else {
+        alert(`تم تعيين الفرع النشط للتوجيه المباشر: ${matchedBranch.name}`);
+      }
       return;
     }
 
@@ -113,43 +122,79 @@ export default function OrdersTable({
           setAssigningLoading(true);
           try {
             await onAssignDriver(matchedOrder.id, activeQuickDriverId);
-            alert(`تم تعيين الطلب #${matchedOrder.id.slice(-6).toUpperCase()} للسائق بنجاح!`);
+            if (showToast) {
+              showToast(`تم تعيين الطلب #${matchedOrder.id.slice(-6).toUpperCase()} للسائق بنجاح! 📦`, "success");
+            } else {
+              alert(`تم تعيين الطلب #${matchedOrder.id.slice(-6).toUpperCase()} للسائق بنجاح!`);
+            }
           } catch (err) {
             console.error(err);
-            alert("حدث خطأ أثناء التعيين");
+            if (showToast) {
+              showToast("حدث خطأ أثناء التعيين", "error");
+            } else {
+              alert("حدث خطأ أثناء التعيين");
+            }
           }
           setAssigningLoading(false);
         } else {
-          alert(`تم تحديد الطلب #${matchedOrder.id.slice(-6).toUpperCase()} للطباعة`);
+          if (showToast) {
+            showToast(`تم تحديد الطلب #${matchedOrder.id.slice(-6).toUpperCase()} للطباعة 🖨️`, "info");
+          } else {
+            alert(`تم تحديد الطلب #${matchedOrder.id.slice(-6).toUpperCase()} للطباعة`);
+          }
         }
       } else {
         if (activeQuickBranchId && onAssignBranch) {
           setAssigningLoading(true);
           try {
             await onAssignBranch(matchedOrder.id, activeQuickBranchId);
-            alert(`تم توجيه الطلب #${matchedOrder.id.slice(-6).toUpperCase()} للفرع بنجاح!`);
+            if (showToast) {
+              showToast(`تم توجيه الطلب #${matchedOrder.id.slice(-6).toUpperCase()} للفرع بنجاح! 🏢`, "success");
+            } else {
+              alert(`تم توجيه الطلب #${matchedOrder.id.slice(-6).toUpperCase()} للفرع بنجاح!`);
+            }
           } catch (err) {
             console.error(err);
-            alert("حدث خطأ أثناء التوجيه للفرع");
+            if (showToast) {
+              showToast("حدث خطأ أثناء التوجيه للفرع", "error");
+            } else {
+              alert("حدث خطأ أثناء التوجيه للفرع");
+            }
           }
           setAssigningLoading(false);
         } else {
-          alert(`تم تحديد الطلب #${matchedOrder.id.slice(-6).toUpperCase()} للطباعة`);
+          if (showToast) {
+            showToast(`تم تحديد الطلب #${matchedOrder.id.slice(-6).toUpperCase()} للطباعة 🖨️`, "info");
+          } else {
+            alert(`تم تحديد الطلب #${matchedOrder.id.slice(-6).toUpperCase()} للطباعة`);
+          }
         }
       }
     } else {
-      alert("لم يتم العثور على طلب أو سائق أو فرع بهذا الباركود");
+      if (showToast) {
+        showToast("لم يتم العثور على طلب أو سائق أو فرع بهذا الباركود 🔍", "error");
+      } else {
+        alert("لم يتم العثور على طلب أو سائق أو فرع بهذا الباركود");
+      }
     }
   };
 
   const handleAssignSelectedToActive = async () => {
     if (routingMode === "DRIVER") {
       if (!activeQuickDriverId) {
-        alert("الرجاء اختيار السائق أولاً");
+        if (showToast) {
+          showToast("الرجاء اختيار السائق أولاً 🚗", "error");
+        } else {
+          alert("الرجاء اختيار السائق أولاً");
+        }
         return;
       }
       if (selectedIds.size === 0) {
-        alert("الرجاء تحديد طلب واحد على الأقل");
+        if (showToast) {
+          showToast("الرجاء تحديد طلب واحد على الأقل 📦", "error");
+        } else {
+          alert("الرجاء تحديد طلب واحد على الأقل");
+        }
         return;
       }
 
@@ -158,16 +203,28 @@ export default function OrdersTable({
         for (const id of Array.from(selectedIds)) {
           await onAssignDriver(id, activeQuickDriverId);
         }
-        alert(`تم تعيين جميع الطلبات المحددة (${selectedIds.size}) للسائق بنجاح!`);
+        if (showToast) {
+          showToast(`تم تعيين جميع الطلبات المحددة (${selectedIds.size}) للسائق بنجاح! 🎉`, "success");
+        } else {
+          alert(`تم تعيين جميع الطلبات المحددة (${selectedIds.size}) للسائق بنجاح!`);
+        }
       }
       setAssigningLoading(false);
     } else {
       if (!activeQuickBranchId) {
-        alert("الرجاء اختيار الفرع أولاً");
+        if (showToast) {
+          showToast("الرجاء اختيار الفرع أولاً 🏢", "error");
+        } else {
+          alert("الرجاء اختيار الفرع أولاً");
+        }
         return;
       }
       if (selectedIds.size === 0) {
-        alert("الرجاء تحديد طلب واحد على الأقل");
+        if (showToast) {
+          showToast("الرجاء تحديد طلب واحد على الأقل 📦", "error");
+        } else {
+          alert("الرجاء تحديد طلب واحد على الأقل");
+        }
         return;
       }
 
@@ -176,7 +233,11 @@ export default function OrdersTable({
         for (const id of Array.from(selectedIds)) {
           await onAssignBranch(id, activeQuickBranchId);
         }
-        alert(`تم توجيه جميع الطلبات المحددة (${selectedIds.size}) للفرع بنجاح!`);
+        if (showToast) {
+          showToast(`تم توجيه جميع الطلبات المحددة (${selectedIds.size}) للفرع بنجاح! 🎉`, "success");
+        } else {
+          alert(`تم توجيه جميع الطلبات المحددة (${selectedIds.size}) للفرع بنجاح!`);
+        }
       }
       setAssigningLoading(false);
     }
@@ -379,7 +440,11 @@ export default function OrdersTable({
                         setSelectedIds(next);
                         (e.target as HTMLInputElement).value = '';
                       } else {
-                        alert('لم يتم العثور على طلب بهذا الباركود');
+                        if (showToast) {
+                          showToast("لم يتم العثور على طلب بهذا الباركود 🔍", "error");
+                        } else {
+                          alert('لم يتم العثور على طلب بهذا الباركود');
+                        }
                       }
                     }
                   }

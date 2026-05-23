@@ -1,0 +1,56 @@
+const { Client } = require('ssh2');
+const conn = new Client();
+
+console.log('Connecting to Hostinger via SSH to extract packages...');
+
+conn.on('ready', () => {
+  console.log('✅ Connected successfully!');
+  
+  const cmd = `
+    echo "=== EXTRACTING MAIN UPDATE ==="
+    unzip -o /home/u754458241/domains/morsall.com/nodejs/final_update.zip -d /home/u754458241/domains/morsall.com/nodejs
+    
+    echo "=== EXTRACTING FIX MODULES ==="
+    unzip -o /home/u754458241/domains/morsall.com/nodejs/fix_modules.zip -d /home/u754458241/domains/morsall.com/nodejs
+    
+    echo "=== CLEANING UP ZIP FILES ==="
+    rm -f /home/u754458241/domains/morsall.com/nodejs/final_update.zip
+    rm -f /home/u754458241/domains/morsall.com/nodejs/fix_modules.zip
+    
+    echo "=== RESTARTING SERVER ==="
+    touch /home/u754458241/domains/morsall.com/tmp/restart.txt
+    
+    echo "=== DONE! ==="
+  `;
+  
+  conn.exec(cmd, (err, stream) => {
+    if (err) {
+      console.error('Execution Error:', err);
+      conn.end();
+      return;
+    }
+    stream.on('close', (code) => {
+      console.log('Extraction completed with exit code: ' + code);
+      conn.end();
+    }).on('data', (data) => {
+      process.stdout.write(data);
+    }).stderr.on('data', (data) => {
+      process.stderr.write(data);
+    });
+  });
+}).on('keyboard-interactive', (name, instructions, lang, prompts, finish) => {
+  if (prompts.length > 0 && prompts[0].prompt.toLowerCase().includes('password')) {
+    finish(['@n9qe3KgL']);
+  } else {
+    finish([]);
+  }
+}).on('error', (err) => {
+  console.error('Connection Error:', err);
+}).connect({
+  host: '82.198.228.182',
+  port: 65002,
+  username: 'u754458241',
+  password: '@n9qe3KgL',
+  tryKeyboard: true,
+  readyTimeout: 30000
+});

@@ -1,0 +1,50 @@
+timer has gone away
+stack backtrace:
+note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+    at async n (.next/server/app/page.js:2:25290) {
+  clientVersion: '6.2.1',
+  errorCode: undefined,
+  digest: '191662937'
+}
+thread 'tokio-runtime-worker' panicked at /root/.cargo/registry/src/index.crates.io-6f17d22bba15001f/futures-timer-3.0.2/src/native/delay.rs:112:21:
+timer has gone away
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+ ⨯ Error [PrismaClientRustPanicError]: 
+Invalid `prisma.vendor.findMany()` invocation:
+
+
+PANIC: timer has gone away
+
+This is a non-recoverable error which probably happens when the Prisma Query Engine has a panic.
+
+https://github.com/prisma/prisma/issues/new?body=Hi+Prisma+Team%21+My+Prisma+Client+just+crashed.+This+is+the+report%3A%0A%23%23+Versions%0A%0A%7C+Name++++++++++++%7C+Version++++++++++++%7C%0A%7C-----------------%7C--------------------%7C%0A%7C+Node++++++++++++%7C+v22.18.0+++++++++++%7C+%0A%7C+OS++++++++++++++%7C+debian-openssl-1.1.x%7C%0A%7C+Prisma+Client+++%7C+6.2.1++++++++++++++%7C%0A%7C+Query+Engine++++%7C+4123509d24aa4dede1e864b46351bf2790323b69%7C%0A%7C+Database++++++++%7C+mysql++++++++++++++%7C%0A%0A%0A%0A%23%23+Logs%0A%60%60%60%0Aprisma%3AtryLoadEnv+Environment+variables+not+found+at+null%0Aprisma%3AtryLoadEnv+Environment+variables+loaded+from+%2Fhome%2Fu754458241%2Fdomains%2Fmorsall.com%2Fnodejs%2F.env%0Aprisma%3Aclient+checkPlatformCaching%3Apostinstall+false%0Aprisma%3Aclient+checkPlatformCaching%3AciName+%0Aprisma%3AtryLoadEnv+Environment+variables+not+found+at+null%0Aprisma%3AtryLoadEnv+Environment+variables+loaded+from+%2Fhome%2Fu754458241%2Fdomains%2Fmorsall.com%2Fnodejs%2F.env%0Aprisma%3Aclient+dirname+%2Fhome%2Fu754458241%2Fnodeapp%2Fnode_modules%2F.prisma%2Fclient%0Aprisma%3Aclient+relativePath+..%2F..%2F..%2F..%2Fdomains%2Fmorsall.com%2Fnodejs%2Fprisma%0Aprisma%3Aclient+cwd+%2Fhome%2Fu754458241%2Fdomains%2Fmorsall.com%2Fnodejs%2Fprisma%0Aprisma%3Aclient+clientVersion+6.2.1%0Aprisma%3Aclient%3AlibraryEngine+internalSetup%0Aprisma%3Aclient%3AlibraryEngine+sending+request%2C+this.libraryStarted%3A+false%0Aprisma%3Aget-platform+Don%27t+know+any+platform-specific+paths+for+%22undefined%22+on+x64+%28x86_64%29%0Aprisma%3Aget-platform+Falling+back+to+%22ldconfig%22+and+other+generic+paths%0Aprisma%3Aget-platform+Found+libssl.so+file+using+%22ldconfig%22+or+other+generic+paths%3A+libssl.so.1.1%0Aprisma%3Aget-platform+The+parsed+libssl+version+is%3A+1.1.x%0Aprisma%3Aget-platform+Distro+is+%22undefined%22.+Falling+back+to+Prisma+engines+built+for+%22debian%22.%0Aprisma%3Aclient%3Aengines%3AresolveEnginePath+enginePath+%2Fhome%2Fu754458241%2Fnodeapp%2Fnode_modules%2F.prisma%2Fclient%2Flibquery_engine-debian-openssl-1.1.x.so.node%0Aprisma%3Aclient%3AlibraryEngine+library+starting%0A%60%60%60%0A%0A%23%23+Client+Snippet%0A%60%60%60ts%0A%2F%2F+PLEASE+FILL+YOUR+CODE+SNIPPET+HERE%0A%60%60%60%0A%0A%23%23+Schema%0A%60%60%60prisma%0A%2F%2F+PLEASE+ADD+YOUR+SCHEMA+HERE+IF+POSSIBLE%0A%60%60%60%0A%0A%23%23+Prisma+Engine+Query%0A%60%60%60%0A%0A%60%60%60%0A&title=PANIC%3A+timer+has+gone+away&template=bug_report.yml
+
+If you want the Prisma team to look into it, please open the link above 🙏
+To increase the chance of success, please post your schema and a snippet of
+how you used Prisma Client in the issue. 
+
+    at async n (.next/server/app/page.js:2:25290) {
+  clientVersion: '6.2.1',
+  digest: '1782085577'
+}
+thread 'tokio-runtime-worker' panicked at /root/.cargo/registry/src/index.crates.io-6f17d22bba15001f/futures-timer-3.0.2/src/native/delay.rs:112:21:
+timer has gone away
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+ ⨯ Error [PrismaClientRustPanicError]: 
+Invalid `prisma.vendor.findMany()` invocation:
+
+
+PANIC: timer has gone away
+
+This is a non-recoverable error which probably happens when the Prisma Query Engine has a panic.
+
+https://github.com/prisma/prisma/issues/new?body=Hi+Prisma+Team%21+My+Prisma+Client+just+crashed.+This+is+the+report%3A%0A%23%23+Versions%0A%0A%7C+Name++++++++++++%7C+Version++++++++++++%7C%0A%7C-----------------%7C--------------------%7C%0A%7C+Node++++++++++++%7C+v22.18.0+++++++++++%7C+%0A%7C+OS++++++++++++++%7C+debian-openssl-1.1.x%7C%0A%7C+Prisma+Client+++%7C+6.2.1++++++++++++++%7C%0A%7C+Query+Engine++++%7C+4123509d24aa4dede1e864b46351bf2790323b69%7C%0A%7C+Database++++++++%7C+mysql++++++++++++++%7C%0A%0A%0A%0A%23%23+Logs%0A%60%60%60%0Aprisma%3AtryLoadEnv+Environment+variables+not+found+at+null%0Aprisma%3AtryLoadEnv+Environment+variables+loaded+from+%2Fhome%2Fu754458241%2Fdomains%2Fmorsall.com%2Fnodejs%2F.env%0Aprisma%3Aclient+checkPlatformCaching%3Apostinstall+false%0Aprisma%3Aclient+checkPlatformCaching%3AciName+%0Aprisma%3AtryLoadEnv+Environment+variables+not+found+at+null%0Aprisma%3AtryLoadEnv+Environment+variables+loaded+from+%2Fhome%2Fu754458241%2Fdomains%2Fmorsall.com%2Fnodejs%2F.env%0Aprisma%3Aclient+dirname+%2Fhome%2Fu754458241%2Fnodeapp%2Fnode_modules%2F.prisma%2Fclient%0Aprisma%3Aclient+relativePath+..%2F..%2F..%2F..%2Fdomains%2Fmorsall.com%2Fnodejs%2Fprisma%0Aprisma%3Aclient+cwd+%2Fhome%2Fu754458241%2Fdomains%2Fmorsall.com%2Fnodejs%2Fprisma%0Aprisma%3Aclient+clientVersion+6.2.1%0Aprisma%3Aclient%3AlibraryEngine+internalSetup%0Aprisma%3Aclient%3AlibraryEngine+sending+request%2C+this.libraryStarted%3A+false%0Aprisma%3Aget-platform+Don%27t+know+any+platform-specific+paths+for+%22undefined%22+on+x64+%28x86_64%29%0Aprisma%3Aget-platform+Falling+back+to+%22ldconfig%22+and+other+generic+paths%0Aprisma%3Aget-platform+Found+libssl.so+file+using+%22ldconfig%22+or+other+generic+paths%3A+libssl.so.1.1%0Aprisma%3Aget-platform+The+parsed+libssl+version+is%3A+1.1.x%0Aprisma%3Aget-platform+Distro+is+%22undefined%22.+Falling+back+to+Prisma+engines+built+for+%22debian%22.%0Aprisma%3Aclient%3Aengines%3AresolveEnginePath+enginePath+%2Fhome%2Fu754458241%2Fnodeapp%2Fnode_modules%2F.prisma%2Fclient%2Flibquery_engine-debian-openssl-1.1.x.so.node%0Aprisma%3Aclient%3AlibraryEngine+library+starting%0A%60%60%60%0A%0A%23%23+Client+Snippet%0A%60%60%60ts%0A%2F%2F+PLEASE+FILL+YOUR+CODE+SNIPPET+HERE%0A%60%60%60%0A%0A%23%23+Schema%0A%60%60%60prisma%0A%2F%2F+PLEASE+ADD+YOUR+SCHEMA+HERE+IF+POSSIBLE%0A%60%60%60%0A%0A%23%23+Prisma+Engine+Query%0A%60%60%60%0A%0A%60%60%60%0A&title=PANIC%3A+timer+has+gone+away&template=bug_report.yml
+
+If you want the Prisma team to look into it, please open the link above 🙏
+To increase the chance of success, please post your schema and a snippet of
+how you used Prisma Client in the issue. 
+
+    at async n (.next/server/app/page.js:2:25290) {
+  clientVersion: '6.2.1',
+  digest: '1782085577'
+}

@@ -12,10 +12,11 @@ interface EditOrderModalProps {
   ORDER_STATUSES: any;
   // الباب الخامس: صلاحيات - إذا كان التاجر يعدّل الحالة فقط 3 خيارات
   restrictedMode?: boolean;
+  showToast?: (message: string, type?: "success" | "error" | "info") => void;
 }
 
 export default function EditOrderModal({
-  isOpen, order, onClose, onSuccess, ORDER_STATUSES, restrictedMode = false
+  isOpen, order, onClose, onSuccess, ORDER_STATUSES, restrictedMode = false, showToast
 }: EditOrderModalProps) {
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState("PENDING");
@@ -83,15 +84,31 @@ export default function EditOrderModal({
       });
       if (res.ok) {
         if (editingAddress) {
-          alert("تم تعديل العنوان بنجاح. تمت إعادة الطلب إلى الفرع لإعادة التوجيه.");
+          if (showToast) {
+            showToast("تم تعديل العنوان بنجاح. تمت إعادة الطلب إلى الفرع لإعادة التوجيه. 📍", "success");
+          } else {
+            alert("تم تعديل العنوان بنجاح. تمت إعادة الطلب إلى الفرع لإعادة التوجيه.");
+          }
+        } else {
+          if (showToast) {
+            showToast("تم تحديث حالة الطلب بنجاح! ✨", "success");
+          }
         }
         onSuccess();
         onClose();
       } else {
-        alert("فشل تحديث حالة الطلب");
+        if (showToast) {
+          showToast("فشل تحديث حالة الطلب", "error");
+        } else {
+          alert("فشل تحديث حالة الطلب");
+        }
       }
     } catch (err) {
-      alert("حدث خطأ أثناء التحديث");
+      if (showToast) {
+        showToast("حدث خطأ أثناء التحديث", "error");
+      } else {
+        alert("حدث خطأ أثناء التحديث");
+      }
     }
     setLoading(false);
   };

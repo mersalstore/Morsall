@@ -1,0 +1,4 @@
+# PassengerEnabled off
+Options -MultiViews
+RewriteEngine On
+RewriteBase /

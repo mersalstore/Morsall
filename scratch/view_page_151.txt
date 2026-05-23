@@ -1,0 +1,86 @@
+Created At: 2026-05-19T19:02:06Z
+Completed At: 2026-05-19T19:02:06Z
+File Path: `file:///C:/Users/hazem/Downloads/matger2/src/app/admin/dashboard/page.tsx`
+Total Lines: 494
+Total Bytes: 28753
+Showing lines 130 to 220
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+130:     const userPermissions = (session?.user as any)?.permissions;
+131:     const hasPermissions = userPermissions && userPermissions.length > 0;
+132:     const ALLOWED_ROLES = ["ADMIN", "PACKING", "SHIPPING", "CUSTOMER_SERVICE", "INVENTORY", "DRIVER"];
+133:     
+134:     // Redirect if not an allowed role AND doesn't have custom permissions
+135:     if (!role || (!ALLOWED_ROLES.includes(role) && !hasPermissions)) {
+136:       router.replace("/login");
+137:       return;
+138:     }
+139:     
+140:     // Set the first allowed tab for this role
+141:     const firstAllowed = ROLE_PERMISSIONS[role]?.[0];
+142:     if (firstAllowed) setActiveTab(firstAllowed);
+143:     
+144:     fetchData();
+145:   }, [status, session]);
+146: 
+147:   const fetchData = async (range?: string, from?: string, to?: string) => {
+148:     setLoading(true);
+149:     try {
+150:       const r = range || dateRange;
+151:       let statsUrl = `/api/admin/stats?range=${r}`;
+152:       if (r === "custom" && from && to) statsUrl += `&from=${from}&to=${to}`;
+153: 
+154:       const [resOrders, resLogisticsOrders, resProducts, resStats, resPending, resUsers, resVendors, resDrivers] = await Promise.all([
+155:         fetch("/api/admin/orders"),                          // طلبات عادية (تخفي AWAITING_PICKUP)
+156:         fetch("/api/admin/orders?logistics=1"),              // كل الطلبات للوجستيات
+157:         fetch("/api/admin/inventory"),
+158:         fetch(statsUrl),
+159:         fetch("/api/admin/approvals"),
+160:         fetch("/api/admin/users"),
+161:         fetch("/a
+<truncated 750 bytes>
+vers?.ok) setDrivers(await resDrivers.json());
+177:       if (resPending?.ok) {
+178:         const d = await resPending.json();
+179:         setPendingVendors(d.vendors || []);
+180:         setPendingProducts(d.products || []);
+181:       }
+182:     } catch (err) { console.error(err); }
+183:     setLoading(false);
+184:   };
+185: 
+186:   const handleVendorAction = async (id: string, action: string) => {
+187:     setActionLoading(id);
+188:     await fetch("/api/admin/vendors", { 
+189:       method: "PATCH", 
+190:       headers: { "Content-Type": "application/json" },
+191:       body: JSON.stringify({ id, action }) 
+192:     });
+193:     fetchData();
+194:     setActionLoading(null);
+195:   };
+196: 
+197:   const handleProductAction = async (id: string, action: string) => {
+198:     setActionLoading(id);
+199:     await fetch("/api/admin/products", { 
+200:       method: "POST", 
+201:       headers: { "Content-Type": "application/json" },
+202:       body: JSON.stringify({ id, action }) 
+203:     });
+204:     fetchData();
+205:     setActionLoading(null);
+206:   };
+207: 
+208:   if (!mounted || loading) return (
+209:     <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center">
+210:       <div className="flex flex-col items-center gap-4">
+211:         <div className="w-16 h-16 border-4 border-[#C5A021] border-t-transparent rounded-full animate-spin" />
+212:         <p className="font-black text-[#0F172A] uppercase tracking-widest text-xs text-center">جاري التجهيز...</p>
+213:       </div>
+214:     </div>
+215:   );
+216: 
+217:   return (
+218:     <div className="flex min-h-screen bg-[#F8FAFC] relative overflow-hidden" dir="rtl">
+219:       {/* Abstract Background Accents */}
+220:       <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-[#C5A021]/5 blur-[120px] rounded-full pointer-events-none" />
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.

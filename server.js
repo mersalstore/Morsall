@@ -1,71 +1,96 @@
 const { createServer } = require('http');
 const { parse } = require('url');
 const path = require('path');
-require('dotenv').config({ path: path.join(__dirname, '.env') });
-const next = require('next');
+const fs = require('fs');
 
-function bootstrapEnv() {
-  process.env.NODE_ENV = process.env.NODE_ENV || "production";
-  process.env.PRISMA_CLIENT_ENGINE_TYPE =
-    process.env.PRISMA_CLIENT_ENGINE_TYPE || "binary";
-
-  const pool = (process.env.POSTGRES_PRISMA_URL || process.env.DATABASE_URL || "").trim();
-  const direct = (
-    process.env.POSTGRES_URL_NON_POOLING ||
-    process.env.DIRECT_URL ||
-    pool
-  ).trim();
-
-  if (!pool) {
-    console.error(
-      "Missing database URL. Set DATABASE_URL or POSTGRES_PRISMA_URL (Hostinger env). Optional: POSTGRES_URL_NON_POOLING."
-    );
-    process.exit(1);
-  }
-  process.env.POSTGRES_PRISMA_URL = pool;
-  process.env.POSTGRES_URL_NON_POOLING = direct;
-  if (!process.env.DATABASE_URL) process.env.DATABASE_URL = pool;
-
-  if (
-    !process.env.NEXTAUTH_URL?.trim() ||
-    !process.env.NEXTAUTH_SECRET?.trim()
-  ) {
-    console.error(
-      "Set NEXTAUTH_URL and NEXTAUTH_SECRET in Hostinger (or VPS .env)."
-    );
-    process.exit(1);
-  }
-
-  process.env.GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || "";
-  process.env.GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET || "";
+// Load environment variables
+try {
+    const envPath = path.join(__dirname, '.env');
+    if (fs.existsSync(envPath)) {
+        require('dotenv').config({ path: envPath });
+        console.log('Loaded .env from:', envPath);
+    }
+} catch (e) {
+    console.error('Error loading .env:', e);
 }
 
-bootstrapEnv();
+// Use __dirname to be path-independent
+const rootDir = __dirname;
+const logPath = path.join(rootDir, 'server.log');
 
-const dev = false;
-const hostname = '0.0.0.0';
-const port = parseInt(process.env.PORT || '3000', 10);
-const dir = __dirname;
-
-const app = next({ dev, hostname, port, dir });
-const handle = app.getRequestHandler();
-
-app.prepare().then(() => {
-  createServer(async (req, res) => {
+function log(msg) {
+    const line = `[${new Date().toISOString()}] ${msg}\n`;
     try {
-      const parsedUrl = parse(req.url, true);
-      await handle(req, res, parsedUrl);
-    } catch (err) {
-      console.error('Error handling request:', req.url, err);
-      res.statusCode = 500;
-      res.end('Internal server error');
+        fs.appendFileSync(logPath, line);
+    } catch (e) {
+        // Fallback if log file is not writable
     }
-  }).listen(port, hostname, (err) => {
-    if (err) throw err;
-    console.log(`> Morsall ready on http://${hostname}:${port}`);
-    console.log(`> Environment: production`);
-  });
-}).catch((err) => {
-  console.error('Failed to start server:', err);
-  process.exit(1);
-});
+    console.log(msg);
+}
+
+log('--- PRODUCTION SERVER STARTING (AUTO-DETECT PRISMA) ---');
+
+try {
+    process.env.NODE_ENV = 'production';
+    
+    // Set engine type to match schema.prisma
+    process.env.PRISMA_CLIENT_ENGINE_TYPE = 'library';
+
+    // Auto-detect the correct prisma library (.so.node)
+    const prismaPath = path.join(rootDir, 'node_modules', '.prisma', 'client');
+    if (fs.existsSync(prismaPath)) {
+        const files = fs.readdirSync(prismaPath);
+        const libFile = files.find(f => f.startsWith('libquery_engine') && f.endsWith('.so.node'));
+        if (libFile) {
+            const fullLibPath = path.join(prismaPath, libFile);
+            process.env.PRISMA_QUERY_ENGINE_LIBRARY = fullLibPath;
+            log(`Found prisma library: ${fullLibPath}`);
+        } else {
+            // Fallback for binary engine if library not found
+            const binFile = files.find(f => f.startsWith('query-engine') && !f.includes('.'));
+            if (binFile) {
+                const fullBinPath = path.join(prismaPath, binFile);
+                process.env.PRISMA_QUERY_ENGINE_BINARY = fullBinPath;
+                process.env.PRISMA_CLIENT_ENGINE_TYPE = 'library';
+                log(`Found prisma binary: ${fullBinPath}`);
+            }
+        }
+    }
+
+    const port = process.env.PORT || 3000;
+    log(`Detected PORT/SOCKET: ${port}`);
+
+    const next = require('next');
+    log('Next.js module required.');
+
+    const app = next({ dev: false, dir: rootDir });
+    const handle = app.getRequestHandler();
+
+    log('Preparing Next.js app...');
+    app.prepare().then(() => {
+        log('Next.js app prepared. Creating server...');
+        
+        const server = createServer(async (req, res) => {
+            try {
+                const parsedUrl = parse(req.url, true);
+                await handle(req, res, parsedUrl);
+            } catch (err) {
+                log(`RUNTIME_ERROR: ${err.message}`);
+                res.statusCode = 500;
+                res.end('Internal Server Error');
+            }
+        });
+
+        server.listen(port, () => {
+            log(`Server listening on ${port}`);
+        });
+
+    }).catch(err => {
+        log(`PREPARE_ERROR: ${err.stack}`);
+        process.exit(1);
+    });
+
+} catch (err) {
+    log(`FATAL_BOOTSTRAP_ERROR: ${err.stack}`);
+    process.exit(1);
+}

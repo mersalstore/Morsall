@@ -88,7 +88,7 @@ export default function OnboardingPage() {
            
            <div className="flex items-center gap-6 p-6 bg-muted rounded-2xl">
               <div className="w-16 h-16 rounded-full overflow-hidden border-4 border-white shadow-xl">
-                 <Image src={session?.user?.image || "/logo-navbar-final.png"} alt="User" width={64} height={64} className="object-cover" />
+                 <Image src={session?.user?.image || "/logo.png"} alt="User" width={64} height={64} className="object-cover" />
               </div>
               <div className="flex-grow">
                  <label className="block text-[9px] font-black text-primary/40 uppercase tracking-widest mb-1 pr-2">الاسم الكامل</label>

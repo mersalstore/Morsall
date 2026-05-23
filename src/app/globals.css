@@ -459,3 +459,194 @@
   margin: 0 auto;
   padding: 0 1rem;
 }
+
+/* ── MERSAL 3.0 FUTURISTIC STYLES (GLASSMORPHISM & 3D) ── */
+.glass-panel-dark {
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+.glass-panel-light {
+  background: rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+}
+
+.glass-panel-gold {
+  background: rgba(197, 160, 33, 0.06);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(197, 160, 33, 0.2);
+  box-shadow: 0 8px 32px 0 rgba(197, 160, 33, 0.08);
+}
+
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.card-3d-wrapper {
+  transform-style: preserve-3d;
+  transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.5s ease, border-color 0.5s ease;
+}
+
+.card-3d-wrapper:hover {
+  transform: rotateX(6deg) rotateY(-6deg) translateY(-8px);
+  box-shadow: 0 20px 40px rgba(197, 160, 33, 0.15);
+  border-color: rgba(197, 160, 33, 0.4);
+}
+
+.button-3d-gold {
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transform-style: preserve-3d;
+}
+
+.button-3d-gold::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #C5A021, #F29124);
+  border-radius: inherit;
+  transform: translateZ(-8px);
+  opacity: 0.4;
+  filter: blur(8px);
+  transition: opacity 0.3s ease;
+}
+
+.button-3d-gold:hover {
+  transform: translateY(-2px) translateZ(8px);
+}
+
+.button-3d-gold:hover::after {
+  opacity: 0.8;
+}
+
+.neon-glow-gold {
+  box-shadow: 0 0 15px rgba(197, 160, 33, 0.25);
+}
+
+.neon-glow-blue {
+  box-shadow: 0 0 15px rgba(16, 137, 164, 0.25);
+}
+
+.glow-border-hover {
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.glow-border-hover:hover {
+  border-color: rgba(197, 160, 33, 0.4);
+  box-shadow: 0 0 20px rgba(197, 160, 33, 0.15);
+}
+
+.glow-text-gold {
+  text-shadow: 0 0 10px rgba(197, 160, 33, 0.4);
+}
+
+.glow-text-blue {
+  text-shadow: 0 0 10px rgba(16, 137, 164, 0.4);
+}
+
+.translate-z-10 {
+  transform: translateZ(10px);
+}
+
+.translate-z-20 {
+  transform: translateZ(20px);
+}
+
+@keyframes ambientBg {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.animate-ambient {
+  background-size: 200% 200%;
+  animation: ambientBg 15s ease infinite;
+}
+
+/* ── RTL Mega-Menu Specifics ──────────────────────────── */
+.mega-menu-formal {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* ── MORSALL BRAND IDENTITY (FORMAL & MINIMALIST LIGHT DESIGN) ── */
+.morsall-light-bg {
+  background-color: #F8FAFC;
+  background-image: 
+    radial-gradient(at 100% 0%, rgba(37, 99, 235, 0.02) 0px, transparent 40%),
+    radial-gradient(at 0% 100%, rgba(30, 58, 138, 0.01) 0px, transparent 40%);
+}
+
+.formal-shadow {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
+}
+
+.formal-shadow-lg {
+  box-shadow: 0 10px 15px -3px rgba(15, 23, 42, 0.05), 0 4px 6px -4px rgba(15, 23, 42, 0.05);
+}
+
+.formal-card {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 1rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.formal-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 20px -3px rgba(15, 23, 42, 0.06);
+  border-color: #CBD5E1;
+}
+
+.formal-input {
+  background: #FFFFFF;
+  border: 1px solid #CBD5E1;
+  color: #0F172A;
+  border-radius: 0.5rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.formal-input:focus {
+  border-color: #2563EB;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+  outline: none;
+}
+
+.formal-btn-primary {
+  background-color: #1E3A8A;
+  color: #FFFFFF;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.formal-btn-primary:hover {
+  background-color: #1D4ED8;
+  box-shadow: 0 4px 12px rgba(29, 78, 216, 0.15);
+}
+
+.formal-btn-secondary {
+  background-color: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  color: #334155;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.formal-btn-secondary:hover {
+  background-color: #F8FAFC;
+  border-color: #CBD5E1;
+}
+
+
+

@@ -1,31 +1,21 @@
 @echo off
-setlocal
-echo ==========================================
-echo    MORSALL - AUTO DEPLOYMENT SYSTEM
-echo ==========================================
-
-echo [1/4] Preparing database models...
-call npx prisma generate
-
-echo [2/4] Building your website (Generating latest colors and designs)...
-call npm run build
-
-echo [3/4] Fixing Hostinger CSS (LiteSpeed Fix)...
-if exist _next (
-    rmdir /s /q _next
-)
-mkdir _next
-xcopy /e /i /y .next\static _next\static > nul
-
-echo [4/4] Uploading to GitHub...
-git add .
-git commit -m "Automatic update: %date% %time%"
-git push origin main
-
+title Morsall Auto-Deploy Tool
+echo 🚀 Starting Automated Deployment for Morsall...
 echo.
-echo ==========================================
-echo    SUCCESS! Site updated on GitHub.
-echo    Hostinger is now pulling changes...
-echo ==========================================
-echo Your site will be ready in 1-2 minutes.
+cd /d "%~dp0"
+echo 📦 Current Directory: %cd%
+echo.
+echo ⚠️  Please close heavy applications (Chrome, Games) to free up RAM.
+echo.
+pause
+echo 🏗️  Building and Deploying...
+npm run deploy
+if %ERRORLEVEL% NEQ 0 (
+    echo.
+    echo ❌ Deployment Failed! Please check the errors above.
+) else (
+    echo.
+    echo 🎉 Deployment Successful! Your site is now live and updated.
+)
+echo.
 pause

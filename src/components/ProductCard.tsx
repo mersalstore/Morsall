@@ -59,21 +59,21 @@ export default function ProductCard({ id, title, price, image, vendor, vendorLoc
     <div className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:border-gray-300 transition-colors flex flex-row sm:flex-col h-full relative">
       
       {/* Image Container */}
-      <div className="relative w-2/5 sm:w-full aspect-square sm:aspect-[4/5] bg-white p-4 shrink-0 flex items-center justify-center">
+      <div className="relative w-2/5 sm:w-full aspect-square sm:aspect-[4/3] bg-slate-50 shrink-0 flex items-center justify-center overflow-hidden">
         <Link href={`/product/${id}`} className="block w-full h-full relative">
           <Image
             src={image}
             alt={title}
             fill
-            className="object-contain"
+            className="object-cover"
           />
         </Link>
         {discount && discount > 0 ? (
-          <div className="absolute top-2 left-2 bg-[#CC0C39] text-white text-[10px] font-bold px-2 py-1 rounded-sm">
+          <div className="absolute top-2 left-2 bg-[#CC0C39] text-white text-[10px] font-bold px-2 py-1 rounded-sm z-10">
             خصم {discount}%
           </div>
         ) : badge ? (
-          <div className="absolute top-2 left-2 bg-[#B12704] text-white text-[10px] font-bold px-2 py-1 rounded-sm">
+          <div className="absolute top-2 left-2 bg-[#1E3A8A] text-white text-[10px] font-bold px-2 py-1 rounded-sm z-10">
             {badge}
           </div>
         ) : null}

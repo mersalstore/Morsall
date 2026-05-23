@@ -1,0 +1,39 @@
+BASE=/home/u754458241/domains/morsall.com/public_html/.builds/source
+chmod -R u+rwX "$BASE"
+find "$BASE" -type d -exec chmod 755 {} \;
+find "$BASE" -type f -exec chmod 644 {} \;
+BASE=/home/u754458241/domains/morsall.com/public_html/.builds/source
+chmod -R u+rwX "$BASE"
+find "$BASE" -type d -exec chmod 755 {} \;
+find "$BASE" -type f -exec chmod 644 {} \;
+ls -la "$BASE/src/app/admin/"
+BASE=/home/u754458241/domains/morsall.com/public_html/.builds/source
+chmod -R u+rwX "$BASE"
+find "$BASE" -type d -exec chmod 755 {} \;
+find "$BASE" -type f -exec chmod 644 {} \;
+BASE=/home/u754458241/domains/morsall.com/public_html/.builds/source
+chmod -R u+rwX "$BASE"
+find "$BASE" -type d -exec chmod 755 {} \;
+find "$BASE" -type f -exec chmod 644 {} \;kill %14
+kill %1
+BASE=/home/u754458241/domains/morsall.com/public_html/.builds/source
+chmod -R u+rwX "$BASE"
+find "$BASE" -type d -exec chmod 755 {} \;
+find "$BASE" -type f -exec chmod 644 {} \;
+ls -la "$BASE/src/app/admin/"
+BASE=/home/u754458241/domains/morsall.com/public_html/.builds/source
+chmod -R u+rwX "$BASE"
+find "$BASE" -type d -exec chmod 755 {} \;
+find "$BASE" -type f -exec chmod 644 {} \;
+jobs; kill %1 2>/dev/null; kill %2 2>/dev/null
+BASE=/home/u754458241/domains/morsall.com/public_html/.builds/source
+chmod -R u+rwx,go+rX "$BASE"
+ls -la "$BASE/src/app/admin/"
+exit
+find ~/domains -maxdepth 5 -type d -name '.builds'
+chmod -R u+rwx,go+rX /home/u754458241/domains/morsall.com/public_html/.builds
+chmod -R u+rwx,go+rX /home/u754458241/domains/morsall.com/public_html/.builds/source
+ls -la /home/u754458241/domains/morsall.com/public_html/.builds/source/src/app/admin/
+cd /home/u754458241/domains/morsall.com/nodejs && npx prisma db push --accept-data-loss
+cd /home/u754458241/domains/morsall.com/nodejs && /opt/alt/alt-nodejs22/root/usr/bin/npx prisma db push --accept-data-loss
+mysql -u u754458241_Kanan -pMersal2026 -e "show databases;"

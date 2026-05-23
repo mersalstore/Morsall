@@ -20,7 +20,7 @@ export default function DeliveryLanding() {
     <div className="min-h-screen bg-[#0F172A] text-white flex flex-col items-center justify-center p-6" dir="rtl">
       <div className="max-w-md w-full space-y-8 text-center">
         <div className="relative w-48 h-20 mx-auto">
-          <Image src="/logo-navbar-final.png" alt="Mersal" fill className="object-contain" />
+          <Image src="/logo.png" alt="Mersal" fill className="object-contain" />
         </div>
         
         <div className="space-y-4">

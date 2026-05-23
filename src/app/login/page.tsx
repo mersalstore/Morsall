@@ -96,7 +96,7 @@ function LoginContent() {
            <div className="relative z-10 w-full flex items-center justify-start">
               <Link href="/" className="inline-block transition-transform hover:scale-105 duration-300">
                  <div className="w-24 h-24 relative">
-                    <Image src="/logo-navbar-final.png" alt="مرسال" fill className="object-contain" />
+                    <Image src="/logo.png" alt="مرسال" fill className="object-contain" />
                  </div>
               </Link>
            </div>

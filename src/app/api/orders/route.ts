@@ -227,6 +227,28 @@ export async function POST(req: Request) {
       }
     }
 
+    // Notify admins and vendors about new order
+    try {
+      const { notifyAdmins, notifyVendor } = await import("@/lib/notification");
+      notifyAdmins(
+        "📦 طلب جديد",
+        `طلب جديد #${order.id.slice(-8)} بمبلغ ${totalAmount.toLocaleString()} ج.س`,
+        "order",
+        "/admin/dashboard"
+      );
+      for (const item of finalItems) {
+        if (item.vendorId) {
+          notifyVendor(
+            item.vendorId,
+            "📦 طلب جديد في متجرك",
+            `لديك طلب جديد #${order.id.slice(-8)} بقيمة ${totalAmount.toLocaleString()} ج.س`,
+            "order",
+            "/vendor/dashboard"
+          );
+        }
+      }
+    } catch {}
+
     return NextResponse.json({
       success: true,
       orderId: order.id,

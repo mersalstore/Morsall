@@ -215,7 +215,7 @@ export default function Navbar() {
                 className="relative w-[100px] h-8 lg:w-[180px] lg:h-16"
               >
                 <Image
-                  src={siteSettings?.logo || "/logo-navbar-final.png"}
+                  src={`${siteSettings?.logo || "/logo.png"}?v=6`}
                   alt={siteSettings?.siteTitle || "مرسال - MERSAL"}
                   fill
                   className="object-contain"

@@ -1,0 +1,4 @@
+# No Passenger here
+Options -MultiViews
+RewriteEngine On
+RewriteBase /

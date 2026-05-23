@@ -1,0 +1,26 @@
+# Enable Passenger
+PassengerEnabled on
+PassengerAppType node
+PassengerStartupFile server.js
+PassengerAppRoot /home/u754458241/domains/morsall.com/nodejs
+
+# Try to specify the Node path (adjust if needed)
+# PassengerNodejs /usr/local/bin/node
+
+Options -MultiViews
+RewriteEngine On
+RewriteBase /
+
+# ── EXCLUDE PHP AND DIAGNOSTIC SCRIPTS ──
+RewriteCond %{REQUEST_URI} \.(php|html|png|jpg|jpeg|gif|ico)$ [NC]
+RewriteRule .* - [L]
+
+# ── Serve uploaded images directly from Apache ──
+RewriteCond %{REQUEST_URI} ^/uploads/
+RewriteCond %{DOCUMENT_ROOT}/uploads/%{REQUEST_URI} -f
+RewriteRule ^uploads/(.+)$ /uploads/$1 [L]
+
+# ── Let Node.js handle everything else ──
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ server.js/$1 [QSA,L]

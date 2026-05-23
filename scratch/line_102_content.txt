@@ -1,0 +1,77 @@
+Created At: 2026-05-19T19:01:01Z
+Completed At: 2026-05-19T19:01:01Z
+File Path: `file:///C:/Users/hazem/Downloads/matger2/src/components/admin/LogisticsTab.tsx`
+Total Lines: 890
+Total Bytes: 45507
+Showing lines 1 to 69
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+1: "use client";
+2: 
+3: import React, { useState, useEffect } from "react";
+4: import { motion, AnimatePresence } from "framer-motion";
+5: import { 
+6:   Truck, 
+7:   MapPin, 
+8:   Navigation, 
+9:   Timer, 
+10:   CheckCircle2, 
+11:   AlertCircle,
+12:   Users,
+13:   Search,
+14:   ChevronRight,
+15:   Activity,
+16:   Package,
+17:   Globe,
+18:   Wallet,
+19:   ArrowUpRight,
+20:   ArrowDownLeft,
+21:   Building2,
+22:   Settings2,
+23:   DollarSign,
+24:   Plus,
+25:   Phone,
+26:   RefreshCw,
+27:   X,
+28:   Loader2
+29: } from "lucide-react";
+30: import { cn } from "@/lib/utils";
+31: 
+32: interface Driver {
+33:   id: string;
+34:   name: string;
+35:   phone: string;
+36:   vehicleType: string;
+37:   isActive: boolean;
+38:   isOnline: boolean;
+39:   balance: number;
+40:   unsettledCash: number;
+41: }
+42: 
+43: interface Branch {
+44:   id: string;
+45:   name: string;
+46:   location: string;
+47:   phone?: string | null;
+48:   isActive: boolean;
+49:   createdAt: string;
+50: }
+51: 
+52: interface SettlementLog {
+53:   id: string;
+54:   driverId: string;
+55:   totalCash: number;
+56:   actualCash: number;
+57:   difference: number;
+58:   notes?: string | null;
+59:   settledBy?: string | null;
+60:   orderIds: string;
+61:   status: string;
+62:   createdAt: string;
+63: }
+64: 
+65: interface UnsettledOrder {
+66:   id: string;
+67:   totalAmount: number;
+68:   status: string;
+69:   createdAt: string;
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.

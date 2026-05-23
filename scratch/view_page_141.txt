@@ -1,0 +1,39 @@
+Created At: 2026-05-19T19:01:58Z
+Completed At: 2026-05-19T19:01:58Z
+File Path: `file:///C:/Users/hazem/Downloads/matger2/src/app/admin/dashboard/page.tsx`
+Total Lines: 494
+Total Bytes: 28753
+Showing lines 420 to 450
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+420:                   ORDER_STATUSES={ORDER_STATUSES}
+421:                   defaultStatusFilter={statusFilter}
+422:                   onAssignDriver={async (orderId, driverId) => {
+423:                     await fetch("/api/admin/orders", {
+424:                       method: "PATCH",
+425:                       headers: { "Content-Type": "application/json" },
+426:                       body: JSON.stringify({ id: orderId, action: "assign_driver", driverId })
+427:                     });
+428:                     fetchData();
+429:                   }}
+430:                 />
+431:                 <EditOrderModal
+432:                   isOpen={!!editingOrder}
+433:                   order={editingOrder}
+434:                   onClose={() => setEditingOrder(null)}
+435:                   onSuccess={fetchData}
+436:                   ORDER_STATUSES={ORDER_STATUSES}
+437:                 />
+438:                 <PrintPolicyModal
+439:                   isOpen={isPolicyModalOpen}
+440:                   orders={printingOrders}
+441:                   onClose={() => setIsPolicyModalOpen(false)}
+442:                 />
+443:                 <PrintInvoiceModal
+444:                   isOpen={!!printingOrder}
+445:                   order={printingOrder}
+446:                   onClose={() => setPrintingOrder(null)}
+447:                 />
+448:               </>
+449:             )}
+450:             {activeTab === "inventory" && (
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.

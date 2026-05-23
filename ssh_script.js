@@ -3,7 +3,7 @@ const { Client } = require('ssh2');
 const conn = new Client();
 conn.on('ready', () => {
   console.log('Client :: ready');
-  conn.exec('ls -lad /home/u754458241 /home/u754458241/domains /home/u754458241/domains/morsall.com /home/u754458241/domains/morsall.com/public_html /home/u754458241/domains/morsall.com/public_html/.builds 2>/dev/null; echo "---BUILDS_DONE---"; ls -la /home/u754458241/domains/morsall.com/public_html/.builds/ 2>/dev/null; echo "---STAT---"; stat /home/u754458241/domains/morsall.com/public_html/.builds/source/src/app/admin/dashboard 2>/dev/null || echo "path_not_found"; echo "---FIX---"; chmod -R u+rwx /home/u754458241/domains/morsall.com/public_html/.builds 2>/dev/null; chmod -R a+rX /home/u754458241/domains/morsall.com/public_html/.builds 2>/dev/null; chmod a+rx /home/u754458241/domains/morsall.com/public_html/.builds 2>/dev/null; chmod a+rx /home/u754458241/domains/morsall.com/public_html 2>/dev/null; echo "---FIX_DONE---"', (err, stream) => {
+  conn.exec('mv /home/u754458241/domains/morsall.com/public_html/fast_update.zip /home/u754458241/domains/morsall.com/nodejs/ 2>/dev/null; cd /home/u754458241/domains/morsall.com/nodejs && unzip -o fast_update.zip && touch tmp/restart.txt && echo "---UPDATE_AND_RESTART_DONE---"', (err, stream) => {
     if (err) throw err;
     stream.on('close', (code, signal) => {
       console.log('Stream :: close :: code: ' + code + ', signal: ' + signal);

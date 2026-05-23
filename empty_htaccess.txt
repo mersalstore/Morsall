@@ -1,0 +1,1 @@
+# Empty htaccess to disable proxying in this folder

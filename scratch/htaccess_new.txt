@@ -1,0 +1,16 @@
+# Enable Passenger
+PassengerEnabled on
+PassengerAppType node
+PassengerNodejs /opt/alt/alt-nodejs22/root/usr/bin/node
+PassengerStartupFile server-hostinger.js
+PassengerAppRoot /home/u754458241/domains/morsall.com/nodejs
+
+Options -MultiViews
+RewriteEngine On
+RewriteBase /
+
+# EXCLUDE PHP AND DIAGNOSTIC SCRIPTS
+RewriteCond %{REQUEST_URI} \.(php|html|png|jpg|jpeg|gif|ico)$ [NC]
+RewriteRule .* - [L]
+
+# No other rewrite rules needed for Passenger

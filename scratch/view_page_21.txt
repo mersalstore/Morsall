@@ -1,0 +1,54 @@
+Created At: 2026-05-19T18:57:59Z
+Completed At: 2026-05-19T18:57:59Z
+File Path: `file:///C:/Users/hazem/Downloads/matger2/src/app/admin/dashboard/page.tsx`
+Total Lines: 494
+Total Bytes: 28753
+Showing lines 145 to 190
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+145:   }, [status, session]);
+146: 
+147:   const fetchData = async (range?: string, from?: string, to?: string) => {
+148:     setLoading(true);
+149:     try {
+150:       const r = range || dateRange;
+151:       let statsUrl = `/api/admin/stats?range=${r}`;
+152:       if (r === "custom" && from && to) statsUrl += `&from=${from}&to=${to}`;
+153: 
+154:       const [resOrders, resLogisticsOrders, resProducts, resStats, resPending, resUsers, resVendors, resDrivers] = await Promise.all([
+155:         fetch("/api/admin/orders"),                          // طلبات عادية (تخفي AWAITING_PICKUP)
+156:         fetch("/api/admin/orders?logistics=1"),              // كل الطلبات للوجستيات
+157:         fetch("/api/admin/inventory"),
+158:         fetch(statsUrl),
+159:         fetch("/api/admin/approvals"),
+160:         fetch("/api/admin/users"),
+161:         fetch("/api/admin/vendors"),
+162:         fetch("/api/admin/drivers"),
+163:       ]);
+164:       if (resOrders.ok) setOrders(await resOrders.json());
+165:       if (resLogisticsOrders.ok) setLogisticsOrders(await resLogisticsOrders.json());
+166:       if (resProducts.ok) setInventoryProducts(await resProducts.json());
+167:       if (resStats.ok) {
+168:         const d = await resStats.json();
+169:         setStats(d.stats || []);
+170:         setOrderStatuses(d.orderStatuses || {});
+171:         setDeliveryByCity(d.deliveryByCity || []);
+172:         setActiveDrivers(d.activeDrivers || 0);
+173:       }
+174:       if (resUsers.ok) setUsers(await resUsers.json());
+175:       if (resVendors.ok) setVendors(await resVendors.json());
+176:       if (resDrivers?.ok) setDrivers(await resDrivers.json());
+177:       if (resPending?.ok) {
+178:         const d = await resPending.json();
+179:         setPendingVendors(d.vendors || []);
+180:         setPendingProducts(d.products || []);
+181:       }
+182:     } catch (err) { console.error(err); }
+183:     setLoading(false);
+184:   };
+185: 
+186:   const handleVendorAction = async (id: string, action: string) => {
+187:     setActionLoading(id);
+188:     await fetch("/api/admin/vendors", { 
+189:       method: "PATCH", 
+190:       headers: { "Content-Type": "application/json" },
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.

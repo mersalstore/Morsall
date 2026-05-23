@@ -1,0 +1,1605 @@
+[2026-05-12T19:58:01.026Z] --- SERVER STARTING ---
+[2026-05-12T19:58:01.027Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T19:58:01.027Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T19:58:01.027Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T19:58:01.028Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T19:58:01.436Z] --- SERVER STARTING ---
+[2026-05-12T19:58:01.437Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T19:58:01.437Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T19:58:01.437Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T19:58:01.438Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:02:01.360Z] --- SERVER STARTING ---
+[2026-05-12T20:02:01.361Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:02:01.361Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:02:01.361Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:02:01.361Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:09:08.453Z] --- SERVER STARTING ---
+[2026-05-12T20:09:08.454Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:09:08.454Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:09:08.454Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:09:08.454Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:09:08.854Z] --- SERVER STARTING ---
+[2026-05-12T20:09:08.855Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:09:08.855Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:09:08.855Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:09:08.855Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:09:09.258Z] --- SERVER STARTING ---
+[2026-05-12T20:09:09.259Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:09:09.259Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:09:09.259Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:09:09.259Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:09:12.700Z] --- SERVER STARTING ---
+[2026-05-12T20:09:12.701Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:09:12.701Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:09:12.701Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:09:12.701Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:09:13.189Z] --- SERVER STARTING ---
+[2026-05-12T20:09:13.190Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:09:13.190Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:09:13.190Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:09:13.190Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:09:13.595Z] --- SERVER STARTING ---
+[2026-05-12T20:09:13.596Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:09:13.596Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:09:13.596Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:09:13.596Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:09:14.183Z] --- SERVER STARTING ---
+[2026-05-12T20:09:14.184Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:09:14.184Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:09:14.184Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:09:14.184Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:09:14.586Z] --- SERVER STARTING ---
+[2026-05-12T20:09:14.587Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:09:14.587Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:09:14.587Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:09:14.587Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:09:16.440Z] --- SERVER STARTING ---
+[2026-05-12T20:09:16.441Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:09:16.441Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:09:16.442Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:09:16.442Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:09:20.346Z] --- SERVER STARTING ---
+[2026-05-12T20:09:20.348Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:09:20.348Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:09:20.348Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:09:20.348Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:09:25.823Z] --- SERVER STARTING ---
+[2026-05-12T20:09:25.824Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:09:25.824Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:09:25.824Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:09:25.824Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:09:26.230Z] --- SERVER STARTING ---
+[2026-05-12T20:09:26.231Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:09:26.231Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:09:26.231Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:09:26.231Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:09:28.995Z] --- SERVER STARTING ---
+[2026-05-12T20:09:28.996Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:09:28.996Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:09:28.996Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:09:28.996Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:09:29.405Z] --- SERVER STARTING ---
+[2026-05-12T20:09:29.406Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:09:29.406Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:09:29.406Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:09:29.406Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:09:35.118Z] --- SERVER STARTING ---
+[2026-05-12T20:09:35.120Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:09:35.120Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:09:35.120Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:09:35.120Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:09:35.668Z] --- SERVER STARTING ---
+[2026-05-12T20:09:35.669Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:09:35.669Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:09:35.669Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:09:35.669Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:09:36.190Z] --- SERVER STARTING ---
+[2026-05-12T20:09:36.191Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:09:36.192Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:09:36.192Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:09:36.192Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:09:46.760Z] --- SERVER STARTING ---
+[2026-05-12T20:09:46.761Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:09:46.761Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:09:46.762Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:09:46.762Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:09:47.242Z] --- SERVER STARTING ---
+[2026-05-12T20:09:47.243Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:09:47.243Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:09:47.243Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:09:47.243Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:09:49.863Z] --- SERVER STARTING ---
+[2026-05-12T20:09:49.864Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:09:49.864Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:09:49.865Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:09:49.865Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:09:50.284Z] --- SERVER STARTING ---
+[2026-05-12T20:09:50.284Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:09:50.285Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:09:50.285Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:09:50.285Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:21:35.488Z] --- SERVER STARTING ---
+[2026-05-12T20:21:35.489Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:21:35.489Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:21:35.489Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:21:35.489Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:21:36.173Z] --- SERVER STARTING ---
+[2026-05-12T20:21:36.174Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:21:36.174Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:21:36.174Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:21:36.174Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:21:36.896Z] --- SERVER STARTING ---
+[2026-05-12T20:21:36.897Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:21:36.897Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:21:36.897Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:21:36.897Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:21:37.317Z] --- SERVER STARTING ---
+[2026-05-12T20:21:37.318Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:21:37.318Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:21:37.318Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:21:37.318Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:21:38.254Z] --- SERVER STARTING ---
+[2026-05-12T20:21:38.255Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:21:38.255Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:21:38.255Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:21:38.256Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:30:23.013Z] --- SERVER STARTING ---
+[2026-05-12T20:30:23.015Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:30:23.015Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:30:23.015Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:30:23.015Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:30:23.448Z] --- SERVER STARTING ---
+[2026-05-12T20:30:23.449Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:30:23.449Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:30:23.449Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:30:23.449Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:32:13.681Z] --- SERVER STARTING ---
+[2026-05-12T20:32:13.682Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:32:13.682Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:32:13.682Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:32:13.682Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:32:15.691Z] --- SERVER STARTING ---
+[2026-05-12T20:32:15.692Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:32:15.692Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:32:15.692Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:32:15.692Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:33:09.551Z] --- SERVER STARTING ---
+[2026-05-12T20:33:09.552Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:33:09.552Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:33:09.552Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:33:09.552Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:34:01.403Z] --- SERVER STARTING ---
+[2026-05-12T20:34:01.405Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:34:01.405Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:34:01.405Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:34:01.405Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:34:36.061Z] --- SERVER STARTING ---
+[2026-05-12T20:34:36.062Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:34:36.062Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:34:36.062Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:34:36.063Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:34:36.474Z] --- SERVER STARTING ---
+[2026-05-12T20:34:36.475Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:34:36.475Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:34:36.475Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:34:36.475Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:34:38.833Z] --- SERVER STARTING ---
+[2026-05-12T20:34:38.834Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:34:38.834Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:34:38.834Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:34:38.834Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:34:39.254Z] --- SERVER STARTING ---
+[2026-05-12T20:34:39.255Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:34:39.255Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:34:39.255Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:34:39.255Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:34:42.131Z] --- SERVER STARTING ---
+[2026-05-12T20:34:42.132Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:34:42.132Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:34:42.133Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:34:42.133Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:34:45.112Z] --- SERVER STARTING ---
+[2026-05-12T20:34:45.114Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:34:45.114Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:34:45.114Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:34:45.114Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:34:45.709Z] --- SERVER STARTING ---
+[2026-05-12T20:34:45.710Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:34:45.710Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:34:45.710Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:34:45.710Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:34:46.167Z] --- SERVER STARTING ---
+[2026-05-12T20:34:46.168Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:34:46.168Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:34:46.168Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:34:46.168Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:34:55.113Z] --- SERVER STARTING ---
+[2026-05-12T20:34:55.114Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:34:55.114Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:34:55.114Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:34:55.114Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:36:32.183Z] --- SERVER STARTING ---
+[2026-05-12T20:36:32.184Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:36:32.184Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:36:32.184Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:36:32.184Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:39:23.249Z] --- SERVER STARTING ---
+[2026-05-12T20:39:23.250Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:39:23.250Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:39:23.250Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:39:23.250Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:39:23.659Z] --- SERVER STARTING ---
+[2026-05-12T20:39:23.660Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:39:23.660Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:39:23.660Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:39:23.661Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:39:23.662Z] --- SERVER STARTING ---
+[2026-05-12T20:39:23.663Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:39:23.664Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:39:23.664Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:39:23.664Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:39:24.156Z] --- SERVER STARTING ---
+[2026-05-12T20:39:24.157Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:39:24.157Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:39:24.157Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:39:24.157Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:39:24.565Z] --- SERVER STARTING ---
+[2026-05-12T20:39:24.566Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:39:24.566Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:39:24.566Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:39:24.566Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:39:24.573Z] --- SERVER STARTING ---
+[2026-05-12T20:39:24.574Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:39:24.574Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:39:24.574Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:39:24.574Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:39:25.139Z] --- SERVER STARTING ---
+[2026-05-12T20:39:25.140Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:39:25.140Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:39:25.140Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:39:25.140Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:39:25.691Z] --- SERVER STARTING ---
+[2026-05-12T20:39:25.692Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:39:25.693Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:39:25.693Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:39:25.693Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:39:26.918Z] --- SERVER STARTING ---
+[2026-05-12T20:39:26.919Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:39:26.919Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:39:26.919Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:39:26.919Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:39:27.125Z] --- SERVER STARTING ---
+[2026-05-12T20:39:27.126Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:39:27.126Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:39:27.126Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:39:27.126Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:39:35.124Z] --- SERVER STARTING ---
+[2026-05-12T20:39:35.125Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:39:35.125Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:39:35.125Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:39:35.125Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:39:35.611Z] --- SERVER STARTING ---
+[2026-05-12T20:39:35.612Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:39:35.612Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:39:35.612Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:39:35.612Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:39:37.712Z] --- SERVER STARTING ---
+[2026-05-12T20:39:37.713Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:39:37.713Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:39:37.713Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:39:37.713Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:39:38.121Z] --- SERVER STARTING ---
+[2026-05-12T20:39:38.122Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:39:38.122Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:39:38.122Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:39:38.122Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:39:42.035Z] --- SERVER STARTING ---
+[2026-05-12T20:39:42.036Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:39:42.036Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:39:42.036Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:39:42.036Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:39:42.444Z] --- SERVER STARTING ---
+[2026-05-12T20:39:42.446Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:39:42.446Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:39:42.446Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:39:42.446Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:40:01.322Z] --- SERVER STARTING ---
+[2026-05-12T20:40:01.323Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:40:01.323Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:40:01.323Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:40:01.323Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:40:01.783Z] --- SERVER STARTING ---
+[2026-05-12T20:40:01.785Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:40:01.785Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:40:01.785Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:40:01.785Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:40:02.280Z] --- SERVER STARTING ---
+[2026-05-12T20:40:02.281Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:40:02.281Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:40:02.281Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:40:02.282Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:40:04.307Z] --- SERVER STARTING ---
+[2026-05-12T20:40:04.308Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:40:04.308Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:40:04.308Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:40:04.308Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:40:23.413Z] --- SERVER STARTING ---
+[2026-05-12T20:40:23.415Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:40:23.415Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:40:23.415Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:40:23.415Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:40:23.872Z] --- SERVER STARTING ---
+[2026-05-12T20:40:23.873Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:40:23.873Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:40:23.873Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:40:23.873Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:40:23.879Z] --- SERVER STARTING ---
+[2026-05-12T20:40:23.880Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:40:23.880Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:40:23.880Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:40:23.880Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:40:24.324Z] --- SERVER STARTING ---
+[2026-05-12T20:40:24.326Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:40:24.326Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:40:24.326Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:40:24.326Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:40:25.111Z] --- SERVER STARTING ---
+[2026-05-12T20:40:25.112Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:40:25.112Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:40:25.112Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:40:25.112Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:41:07.419Z] --- SERVER STARTING ---
+[2026-05-12T20:41:07.420Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:41:07.420Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:41:07.420Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:41:07.420Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:41:08.134Z] --- SERVER STARTING ---
+[2026-05-12T20:41:08.135Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:41:08.135Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:41:08.135Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:41:08.135Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:41:15.103Z] --- SERVER STARTING ---
+[2026-05-12T20:41:15.104Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:41:15.104Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:41:15.104Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:41:15.105Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:41:15.629Z] --- SERVER STARTING ---
+[2026-05-12T20:41:15.630Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:41:15.630Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:41:15.631Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:41:15.631Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:41:15.637Z] --- SERVER STARTING ---
+[2026-05-12T20:41:15.638Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:41:15.638Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:41:15.638Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:41:15.638Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:41:15.953Z] --- SERVER STARTING ---
+[2026-05-12T20:41:15.954Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:41:15.954Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:41:15.954Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:41:15.954Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:41:16.145Z] --- SERVER STARTING ---
+[2026-05-12T20:41:16.146Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:41:16.146Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:41:16.146Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:41:16.146Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:41:16.362Z] --- SERVER STARTING ---
+[2026-05-12T20:41:16.363Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:41:16.363Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:41:16.363Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:41:16.363Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:41:16.643Z] --- SERVER STARTING ---
+[2026-05-12T20:41:16.644Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:41:16.644Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:41:16.644Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:41:16.644Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:41:24.765Z] --- SERVER STARTING ---
+[2026-05-12T20:41:24.766Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:41:24.766Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:41:24.766Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:41:24.766Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:41:25.178Z] --- SERVER STARTING ---
+[2026-05-12T20:41:25.179Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:41:25.179Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:41:25.179Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:41:25.179Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:41:40.741Z] --- SERVER STARTING ---
+[2026-05-12T20:41:40.742Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:41:40.742Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:41:40.742Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:41:40.742Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:41:41.221Z] --- SERVER STARTING ---
+[2026-05-12T20:41:41.222Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:41:41.222Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:41:41.222Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:41:41.222Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:41:45.104Z] --- SERVER STARTING ---
+[2026-05-12T20:41:45.105Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:41:45.105Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:41:45.105Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:41:45.105Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:41:45.717Z] --- SERVER STARTING ---
+[2026-05-12T20:41:45.718Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:41:45.718Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:41:45.719Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:41:45.719Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:41:46.112Z] --- SERVER STARTING ---
+[2026-05-12T20:41:46.114Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:41:46.114Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:41:46.114Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:41:46.114Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:41:49.812Z] --- SERVER STARTING ---
+[2026-05-12T20:41:49.813Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:41:49.813Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:41:49.813Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:41:49.813Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:41:50.226Z] --- SERVER STARTING ---
+[2026-05-12T20:41:50.227Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:41:50.227Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:41:50.227Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:41:50.227Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:41:51.669Z] --- SERVER STARTING ---
+[2026-05-12T20:41:51.671Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:41:51.671Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:41:51.671Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:41:51.671Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:41:52.757Z] --- SERVER STARTING ---
+[2026-05-12T20:41:52.758Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:41:52.758Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:41:52.758Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:41:52.758Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:41:53.155Z] --- SERVER STARTING ---
+[2026-05-12T20:41:53.156Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:41:53.156Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:41:53.156Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:41:53.157Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:41:55.138Z] --- SERVER STARTING ---
+[2026-05-12T20:41:55.139Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:41:55.139Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:41:55.140Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:41:55.140Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:42:23.025Z] --- SERVER STARTING ---
+[2026-05-12T20:42:23.026Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:42:23.026Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:42:23.026Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:42:23.026Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:42:23.416Z] --- SERVER STARTING ---
+[2026-05-12T20:42:23.417Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:42:23.417Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:42:23.417Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:42:23.417Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:42:25.108Z] --- SERVER STARTING ---
+[2026-05-12T20:42:25.109Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:42:25.109Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:42:25.110Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:42:25.111Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:42:35.105Z] --- SERVER STARTING ---
+[2026-05-12T20:42:35.107Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:42:35.107Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:42:35.107Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:42:35.107Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:42:35.871Z] --- SERVER STARTING ---
+[2026-05-12T20:42:35.872Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:42:35.872Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:42:35.872Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:42:35.872Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:42:36.279Z] --- SERVER STARTING ---
+[2026-05-12T20:42:36.280Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:42:36.280Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:42:36.280Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:42:36.280Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:42:45.121Z] --- SERVER STARTING ---
+[2026-05-12T20:42:45.122Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:42:45.122Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:42:45.122Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:42:45.122Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:42:45.638Z] --- SERVER STARTING ---
+[2026-05-12T20:42:45.639Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:42:45.639Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:42:45.639Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:42:45.640Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:42:46.774Z] --- SERVER STARTING ---
+[2026-05-12T20:42:46.775Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:42:46.775Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:42:46.775Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:42:46.775Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:42:47.187Z] --- SERVER STARTING ---
+[2026-05-12T20:42:47.188Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:42:47.188Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:42:47.188Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:42:47.188Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:43:01.147Z] --- SERVER STARTING ---
+[2026-05-12T20:43:01.148Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:43:01.148Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:43:01.148Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:43:01.148Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:43:01.126Z] --- SERVER STARTING ---
+[2026-05-12T20:43:01.127Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:43:01.127Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:43:01.127Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:43:01.127Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:43:03.205Z] --- SERVER STARTING ---
+[2026-05-12T20:43:03.206Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:43:03.206Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:43:03.207Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:43:03.207Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:44:01.706Z] --- SERVER STARTING ---
+[2026-05-12T20:44:01.707Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:44:01.707Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:44:01.707Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:44:01.707Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:44:02.161Z] --- SERVER STARTING ---
+[2026-05-12T20:44:02.162Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:44:02.162Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:44:02.162Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:44:02.162Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:44:21.389Z] --- SERVER STARTING ---
+[2026-05-12T20:44:21.390Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:44:21.390Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:44:21.390Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:44:21.390Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:44:26.542Z] --- SERVER STARTING ---
+[2026-05-12T20:44:26.543Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:44:26.543Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:44:26.543Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:44:26.544Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:44:26.562Z] --- SERVER STARTING ---
+[2026-05-12T20:44:26.563Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:44:26.563Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:44:26.563Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:44:26.563Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:44:27.197Z] --- SERVER STARTING ---
+[2026-05-12T20:44:27.206Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:44:27.206Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:44:27.206Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:44:27.207Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:44:27.767Z] --- SERVER STARTING ---
+[2026-05-12T20:44:27.768Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:44:27.768Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:44:27.768Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:44:27.768Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:44:27.775Z] --- SERVER STARTING ---
+[2026-05-12T20:44:27.776Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:44:27.776Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:44:27.776Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:44:27.777Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:44:28.177Z] --- SERVER STARTING ---
+[2026-05-12T20:44:28.178Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:44:28.178Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:44:28.178Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:44:28.178Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:44:31.079Z] --- SERVER STARTING ---
+[2026-05-12T20:44:31.080Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:44:31.080Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:44:31.080Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:44:31.081Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:44:31.546Z] --- SERVER STARTING ---
+[2026-05-12T20:44:31.547Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:44:31.547Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:44:31.547Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:44:31.547Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:44:34.505Z] --- SERVER STARTING ---
+[2026-05-12T20:44:34.506Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:44:34.506Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:44:34.506Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:44:34.506Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:44:35.303Z] --- SERVER STARTING ---
+[2026-05-12T20:44:35.304Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:44:35.304Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:44:35.304Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:44:35.304Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:44:35.395Z] --- SERVER STARTING ---
+[2026-05-12T20:44:35.396Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:44:35.396Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:44:35.396Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:44:35.397Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:44:36.174Z] --- SERVER STARTING ---
+[2026-05-12T20:44:36.175Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:44:36.175Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:44:36.175Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:44:36.176Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:45:27.467Z] --- SERVER STARTING ---
+[2026-05-12T20:45:27.490Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:45:27.491Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:45:27.491Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:45:27.491Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:45:29.606Z] --- SERVER STARTING ---
+[2026-05-12T20:45:29.607Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:45:29.607Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:45:29.608Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:45:29.608Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:45:30.397Z] --- SERVER STARTING ---
+[2026-05-12T20:45:30.399Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:45:30.399Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:45:30.399Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:45:30.399Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:45:31.455Z] --- SERVER STARTING ---
+[2026-05-12T20:45:31.456Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:45:31.456Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:45:31.456Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:45:31.456Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:45:35.119Z] --- SERVER STARTING ---
+[2026-05-12T20:45:35.121Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:45:35.121Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:45:35.121Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:45:35.121Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:45:35.653Z] --- SERVER STARTING ---
+[2026-05-12T20:45:35.654Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:45:35.654Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:45:35.654Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:45:35.654Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:45:36.170Z] --- SERVER STARTING ---
+[2026-05-12T20:45:36.171Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:45:36.171Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:45:36.171Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:45:36.171Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:45:43.203Z] --- SERVER STARTING ---
+[2026-05-12T20:45:43.204Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:45:43.204Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:45:43.204Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:45:43.204Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:45:45.105Z] --- SERVER STARTING ---
+[2026-05-12T20:45:45.106Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:45:45.107Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:45:45.107Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:45:45.107Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:45:48.936Z] --- SERVER STARTING ---
+[2026-05-12T20:45:48.937Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:45:48.937Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:45:48.937Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:45:48.937Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:45:48.950Z] --- SERVER STARTING ---
+[2026-05-12T20:45:48.951Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:45:48.951Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:45:48.951Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:45:48.951Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:45:49.345Z] --- SERVER STARTING ---
+[2026-05-12T20:45:49.346Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:45:49.346Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:45:49.346Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:45:49.346Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:45:54.171Z] --- SERVER STARTING ---
+[2026-05-12T20:45:54.172Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:45:54.172Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:45:54.172Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:45:54.172Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:45:59.433Z] --- SERVER STARTING ---
+[2026-05-12T20:45:59.434Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:45:59.434Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:45:59.434Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:45:59.434Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:45:59.431Z] --- SERVER STARTING ---
+[2026-05-12T20:45:59.432Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:45:59.432Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:45:59.432Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:45:59.432Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:46:00.512Z] --- SERVER STARTING ---
+[2026-05-12T20:46:00.513Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:46:00.513Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:46:00.513Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:46:00.513Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:46:03.385Z] --- SERVER STARTING ---
+[2026-05-12T20:46:03.386Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:46:03.386Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:46:03.386Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:46:03.387Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:46:03.416Z] --- SERVER STARTING ---
+[2026-05-12T20:46:03.417Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:46:03.417Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:46:03.417Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:46:03.417Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:46:05.211Z] --- SERVER STARTING ---
+[2026-05-12T20:46:05.212Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:46:05.212Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:46:05.212Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:46:05.212Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:46:06.925Z] --- SERVER STARTING ---
+[2026-05-12T20:46:06.926Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:46:06.926Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:46:06.927Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:46:06.927Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:46:07.643Z] --- SERVER STARTING ---
+[2026-05-12T20:46:07.644Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:46:07.644Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:46:07.644Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:46:07.644Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:46:14.013Z] --- SERVER STARTING ---
+[2026-05-12T20:46:14.014Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:46:14.014Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:46:14.014Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:46:14.014Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:46:14.012Z] --- SERVER STARTING ---
+[2026-05-12T20:46:14.013Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:46:14.014Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:46:14.014Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:46:14.014Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:46:14.022Z] --- SERVER STARTING ---
+[2026-05-12T20:46:14.023Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:46:14.023Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:46:14.024Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:46:14.024Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:46:14.456Z] --- SERVER STARTING ---
+[2026-05-12T20:46:14.457Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:46:14.457Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:46:14.457Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:46:14.457Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:46:15.211Z] --- SERVER STARTING ---
+[2026-05-12T20:46:15.212Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:46:15.212Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:46:15.213Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:46:15.213Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:46:17.074Z] --- SERVER STARTING ---
+[2026-05-12T20:46:17.075Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:46:17.075Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:46:17.075Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:46:17.075Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:46:17.079Z] --- SERVER STARTING ---
+[2026-05-12T20:46:17.080Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:46:17.080Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:46:17.080Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:46:17.080Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:46:17.137Z] --- SERVER STARTING ---
+[2026-05-12T20:46:17.138Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:46:17.138Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:46:17.138Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:46:17.138Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:46:17.606Z] --- SERVER STARTING ---
+[2026-05-12T20:46:17.607Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:46:17.607Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:46:17.607Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:46:17.607Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:46:27.281Z] --- SERVER STARTING ---
+[2026-05-12T20:46:27.282Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:46:27.282Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:46:27.283Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:46:27.283Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:46:34.519Z] --- SERVER STARTING ---
+[2026-05-12T20:46:34.520Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:46:34.520Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:46:34.520Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:46:34.520Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:46:34.555Z] --- SERVER STARTING ---
+[2026-05-12T20:46:34.556Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:46:34.556Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:46:34.556Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:46:34.556Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:46:39.123Z] --- SERVER STARTING ---
+[2026-05-12T20:46:39.124Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:46:39.124Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:46:39.124Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:46:39.124Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:46:42.912Z] --- SERVER STARTING ---
+[2026-05-12T20:46:42.913Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:46:42.914Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:46:42.914Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:46:42.914Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:46:43.347Z] --- SERVER STARTING ---
+[2026-05-12T20:46:43.348Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:46:43.348Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:46:43.348Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:46:43.348Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:46:45.377Z] --- SERVER STARTING ---
+[2026-05-12T20:46:45.378Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:46:45.378Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:46:45.378Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:46:45.379Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:46:48.631Z] --- SERVER STARTING ---
+[2026-05-12T20:46:48.632Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:46:48.632Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:46:48.632Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:46:48.633Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:46:55.191Z] --- SERVER STARTING ---
+[2026-05-12T20:46:55.193Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:46:55.193Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:46:55.193Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:46:55.193Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:47:05.104Z] --- SERVER STARTING ---
+[2026-05-12T20:47:05.105Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:47:05.105Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:47:05.105Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:47:05.105Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:47:39.217Z] --- SERVER STARTING ---
+[2026-05-12T20:47:39.218Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:47:39.218Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:47:39.218Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:47:39.218Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:47:41.390Z] --- SERVER STARTING ---
+[2026-05-12T20:47:41.391Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:47:41.391Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:47:41.391Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:47:41.391Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:47:41.388Z] --- SERVER STARTING ---
+[2026-05-12T20:47:41.389Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:47:41.389Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:47:41.389Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:47:41.389Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:47:43.327Z] --- SERVER STARTING ---
+[2026-05-12T20:47:43.328Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:47:43.328Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:47:43.328Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:47:43.328Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:47:43.324Z] --- SERVER STARTING ---
+[2026-05-12T20:47:43.326Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:47:43.326Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:47:43.326Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:47:43.326Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:48:21.657Z] --- SERVER STARTING ---
+[2026-05-12T20:48:21.658Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:48:21.658Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:48:21.658Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:48:21.658Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:48:23.612Z] --- SERVER STARTING ---
+[2026-05-12T20:48:23.613Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:48:23.613Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:48:23.613Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:48:23.613Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:48:24.011Z] --- SERVER STARTING ---
+[2026-05-12T20:48:24.012Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:48:24.012Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:48:24.012Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:48:24.012Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:48:24.141Z] --- SERVER STARTING ---
+[2026-05-12T20:48:24.142Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:48:24.142Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:48:24.142Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:48:24.142Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:48:25.105Z] --- SERVER STARTING ---
+[2026-05-12T20:48:25.106Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:48:25.106Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:48:25.107Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:48:25.107Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:48:26.185Z] --- SERVER STARTING ---
+[2026-05-12T20:48:26.186Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:48:26.186Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:48:26.186Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:48:26.186Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:48:35.110Z] --- SERVER STARTING ---
+[2026-05-12T20:48:35.111Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:48:35.112Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:48:35.112Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:48:35.112Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:48:41.068Z] --- SERVER STARTING ---
+[2026-05-12T20:48:41.069Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:48:41.069Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:48:41.069Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:48:41.070Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:48:41.519Z] --- SERVER STARTING ---
+[2026-05-12T20:48:41.520Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:48:41.520Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:48:41.521Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:48:41.521Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:48:45.105Z] --- SERVER STARTING ---
+[2026-05-12T20:48:45.106Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:48:45.106Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:48:45.106Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:48:45.106Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:48:45.833Z] --- SERVER STARTING ---
+[2026-05-12T20:48:45.834Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:48:45.834Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:48:45.834Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:48:45.834Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:48:46.162Z] --- SERVER STARTING ---
+[2026-05-12T20:48:46.163Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:48:46.163Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:48:46.163Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:48:46.163Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:48:46.561Z] --- SERVER STARTING ---
+[2026-05-12T20:48:46.562Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:48:46.562Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:48:46.562Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:48:46.562Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:48:46.567Z] --- SERVER STARTING ---
+[2026-05-12T20:48:46.568Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:48:46.568Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:48:46.568Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:48:46.568Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:48:50.823Z] --- SERVER STARTING ---
+[2026-05-12T20:48:50.824Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:48:50.824Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:48:50.824Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:48:50.825Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:48:51.238Z] --- SERVER STARTING ---
+[2026-05-12T20:48:51.239Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:48:51.239Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:48:51.239Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:48:51.239Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:48:51.326Z] --- SERVER STARTING ---
+[2026-05-12T20:48:51.327Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:48:51.327Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:48:51.328Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:48:51.328Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:48:53.151Z] --- SERVER STARTING ---
+[2026-05-12T20:48:53.152Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:48:53.153Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:48:53.153Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:48:53.153Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:48:55.110Z] --- SERVER STARTING ---
+[2026-05-12T20:48:55.111Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:48:55.111Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:48:55.111Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:48:55.111Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:49:05.102Z] --- SERVER STARTING ---
+[2026-05-12T20:49:05.103Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:49:05.103Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:49:05.104Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:49:05.104Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:49:05.609Z] --- SERVER STARTING ---
+[2026-05-12T20:49:05.611Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:49:05.611Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:49:05.611Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:49:05.611Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:49:06.137Z] --- SERVER STARTING ---
+[2026-05-12T20:49:06.138Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:49:06.138Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:49:06.138Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:49:06.138Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:49:15.102Z] --- SERVER STARTING ---
+[2026-05-12T20:49:15.103Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:49:15.103Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:49:15.103Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:49:15.103Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:49:25.104Z] --- SERVER STARTING ---
+[2026-05-12T20:49:25.105Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:49:25.105Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:49:25.105Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:49:25.105Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:50:20.476Z] --- SERVER STARTING ---
+[2026-05-12T20:50:20.477Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:50:20.477Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:50:20.477Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:50:20.477Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:50:22.612Z] --- SERVER STARTING ---
+[2026-05-12T20:50:22.613Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:50:22.613Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:50:22.613Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:50:22.613Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:50:25.051Z] --- SERVER STARTING ---
+[2026-05-12T20:50:25.052Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:50:25.052Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:50:25.052Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:50:25.052Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:50:25.454Z] --- SERVER STARTING ---
+[2026-05-12T20:50:25.455Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:50:25.455Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:50:25.456Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:50:25.456Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:50:27.135Z] --- SERVER STARTING ---
+[2026-05-12T20:50:27.136Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:50:27.136Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:50:27.136Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:50:27.136Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:50:35.386Z] --- SERVER STARTING ---
+[2026-05-12T20:50:35.387Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:50:35.388Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:50:35.388Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:50:35.388Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:50:36.692Z] --- SERVER STARTING ---
+[2026-05-12T20:50:36.694Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:50:36.694Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:50:36.694Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:50:36.694Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:50:40.732Z] --- SERVER STARTING ---
+[2026-05-12T20:50:40.733Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:50:40.733Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:50:40.733Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:50:40.733Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:50:41.139Z] --- SERVER STARTING ---
+[2026-05-12T20:50:41.140Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:50:41.140Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:50:41.140Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:50:41.140Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:50:48.711Z] --- SERVER STARTING ---
+[2026-05-12T20:50:48.713Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:50:48.713Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:50:48.713Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:50:48.713Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:50:49.124Z] --- SERVER STARTING ---
+[2026-05-12T20:50:49.125Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:50:49.125Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:50:49.125Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:50:49.125Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:50:52.389Z] --- SERVER STARTING ---
+[2026-05-12T20:50:52.390Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:50:52.390Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:50:52.390Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:50:52.391Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:50:56.662Z] --- SERVER STARTING ---
+[2026-05-12T20:50:56.663Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:50:56.664Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:50:56.664Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:50:56.664Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:51:15.354Z] --- SERVER STARTING ---
+[2026-05-12T20:51:15.355Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:51:15.355Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:51:15.355Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:51:15.355Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:51:15.747Z] --- SERVER STARTING ---
+[2026-05-12T20:51:15.748Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:51:15.748Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:51:15.749Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:51:15.749Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:51:16.148Z] --- SERVER STARTING ---
+[2026-05-12T20:51:16.149Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:51:16.149Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:51:16.149Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:51:16.149Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:51:17.947Z] --- SERVER STARTING ---
+[2026-05-12T20:51:17.948Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:51:17.948Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:51:17.948Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:51:17.948Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:51:18.352Z] --- SERVER STARTING ---
+[2026-05-12T20:51:18.353Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:51:18.353Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:51:18.353Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:51:18.353Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:51:19.117Z] --- SERVER STARTING ---
+[2026-05-12T20:51:19.118Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:51:19.118Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:51:19.119Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:51:19.119Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:51:19.522Z] --- SERVER STARTING ---
+[2026-05-12T20:51:19.523Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:51:19.523Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:51:19.523Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:51:19.523Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:51:20.613Z] --- SERVER STARTING ---
+[2026-05-12T20:51:20.614Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:51:20.614Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:51:20.614Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:51:20.614Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:51:25.019Z] --- SERVER STARTING ---
+[2026-05-12T20:51:25.020Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:51:25.020Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:51:25.021Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:51:25.021Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:51:25.427Z] --- SERVER STARTING ---
+[2026-05-12T20:51:25.428Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:51:25.428Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:51:25.428Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:51:25.428Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:57:55.111Z] --- SERVER STARTING ---
+[2026-05-12T20:57:55.112Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:57:55.112Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:57:55.112Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:57:55.112Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:57:55.538Z] Next.js prepared OK
+[2026-05-12T20:57:55.550Z] Server listening on port 3000
+[2026-05-12T20:57:57.322Z] --- SERVER STARTING ---
+[2026-05-12T20:57:57.323Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T20:57:57.323Z] __dirname: /home/u754458241/nodeapp
+[2026-05-12T20:57:57.323Z] cwd: /home/u754458241/nodeapp
+[2026-05-12T20:57:57.323Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules exists: true
+[2026-05-12T20:57:57.730Z] Next.js prepared OK
+[2026-05-12T20:57:57.742Z] Server listening on port 3000
+[2026-05-12T21:01:55.159Z] --- SERVER STARTING ---
+[2026-05-12T21:01:55.160Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T21:01:55.160Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules
+[2026-05-12T21:01:55.162Z] Found prisma binary: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules/.prisma/client/query-engine-debian-openssl-3.0.x
+[2026-05-12T21:01:55.616Z] Next.js prepared OK
+[2026-05-12T21:01:55.628Z] Server listening on port 3000
+[2026-05-12T21:04:04.839Z] --- SERVER STARTING ---
+[2026-05-12T21:04:04.840Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T21:04:04.840Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules
+[2026-05-12T21:04:04.842Z] Found prisma binary: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules/.prisma/client/query-engine-debian-openssl-3.0.x
+[2026-05-12T21:04:05.273Z] Next.js prepared OK
+[2026-05-12T21:04:05.286Z] Server listening on port 3000
+[2026-05-12T21:06:05.384Z] --- SERVER STARTING ---
+[2026-05-12T21:06:05.385Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T21:06:05.385Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules
+[2026-05-12T21:06:05.386Z] Found prisma binary: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules/.prisma/client/query-engine-debian-openssl-3.0.x
+[2026-05-12T21:06:05.386Z] Generating Prisma Client...
+[2026-05-12T21:06:05.501Z] Prisma Generate Error: Command failed: /opt/alt/alt-nodejs20/root/usr/bin/node /home/u754458241/domains/morsall.com/public_html/app_new/node_modules/prisma/build/index.js generate
+node:internal/modules/cjs/loader:1215
+  throw err;
+  ^
+
+Error: Cannot find module '/home/u754458241/domains/morsall.com/public_html/app_new/node_modules/prisma/build/index.js'
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1212:15)
+    at Module._load (node:internal/modules/cjs/loader:1043:27)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:164:12)
+    at node:internal/main/run_main_module:28:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v20.19.4
+
+[2026-05-12T21:06:05.502Z] Prisma Generate Stdout: 
+[2026-05-12T21:06:05.502Z] Prisma Generate Stderr: node:internal/modules/cjs/loader:1215
+  throw err;
+  ^
+
+Error: Cannot find module '/home/u754458241/domains/morsall.com/public_html/app_new/node_modules/prisma/build/index.js'
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1212:15)
+    at Module._load (node:internal/modules/cjs/loader:1043:27)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:164:12)
+    at node:internal/main/run_main_module:28:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v20.19.4
+
+[2026-05-12T21:06:05.904Z] Next.js prepared OK
+[2026-05-12T21:06:05.916Z] Server listening on port 3000
+[2026-05-12T21:06:37.342Z] --- SERVER STARTING ---
+[2026-05-12T21:06:37.343Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T21:06:37.343Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules
+[2026-05-12T21:06:37.344Z] Found prisma binary: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules/.prisma/client/query-engine-debian-openssl-3.0.x
+[2026-05-12T21:06:37.344Z] Generating Prisma Client...
+[2026-05-12T21:06:37.446Z] Prisma Generate Error: Command failed: /opt/alt/alt-nodejs20/root/usr/bin/node /home/u754458241/domains/morsall.com/public_html/app_new/node_modules/prisma/build/index.js generate
+node:internal/modules/cjs/loader:1215
+  throw err;
+  ^
+
+Error: Cannot find module '/home/u754458241/domains/morsall.com/public_html/app_new/node_modules/prisma/build/index.js'
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1212:15)
+    at Module._load (node:internal/modules/cjs/loader:1043:27)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:164:12)
+    at node:internal/main/run_main_module:28:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v20.19.4
+
+[2026-05-12T21:06:37.446Z] Prisma Generate Stdout: 
+[2026-05-12T21:06:37.446Z] Prisma Generate Stderr: node:internal/modules/cjs/loader:1215
+  throw err;
+  ^
+
+Error: Cannot find module '/home/u754458241/domains/morsall.com/public_html/app_new/node_modules/prisma/build/index.js'
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1212:15)
+    at Module._load (node:internal/modules/cjs/loader:1043:27)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:164:12)
+    at node:internal/main/run_main_module:28:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v20.19.4
+
+[2026-05-12T21:06:37.849Z] Next.js prepared OK
+[2026-05-12T21:06:37.861Z] Server listening on port 3000
+[2026-05-12T21:06:38.753Z] --- SERVER STARTING ---
+[2026-05-12T21:06:38.753Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T21:06:38.754Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules
+[2026-05-12T21:06:38.755Z] Found prisma binary: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules/.prisma/client/query-engine-debian-openssl-3.0.x
+[2026-05-12T21:06:38.755Z] Generating Prisma Client...
+[2026-05-12T21:06:38.845Z] Prisma Generate Error: Command failed: /opt/alt/alt-nodejs20/root/usr/bin/node /home/u754458241/domains/morsall.com/public_html/app_new/node_modules/prisma/build/index.js generate
+node:internal/modules/cjs/loader:1215
+  throw err;
+  ^
+
+Error: Cannot find module '/home/u754458241/domains/morsall.com/public_html/app_new/node_modules/prisma/build/index.js'
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1212:15)
+    at Module._load (node:internal/modules/cjs/loader:1043:27)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:164:12)
+    at node:internal/main/run_main_module:28:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v20.19.4
+
+[2026-05-12T21:06:38.845Z] Prisma Generate Stdout: 
+[2026-05-12T21:06:38.845Z] Prisma Generate Stderr: node:internal/modules/cjs/loader:1215
+  throw err;
+  ^
+
+Error: Cannot find module '/home/u754458241/domains/morsall.com/public_html/app_new/node_modules/prisma/build/index.js'
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1212:15)
+    at Module._load (node:internal/modules/cjs/loader:1043:27)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:164:12)
+    at node:internal/main/run_main_module:28:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v20.19.4
+
+[2026-05-12T21:06:39.243Z] Next.js prepared OK
+[2026-05-12T21:06:39.255Z] Server listening on port 3000
+[2026-05-12T21:07:20.844Z] --- SERVER STARTING ---
+[2026-05-12T21:07:20.845Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T21:07:20.845Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules
+[2026-05-12T21:07:20.847Z] Found prisma library: /home/u754458241/nodeapp/node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node
+[2026-05-12T21:07:21.254Z] Next.js prepared OK
+[2026-05-12T21:07:21.266Z] Server listening on port 3000
+[2026-05-12T21:08:23.027Z] --- SERVER STARTING ---
+[2026-05-12T21:08:23.028Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T21:08:23.028Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules
+[2026-05-12T21:08:23.030Z] Found prisma library: /home/u754458241/nodeapp/node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node
+[2026-05-12T21:08:23.450Z] Next.js prepared OK
+[2026-05-12T21:08:23.464Z] Server listening on port 3000
+[2026-05-12T21:09:30.777Z] --- SERVER STARTING ---
+[2026-05-12T21:09:30.778Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T21:09:30.778Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules
+[2026-05-12T21:09:30.779Z] Found prisma library: /home/u754458241/nodeapp/node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node
+[2026-05-12T21:09:31.176Z] Next.js prepared OK
+[2026-05-12T21:09:31.188Z] Server listening on port 3000
+[2026-05-12T21:09:48.279Z] --- SERVER STARTING ---
+[2026-05-12T21:09:48.280Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T21:09:48.280Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules
+[2026-05-12T21:09:48.281Z] Found prisma library: /home/u754458241/nodeapp/node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node
+[2026-05-12T21:09:48.691Z] Next.js prepared OK
+[2026-05-12T21:09:48.703Z] Server listening on port 3000
+[2026-05-12T21:09:55.162Z] --- SERVER STARTING ---
+[2026-05-12T21:09:55.163Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T21:09:55.164Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules
+[2026-05-12T21:09:55.165Z] Found prisma library: /home/u754458241/nodeapp/node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node
+[2026-05-12T21:09:55.594Z] Next.js prepared OK
+[2026-05-12T21:09:55.610Z] Server listening on port 3000
+[2026-05-12T21:18:55.161Z] --- SERVER STARTING ---
+[2026-05-12T21:18:55.162Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T21:18:55.162Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules
+[2026-05-12T21:18:55.163Z] Found prisma library: /home/u754458241/nodeapp/node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node
+[2026-05-12T21:18:55.604Z] Next.js prepared OK
+[2026-05-12T21:18:55.620Z] Server listening on port 3000
+[2026-05-12T22:21:02.530Z] --- SERVER STARTING ---
+[2026-05-12T22:21:02.531Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T22:21:02.531Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules
+[2026-05-12T22:21:02.533Z] Found prisma library: /home/u754458241/nodeapp/node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node
+[2026-05-12T22:21:02.958Z] Next.js prepared OK
+[2026-05-12T22:21:02.970Z] Server listening on port 3000
+[2026-05-12T22:21:42.125Z] --- SERVER STARTING ---
+[2026-05-12T22:21:42.126Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T22:21:42.126Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules
+[2026-05-12T22:21:42.127Z] Found prisma library: /home/u754458241/nodeapp/node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node
+[2026-05-12T22:21:42.517Z] Next.js prepared OK
+[2026-05-12T22:21:42.529Z] Server listening on port 3000
+[2026-05-12T22:27:49.519Z] --- SERVER STARTING ---
+[2026-05-12T22:27:49.520Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T22:27:49.520Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules
+[2026-05-12T22:27:49.521Z] Found prisma library: /home/u754458241/nodeapp/node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node
+[2026-05-12T22:27:49.942Z] Next.js prepared OK
+[2026-05-12T22:27:49.954Z] Server listening on port 3000
+[2026-05-12T22:45:20.338Z] --- SERVER STARTING ---
+[2026-05-12T22:45:20.340Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T22:45:20.340Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules
+[2026-05-12T22:45:20.341Z] Found prisma library: /home/u754458241/nodeapp/node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node
+[2026-05-12T22:45:20.740Z] Next.js prepared OK
+[2026-05-12T22:45:20.752Z] Server listening on port 3000
+[2026-05-12T22:46:02.082Z] --- SERVER STARTING ---
+[2026-05-12T22:46:02.083Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T22:46:02.083Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules
+[2026-05-12T22:46:02.085Z] Found prisma library: /home/u754458241/nodeapp/node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node
+[2026-05-12T22:46:02.504Z] Next.js prepared OK
+[2026-05-12T22:46:02.517Z] Server listening on port 3000
+[2026-05-12T22:47:09.135Z] --- SERVER STARTING ---
+[2026-05-12T22:47:09.135Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T22:47:09.135Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules
+[2026-05-12T22:47:09.136Z] Found prisma library: /home/u754458241/nodeapp/node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node
+[2026-05-12T22:47:09.554Z] Next.js prepared OK
+[2026-05-12T22:47:09.566Z] Server listening on port 3000
+[2026-05-12T22:50:20.373Z] --- SERVER STARTING ---
+[2026-05-12T22:50:20.373Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T22:50:20.373Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules
+[2026-05-12T22:50:20.374Z] Found prisma library: /home/u754458241/nodeapp/node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node
+[2026-05-12T22:50:20.782Z] Next.js prepared OK
+[2026-05-12T22:50:20.794Z] Server listening on port 3000
+[2026-05-12T22:51:07.143Z] --- SERVER STARTING ---
+[2026-05-12T22:51:07.143Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T22:51:07.143Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules
+[2026-05-12T22:51:07.145Z] Found prisma library: /home/u754458241/nodeapp/node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node
+[2026-05-12T22:51:07.561Z] Next.js prepared OK
+[2026-05-12T22:51:07.573Z] Server listening on port 3000
+[2026-05-12T22:51:47.875Z] --- SERVER STARTING ---
+[2026-05-12T22:51:47.875Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T22:51:47.875Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules
+[2026-05-12T22:51:47.877Z] Found prisma library: /home/u754458241/nodeapp/node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node
+[2026-05-12T22:51:48.277Z] Next.js prepared OK
+[2026-05-12T22:51:48.289Z] Server listening on port 3000
+[2026-05-12T22:52:06.640Z] --- SERVER STARTING ---
+[2026-05-12T22:52:06.641Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T22:52:06.641Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules
+[2026-05-12T22:52:06.642Z] Found prisma library: /home/u754458241/nodeapp/node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node
+[2026-05-12T22:52:07.042Z] Next.js prepared OK
+[2026-05-12T22:52:07.054Z] Server listening on port 3000
+[2026-05-12T22:52:22.054Z] --- SERVER STARTING ---
+[2026-05-12T22:52:22.054Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T22:52:22.054Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules
+[2026-05-12T22:52:22.056Z] Found prisma library: /home/u754458241/nodeapp/node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node
+[2026-05-12T22:52:22.457Z] Next.js prepared OK
+[2026-05-12T22:52:22.469Z] Server listening on port 3000
+[2026-05-12T22:52:51.643Z] --- SERVER STARTING ---
+[2026-05-12T22:52:51.643Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T22:52:51.643Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules
+[2026-05-12T22:52:51.644Z] Found prisma library: /home/u754458241/nodeapp/node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node
+[2026-05-12T22:52:52.030Z] Next.js prepared OK
+[2026-05-12T22:52:52.043Z] Server listening on port 3000
+[2026-05-12T23:35:50.468Z] --- SERVER STARTING ---
+[2026-05-12T23:35:50.468Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T23:35:50.468Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules
+[2026-05-12T23:35:50.469Z] Found prisma library: /home/u754458241/nodeapp/node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node
+[2026-05-12T23:35:50.873Z] Next.js prepared OK
+[2026-05-12T23:35:50.885Z] Server listening on port 3000
+[2026-05-12T23:35:59.916Z] --- SERVER STARTING ---
+[2026-05-12T23:35:59.916Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T23:35:59.916Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules
+[2026-05-12T23:35:59.917Z] Found prisma library: /home/u754458241/nodeapp/node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node
+[2026-05-12T23:36:00.302Z] Next.js prepared OK
+[2026-05-12T23:36:00.314Z] Server listening on port 3000
+[2026-05-12T23:38:01.136Z] --- SERVER STARTING ---
+[2026-05-12T23:38:01.136Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T23:38:01.136Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules
+[2026-05-12T23:38:01.137Z] Found prisma library: /home/u754458241/nodeapp/node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node
+[2026-05-12T23:38:01.562Z] Next.js prepared OK
+[2026-05-12T23:38:01.575Z] Server listening on port 3000
+[2026-05-12T23:58:02.526Z] --- SERVER STARTING ---
+[2026-05-12T23:58:02.526Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T23:58:02.526Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules
+[2026-05-12T23:58:02.528Z] Found prisma library: /home/u754458241/nodeapp/node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node
+[2026-05-12T23:58:03.007Z] Next.js prepared OK
+[2026-05-12T23:58:03.022Z] Server listening on port 3000
+[2026-05-12T23:58:04.125Z] --- SERVER STARTING ---
+[2026-05-12T23:58:04.126Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-12T23:58:04.126Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules
+[2026-05-12T23:58:04.127Z] Found prisma library: /home/u754458241/nodeapp/node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node
+[2026-05-12T23:58:04.512Z] Next.js prepared OK
+[2026-05-12T23:58:04.525Z] Server listening on port 3000
+[2026-05-13T00:02:25.581Z] --- SERVER STARTING ---
+[2026-05-13T00:02:25.582Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-13T00:02:25.582Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules
+[2026-05-13T00:02:25.583Z] Found prisma library: /home/u754458241/nodeapp/node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node
+[2026-05-13T00:02:25.978Z] Next.js prepared OK
+[2026-05-13T00:02:25.990Z] Server listening on port 3000
+[2026-05-13T00:03:23.051Z] --- SERVER STARTING ---
+[2026-05-13T00:03:23.051Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-13T00:03:23.051Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules
+[2026-05-13T00:03:23.052Z] Found prisma library: /home/u754458241/nodeapp/node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node
+[2026-05-13T00:03:23.443Z] Next.js prepared OK
+[2026-05-13T00:03:23.456Z] Server listening on port 3000
+[2026-05-13T00:03:52.945Z] --- SERVER STARTING ---
+[2026-05-13T00:03:52.945Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-13T00:03:52.945Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules
+[2026-05-13T00:03:52.946Z] Found prisma library: /home/u754458241/nodeapp/node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node
+[2026-05-13T00:03:53.345Z] Next.js prepared OK
+[2026-05-13T00:03:53.356Z] Server listening on port 3000
+[2026-05-13T00:09:49.200Z] --- SERVER STARTING ---
+[2026-05-13T00:09:49.200Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-13T00:09:49.200Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules
+[2026-05-13T00:09:49.202Z] Found prisma library: /home/u754458241/nodeapp/node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node
+[2026-05-13T00:09:49.594Z] Next.js prepared OK
+[2026-05-13T00:09:49.607Z] Server listening on port 3000
+[2026-05-13T00:10:20.812Z] --- SERVER STARTING ---
+[2026-05-13T00:10:20.813Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-13T00:10:20.813Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules
+[2026-05-13T00:10:20.814Z] Found prisma library: /home/u754458241/nodeapp/node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node
+[2026-05-13T00:10:21.230Z] Next.js prepared OK
+[2026-05-13T00:10:21.250Z] Server listening on port 3000
+[2026-05-13T00:11:14.247Z] --- SERVER STARTING ---
+[2026-05-13T00:11:14.247Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-13T00:11:14.247Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules
+[2026-05-13T00:11:14.248Z] Found prisma library: /home/u754458241/nodeapp/node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node
+[2026-05-13T00:11:14.677Z] Next.js prepared OK
+[2026-05-13T00:11:14.689Z] Server listening on port 3000
+[2026-05-13T00:25:55.138Z] --- SERVER STARTING ---
+[2026-05-13T00:25:55.138Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-13T00:25:55.138Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules
+[2026-05-13T00:25:55.139Z] Found prisma library: /home/u754458241/nodeapp/node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node
+[2026-05-13T00:25:55.461Z] PREPARE_ERROR: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+[2026-05-13T00:25:59.357Z] --- SERVER STARTING ---
+[2026-05-13T00:25:59.357Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-13T00:25:59.357Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules
+[2026-05-13T00:25:59.358Z] Found prisma library: /home/u754458241/nodeapp/node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node
+[2026-05-13T00:25:59.653Z] PREPARE_ERROR: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+[2026-05-13T00:25:59.843Z] --- SERVER STARTING ---
+[2026-05-13T00:25:59.844Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-13T00:25:59.844Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules
+[2026-05-13T00:25:59.845Z] Found prisma library: /home/u754458241/nodeapp/node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node
+[2026-05-13T00:26:00.159Z] PREPARE_ERROR: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+[2026-05-13T00:26:00.278Z] --- SERVER STARTING ---
+[2026-05-13T00:26:00.278Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-13T00:26:00.278Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules
+[2026-05-13T00:26:00.279Z] Found prisma library: /home/u754458241/nodeapp/node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node
+[2026-05-13T00:26:00.573Z] PREPARE_ERROR: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+[2026-05-13T00:30:32.112Z] --- SERVER STARTING ---
+[2026-05-13T00:30:32.112Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-13T00:30:32.112Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules
+[2026-05-13T00:30:32.114Z] Found prisma library: /home/u754458241/nodeapp/node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node
+[2026-05-13T00:30:32.418Z] PREPARE_ERROR: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+[2026-05-13T00:30:32.553Z] --- SERVER STARTING ---
+[2026-05-13T00:30:32.554Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-13T00:30:32.554Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules
+[2026-05-13T00:30:32.555Z] Found prisma library: /home/u754458241/nodeapp/node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node
+[2026-05-13T00:30:32.854Z] PREPARE_ERROR: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+[2026-05-13T00:30:36.597Z] --- SERVER STARTING ---
+[2026-05-13T00:30:36.598Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-13T00:30:36.598Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules
+[2026-05-13T00:30:36.599Z] Found prisma library: /home/u754458241/nodeapp/node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node
+[2026-05-13T00:30:36.896Z] PREPARE_ERROR: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+[2026-05-13T00:30:44.317Z] --- SERVER STARTING ---
+[2026-05-13T00:30:44.318Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-13T00:30:44.318Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules
+[2026-05-13T00:30:44.319Z] Found prisma library: /home/u754458241/nodeapp/node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node
+[2026-05-13T00:30:44.613Z] PREPARE_ERROR: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+[2026-05-13T00:39:41.151Z] --- SERVER STARTING ---
+[2026-05-13T00:39:41.151Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-13T00:39:41.151Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules
+[2026-05-13T00:39:41.153Z] Found prisma library: /home/u754458241/nodeapp/node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node
+[2026-05-13T00:39:41.442Z] PREPARE_ERROR: EACCES: permission denied, scandir '/home/u754458241/domains/morsall.com/public_html/app_new/.next/static/-TuTYuypzkutMTYBG590q'
+[2026-05-13T00:39:45.743Z] --- SERVER STARTING ---
+[2026-05-13T00:39:45.743Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-13T00:39:45.743Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules
+[2026-05-13T00:39:45.745Z] Found prisma library: /home/u754458241/nodeapp/node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node
+[2026-05-13T00:39:46.036Z] PREPARE_ERROR: EACCES: permission denied, scandir '/home/u754458241/domains/morsall.com/public_html/app_new/.next/static/-TuTYuypzkutMTYBG590q'
+[2026-05-13T00:39:46.146Z] --- SERVER STARTING ---
+[2026-05-13T00:39:46.146Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-13T00:39:46.146Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules
+[2026-05-13T00:39:46.148Z] Found prisma library: /home/u754458241/nodeapp/node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node
+[2026-05-13T00:39:46.441Z] PREPARE_ERROR: EACCES: permission denied, scandir '/home/u754458241/domains/morsall.com/public_html/app_new/.next/static/-TuTYuypzkutMTYBG590q'
+[2026-05-13T00:39:58.491Z] --- SERVER STARTING ---
+[2026-05-13T00:39:58.492Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-13T00:39:58.492Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules
+[2026-05-13T00:39:58.493Z] Found prisma library: /home/u754458241/nodeapp/node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node
+[2026-05-13T00:39:58.784Z] PREPARE_ERROR: EACCES: permission denied, scandir '/home/u754458241/domains/morsall.com/public_html/app_new/.next/static/-TuTYuypzkutMTYBG590q'
+[2026-05-13T00:40:10.854Z] --- SERVER STARTING ---
+[2026-05-13T00:40:10.854Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-13T00:40:10.855Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules
+[2026-05-13T00:40:10.856Z] Found prisma library: /home/u754458241/nodeapp/node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node
+[2026-05-13T00:40:11.239Z] Next.js prepared OK
+[2026-05-13T00:40:11.250Z] Server listening on port 3005
+[2026-05-13T00:40:30.368Z] --- SERVER STARTING ---
+[2026-05-13T00:40:30.368Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-13T00:40:30.368Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules
+[2026-05-13T00:40:30.370Z] Found prisma library: /home/u754458241/nodeapp/node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node
+[2026-05-13T00:40:30.756Z] Next.js prepared OK
+[2026-05-13T00:40:30.768Z] Server listening on port 3000
+[2026-05-13T00:55:02.078Z] --- SERVER STARTING ---
+[2026-05-13T00:55:02.078Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-13T00:55:02.078Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules
+[2026-05-13T00:55:02.079Z] Found prisma library: /home/u754458241/nodeapp/node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node
+[2026-05-13T00:55:02.501Z] Next.js prepared OK
+[2026-05-13T00:55:02.519Z] Server listening on port 3000
+[2026-05-13T00:55:03.904Z] --- SERVER STARTING ---
+[2026-05-13T00:55:03.905Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-13T00:55:03.905Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules
+[2026-05-13T00:55:03.906Z] Found prisma library: /home/u754458241/nodeapp/node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node
+[2026-05-13T00:55:04.287Z] Next.js prepared OK
+[2026-05-13T00:55:04.299Z] Server listening on port 3000
+[2026-05-13T01:04:07.017Z] --- SERVER STARTING ---
+[2026-05-13T01:04:07.018Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-13T01:04:07.018Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules
+[2026-05-13T01:04:07.020Z] Found prisma library: /home/u754458241/nodeapp/node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node
+[2026-05-13T01:04:07.444Z] Next.js prepared OK
+[2026-05-13T01:04:07.458Z] Server listening on port 3000
+[2026-05-13T01:04:09.665Z] --- SERVER STARTING ---
+[2026-05-13T01:04:09.665Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-13T01:04:09.665Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules
+[2026-05-13T01:04:09.666Z] Found prisma library: /home/u754458241/nodeapp/node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node
+[2026-05-13T01:04:10.057Z] Next.js prepared OK
+[2026-05-13T01:04:10.069Z] Server listening on port 3000
+[2026-05-13T02:06:48.396Z] --- SERVER STARTING ---
+[2026-05-13T02:06:48.397Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-13T02:06:48.397Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules
+[2026-05-13T02:06:48.399Z] Found prisma library: /home/u754458241/nodeapp/node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node
+[2026-05-13T02:06:48.819Z] Next.js prepared OK
+[2026-05-13T02:06:48.837Z] Server listening on port 3000
+[2026-05-13T02:53:37.913Z] --- SERVER STARTING ---
+[2026-05-13T02:53:37.913Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-13T02:53:37.913Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules
+[2026-05-13T02:53:37.914Z] Found prisma library: /home/u754458241/nodeapp/node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node
+[2026-05-13T02:53:38.300Z] Next.js prepared OK
+[2026-05-13T02:53:38.312Z] Server listening on port 3000
+[2026-05-13T03:11:05.635Z] --- SERVER STARTING ---
+[2026-05-13T03:11:05.635Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-13T03:11:05.635Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules
+[2026-05-13T03:11:05.637Z] Found prisma library: /home/u754458241/nodeapp/node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node
+[2026-05-13T03:11:06.031Z] Next.js prepared OK
+[2026-05-13T03:11:06.043Z] Server listening on port 3000
+[2026-05-13T04:00:19.883Z] --- SERVER STARTING ---
+[2026-05-13T04:00:19.883Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-13T04:00:19.883Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules
+[2026-05-13T04:00:19.884Z] Found prisma library: /home/u754458241/nodeapp/node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node
+[2026-05-13T04:00:20.284Z] Next.js prepared OK
+[2026-05-13T04:00:20.297Z] Server listening on port 3000
+[2026-05-13T04:23:26.353Z] --- SERVER STARTING ---
+[2026-05-13T04:23:26.353Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-13T04:23:26.353Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules
+[2026-05-13T04:23:26.354Z] Found prisma library: /home/u754458241/nodeapp/node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node
+[2026-05-13T04:23:26.774Z] Next.js prepared OK
+[2026-05-13T04:23:26.789Z] Server listening on port 3000
+[2026-05-13T05:21:37.777Z] --- SERVER STARTING ---
+[2026-05-13T05:21:37.777Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-13T05:21:37.777Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules
+[2026-05-13T05:21:37.778Z] Found prisma library: /home/u754458241/nodeapp/node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node
+[2026-05-13T05:21:38.162Z] Next.js prepared OK
+[2026-05-13T05:21:38.174Z] Server listening on port 3000
+[2026-05-13T06:04:59.452Z] --- SERVER STARTING ---
+[2026-05-13T06:04:59.452Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-13T06:04:59.452Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules
+[2026-05-13T06:04:59.453Z] Found prisma library: /home/u754458241/nodeapp/node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node
+[2026-05-13T06:04:59.860Z] Next.js prepared OK
+[2026-05-13T06:04:59.873Z] Server listening on port 3000
+[2026-05-13T07:25:51.150Z] --- SERVER STARTING ---
+[2026-05-13T07:25:51.150Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-13T07:25:51.150Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules
+[2026-05-13T07:25:51.152Z] Found prisma library: /home/u754458241/nodeapp/node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node
+[2026-05-13T07:25:51.564Z] Next.js prepared OK
+[2026-05-13T07:25:51.576Z] Server listening on port 3000
+[2026-05-13T07:34:14.768Z] --- SERVER STARTING ---
+[2026-05-13T07:34:14.768Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-13T07:34:14.768Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules
+[2026-05-13T07:34:14.769Z] Found prisma library: /home/u754458241/nodeapp/node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node
+[2026-05-13T07:34:15.186Z] Next.js prepared OK
+[2026-05-13T07:34:15.199Z] Server listening on port 3000
+[2026-05-13T08:27:28.330Z] --- SERVER STARTING ---
+[2026-05-13T08:27:28.330Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-13T08:27:28.330Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules
+[2026-05-13T08:27:28.331Z] Found prisma library: /home/u754458241/nodeapp/node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node
+[2026-05-13T08:27:28.734Z] Next.js prepared OK
+[2026-05-13T08:27:28.750Z] Server listening on port 3000
+[2026-05-13T08:56:30.502Z] --- SERVER STARTING ---
+[2026-05-13T08:56:30.502Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-13T08:56:30.502Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules
+[2026-05-13T08:56:30.503Z] Found prisma library: /home/u754458241/nodeapp/node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node
+[2026-05-13T08:56:30.947Z] Next.js prepared OK
+[2026-05-13T08:56:30.959Z] Server listening on port 3000
+[2026-05-13T09:29:57.682Z] --- SERVER STARTING ---
+[2026-05-13T09:29:57.682Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-13T09:29:57.682Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules
+[2026-05-13T09:29:57.684Z] Found prisma library: /home/u754458241/nodeapp/node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node
+[2026-05-13T09:29:58.106Z] Next.js prepared OK
+[2026-05-13T09:29:58.118Z] Server listening on port 3000
+[2026-05-13T10:32:29.991Z] --- SERVER STARTING ---
+[2026-05-13T10:32:29.991Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-13T10:32:29.991Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules
+[2026-05-13T10:32:29.993Z] Found prisma library: /home/u754458241/nodeapp/node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node
+[2026-05-13T10:32:30.493Z] Next.js prepared OK
+[2026-05-13T10:32:30.507Z] Server listening on port 3000
+[2026-05-13T10:56:14.027Z] --- SERVER STARTING ---
+[2026-05-13T10:56:14.028Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-13T10:56:14.028Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules
+[2026-05-13T10:56:14.029Z] Found prisma library: /home/u754458241/nodeapp/node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node
+[2026-05-13T10:56:14.433Z] Next.js prepared OK
+[2026-05-13T10:56:14.446Z] Server listening on port 3000
+[2026-05-13T11:40:12.942Z] --- SERVER STARTING ---
+[2026-05-13T11:40:12.943Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-13T11:40:12.943Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules
+[2026-05-13T11:40:12.944Z] Found prisma library: /home/u754458241/nodeapp/node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node
+[2026-05-13T11:40:13.382Z] Next.js prepared OK
+[2026-05-13T11:40:13.395Z] Server listening on port 3000
+[2026-05-13T12:01:56.346Z] --- SERVER STARTING ---
+[2026-05-13T12:01:56.346Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-13T12:01:56.346Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules
+[2026-05-13T12:01:56.347Z] Found prisma library: /home/u754458241/nodeapp/node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node
+[2026-05-13T12:01:56.744Z] Next.js prepared OK
+[2026-05-13T12:01:56.757Z] Server listening on port 3000
+[2026-05-13T12:41:56.401Z] --- SERVER STARTING ---
+[2026-05-13T12:41:56.401Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-13T12:41:56.401Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules
+[2026-05-13T12:41:56.403Z] Found prisma library: /home/u754458241/nodeapp/node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node
+[2026-05-13T12:41:56.806Z] Next.js prepared OK
+[2026-05-13T12:41:56.818Z] Server listening on port 3000
+[2026-05-13T13:02:24.904Z] --- SERVER STARTING ---
+[2026-05-13T13:02:24.905Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-13T13:02:24.905Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules
+[2026-05-13T13:02:24.906Z] Found prisma library: /home/u754458241/nodeapp/node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node
+[2026-05-13T13:02:25.317Z] Next.js prepared OK
+[2026-05-13T13:02:25.330Z] Server listening on port 3000
+[2026-05-13T13:43:33.134Z] --- SERVER STARTING ---
+[2026-05-13T13:43:33.134Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-13T13:43:33.134Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules
+[2026-05-13T13:43:33.135Z] Found prisma library: /home/u754458241/nodeapp/node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node
+[2026-05-13T13:43:33.570Z] Next.js prepared OK
+[2026-05-13T13:43:33.582Z] Server listening on port 3000
+[2026-05-13T14:14:24.647Z] --- SERVER STARTING ---
+[2026-05-13T14:14:24.648Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-13T14:14:24.648Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules
+[2026-05-13T14:14:24.650Z] Found prisma library: /home/u754458241/nodeapp/node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node
+[2026-05-13T14:14:25.070Z] Next.js prepared OK
+[2026-05-13T14:14:25.083Z] Server listening on port 3000
+[2026-05-13T14:55:22.355Z] --- SERVER STARTING ---
+[2026-05-13T14:55:22.355Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-13T14:55:22.355Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules
+[2026-05-13T14:55:22.356Z] Found prisma library: /home/u754458241/nodeapp/node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node
+[2026-05-13T14:55:22.781Z] Next.js prepared OK
+[2026-05-13T14:55:22.795Z] Server listening on port 3000
+[2026-05-13T15:16:30.801Z] --- SERVER STARTING ---
+[2026-05-13T15:16:30.801Z] APP_DIR: /home/u754458241/domains/morsall.com/public_html/app_new
+[2026-05-13T15:16:30.801Z] NODE_MODULES: /home/u754458241/domains/morsall.com/public_html/app_new/node_modules
+[2026-05-13T15:16:30.803Z] Found prisma library: /home/u754458241/nodeapp/node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node
+[2026-05-13T15:16:31.227Z] Next.js prepared OK
+[2026-05-13T15:16:31.240Z] Server listening on port 3000

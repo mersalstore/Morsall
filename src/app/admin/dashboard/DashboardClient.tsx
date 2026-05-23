@@ -17,6 +17,8 @@ import PaymentMethodsTab from "../../../components/admin/PaymentMethodsTab";
 import PersonnelTab from "../../../components/admin/PersonnelTab";
 import GlobalSettingsTab from "../../../components/admin/GlobalSettingsTab";
 import SubscriptionsTab from "../../../components/admin/SubscriptionsTab";
+import AdminSubscriptionRequests from "../../../components/admin/AdminSubscriptionRequests";
+import SiteSectionsEditor from "../../../components/admin/SiteSectionsEditor";
 import OffersAdsTab from "../../../components/admin/OffersAdsTab";
 import LogisticsTab from "../../../components/admin/LogisticsTab";
 import AddProductModal from "../../../components/admin/AddProductModal";
@@ -25,6 +27,7 @@ import PrintInvoiceModal from "../../../components/admin/PrintInvoiceModal";
 import { cn } from "../../../lib/utils";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import NotificationBell from "../../../components/NotificationBell";
 
 // New imports recovered from pre-checkout states
 import ImportedOrdersTab from "../../../components/admin/ImportedOrdersTab";
@@ -33,7 +36,7 @@ import PrintPolicyModal from "../../../components/admin/PrintPolicyModal";
 
 // صلاحيات كل دور - يجب أن تتطابق مع AdminSidebar
 const ROLE_PERMISSIONS: Record<string, string[]> = {
-  ADMIN: ["overview", "approvals", "users", "vendors", "categories", "employees", "orders", "payments", "logistics", "importedOrders", "delivery", "shipping", "finance", "settings", "inventory", "drivers", "subscriptions", "attributes", "globalSettings", "appearance", "offersAds", "wms"],
+  ADMIN: ["overview", "approvals", "users", "vendors", "categories", "employees", "orders", "payments", "logistics", "importedOrders", "delivery", "shipping", "finance", "settings", "inventory", "drivers", "subscriptions", "subscriptionRequests", "attributes", "globalSettings", "appearance", "siteSections", "offersAds", "wms"],
   PACKING: ["orders", "inventory"],
   SHIPPING: ["logistics", "drivers", "vendors", "importedOrders"],
   CUSTOMER_SERVICE: ["overview", "approvals", "orders", "users"],
@@ -71,6 +74,20 @@ export default function AdminDashboard() {
   const userRole = (session?.user as any)?.role || "CUSTOMER";
   const allowedTabs = ROLE_PERMISSIONS[userRole] || [];
 
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "info" } | null>(null);
+  const hasSetTab = React.useRef(false);
+
+  const showToast = (message: string, type: "success" | "error" | "info" = "success") => {
+    setToast({ message, type });
+  };
+
+  useEffect(() => {
+    if (toast) {
+      const timer = setTimeout(() => setToast(null), 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
+
   // Initial tab = first allowed tab for this role
   const [activeTab, setActiveTab] = useState<any>(() => {
     return ROLE_PERMISSIONS[userRole]?.[0] || "overview";
@@ -89,6 +106,7 @@ export default function AdminDashboard() {
   const [deliveryByCity, setDeliveryByCity] = useState<any[]>([]);
   const [activeDrivers, setActiveDrivers] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [initialLoaded, setInitialLoaded] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [isAddProductOpen, setIsAddProductOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<any>(null);
@@ -129,15 +147,22 @@ export default function AdminDashboard() {
       return;
     }
     
-    // Set the first allowed tab for this role
-    const firstAllowed = ROLE_PERMISSIONS[role]?.[0];
-    if (firstAllowed) setActiveTab(firstAllowed);
+    // Set the first allowed tab for this role only once
+    if (!hasSetTab.current) {
+      const firstAllowed = ROLE_PERMISSIONS[role]?.[0];
+      if (firstAllowed) {
+        setActiveTab(firstAllowed);
+      }
+      hasSetTab.current = true;
+    }
     
     fetchData();
-  }, [status, session]);
+  }, [status, session?.user?.role]);
 
   const fetchData = async (range?: string, from?: string, to?: string) => {
-    setLoading(true);
+    if (!initialLoaded) {
+      setLoading(true);
+    }
     try {
       const r = range || dateRange;
       let statsUrl = `/api/admin/stats?range=${r}`;
@@ -173,8 +198,12 @@ export default function AdminDashboard() {
         setPendingVendors(d.vendors || []);
         setPendingProducts(d.products || []);
       }
-    } catch (err) { console.error(err); }
-    setLoading(false);
+    } catch (err) { 
+      console.error(err); 
+    } finally {
+      setLoading(false);
+      setInitialLoaded(true);
+    }
   };
 
   const handleVendorAction = async (id: string, action: string) => {
@@ -199,7 +228,7 @@ export default function AdminDashboard() {
     setActionLoading(null);
   };
 
-  if (loading) return (
+  if (loading && !initialLoaded) return (
     <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center">
       <div className="flex flex-col items-center gap-4">
         <div className="w-16 h-16 border-4 border-[#C5A021] border-t-transparent rounded-full animate-spin" />
@@ -247,7 +276,9 @@ export default function AdminDashboard() {
                    activeTab === "users" ? "قاعدة العملاء" :
                    activeTab === "vendors" ? "شبكة الموردين" : 
                    activeTab === "logistics" ? "النظام اللوجستي" :
-                   activeTab === "importedOrders" ? "استيراد الطلبات الخارجية" : "الإعدادات"}
+                   activeTab === "importedOrders" ? "استيراد الطلبات الخارجية" :
+                   activeTab === "subscriptionRequests" ? "طلبات الاشتراك" :
+                   activeTab === "siteSections" ? "أقسام الصفحة الرئيسية" : "الإعدادات"}
                 </h1>
              </div>
              <p className="text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em] flex items-center gap-2">
@@ -257,17 +288,18 @@ export default function AdminDashboard() {
              </div>
           </div>
           
-          <div className="flex items-center gap-4 bg-white p-2 pr-5 rounded-2xl border border-slate-100 shadow-[0_4px_20px_rgba(15,23,42,0.02)] w-full md:w-auto justify-between md:justify-start">
-             <div className="text-right">
-                <p className="font-black text-[#0F172A] text-xs leading-tight">{session?.user?.name || "الموظف"}</p>
-                <p className="text-[8px] text-[#F29124] font-black uppercase tracking-widest mt-0.5">
-                  {ROLE_LABELS[userRole] || userRole}
-                </p>
-             </div>
-             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#C5A021] to-[#0F172A] text-white flex items-center justify-center font-black text-lg shadow-lg">
-                {(session?.user?.name?.[0] || "M").toUpperCase()}
-             </div>
-          </div>
+           <div className="flex items-center gap-3 bg-white p-2 pr-5 rounded-2xl border border-slate-100 shadow-[0_4px_20px_rgba(15,23,42,0.02)] w-full md:w-auto justify-between md:justify-start">
+              <NotificationBell />
+              <div className="text-right">
+                 <p className="font-black text-[#0F172A] text-xs leading-tight">{session?.user?.name || "الموظف"}</p>
+                 <p className="text-[8px] text-[#F29124] font-black uppercase tracking-widest mt-0.5">
+                   {ROLE_LABELS[userRole] || userRole}
+                 </p>
+              </div>
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#C5A021] to-[#0F172A] text-white flex items-center justify-center font-black text-lg shadow-lg">
+                 {(session?.user?.name?.[0] || "M").toUpperCase()}
+              </div>
+           </div>
         </header>
 
         <div className="p-6 md:pr-16 md:pl-10 md:py-8">
@@ -420,6 +452,7 @@ export default function AdminDashboard() {
                       headers: { "Content-Type": "application/json" },
                       body: JSON.stringify({ id: orderId, driverId, status: "SHIPPED" })
                     });
+                    if (showToast) showToast("تم تعيين الطلب للسائق بنجاح! 🚗", "success");
                     fetchData();
                   }}
                   onAssignBranch={async (orderId, branchId) => {
@@ -428,8 +461,10 @@ export default function AdminDashboard() {
                       headers: { "Content-Type": "application/json" },
                       body: JSON.stringify({ id: orderId, branchId, status: "AT_BRANCH" })
                     });
+                    if (showToast) showToast("تم توجيه الطلب للفرع بنجاح! 🏢", "success");
                     fetchData();
                   }}
+                  showToast={showToast}
                 />
                 <EditOrderModal
                   isOpen={!!editingOrder}
@@ -437,6 +472,7 @@ export default function AdminDashboard() {
                   onClose={() => setEditingOrder(null)}
                   onSuccess={fetchData}
                   ORDER_STATUSES={ORDER_STATUSES}
+                  showToast={showToast}
                 />
                 <PrintPolicyModal
                   isOpen={isPolicyModalOpen}
@@ -458,6 +494,7 @@ export default function AdminDashboard() {
                   onAdd={() => setIsAddProductOpen(true)} 
                   classes={classes} 
                   onRefresh={fetchData}
+                  showToast={showToast}
                 />
                 <AddProductModal 
                   isOpen={isAddProductOpen || !!editingProduct} 
@@ -469,29 +506,55 @@ export default function AdminDashboard() {
                     setInitialVendorId(undefined);
                   }} 
                   onSuccess={fetchData} 
+                  showToast={showToast}
                 />
               </>
             )}
-            {activeTab === "attributes" && <AttributesTab />}
-            {activeTab === "delivery" && <DeliveryZonesTab />}
-            {activeTab === "finance" && <FinanceTab />}
-            {activeTab === "payments" && <PaymentMethodsTab />}
-            {activeTab === "logistics" && <LogisticsTab orders={logisticsOrders} users={users} vendors={vendors} fetchData={fetchData} ORDER_STATUSES={ORDER_STATUSES} classes={classes} />}
-            {activeTab === "employees" && <PersonnelTab type="employees" />}
-            {activeTab === "drivers" && <PersonnelTab type="drivers" />}
-            {activeTab === "subscriptions" && <SubscriptionsTab />}
-            {activeTab === "globalSettings" && <GlobalSettingsTab />}
-            {activeTab === "categories" && <CategoriesTab />}
-            {activeTab === "users" && <UsersVendorsTab type="users" data={users} classes={classes} fetchData={fetchData} />}
-            {activeTab === "vendors" && <UsersVendorsTab type="vendors" data={vendors} classes={classes} fetchData={fetchData} onAddProduct={(vId) => { setInitialVendorId(vId); setIsAddProductOpen(true); setActiveTab("inventory"); }} />}
-            {activeTab === "appearance" && <AppearanceSettings />}
-            {activeTab === "offersAds" && <OffersAdsTab />}
-            {activeTab === "wms" && <WarehouseTab classes={classes} />}
-            {activeTab === "importedOrders" && <ImportedOrdersTab classes={classes} vendors={vendors} />}
+            {activeTab === "attributes" && <AttributesTab showToast={showToast} />}
+            {activeTab === "delivery" && <DeliveryZonesTab showToast={showToast} />}
+            {activeTab === "finance" && <FinanceTab showToast={showToast} />}
+            {activeTab === "payments" && <PaymentMethodsTab showToast={showToast} />}
+            {activeTab === "logistics" && <LogisticsTab orders={logisticsOrders} users={users} vendors={vendors} fetchData={fetchData} ORDER_STATUSES={ORDER_STATUSES} classes={classes} showToast={showToast} />}
+            {activeTab === "employees" && <PersonnelTab type="employees" showToast={showToast} />}
+            {activeTab === "drivers" && <PersonnelTab type="drivers" showToast={showToast} />}
+            {activeTab === "subscriptions" && <SubscriptionsTab showToast={showToast} />}
+            {activeTab === "subscriptionRequests" && <AdminSubscriptionRequests showToast={showToast} />}
+            {activeTab === "globalSettings" && <GlobalSettingsTab showToast={showToast} />}
+            {activeTab === "categories" && <CategoriesTab showToast={showToast} />}
+            {activeTab === "users" && <UsersVendorsTab type="users" data={users} classes={classes} fetchData={fetchData} showToast={showToast} />}
+            {activeTab === "vendors" && <UsersVendorsTab type="vendors" data={vendors} classes={classes} fetchData={fetchData} onAddProduct={(vId) => { setInitialVendorId(vId); setIsAddProductOpen(true); setActiveTab("inventory"); }} showToast={showToast} />}
+            {activeTab === "appearance" && <AppearanceSettings showToast={showToast} />}
+            {activeTab === "siteSections" && <SiteSectionsEditor showToast={showToast} />}
+            {activeTab === "offersAds" && <OffersAdsTab showToast={showToast} />}
+            {activeTab === "wms" && <WarehouseTab classes={classes} showToast={showToast} />}
+            {activeTab === "importedOrders" && <ImportedOrdersTab classes={classes} vendors={vendors} showToast={showToast} />}
           </motion.div>
         </AnimatePresence>
         </div>
       </main>
+
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            initial={{ opacity: 0, y: 50, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.9 }}
+            className={cn(
+              "fixed bottom-10 left-10 z-[100] px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-4 border text-white backdrop-blur-md",
+              toast.type === "success" 
+                ? "bg-green-500/90 border-green-500/20 shadow-green-500/10" 
+                : toast.type === "error" 
+                ? "bg-red-500/90 border-red-500/20 shadow-red-500/10" 
+                : "bg-blue-500/90 border-blue-500/20 shadow-blue-500/10"
+            )}
+          >
+            <span className="material-symbols-rounded text-xl animate-bounce">
+              {toast.type === "success" ? "check_circle" : toast.type === "error" ? "error" : "info"}
+            </span>
+            <span className="text-sm font-black">{toast.message}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

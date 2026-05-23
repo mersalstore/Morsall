@@ -1,0 +1,39 @@
+Created At: 2026-05-19T19:02:59Z
+Completed At: 2026-05-19T19:02:59Z
+File Path: `file:///C:/Users/hazem/Downloads/matger2/src/app/admin/dashboard/page.tsx`
+Total Lines: 510
+Total Bytes: 29446
+Showing lines 425 to 455
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+425:                   defaultStatusFilter={statusFilter}
+426:                   onAssignDriver={async (orderId, driverId) => {
+427:                     await fetch("/api/admin/orders", {
+428:                       method: "PATCH",
+429:                       headers: { "Content-Type": "application/json" },
+430:                       body: JSON.stringify({ id: orderId, action: "assign_driver", driverId })
+431:                     });
+432:                     fetchData();
+433:                   }}
+434:                   onAssignBranch={async (orderId, branchId) => {
+435:                     await fetch("/api/admin/orders", {
+436:                       method: "PATCH",
+437:                       headers: { "Content-Type": "application/json" },
+438:                       body: JSON.stringify({ id: orderId, branchId, status: "AT_BRANCH" })
+439:                     });
+440:                     fetchData();
+441:                   }}
+442:                       body: JSON.stringify({ id: orderId, action: "assign_driver", driverId })
+443:                     });
+444:                     fetchData();
+445:                   }}
+446:                 />
+447:                 <EditOrderModal
+448:                   isOpen={!!editingOrder}
+449:                   order={editingOrder}
+450:                   onClose={() => setEditingOrder(null)}
+451:                   onSuccess={fetchData}
+452:                   ORDER_STATUSES={ORDER_STATUSES}
+453:                 />
+454:                 <PrintPolicyModal
+455:                   isOpen={isPolicyModalOpen}
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.

@@ -1,0 +1,49 @@
+Created At: 2026-05-19T19:02:09Z
+Completed At: 2026-05-19T19:02:09Z
+File Path: `file:///C:/Users/hazem/Downloads/matger2/src/app/admin/dashboard/page.tsx`
+Total Lines: 494
+Total Bytes: 28753
+Showing lines 90 to 130
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+90:   const [pendingProducts, setPendingProducts] = useState<any[]>([]);
+91:   const [users, setUsers] = useState<any[]>([]);
+92:   const [vendors, setVendors] = useState<any[]>([]);
+93:   const [drivers, setDrivers] = useState<any[]>([]);
+94:   const [stats, setStats] = useState<any[]>([]);
+95:   const [orderStatuses, setOrderStatuses] = useState<Record<string,number>>({});
+96:   const [deliveryByCity, setDeliveryByCity] = useState<any[]>([]);
+97:   const [activeDrivers, setActiveDrivers] = useState(0);
+98:   const [loading, setLoading] = useState(true);
+99:   const [actionLoading, setActionLoading] = useState<string | null>(null);
+100:   const [isAddProductOpen, setIsAddProductOpen] = useState(false);
+101:   const [editingProduct, setEditingProduct] = useState<any>(null);
+102:   const [initialVendorId, setInitialVendorId] = useState<string | undefined>(undefined);
+103:   const [editingOrder, setEditingOrder] = useState<any>(null);
+104:   const [printingOrder, setPrintingOrder] = useState<any>(null);
+105:   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+106:   const [dateRange, setDateRange] = useState("all"); // today, week, month, all, custom
+107:   const [customFrom, setCustomFrom] = useState("");
+108:   const [customTo, setCustomTo] = useState("");
+109:   const [statusFilter, setStatusFilter] = useState<string | null>(null);
+110:   const [printingOrders, setPrintingOrders] = useState<any[]>([]);
+111:   const [isPolicyModalOpen, setIsPolicyModalOpen] = useState(false);
+112: 
+113:   const classes = {
+114:     card: "bg-white rounded-[2rem] shadow-[0_8px_30px_rgba(15,23,42,0.04)] border border-slate-100 overflow-hidden transition-all duration-500",
+115:     tableHeader: "bg-[#0F172A] text-white/60 text-[10px] font-black uppercase tracking-[0.3em] border-b border-white/10",
+116:     tableRow: "hover:bg-slate-50/50 transition-all duration-300 group cursor-pointer border-b border-slate-100 last:border-0",
+117:     input: "w-full bg-white border border-slate-200 rounded-2xl px-6 py-4 text-sm font-bold outline-none focus:border-[#C5A021] focus:ring-4 focus:ring-[#C5A021]/5 transition-all shadow-sm shadow-slate-100/10 placeholder:text-slate-400 text-slate-800",
+118:     btnPrimary: "bg-gradient-to-r from-[#C5A021] to-[#A9841B] text-white px-8 py-4 rounded-2xl font-black text-sm transition-all duration-500 shadow-xl shadow-[#C5A021]/10 hover:brightness-105 active:scale-[0.98]",
+119:     badge: "px-4 py-1.5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all duration-300",
+120:   };
+121: 
+122:   const [mounted, setMounted] = useState(false);
+123:   
+124:   // Set correct initial tab when session loads
+125:   useEffect(() => {
+126:     setMounted(true);
+127:     if (status === "loading") return;
+128:     
+129:     const role = (session?.user as any)?.role;
+130:     const userPermissions = (session?.user as any)?.permissions;
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.

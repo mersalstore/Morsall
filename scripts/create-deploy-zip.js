@@ -22,20 +22,38 @@ async function createZip() {
     const files = fs.readdirSync(projectDir);
 
     const ignoreList = [
-      'node_modules', '.git', 'matger2-deploy.zip', 
-      'matger2-hostinger-deploy.zip', 'Morsall_Deploy_Final.zip',
-      'Morsall_Hostinger_Deploy.zip', 'staging_deploy', 'scratch'
+      'node_modules', '.git', 'staging_deploy', 'scratch', '.vercel', '_next', '.next/cache'
     ];
 
+    // Include ONLY the Prisma client (without the huge engines folder)
+    // The engines will be generated/downloaded on the server via 'prisma generate'
+    const prismaClientPath = path.join(projectDir, 'node_modules/@prisma/client');
+    if (fs.existsSync(prismaClientPath)) {
+      console.log('Adding Prisma client (library)...');
+      archive.directory(prismaClientPath, 'node_modules/@prisma/client');
+    }
+
     files.forEach(file => {
-      if (ignoreList.includes(file) || file.endsWith('.log') || file.endsWith('.zip')) {
+      // Exclude zips, logs, and other non-essential files
+      if (ignoreList.includes(file) || 
+          file.toLowerCase().endsWith('.log') || 
+          file.toLowerCase().endsWith('.zip') ||
+          file.toLowerCase().endsWith('.bat') ||
+          file.toLowerCase().endsWith('.py') ||
+          file.toLowerCase().endsWith('.php')) {
         return;
       }
+      
       const fullPath = path.join(projectDir, file);
       const isDirectory = fs.lstatSync(fullPath).isDirectory();
       if (isDirectory) {
         console.log(`Adding directory: ${file}`);
-        archive.directory(fullPath, file);
+        archive.directory(fullPath, file, (entry) => {
+          if (entry.name.includes('/cache/') || entry.name.includes('\\cache\\') || entry.name.endsWith('/cache') || entry.name.endsWith('\\cache')) {
+            return false;
+          }
+          return entry;
+        });
       } else {
         console.log(`Adding file: ${file}`);
         archive.file(fullPath, { name: file });

@@ -1,0 +1,68 @@
+const { createServer } = require('http');
+const { parse } = require('url');
+const path = require('path');
+const fs = require('fs');
+
+// Use __dirname to be path-independent
+const rootDir = __dirname;
+const logPath = path.join(rootDir, 'server.log');
+
+function log(msg) {
+    const line = `[${new Date().toISOString()}] ${msg}\n`;
+    try {
+        fs.appendFileSync(logPath, line);
+    } catch (e) {
+        // Fallback if log file is not writable
+    }
+    console.log(msg);
+}
+
+log('--- PRODUCTION SERVER STARTING (FIXED PATHS) ---');
+
+try {
+    process.env.PRISMA_CLIENT_ENGINE_TYPE = 'binary';
+    process.env.NODE_ENV = 'production';
+    
+    // Explicitly set the engine path for Hostinger RHEL 9
+    const enginePath = path.join(rootDir, 'node_modules', '.prisma', 'client', 'query-engine-rhel-openssl-3.0.x');
+    process.env.PRISMA_QUERY_ENGINE_BINARY = enginePath;
+    
+    log(`Environment variables set. Engine path: ${enginePath}`);
+
+    const port = process.env.PORT || 3000;
+    log(`Detected PORT/SOCKET: ${port}`);
+
+    const next = require('next');
+    log('Next.js module required.');
+
+    const app = next({ dev: false, dir: rootDir });
+    const handle = app.getRequestHandler();
+
+    log('Preparing Next.js app...');
+    app.prepare().then(() => {
+        log('Next.js app prepared. Creating server...');
+        
+        const server = createServer(async (req, res) => {
+            try {
+                const parsedUrl = parse(req.url, true);
+                await handle(req, res, parsedUrl);
+            } catch (err) {
+                log(`RUNTIME_ERROR: ${err.message}`);
+                res.statusCode = 500;
+                res.end('Internal Server Error');
+            }
+        });
+
+        server.listen(port, () => {
+            log(`Server listening on ${port}`);
+        });
+
+    }).catch(err => {
+        log(`PREPARE_ERROR: ${err.stack}`);
+        process.exit(1);
+    });
+
+} catch (err) {
+    log(`FATAL_BOOTSTRAP_ERROR: ${err.stack}`);
+    process.exit(1);
+}

@@ -1,0 +1,75 @@
+Created At: 2026-05-19T19:02:57Z
+Completed At: 2026-05-19T19:02:58Z
+File Path: `file:///C:/Users/hazem/Downloads/matger2/src/app/admin/dashboard/page.tsx`
+Total Lines: 510
+Total Bytes: 29446
+Showing lines 390 to 470
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+390: 
+391:                   <div className={cn(classes.card, "p-8")}>
+392:                     <h4 className="text-base font-black text-[#0F172A] mb-6 flex items-center gap-3">
+393:                       <span className="material-symbols-rounded text-[#C5A021]">delivery_dining</span>
+394:                       السائقون
+395:                     </h4>
+396:                     <div className="flex flex-col items-center justify-center h-32">
+397:                       <p className="text-6xl font-black text-[#0F172A]">{activeDrivers}</p>
+398:                       <p className="text-xs font-black text-slate-400 uppercase tracking-widest mt-2">سائق نشط</p>
+399:                     </div>
+400:                     <button onClick={() => setActiveTab("drivers")} className="w-full mt-4 py-3 rounded-2xl bg-[#C5A021]/10 text-[#C5A021] font-black text-sm hover:bg-[#C5A021] hover:text-white transition-all">
+401:                       إدارة المناديب
+402:                     </button>
+403:                   </div>
+404:                 </div>
+405:               </div>
+406:             )}
+407:             {activeTab === "approvals" && <ApprovalsTab pendingVendors={pendingVendors} pendingProducts={pendingProducts} onVendorAction={handleVendorAction} onProductAction={handleProductAction} classes={classes} />}
+408:             {activeTab === "orders" && (
+409:               <>
+410:                 <OrdersTable 
+411:                   orders={orders}
+412:                   drivers={drivers}
+413:                   branches={branches}
+414:                   o
+<truncated 786 bytes>
+0:                       body: JSON.stringify({ id: orderId, action: "assign_driver", driverId })
+431:                     });
+432:                     fetchData();
+433:                   }}
+434:                   onAssignBranch={async (orderId, branchId) => {
+435:                     await fetch("/api/admin/orders", {
+436:                       method: "PATCH",
+437:                       headers: { "Content-Type": "application/json" },
+438:                       body: JSON.stringify({ id: orderId, branchId, status: "AT_BRANCH" })
+439:                     });
+440:                     fetchData();
+441:                   }}
+442:                       body: JSON.stringify({ id: orderId, action: "assign_driver", driverId })
+443:                     });
+444:                     fetchData();
+445:                   }}
+446:                 />
+447:                 <EditOrderModal
+448:                   isOpen={!!editingOrder}
+449:                   order={editingOrder}
+450:                   onClose={() => setEditingOrder(null)}
+451:                   onSuccess={fetchData}
+452:                   ORDER_STATUSES={ORDER_STATUSES}
+453:                 />
+454:                 <PrintPolicyModal
+455:                   isOpen={isPolicyModalOpen}
+456:                   orders={printingOrders}
+457:                   onClose={() => setIsPolicyModalOpen(false)}
+458:                 />
+459:                 <PrintInvoiceModal
+460:                   isOpen={!!printingOrder}
+461:                   order={printingOrder}
+462:                   onClose={() => setPrintingOrder(null)}
+463:                 />
+464:               </>
+465:             )}
+466:             {activeTab === "inventory" && (
+467:               <>
+468:                 <InventoryTable 
+469:                   products={inventoryProducts} 
+470:                   onEdit={setEditingProduct} 
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.

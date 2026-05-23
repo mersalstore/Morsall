@@ -8,17 +8,17 @@ import { useRouter } from "next/navigation";
 interface AddProductModalProps {
   isOpen: boolean;
   onClose: () => void;
+  editingProduct?: any;
 }
 
-export default function AddProductModal({ isOpen, onClose }: AddProductModalProps) {
+export default function AddProductModal({ isOpen, onClose, editingProduct }: AddProductModalProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState<any[]>([]);
   const [availableAttributes, setAvailableAttributes] = useState<any[]>([]);
 
-  // Form State
   const [formData, setFormData] = useState({
-    type: "SIMPLE", // SIMPLE | VARIABLE | BUNDLE
+    type: "SIMPLE",
     title: "",
     shortDescription: "",
     description: "",
@@ -32,17 +32,15 @@ export default function AddProductModal({ isOpen, onClose }: AddProductModalProp
     price: "",
     stock: "",
     discountPrice: "",
-    discountType: "FIXED", // FIXED | PERCENTAGE
+    discountType: "FIXED",
     categoryId: "",
-    images: "", // Commas separated URLs for now
+    images: "",
     externalImageUrl: "",
   });
 
   const [bundleItems, setBundleItems] = useState<{ name: string, price: string }[]>([]);
-
   const [step, setStep] = useState(1);
 
-  // Advanced Variations State
   const [selectedAttributes, setSelectedAttributes] = useState<{ name: string, values: string[] }[]>([]);
   const [variations, setVariations] = useState<any[]>([]);
   const [activeAttributeId, setActiveAttributeId] = useState<string | null>(null);
@@ -52,28 +50,107 @@ export default function AddProductModal({ isOpen, onClose }: AddProductModalProp
   const [localFiles, setLocalFiles] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
 
+  // Tabular specifications
+  const [specs, setSpecs] = useState<{ key: string; value: string }[]>([]);
+
+  // Variant pricing mode: "absolute" | "adjustment"
+  const [variantPricingMode, setVariantPricingMode] = useState<"absolute" | "adjustment">("absolute");
+
   useEffect(() => {
     if (isOpen) {
-      setStep(1); // Reset to first step when opening
-      // Fetch Categories
+      document.body.style.overflow = 'hidden';
+      setStep(1);
       fetch("/api/categories")
         .then(res => res.json())
-        .then(data => {
-          if (Array.isArray(data)) setCategories(data);
-          else setCategories([]);
-        })
-        .catch(err => console.error("Failed to fetch categories", err));
-
-      // Fetch Global Attributes
+        .then(data => { if (Array.isArray(data)) setCategories(data); else setCategories([]); })
+        .catch(() => {});
       fetch("/api/attributes")
         .then(res => res.json())
-        .then(data => {
-          if (Array.isArray(data)) setAvailableAttributes(data);
-          else setAvailableAttributes([]);
-        })
-        .catch(err => console.error("Failed to fetch attributes", err));
+        .then(data => { if (Array.isArray(data)) setAvailableAttributes(data); else setAvailableAttributes([]); })
+        .catch(() => {});
+
+      if (editingProduct) {
+        setLoading(true);
+        fetch(`/api/vendor/products/${editingProduct.id}`)
+          .then(res => res.json())
+          .then(data => {
+            if (data && !data.error) {
+              setFormData({
+                type: data.type || "SIMPLE",
+                title: data.title || "",
+                shortDescription: data.shortDescription || "",
+                description: data.description || "",
+                sku: data.sku || "",
+                brand: data.brand || "",
+                range: data.range || "",
+                weight: data.weight?.toString() || "",
+                length: data.length?.toString() || "",
+                width: data.width?.toString() || "",
+                height: data.height?.toString() || "",
+                price: data.price?.toString() || "",
+                stock: data.stock?.toString() || "",
+                discountPrice: data.discountPrice?.toString() || "",
+                discountType: data.discountType || "FIXED",
+                categoryId: data.categoryId || "",
+                images: "",
+                externalImageUrl: "",
+              });
+              setBundleItems(data.bundleData ? (typeof data.bundleData === 'string' ? JSON.parse(data.bundleData) : data.bundleData) : []);
+              setSelectedAttributes(data.productAttributes?.map((attr: any) => ({
+                name: attr.name,
+                values: attr.values
+              })) || []);
+              setVariations(data.variations?.map((v: any) => ({
+                combination: typeof v.combination === 'string' ? JSON.parse(v.combination) : v.combination,
+                price: v.price?.toString() || data.price?.toString() || "",
+                stock: v.stock?.toString() || "",
+                sku: v.sku || "",
+                image: v.image || ""
+              })) || []);
+
+              // Parse specifications
+              if (data.specifications) {
+                try {
+                  const parsed = typeof data.specifications === 'string' ? JSON.parse(data.specifications) : data.specifications;
+                  if (Array.isArray(parsed)) setSpecs(parsed);
+                  else if (typeof parsed === 'object') setSpecs(Object.entries(parsed).map(([k, v]) => ({ key: k, value: String(v) })));
+                  else setSpecs([]);
+                } catch { setSpecs([]); }
+              }
+
+              if (Array.isArray(data.images)) {
+                setPreviews(data.images);
+              } else if (typeof data.images === "string" && data.images.trim()) {
+                setPreviews(data.images.split(",").map(u => u.trim()).filter(Boolean));
+              }
+            }
+          })
+          .catch(err => console.error("Error fetching product for edit", err))
+          .finally(() => setLoading(false));
+      } else {
+        resetForm();
+      }
+    } else {
+      document.body.style.overflow = '';
     }
-  }, [isOpen]);
+    return () => { document.body.style.overflow = ''; }
+  }, [isOpen, editingProduct]);
+
+  const resetForm = () => {
+    setFormData({
+      type: "SIMPLE", title: "", shortDescription: "", description: "", sku: "", brand: "", range: "",
+      weight: "", length: "", width: "", height: "", price: "", stock: "",
+      discountPrice: "", discountType: "FIXED",
+      categoryId: "", images: "", externalImageUrl: ""
+    });
+    setBundleItems([]);
+    setSelectedAttributes([]);
+    setVariations([]);
+    setPreviews([]);
+    setSpecs([]);
+    setVariantPricingMode("absolute");
+    setStep(1);
+  };
 
   useEffect(() => {
     const handleOutsideClick = (e: MouseEvent) => {
@@ -100,6 +177,12 @@ export default function AddProductModal({ isOpen, onClose }: AddProductModalProp
     setPreviews(prev => prev.filter((_, i) => i !== index));
   };
 
+  const addSpec = () => setSpecs(prev => [...prev, { key: "", value: "" }]);
+  const removeSpec = (idx: number) => setSpecs(prev => prev.filter((_, i) => i !== idx));
+  const updateSpec = (idx: number, field: "key" | "value", val: string) => {
+    setSpecs(prev => prev.map((s, i) => i === idx ? { ...s, [field]: val } : s));
+  };
+
   const handleSubmit = async () => {
     if (!formData.title || !formData.price || !formData.categoryId) {
       alert("يرجى ملء البيانات الأساسية (الاسم، السعر، التصنيف)");
@@ -110,78 +193,83 @@ export default function AddProductModal({ isOpen, onClose }: AddProductModalProp
     try {
       let finalImageUrl = formData.images;
 
-      // Upload local files first
       if (localFiles.length > 0) {
         const uploadPromises = localFiles.map(async (file) => {
           const body = new FormData();
           body.append("file", file);
-          const res = await fetch("/api/upload", {
-            method: "POST",
-            body,
-          });
-
-          if (!res.ok) {
-            const errData = await res.json().catch(() => ({}));
-            throw new Error(errData.error || "فشل في رفع إحدى الصور — قد يكون السبب حجم الملف أو قيود السيرفر");
-          }
-
+          const res = await fetch("/api/upload", { method: "POST", body });
+          if (!res.ok) throw new Error("فشل في رفع إحدى الصور");
           const data = await res.json();
           return data.url;
         });
-
         const urls = await Promise.all(uploadPromises);
         finalImageUrl = urls.filter(u => !!u).join(",");
       }
 
-      // Merge with external URL if provided
       if (formData.externalImageUrl) {
         finalImageUrl = finalImageUrl
           ? `${formData.externalImageUrl},${finalImageUrl}`
           : formData.externalImageUrl;
       }
 
-      const res = await fetch("/api/vendor/products", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...formData,
-          images: finalImageUrl,
-          productAttributes: selectedAttributes,
-          variations: variations,
-          bundleData: formData.type === 'BUNDLE' ? JSON.stringify(bundleItems) : null,
-        }),
-      });
-
-      const result = await res.json().catch(() => ({ error: "خطأ في السيرفر أو لم يتم استلام استجابة صالحة" }));
-
-      if (!res.ok) {
-        throw new Error(result.error || result.message || "فشل في حفظ بيانات المنتج — تأكد من صحة البيانات المدخلة");
+      // Use preview URLs directly if no new uploads and we have existing images
+      if (!finalImageUrl && previews.length > 0 && editingProduct) {
+        finalImageUrl = previews.join(",");
       }
 
-      alert("تم إرسال المنتج للمراجعة بنجاح!");
+      const payload: any = {
+        ...formData,
+        images: finalImageUrl,
+        productAttributes: selectedAttributes,
+        variations: variations,
+        bundleData: formData.type === 'BUNDLE' ? JSON.stringify(bundleItems) : null,
+        specifications: specs,
+      };
+
+      const url = editingProduct
+        ? `/api/vendor/products/${editingProduct.id}`
+        : "/api/vendor/products";
+      const method = editingProduct ? "PUT" : "POST";
+
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const result = await res.json().catch(() => ({ error: "خطأ في السيرفر" }));
+
+      if (!res.ok) {
+        throw new Error(result.error || result.message || "فشل في حفظ المنتج");
+      }
+
+      alert(editingProduct ? "تم تحديث المنتج بنجاح!" : "تم إرسال المنتج للمراجعة بنجاح!");
       onClose();
       router.refresh();
-      // Reset form
-      setFormData({
-        type: "SIMPLE", title: "", shortDescription: "", description: "", sku: "", brand: "", range: "",
-        weight: "", length: "", width: "", height: "", price: "", stock: "",
-        discountPrice: "", discountType: "FIXED",
-        categoryId: "", 
-        images: "", externalImageUrl: ""
-      });
-      setBundleItems([]);
-      setSelectedAttributes([]);
-      setVariations([]);
-      setStep(1);
+      resetForm();
     } catch (error: any) {
-      console.error("Submission Error:", error);
-      alert(error.message || "حدث خطأ غير متوقع أثناء حفظ المنتج");
+      alert(error.message || "حدث خطأ غير متوقع");
     } finally {
       setLoading(false);
     }
   };
 
   if (!isOpen) return null;
+
+  const generateCombinations = (attrs: any[]) => {
+    if (attrs.length === 0) return [];
+    let results: any[] = [{}];
+    for (const attr of attrs) {
+      const next: any[] = [];
+      for (const res of results) {
+        for (const val of attr.values) next.push({ ...res, [attr.name]: val });
+      }
+      results = next;
+    }
+    return results;
+  };
+
+  const basePrice = parseFloat(formData.price) || 0;
 
   return (
     <AnimatePresence mode="wait">
@@ -204,17 +292,19 @@ export default function AddProductModal({ isOpen, onClose }: AddProductModalProp
           <div className="px-12 py-8 border-b border-border flex items-center justify-between flex-shrink-0 bg-white">
             <div className="flex items-center gap-6">
               <div className="w-16 h-16 bg-[#C5A021]/10 text-[#C5A021] rounded-[1.5rem] flex items-center justify-center shadow-lg shadow-[#C5A021]/5 border border-[#C5A021]/10 font-black text-xl">
-                {step}
+                {editingProduct ? <span className="material-symbols-rounded text-2xl">edit</span> : step}
               </div>
               <div>
                 <h2 className="text-2xl font-black tracking-tight text-[#0F172A]">
-                  {step === 1 ? "اختيار النوع والتصنيف" : step === 2 ? "بيانات المنتج والسمات" : "التسعير والمخزون والصور"}
+                  {editingProduct ? "تعديل المنتج" : step === 1 ? "اختيار النوع والتصنيف" : step === 2 ? "بيانات المنتج والسمات" : "التسعير والمخزون والصور"}
                 </h2>
-                <div className="flex gap-2 mt-2">
-                  {[1, 2, 3].map(s => (
-                    <div key={s} className={cn("h-1 rounded-full transition-all", step >= s ? "w-8 bg-[#C5A021]" : "w-4 bg-gray-100")} />
-                  ))}
-                </div>
+                {!editingProduct && (
+                  <div className="flex gap-2 mt-2">
+                    {[1, 2, 3].map(s => (
+                      <div key={s} className={cn("h-1 rounded-full transition-all", step >= s ? "w-8 bg-[#C5A021]" : "w-4 bg-gray-100")} />
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
             <button onClick={onClose} className="p-4 hover:bg-muted rounded-2xl transition-all group">
@@ -224,7 +314,8 @@ export default function AddProductModal({ isOpen, onClose }: AddProductModalProp
 
           <div className="flex-grow overflow-y-auto p-12 custom-scrollbar">
             <AnimatePresence mode="wait">
-              {step === 1 && (
+              {/* STEP 1 */}
+              {step === 1 && !editingProduct && (
                 <motion.div
                   key="step1"
                   initial={{ opacity: 0, x: -20 }}
@@ -282,7 +373,8 @@ export default function AddProductModal({ isOpen, onClose }: AddProductModalProp
                 </motion.div>
               )}
 
-              {step === 2 && (
+              {/* STEP 2 - Product Details & Attributes */}
+              {(step === 2 || editingProduct) && (
                 <motion.div
                   key="step2"
                   initial={{ opacity: 0, x: -20 }}
@@ -292,7 +384,7 @@ export default function AddProductModal({ isOpen, onClose }: AddProductModalProp
                 >
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 px-1">اسم المنتج</label>
+                      <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 px-1">اسم المنتج *</label>
                       <input
                         type="text"
                         value={formData.title}
@@ -323,7 +415,49 @@ export default function AddProductModal({ isOpen, onClose }: AddProductModalProp
                     />
                   </div>
 
-                  {/* Dynamic Attributes Manager */}
+                  {/* Tabular Specifications */}
+                  <div className="space-y-4 p-8 bg-blue-50/30 rounded-[2.5rem] border-2 border-dashed border-blue-200">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-black text-[#0F172A]">المواصفات الفنية (جدول)</h4>
+                        <p className="text-[10px] text-gray-400 font-bold mt-1">أضف مواصفات المنتج كأزواج (مفتاح / قيمة)</p>
+                      </div>
+                      <button onClick={addSpec} className="px-4 py-2 bg-blue-500 text-white rounded-xl font-black text-[10px] hover:bg-blue-600 transition-all">+ إضافة صف</button>
+                    </div>
+                    <div className="space-y-3">
+                      {specs.map((spec, idx) => (
+                        <div key={idx} className="flex gap-3 items-center">
+                          <input
+                            type="text"
+                            value={spec.key}
+                            onChange={e => updateSpec(idx, "key", e.target.value)}
+                            placeholder="المفتاح (مثلاً: المعالج)"
+                            className="flex-1 bg-white border-2 border-gray-200 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-blue-400 transition-all"
+                          />
+                          <input
+                            type="text"
+                            value={spec.value}
+                            onChange={e => updateSpec(idx, "value", e.target.value)}
+                            placeholder="القيمة (مثلاً: Snapdragon 8 Gen 2)"
+                            className="flex-1 bg-white border-2 border-gray-200 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-blue-400 transition-all"
+                          />
+                          <button onClick={() => removeSpec(idx)} className="w-10 h-10 bg-red-50 text-red-400 rounded-xl flex items-center justify-center hover:bg-red-100 transition-all shrink-0">
+                            <span className="material-symbols-rounded text-sm">close</span>
+                          </button>
+                        </div>
+                      ))}
+                      {specs.length === 0 && (
+                        <p className="text-center text-xs text-gray-400 py-6 bg-white rounded-2xl border-2 border-dashed border-gray-200">
+                          لم تضف أي مواصفات بعد. اضغط "إضافة صف" لإضافة مواصفات المنتج.
+                        </p>
+                      )}
+                    </div>
+                    {specs.length > 1 && (
+                      <p className="text-[10px] text-green-600 font-bold">✓ سيتم عرض المواصفات كجدول في صفحة المنتج</p>
+                    )}
+                  </div>
+
+                  {/* Attributes & Variations Manager */}
                   {formData.type === "VARIABLE" && (
                     <div className="space-y-8 p-8 bg-[#C5A021]/5 rounded-[2.5rem] border-2 border-dashed border-[#C5A021]/20">
                       <div className="flex items-center justify-between">
@@ -352,25 +486,13 @@ export default function AddProductModal({ isOpen, onClose }: AddProductModalProp
                             type="text"
                             placeholder="ابحث عن سمة (مثال: لون، مقاس، خامة)..."
                             value={attrSearch}
-                            onChange={(e) => {
-                              setAttrSearch(e.target.value);
-                              setIsAttrDropdownOpen(true);
-                            }}
+                            onChange={(e) => { setAttrSearch(e.target.value); setIsAttrDropdownOpen(true); }}
                             onFocus={() => setIsAttrDropdownOpen(true)}
                             className="w-full bg-white border-2 border-gray-100 rounded-2xl px-6 py-4 pr-12 focus:border-[#C5A021] outline-none font-bold transition-all text-right"
                           />
-                          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 material-symbols-rounded">
-                            search
-                          </span>
+                          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 material-symbols-rounded">search</span>
                           {attrSearch && (
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setAttrSearch("");
-                                setActiveAttributeId(null);
-                              }}
-                              className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                            >
+                            <button type="button" onClick={() => { setAttrSearch(""); setActiveAttributeId(null); }} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
                               <span className="material-symbols-rounded text-sm">close</span>
                             </button>
                           )}
@@ -378,38 +500,23 @@ export default function AddProductModal({ isOpen, onClose }: AddProductModalProp
 
                         {isAttrDropdownOpen && (
                           <div className="absolute z-[110] w-full mt-2 max-h-60 overflow-y-auto bg-white border border-gray-100 rounded-2xl shadow-xl p-2 space-y-1">
-                            {availableAttributes.filter(attr => 
-                              attr.name.toLowerCase().includes(attrSearch.toLowerCase())
-                            ).length > 0 ? (
-                              availableAttributes
-                                .filter(attr => attr.name.toLowerCase().includes(attrSearch.toLowerCase()))
-                                .map(attr => (
-                                  <button
-                                    type="button"
-                                    key={attr.id}
-                                    onClick={() => {
-                                      setActiveAttributeId(attr.id);
-                                      setAttrSearch(attr.name);
-                                      setIsAttrDropdownOpen(false);
-                                    }}
-                                    className={cn(
-                                      "w-full text-right px-4 py-3 rounded-xl text-sm font-bold transition-all block",
-                                      activeAttributeId === attr.id
-                                        ? "bg-[#C5A021]/10 text-[#C5A021]"
-                                        : "hover:bg-gray-50 text-gray-700"
-                                    )}
-                                  >
-                                    {attr.name}
-                                  </button>
-                                ))
+                            {availableAttributes.filter(attr => attr.name.toLowerCase().includes(attrSearch.toLowerCase())).length > 0 ? (
+                              availableAttributes.filter(attr => attr.name.toLowerCase().includes(attrSearch.toLowerCase())).map(attr => (
+                                <button
+                                  type="button"
+                                  key={attr.id}
+                                  onClick={() => { setActiveAttributeId(attr.id); setAttrSearch(attr.name); setIsAttrDropdownOpen(false); }}
+                                  className={cn("w-full text-right px-4 py-3 rounded-xl text-sm font-bold transition-all block", activeAttributeId === attr.id ? "bg-[#C5A021]/10 text-[#C5A021]" : "hover:bg-gray-50 text-gray-700")}
+                                >
+                                  {attr.name}
+                                </button>
+                              ))
                             ) : (
-                              <div className="p-4 text-center text-xs text-gray-400">
-                                لا توجد سمات مطابقة. يمكنك إضافة سمة مخصصة أعلاه.
-                              </div>
+                              <div className="p-4 text-center text-xs text-gray-400">لا توجد سمات مطابقة. يمكنك إضافة سمة مخصصة أعلاه.</div>
                             )}
                           </div>
                         )}
-                        
+
                         {activeAttributeId && availableAttributes.find(a => a.id === activeAttributeId) && (() => {
                           const attr = availableAttributes.find(a => a.id === activeAttributeId);
                           return (
@@ -435,10 +542,7 @@ export default function AddProductModal({ isOpen, onClose }: AddProductModalProp
                                           return [...prev, { name: attr.name, values: [opt.value] }];
                                         });
                                       }}
-                                      className={cn(
-                                        "px-4 py-2 rounded-xl text-[10px] font-black transition-all border-2",
-                                        isSelected ? "bg-[#0F172A] border-[#0F172A] text-white" : "bg-gray-50 border-transparent text-gray-400 hover:border-gray-200"
-                                      )}
+                                      className={cn("px-4 py-2 rounded-xl text-[10px] font-black transition-all border-2", isSelected ? "bg-[#0F172A] border-[#0F172A] text-white" : "bg-gray-50 border-transparent text-gray-400 hover:border-gray-200")}
                                     >
                                       {opt.value}
                                     </button>
@@ -473,16 +577,7 @@ export default function AddProductModal({ isOpen, onClose }: AddProductModalProp
                       </div>
                       {bundleItems.map((item, idx) => (
                         <div key={idx} className="flex gap-4">
-                          <input
-                            placeholder="اسم المنتج في الحزمة"
-                            value={item.name}
-                            onChange={e => {
-                              const next = [...bundleItems];
-                              next[idx].name = e.target.value;
-                              setBundleItems(next);
-                            }}
-                            className="flex-grow bg-white border rounded-xl px-4 py-2 text-xs font-bold outline-none"
-                          />
+                          <input placeholder="اسم المنتج في الحزمة" value={item.name} onChange={e => { const next = [...bundleItems]; next[idx].name = e.target.value; setBundleItems(next); }} className="flex-grow bg-white border rounded-xl px-4 py-2 text-xs font-bold outline-none" />
                           <button onClick={() => setBundleItems(bundleItems.filter((_, i) => i !== idx))} className="text-red-500 material-symbols-rounded">delete</button>
                         </div>
                       ))}
@@ -491,7 +586,8 @@ export default function AddProductModal({ isOpen, onClose }: AddProductModalProp
                 </motion.div>
               )}
 
-              {step === 3 && (
+              {/* STEP 3 - Pricing, Stock, Images, Variations */}
+              {(step === 3 || editingProduct) && (
                 <motion.div
                   key="step3"
                   initial={{ opacity: 0, x: -20 }}
@@ -501,7 +597,7 @@ export default function AddProductModal({ isOpen, onClose }: AddProductModalProp
                 >
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 px-1">السعر الأساسي</label>
+                      <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 px-1">السعر الأساسي *</label>
                       <input
                         type="number"
                         value={formData.price}
@@ -546,84 +642,184 @@ export default function AddProductModal({ isOpen, onClose }: AddProductModalProp
                     </div>
                   </div>
 
-                  {formData.type === "VARIABLE" && variations.length === 0 && (
-                    <button
-                      onClick={() => {
-                        const generateCombinations = (attrs: any[]) => {
-                          if (attrs.length === 0) return [];
-                          let results: any[] = [{}];
-                          for (const attr of attrs) {
-                            const next: any[] = [];
-                            for (const res of results) {
-                              for (const val of attr.values) next.push({ ...res, [attr.name]: val });
-                            }
-                            results = next;
-                          }
-                          return results;
-                        };
-                        const combos = generateCombinations(selectedAttributes);
-                        setVariations(combos.map(c => ({
-                          combination: c,
-                          price: formData.price,
-                          stock: formData.stock || "10",
-                          sku: `${formData.sku || 'SKU'}-${Object.values(c).join('-').toUpperCase()}`
-                        })));
-                      }}
-                      className="w-full py-4 bg-[#0F172A] text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl"
-                    >
-                      توليد خيارات المنتج (Variations)
-                    </button>
-                  )}
+                  {/* Variable Product: Generate Variations */}
+                  {formData.type === "VARIABLE" && selectedAttributes.length > 0 && (() => {
+                    const hasCombos = variations.length > 0;
+                    return (
+                      <div className="space-y-6">
+                        {!hasCombos ? (
+                          <button
+                            onClick={() => {
+                              const combos = generateCombinations(selectedAttributes);
+                              setVariations(combos.map(c => ({
+                                combination: c,
+                                price: formData.price,
+                                stock: formData.stock || "10",
+                                sku: `${formData.sku || 'SKU'}-${Object.values(c).join('-').toUpperCase()}`,
+                                image: ""
+                              })));
+                            }}
+                            className="w-full py-4 bg-[#0F172A] text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl"
+                          >
+                            ⚡ توليد خيارات المنتج تلقائياً
+                          </button>
+                        ) : (
+                          <div className="space-y-4 border-t pt-6">
+                            <div className="flex items-center justify-between">
+                              <p className="text-[10px] font-black uppercase text-[#C5A021]">قائمة الخيارات المولدة</p>
+                              <button onClick={() => setVariations([])} className="text-[10px] text-red-400 underline">إعادة توليد</button>
+                            </div>
 
-                  {variations.length > 0 && (
-                    <div className="space-y-4 max-h-[300px] overflow-y-auto no-scrollbar border-t pt-6">
-                      <p className="text-[10px] font-black uppercase text-[#C5A021]">قائمة الخيارات المولدة</p>
-                      {variations.map((v, idx) => (
-                        <div key={idx} className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border border-gray-100">
-                          <span className="text-[10px] font-black">{Object.values(v.combination).join(" / ")}</span>
-                          <div className="flex gap-4">
-                            <input type="number" value={v.price} className="w-20 bg-white border rounded-lg px-2 py-1 text-xs font-bold" />
-                            <input type="number" value={v.stock} className="w-16 bg-white border rounded-lg px-2 py-1 text-xs font-bold" />
+                            {/* Pricing Mode Selector */}
+                            <div className="flex items-center gap-4 p-4 bg-white rounded-2xl border border-gray-200">
+                              <span className="text-xs font-bold text-gray-600">طريقة تسعير الخيارات:</span>
+                              <button
+                                onClick={() => setVariantPricingMode("absolute")}
+                                className={cn("px-4 py-2 rounded-xl text-[10px] font-black transition-all border-2", variantPricingMode === "absolute" ? "bg-[#0F172A] border-[#0F172A] text-white" : "bg-gray-50 border-gray-200 text-gray-400")}
+                              >
+                                سعر مطلق لكل خيار
+                              </button>
+                              <button
+                                onClick={() => setVariantPricingMode("adjustment")}
+                                className={cn("px-4 py-2 rounded-xl text-[10px] font-black transition-all border-2", variantPricingMode === "adjustment" ? "bg-[#C5A021] border-[#C5A021] text-white" : "bg-gray-50 border-gray-200 text-gray-400")}
+                              >
+                                إضافة / خصم من السعر الأساسي
+                              </button>
+                            </div>
+
+                            <div className="max-h-[400px] overflow-y-auto space-y-3 pr-1">
+                              {variations.map((v, idx) => {
+                                const isColor = Object.keys(v.combination).some(k =>
+                                  ["color","لون","colour","كلر","اللون"].some(c => k.toLowerCase().includes(c))
+                                );
+                                const variantPrice = parseFloat(v.price) || 0;
+                                const displayPrice = variantPricingMode === "adjustment"
+                                  ? `${variantPrice >= 0 ? '+' : ''}${variantPrice.toLocaleString()} (المجموع: ${(basePrice + variantPrice).toLocaleString()} ج.س)`
+                                  : `${variantPrice.toLocaleString()} ج.س`;
+
+                                return (
+                                  <div key={idx} className="p-4 bg-gray-50 rounded-2xl border border-gray-200 space-y-3">
+                                    <div className="flex items-center justify-between">
+                                      <span className="text-xs font-black text-[#0F172A]">
+                                        {Object.entries(v.combination).map(([k,val]) => `${k}: ${val}`).join(" / ")}
+                                      </span>
+                                      <span className="text-[10px] font-black text-[#C5A021]">{displayPrice}</span>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-3">
+                                      <div className="space-y-1">
+                                        <label className="text-[9px] font-black uppercase">
+                                          {variantPricingMode === "adjustment" ? "التعديل على السعر (ج.س)" : "السعر (ج.س)"}
+                                        </label>
+                                        <input
+                                          type="number"
+                                          value={v.price}
+                                          onChange={e => {
+                                            const updated = [...variations];
+                                            updated[idx] = { ...updated[idx], price: e.target.value };
+                                            setVariations(updated);
+                                          }}
+                                          placeholder={variantPricingMode === "adjustment" ? "+500 أو -200" : "0"}
+                                          className="w-full bg-white border-2 border-gray-200 rounded-xl px-3 py-2 text-sm font-black text-[#C5A021] outline-none focus:border-[#C5A021]"
+                                        />
+                                      </div>
+                                      <div className="space-y-1">
+                                        <label className="text-[9px] font-black uppercase text-gray-400">المخزون</label>
+                                        <input
+                                          type="number"
+                                          value={v.stock}
+                                          onChange={e => {
+                                            const updated = [...variations];
+                                            updated[idx] = { ...updated[idx], stock: e.target.value };
+                                            setVariations(updated);
+                                          }}
+                                          className="w-full bg-white border-2 border-gray-200 rounded-xl px-3 py-2 text-sm font-bold outline-none focus:border-gray-300"
+                                        />
+                                      </div>
+                                    </div>
+                                    {isColor && (
+                                      <div className="space-y-2 border-t pt-2">
+                                        <label className="text-[9px] font-black uppercase text-blue-500">صورة هذا اللون</label>
+                                        <div className="flex items-center gap-3">
+                                          {v.image && (
+                                            <div className="relative w-16 h-16 rounded-xl overflow-hidden border-2 border-[#C5A021]/30">
+                                              <img src={v.image} alt="variant" className="w-full h-full object-cover" />
+                                              <button type="button" onClick={() => { const updated = [...variations]; updated[idx] = { ...updated[idx], image: "" }; setVariations(updated); }} className="absolute top-0 right-0 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-[8px]">×</button>
+                                            </div>
+                                          )}
+                                          <label className="flex items-center gap-2 cursor-pointer px-3 py-2 bg-blue-50 border-2 border-dashed border-blue-200 rounded-xl hover:bg-blue-100 transition-all">
+                                            <input type="file" accept="image/*" className="hidden" onChange={async (e) => {
+                                              const file = e.target.files?.[0];
+                                              if (!file) return;
+                                              const body = new FormData();
+                                              body.append("file", file);
+                                              try {
+                                                const res = await fetch("/api/upload", { method: "POST", body });
+                                                const data = await res.json();
+                                                if (data.url) { const updated = [...variations]; updated[idx] = { ...updated[idx], image: data.url }; setVariations(updated); }
+                                              } catch { alert("فشل رفع صورة اللون"); }
+                                            }} />
+                                            <span className="material-symbols-rounded text-blue-400 text-sm">add_photo_alternate</span>
+                                            <span className="text-[10px] font-black text-blue-500">{v.image ? "تغيير الصورة" : "ارفع صورة اللون"}</span>
+                                          </label>
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+                                );
+                              })}
+                            </div>
                           </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                        )}
+                      </div>
+                    );
+                  })()}
                 </motion.div>
               )}
             </AnimatePresence>
           </div>
 
+          {/* Footer */}
           <div className="px-12 py-10 border-t border-border bg-stone-50/50 flex items-center justify-between flex-shrink-0">
             <button
-              onClick={() => step > 1 ? setStep(step - 1) : onClose()}
+              onClick={() => editingProduct ? onClose() : (step > 1 ? setStep(step - 1) : onClose())}
               className="px-10 py-4 rounded-2xl font-black text-xs uppercase tracking-widest bg-white border-2 border-border hover:bg-muted transition-all text-foreground/40"
             >
-              {step === 1 ? "إلغاء" : "السابق"}
+              {editingProduct ? "إلغاء" : (step === 1 ? "إلغاء" : "السابق")}
             </button>
-            <div className="flex gap-4">
-              {step < 3 ? (
-                <button
-                  onClick={() => {
-                    if (step === 1 && !formData.type) return alert("اختر نوع المنتج");
-                    if (step === 1 && !formData.categoryId) return alert("اختر القسم");
-                    setStep(step + 1);
-                  }}
-                  className="px-14 py-4 rounded-2xl font-black text-xs uppercase tracking-widest bg-[#C5A021] text-white shadow-2xl shadow-[#C5A021]/30 hover:scale-105 active:scale-95 transition-all"
-                >
-                  التالي
-                </button>
-              ) : (
-                <button
-                  onClick={handleSubmit}
-                  disabled={loading}
-                  className="px-14 py-4 rounded-2xl font-black text-xs uppercase tracking-widest bg-[#0F172A] text-white shadow-2xl shadow-[#0F172A]/30 hover:scale-105 active:scale-95 transition-all flex items-center gap-3 disabled:opacity-50"
-                >
-                  {loading ? <span className="animate-spin material-symbols-rounded">sync</span> : <span className="material-symbols-rounded">check_circle</span>}
-                  {loading ? "جاري الحفظ..." : "حفظ المنتج"}
-                </button>
-              )}
-            </div>
+            {editingProduct ? (
+              <button
+                onClick={handleSubmit}
+                disabled={loading}
+                className="px-14 py-4 rounded-2xl font-black text-xs uppercase tracking-widest bg-[#0F172A] text-white shadow-2xl shadow-[#0F172A]/30 hover:scale-105 active:scale-95 transition-all flex items-center gap-3 disabled:opacity-50"
+              >
+                {loading ? <span className="animate-spin material-symbols-rounded">sync</span> : <span className="material-symbols-rounded">check_circle</span>}
+                {loading ? "جاري الحفظ..." : "حفظ التعديلات"}
+              </button>
+            ) : (
+              <div className="flex gap-4">
+                {step < 3 ? (
+                  <button
+                    onClick={() => {
+                      if (step === 1 && !formData.type) return alert("اختر نوع المنتج");
+                      if (step === 1 && !formData.categoryId) return alert("اختر القسم");
+                      setStep(step + 1);
+                    }}
+                    className="px-14 py-4 rounded-2xl font-black text-xs uppercase tracking-widest bg-[#C5A021] text-white shadow-2xl shadow-[#C5A021]/30 hover:scale-105 active:scale-95 transition-all"
+                  >
+                    التالي
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleSubmit}
+                    disabled={loading}
+                    className="px-14 py-4 rounded-2xl font-black text-xs uppercase tracking-widest bg-[#0F172A] text-white shadow-2xl shadow-[#0F172A]/30 hover:scale-105 active:scale-95 transition-all flex items-center gap-3 disabled:opacity-50"
+                  >
+                    {loading ? <span className="animate-spin material-symbols-rounded">sync</span> : <span className="material-symbols-rounded">check_circle</span>}
+                    {loading ? "جاري الحفظ..." : "حفظ المنتج"}
+                  </button>
+                )}
+              </div>
+            )}
           </div>
         </motion.div>
       </div>

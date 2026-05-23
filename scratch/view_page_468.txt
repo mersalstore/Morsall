@@ -1,0 +1,39 @@
+Created At: 2026-05-19T19:26:26Z
+Completed At: 2026-05-19T19:26:26Z
+File Path: `file:///C:/Users/hazem/Downloads/matger2/src/app/admin/dashboard/page.tsx`
+Total Lines: 506
+Total Bytes: 29273
+Showing lines 25 to 55
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+25: import EditOrderModal from "../../../components/admin/EditOrderModal";
+26: import PrintInvoiceModal from "../../../components/admin/PrintInvoiceModal";
+27: import PrintPolicyModal from "../../../components/admin/PrintPolicyModal";
+28: import { cn } from "../../../lib/utils";
+29: import { useSession } from "next-auth/react";
+30: import { useRouter } from "next/navigation";
+31: 
+32: // صلاحيات كل دور - يجب أن تتطابق مع AdminSidebar
+33: const ROLE_PERMISSIONS: Record<string, string[]> = {
+34:   ADMIN: ["overview", "approvals", "users", "vendors", "categories", "employees", "orders", "payments", "logistics", "importedOrders", "delivery", "shipping", "finance", "settings", "inventory", "drivers", "subscriptions", "attributes", "globalSettings", "appearance", "offersAds", "wms"],
+35:   PACKING: ["orders", "inventory"],
+36:   SHIPPING: ["logistics", "drivers", "vendors", "importedOrders"],
+37:   CUSTOMER_SERVICE: ["overview", "approvals", "orders", "users"],
+38:   INVENTORY: ["inventory", "categories", "vendors", "attributes", "wms"],
+39:   DRIVER: ["orders"],
+40: };
+41: 
+42: const ROLE_LABELS: Record<string, string> = {
+43:   ADMIN: "مدير النظام",
+44:   PACKING: "مسؤول التغليف",
+45:   SHIPPING: "مسؤول الشحن",
+46:   CUSTOMER_SERVICE: "خدمة العملاء",
+47:   INVENTORY: "أمين المخزون",
+48:   DRIVER: "مندوب التوصيل",
+49: };
+50: 
+51: const ORDER_STATUSES: any = {
+52:   PENDING:           { label: "معلق",                    cls: "badge-pending", icon: "schedule",          color: "from-gray-400 to-gray-600" },
+53:   PENDING_CONFIRM:   { label: "جاري تأكيد الطلب",        cls: "badge-pending", icon: "hourglass_top",     color: "from-yellow-400 to-yellow-600" },
+54:   CONFIRMED:         { label: "تم استلام الطلب",          cls: "badge-active",  icon: "task_alt",          color: "from-blue-400 to-blue-600" },
+55:   PROCESSING:        { label: "جاري التجهيز",             cls: "badge-active",  icon: "inventory_2",       color: "from-indigo-400 to-indigo-600" },
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.

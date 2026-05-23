@@ -1,0 +1,1 @@
+"import React from \"react\";\nimport DashboardClient from \"./DashboardClient\";\n\nexport const dynamic = \"force-dynamic\";\n\nexport default function AdminDashboardPage() {\n  return <DashboardClient />;\n}\n"

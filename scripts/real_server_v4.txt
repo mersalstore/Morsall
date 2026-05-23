@@ -1,0 +1,74 @@
+const { createServer } = require('http');
+const { parse } = require('url');
+const path = require('path');
+const fs = require('fs');
+const Module = require('module');
+
+const APP_DIR = '/home/u754458241/domains/morsall.com/public_html/app_new';
+const NODE_APP_MODULES = '/home/u754458241/nodeapp/node_modules';
+
+// Force node_modules resolution
+const originalResolveFilename = Module._resolveFilename;
+Module._resolveFilename = function(request, parent, isMain, options) {
+    try {
+        return originalResolveFilename.apply(this, arguments);
+    } catch (e) {
+        if (!request.startsWith('.') && !request.startsWith('/')) {
+            const altPath = path.join(NODE_APP_MODULES, request);
+            try {
+                if (fs.existsSync(altPath) || fs.existsSync(altPath + '.js') || fs.existsSync(altPath + '/package.json')) {
+                    return originalResolveFilename.call(this, altPath, parent, isMain, options);
+                }
+            } catch (e2) {}
+        }
+        throw e;
+    }
+};
+
+const logPath = path.join(APP_DIR, 'server.log');
+const logFile = fs.createWriteStream(logPath, { flags: 'a' });
+function log(msg) {
+    const line = `[${new Date().toISOString()}] ${msg}\n`;
+    logFile.write(line);
+}
+process.stdout.write = process.stderr.write = logFile.write.bind(logFile);
+
+log('--- PRODUCTION STARTUP V4 (RESCUE) ---');
+
+// Set env
+process.env.NODE_ENV = 'production';
+process.env.PRISMA_CLIENT_ENGINE_TYPE = 'library';
+process.env.NODE_PATH = NODE_APP_MODULES;
+Module._initPaths();
+
+// Load .env
+try {
+    const envPath = path.join(APP_DIR, '.env');
+    require('dotenv').config({ path: envPath });
+    log('Loaded .env');
+} catch (e) {
+    log('Env load error: ' + e.message);
+}
+
+const next = require('next');
+const app = next({ dev: false, dir: APP_DIR });
+const handle = app.getRequestHandler();
+
+app.prepare().then(() => {
+    log('Next.js Prepared');
+    createServer(async (req, res) => {
+        try {
+            const parsedUrl = parse(req.url, true);
+            await handle(req, res, parsedUrl);
+        } catch (err) {
+            log('ERROR: ' + err.message);
+            res.statusCode = 500;
+            res.end('Internal Error');
+        }
+    }).listen(process.env.PORT || 3000, () => {
+        log('Listening');
+    });
+}).catch(err => {
+    log('CRITICAL: ' + err.message);
+    log(err.stack);
+});

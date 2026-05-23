@@ -1,0 +1,44 @@
+Created At: 2026-05-19T18:57:46Z
+Completed At: 2026-05-19T18:57:46Z
+File Path: `file:///C:/Users/hazem/Downloads/matger2/src/app/admin/dashboard/page.tsx`
+Total Lines: 494
+Total Bytes: 28753
+Showing lines 390 to 425
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+390:                       <span className="material-symbols-rounded text-[#C5A021]">delivery_dining</span>
+391:                       السائقون
+392:                     </h4>
+393:                     <div className="flex flex-col items-center justify-center h-32">
+394:                       <p className="text-6xl font-black text-[#0F172A]">{activeDrivers}</p>
+395:                       <p className="text-xs font-black text-slate-400 uppercase tracking-widest mt-2">سائق نشط</p>
+396:                     </div>
+397:                     <button onClick={() => setActiveTab("drivers")} className="w-full mt-4 py-3 rounded-2xl bg-[#C5A021]/10 text-[#C5A021] font-black text-sm hover:bg-[#C5A021] hover:text-white transition-all">
+398:                       إدارة المناديب
+399:                     </button>
+400:                   </div>
+401:                 </div>
+402:               </div>
+403:             )}
+404:             {activeTab === "approvals" && <ApprovalsTab pendingVendors={pendingVendors} pendingProducts={pendingProducts} onVendorAction={handleVendorAction} onProductAction={handleProductAction} classes={classes} />}
+405:             {activeTab === "orders" && (
+406:               <>
+407:                 <OrdersTable 
+408:                   orders={orders.filter(o => !["PENDING_PICKUP", "AT_BRANCH", "SHIPPED", "DELIVERED"].includes(o.status))}
+409:                   drivers={drivers}
+410:                   onEdit={setEditingOrder} 
+411:                   onPrint={(order) => {
+412:                     setPrintingOrders([order]);
+413:                     setIsPolicyModalOpen(true);
+414:                   }}
+415:                   onPrintBulk={(ords) => {
+416:                     setPrintingOrders(ords);
+417:                     setIsPolicyModalOpen(true);
+418:                   }}
+419:                   classes={classes} 
+420:                   ORDER_STATUSES={ORDER_STATUSES}
+421:                   defaultStatusFilter={statusFilter}
+422:                   onAssignDriver={async (orderId, driverId) => {
+423:                     await fetch("/api/admin/orders", {
+424:                       method: "PATCH",
+425:                       headers: { "Content-Type": "application/json" },
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.

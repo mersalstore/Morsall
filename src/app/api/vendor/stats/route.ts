@@ -23,11 +23,12 @@ export async function GET(req: Request) {
     }
 
     // 1. Total Sales (Gross from all order items)
+    const COMPLETED_STATUSES = ["CONFIRMED", "PROCESSING", "PENDING_PICKUP", "AT_BRANCH", "SHIPPED", "DELIVERED"];
     const orderItems = await prisma.orderItem.findMany({
       where: {
         vendorId: vendor.id,
         order: {
-          status: { in: ["APPROVED", "PACKING", "SHIPPED", "DELIVERED"] }
+          status: { in: COMPLETED_STATUSES }
         }
       },
       select: {
@@ -53,13 +54,14 @@ export async function GET(req: Request) {
 
     const availableBalance = grossProfit - totalWithdrawn;
 
-    // 3. Active Orders Count (PENDING_APPROVAL, APPROVED, PACKING, SHIPPED)
+    // 3. Active Orders Count (PENDING, CONFIRMED, PROCESSING, PENDING_PICKUP, AT_BRANCH, SHIPPED)
+    const ACTIVE_STATUSES = ["PENDING", "PENDING_CONFIRM", "CONFIRMED", "PROCESSING", "PENDING_PICKUP", "AT_BRANCH", "SHIPPED"];
     const activeOrdersCount = await prisma.order.count({
       where: {
         items: {
           some: { vendorId: vendor.id }
         },
-        status: { in: ["PENDING_APPROVAL", "APPROVED", "PACKING", "SHIPPED"] }
+        status: { in: ACTIVE_STATUSES }
       }
     });
 

@@ -1,0 +1,32 @@
+te gds-icon-m action-button-icon google-symbols mat-ligature-font mat-icon-no-color' role='img' />
+	You said
+	سنبدأ بالخطوة الأولى وهي إعادة هيكلة صفحة المنتج (Amazon Layout). من فضلك قم بكتابة وتجهيز الأكواد الكاملة والشرح التفصيلي للقيام بهذه الخطوة في مشروع Next.js الخاص بنا.
+	[87] (427,365)<button class='mdc-button mat-mdc-button-base thoughts-header-button ng-tns-c3976548746-125 mat-mdc-button mat-unthemed' />
+		Show thinking
+	Gemini said
+	خطوة ممتازة جداً! تطبيق
+	"تخطيط أمازون" (Amazon 3-Column Layout)
+	سيعطي دفعة قوية لمعدلات التحويل (Conversion Rate) لأنه يضع أهم المعلومات وزر الشراء أمام عين العميل مباشرة دون تشتيت.
+	في مشروع Next.js الخاص بك، يفضل دائماً فصل تخطيط صفحة المنتج في مكوّن عميل (Client Component) مستقل، لضمان عمل المعرض (Gallery) وأزرار إضافة السلة بكفاءة.
+	إليك الكود الشامل باستخدام
+	React و Tailwind CSS
+	، والذي يراعي التصميم المتجاوب (Mobile-First) ليكون مكدساً بذكاء في الموبايل، و3 أعمدة في الديسكتوب، مع جعل "صندوق الشراء" ثابتاً (Sticky).
+	1. الكود البرمجي:
+	ProductDetailsLayout.tsx
+	قم بإنشاء هذا الملف (أو استبدل محتوى ملف صفحة المنتج الحالية) بهذا الكود.
+	TypeScript
+[88] (600,839)<fieldset  />
+	[89] (600,801)<div aria-label='Enter a prompt for Gemini' class='ql-editor textarea new-input-ui ql-blank' role='textbox' />
+		[90] (595,801)<p  />
+	[91] (374,880)<button aria-label='Open upload file menu' class='mdc-icon-button mat-mdc-icon-button mat-mdc-button-base mat-mdc-tooltip-trigger upload-card-button open mat-primary ng-star-inserted' />
+		[92] (374,879)<mat-icon class='mat-icon notranslate gds-icon-l google-symbols mat-ligature-font mat-icon-no-color' role='img' />
+	[93] (421,880)<button class='mdc-button mat-mdc-button-base toolbox-drawer-button toolbox-drawer-button-with-label mat-mdc-button ng-tns-c2002101076-114 mat-unthemed ng-star-inserted' />
+		Tools
+	[94] (784,875)<button aria-label='Open mode picker' class='mdc-button mat-mdc-button-base mat-mdc-menu-trigger input-area-switch mat-mdc-button mat-unthemed ng-star-inserted' />
+		Pro
+	[95] (826,875)<button aria-label='Microphone' class='mdc-icon-button mat-mdc-icon-button mat-mdc-button-base mat-mdc-tooltip-trigger speech_dictation_mic_button ng-tns-c2383170276-70 mat-unthemed ng-star-inserted' />
+		[96] (826,877)<div  />
+			[97] (826,874)<mat-icon class='mat-icon notranslate ng-tns-c2383170276-70 gds-icon-l icon-filled google-symbols mat-ligature-font mat-icon-no-color' role='img' />
+Gemini is AI and can make mistakes.
+
+</current_dom>

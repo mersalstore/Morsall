@@ -1,0 +1,1 @@
+I will run `git diff` on `src/app/admin/dashboard/page.tsx` to see what changes are currently in the local working directory. This will reveal if the dashboard content has been overwritten or is still there.

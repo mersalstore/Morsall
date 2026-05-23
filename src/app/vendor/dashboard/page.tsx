@@ -16,9 +16,10 @@ import VendorLogisticsTab from "../../../components/VendorLogisticsTab";
 import VendorOrderModal from "../../../components/VendorOrderModal";
 import VendorInvoiceModal from "../../../components/VendorInvoiceModal";
 import VendorDesignTab from "../../../components/VendorDesignTab";
-import VendorShippingSettings from "../../../components/VendorShippingSettings";
 import VendorShippingPolicyModal from "../../../components/VendorShippingPolicyModal";
+import VendorSubscriptionTab from "../../../components/VendorSubscriptionTab";
 import VendorWMSTab from "../../../components/vendor/VendorWMSTab";
+import NotificationBell from "../../../components/NotificationBell";
 
 
 export default function VendorDashboard() {
@@ -47,6 +48,11 @@ export default function VendorDashboard() {
   const [isPolicyModalOpen, setIsPolicyModalOpen] = useState(false);
   const [ordersToPrint, setOrdersToPrint] = useState<any[]>([]);
 
+  // Edit product state
+  const [editingProduct, setEditingProduct] = useState<any>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [viewingProduct, setViewingProduct] = useState<any>(null);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
 
   const toggleProductSelection = (id: string) => {
     const newSelected = new Set(selectedProducts);
@@ -291,9 +297,12 @@ export default function VendorDashboard() {
                  <p className="text-[9px] md:text-xs text-gray-400 font-bold mt-0.5 truncate">لوحة تحكم المتجر</p>
               </div>
            </div>
-           <button onClick={() => setIsModalOpen(true)} className="bg-[#C5A021] text-white px-4 md:px-8 py-2 md:py-3 rounded-xl font-black text-[10px] md:text-sm shadow-lg shadow-[#C5A021]/20 hover:scale-105 transition-all shrink-0">
-              إضافة منتج
-           </button>
+           <div className="flex items-center gap-2">
+             <NotificationBell />
+             <button onClick={() => { setEditingProduct(null); setIsModalOpen(true); }} className="bg-[#C5A021] text-white px-4 md:px-8 py-2 md:py-3 rounded-xl font-black text-[10px] md:text-sm shadow-lg shadow-[#C5A021]/20 hover:scale-105 transition-all shrink-0">
+               إضافة منتج
+             </button>
+           </div>
         </header>
 
         <div className="max-w-7xl mx-auto p-4 md:p-10 space-y-6 md:space-y-12">
@@ -394,8 +403,8 @@ export default function VendorDashboard() {
           {activeTab === "analytics" && <StoreAnalytics stats={statsData} />}
           {activeTab === "logistics" && <VendorLogisticsTab orders={orders} />}
           {activeTab === "wms" && <VendorWMSTab products={products} />}
-          {activeTab === "shipping" && <VendorShippingSettings />}
           {activeTab === "design" && <VendorDesignTab />}
+          {activeTab === "subscription" && <VendorSubscriptionTab />}
           {activeTab === "coupons" && <VendorCoupons />}
           {activeTab === "reviews" && <VendorReviews />}
           {activeTab === "settings" && <VendorStoreSettings />}
@@ -417,7 +426,7 @@ export default function VendorDashboard() {
                         استيراد Excel
                         <input type="file" className="hidden" accept=".xlsx,.xls" onChange={handleImportExcel} disabled={actionLoading === "import"} />
                      </label>
-                     <button onClick={() => setIsModalOpen(true)} className="w-full sm:w-auto justify-center bg-[#C5A021] text-white px-4 py-2 rounded-xl text-[10px] md:text-sm font-bold shadow-lg shadow-[#C5A021]/20 hover:scale-105 transition-all flex items-center gap-2">
+                     <button onClick={() => { setEditingProduct(null); setIsModalOpen(true); }} className="w-full sm:w-auto justify-center bg-[#C5A021] text-white px-4 py-2 rounded-xl text-[10px] md:text-sm font-bold shadow-lg shadow-[#C5A021]/20 hover:scale-105 transition-all flex items-center gap-2">
                         <span className="material-symbols-rounded text-base">add</span>
                         أضف منتج
                      </button>
@@ -503,19 +512,25 @@ export default function VendorDashboard() {
                                       {p.status === "APPROVED" ? "منشور" : "مراجعة"}
                                     </span>
                                  </td>
-                                 <td className="py-4 text-center">
-                                    <div className="flex items-center justify-center gap-1.5">
-                                       <button className="w-7 h-7 rounded-lg bg-gray-50 text-gray-400 flex items-center justify-center hover:bg-[#C5A021]/10 hover:text-[#C5A021] transition-all">
-                                          <span className="material-symbols-rounded text-sm">visibility</span>
-                                       </button>
-                                       <button className="w-7 h-7 rounded-lg bg-gray-50 text-gray-400 flex items-center justify-center hover:bg-blue-500/10 hover:text-blue-500 transition-all">
-                                          <span className="material-symbols-rounded text-sm">edit</span>
-                                       </button>
-                                       <button onClick={() => handleDeleteProduct(p.id)} className="w-7 h-7 rounded-lg bg-gray-50 text-gray-400 flex items-center justify-center hover:bg-red-500/10 hover:text-red-500 transition-all">
-                                          <span className="material-symbols-rounded text-sm">delete</span>
-                                       </button>
-                                    </div>
-                                 </td>
+                                  <td className="py-4 text-center">
+                                     <div className="flex items-center justify-center gap-1.5">
+                                        <button
+                                          onClick={() => { setViewingProduct(p); setIsViewModalOpen(true); }}
+                                          className="w-7 h-7 rounded-lg bg-gray-50 text-gray-400 flex items-center justify-center hover:bg-[#C5A021]/10 hover:text-[#C5A021] transition-all"
+                                        >
+                                           <span className="material-symbols-rounded text-sm">visibility</span>
+                                        </button>
+                                        <button
+                                          onClick={() => { setEditingProduct(p); setIsEditModalOpen(true); }}
+                                          className="w-7 h-7 rounded-lg bg-gray-50 text-gray-400 flex items-center justify-center hover:bg-blue-500/10 hover:text-blue-500 transition-all"
+                                        >
+                                           <span className="material-symbols-rounded text-sm">edit</span>
+                                        </button>
+                                        <button onClick={() => handleDeleteProduct(p.id)} className="w-7 h-7 rounded-lg bg-gray-50 text-gray-400 flex items-center justify-center hover:bg-red-500/10 hover:text-red-500 transition-all">
+                                           <span className="material-symbols-rounded text-sm">delete</span>
+                                        </button>
+                                     </div>
+                                  </td>
                               </tr>
                            ))}
                         </tbody>
@@ -903,7 +918,65 @@ export default function VendorDashboard() {
         </div>
       )}
 
-      <AddProductModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+       <AddProductModal
+          isOpen={isModalOpen || isEditModalOpen}
+          onClose={() => { setIsModalOpen(false); setIsEditModalOpen(false); setEditingProduct(null); }}
+          editingProduct={editingProduct}
+       />
+
+       {/* View Product Details Modal */}
+       <AnimatePresence>
+          {isViewModalOpen && viewingProduct && (
+            <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => { setIsViewModalOpen(false); setViewingProduct(null); }} className="absolute inset-0 bg-[#0F172A]/40 backdrop-blur-sm" />
+              <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="bg-white w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-[3rem] shadow-2xl relative z-10 p-10 space-y-6">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-2xl font-black text-[#0F172A]">تفاصيل المنتج</h2>
+                  <button onClick={() => { setIsViewModalOpen(false); setViewingProduct(null); }} className="p-2 hover:bg-gray-100 rounded-xl transition-all"><span className="material-symbols-rounded text-gray-400">close</span></button>
+                </div>
+                {viewingProduct.images && (
+                  <div className="relative w-full h-64 rounded-3xl overflow-hidden bg-gray-50">
+                    <img src={viewingProduct.images?.split(",")[0] || "/placeholder.png"} alt={viewingProduct.title} className="w-full h-full object-contain" />
+                  </div>
+                )}
+                <div className="space-y-4">
+                  <div>
+                    <p className="text-[10px] font-black uppercase text-gray-400 tracking-widest">الاسم</p>
+                    <p className="text-lg font-black text-[#0F172A]">{viewingProduct.title}</p>
+                  </div>
+                  {viewingProduct.shortDescription && (
+                    <div>
+                      <p className="text-[10px] font-black uppercase text-gray-400 tracking-widest">وصف مختصر</p>
+                      <p className="text-sm text-gray-600">{viewingProduct.shortDescription}</p>
+                    </div>
+                  )}
+                  {viewingProduct.description && (
+                    <div>
+                      <p className="text-[10px] font-black uppercase text-gray-400 tracking-widest">الوصف</p>
+                      <p className="text-sm text-gray-600 whitespace-pre-wrap">{viewingProduct.description}</p>
+                    </div>
+                  )}
+                  <div className="grid grid-cols-3 gap-4">
+                    <div className="bg-gray-50 p-4 rounded-2xl">
+                      <p className="text-[10px] font-black uppercase text-gray-400">السعر</p>
+                      <p className="text-lg font-black text-[#C5A021]">{viewingProduct.price.toLocaleString()} ج.س</p>
+                    </div>
+                    <div className="bg-gray-50 p-4 rounded-2xl">
+                      <p className="text-[10px] font-black uppercase text-gray-400">المخزون</p>
+                      <p className="text-lg font-black text-[#0F172A]">{viewingProduct.stock}</p>
+                    </div>
+                    <div className="bg-gray-50 p-4 rounded-2xl">
+                      <p className="text-[10px] font-black uppercase text-gray-400">الحالة</p>
+                      <span className={cn("px-2 py-1 rounded-full text-[10px] font-black border", viewingProduct.status === "APPROVED" ? "bg-green-50 text-green-600 border-green-100" : "bg-orange-50 text-orange-500 border-orange-100")}>
+                        {viewingProduct.status === "APPROVED" ? "منشور" : "مراجعة"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+          )}
+       </AnimatePresence>
     </div>
   );
 }

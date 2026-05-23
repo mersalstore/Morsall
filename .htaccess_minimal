@@ -1,0 +1,5 @@
+PassengerNodejs /opt/alt/alt-nodejs20/root/usr/bin/node
+PassengerEnabled on
+PassengerAppType node
+PassengerStartupFile app.js
+PassengerAppRoot /home/u754458241/nodeapp

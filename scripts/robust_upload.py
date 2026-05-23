@@ -5,7 +5,7 @@ from paramiko import SFTPClient
 hostname = '82.198.228.182'
 port = 65002
 username = 'u754458241'
-password = 'Code_2252'
+password = '@n9qe3KgL'
 
 local_file = 'Morsall_Hostinger_Deploy.zip'
 remote_file = '/home/u754458241/domains/morsall.com/nodejs/Morsall_Hostinger_Deploy.zip'

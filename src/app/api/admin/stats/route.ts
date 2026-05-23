@@ -43,7 +43,8 @@ export async function GET(req: Request) {
       dailySales,
       orderStatusCounts,
       deliveryByCity,
-      activeDrivers
+      activeDrivers,
+      pendingWithdrawalsCount
     ] = await Promise.all([
       prisma.vendor.count(),
       prisma.order.aggregate({ where: dateFilter, _sum: { totalAmount: true }, _count: true }),
@@ -75,7 +76,9 @@ export async function GET(req: Request) {
         take: 10
       }),
       // Active drivers (has orders in SHIPPED status recently)
-      prisma.deliveryDriver.count({ where: { isActive: true } }).catch(() => 0)
+      prisma.deliveryDriver.count({ where: { isActive: true } }).catch(() => 0),
+      // Pending withdrawals
+      prisma.withdrawal.count({ where: { status: 'PENDING' } })
     ]);
 
     // Format daily chart
@@ -100,7 +103,7 @@ export async function GET(req: Request) {
         { label: "إجمالي الطلبات", value: totalSales._count.toString(), icon: "shopping_bag", color: "bg-gradient-to-br from-[#F29124] to-orange-700", tab: "orders" },
       ],
       orderStatuses: statusCountMap,
-      pendingWithdrawals: 0,
+      pendingWithdrawals: pendingWithdrawalsCount,
       chartData: Object.entries(chartMap).map(([name, value]) => ({ name, value })),
       pendingVendors: pendingVendorsList.map((v: any) => ({
         id: v.id,

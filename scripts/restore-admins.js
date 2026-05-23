@@ -19,9 +19,9 @@ async function main() {
     if (existing) {
         await prisma.user.update({
             where: { email: admin.email },
-            data: { role: 'ADMIN', isOnboarded: true }
+            data: { role: 'ADMIN', isOnboarded: true, password: password }
         });
-        console.log(`Updated existing user to ADMIN: ${admin.email}`);
+        console.log(`Updated existing user to ADMIN and reset password: ${admin.email}`);
     } else {
         await prisma.user.create({
             data: {

@@ -1,12 +1,12 @@
 generator client {
   provider      = "prisma-client-js"
-  binaryTargets = ["native", "debian-openssl-1.1.x", "debian-openssl-3.0.x", "rhel-openssl-1.0.x", "rhel-openssl-1.1.x", "rhel-openssl-3.0.x", "linux-musl"]
+  engineType    = "library"
+  binaryTargets = ["native", "debian-openssl-1.1.x", "debian-openssl-3.0.x", "rhel-openssl-1.0.x", "rhel-openssl-1.1.x", "rhel-openssl-3.0.x", "linux-musl", "linux-musl-openssl-3.0.x"]
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("POSTGRES_PRISMA_URL")
-  directUrl = env("POSTGRES_URL_NON_POOLING")
+  provider = "mysql"
+  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -25,6 +25,7 @@ model User {
   lastLogin     DateTime?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
+  permissions   Json?
   accounts      Account[]
   orders        Order[]
   reviews       Review[]
@@ -71,9 +72,9 @@ model Vendor {
   id                 String            @id @default(cuid())
   userId             String            @unique
   storeName          String
-  storeDescription   String?
-  bankStatementUrl   String?
-  commercialRegUrl   String?
+  storeDescription   String?           @db.Text
+  bankStatementUrl   String?           @db.Text
+  commercialRegUrl   String?           @db.Text
   status             String            @default("PENDING")
   commissionType     String            @default("PERCENTAGE")
   commissionRate     Float             @default(10.0)
@@ -93,9 +94,16 @@ model Vendor {
   instagramUrl       String?
   primaryColor       String            @default("#0F1629")
   secondaryColor     String            @default("#3B82F6")
-  storeBanner        String?
-  storeLogo          String?
+  storeBanner        String?           @db.Text
+  storeLogo          String?           @db.Text
   whatsappNumber     String?
+  rejectionReason    String?           @db.Text
+  walletBalance      Float             @default(0)
+  storeDesign        String?           @db.Text
+  tier               VendorPlan         @default(FREEMIUM)
+  stripeCustomerId   String?
+  paymentTransactions  PaymentTransaction[]
+  customDesignRequests CustomDesignRequest[]
   coupons            Coupon[]
   orderItems         OrderItem[]
   products           Product[]
@@ -103,28 +111,79 @@ model Vendor {
   user               User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   withdrawals        Withdrawal[]
   reviews            VendorReview[]
+  supplyRequests     SupplyRequest[]
+}
+
+enum VendorPlan {
+  FREEMIUM
+  PREMIUM_BUILDER
+  CUSTOM_DESIGN
 }
 
 model SubscriptionPlan {
-  id           String   @id @default(cuid())
-  name         String
-  price        Float
-  durationDays Int
-  isTrial      Boolean  @default(false)
-  createdAt    DateTime @default(now())
-  vendors      Vendor[]
+  id                String             @id @default(cuid())
+  name              String
+  slug              String             @unique // "freemium", "premium-builder", "custom-design"
+  price             Float
+  durationDays      Int
+  isTrial           Boolean            @default(false)
+  canUploadProducts Boolean            @default(false)
+  canUseBuilder     Boolean            @default(false)
+  canCustomDesign   Boolean            @default(false)
+  maxProducts       Int                @default(0)
+  maxBlocks         Int                @default(0)
+  stripePriceId     String?            @unique
+  features          Json?              // ["رفع المنتجات", "منشئ المواقع", ...]
+  createdAt         DateTime           @default(now())
+  vendors           Vendor[]
+  paymentTransactions PaymentTransaction[]
+}
+
+model PaymentTransaction {
+  id                     String   @id @default(cuid())
+  vendorId               String
+  planId                 String?
+  amount                 Float
+  currency               String   @default("SDG")
+  status                 String   @default("PENDING") // PENDING, COMPLETED, FAILED, REFUNDED
+  stripeSessionId        String?  @unique
+  stripePaymentIntentId  String?
+  stripeSubscriptionId   String?
+  paymentMethod          String?  // "stripe", "bank_transfer", "wallet"
+  createdAt              DateTime @default(now())
+  completedAt            DateTime?
+  vendor                 Vendor   @relation(fields: [vendorId], references: [id])
+  plan                   SubscriptionPlan? @relation(fields: [planId], references: [id])
+
+  @@index([vendorId])
+  @@index([stripeSessionId])
+}
+
+model CustomDesignRequest {
+  id              String   @id @default(cuid())
+  vendorId        String
+  description     String   @db.Text
+  requirements    Json?    // attachments, colors, references
+  status          String   @default("PENDING") // PENDING, IN_PROGRESS, COMPLETED, CANCELLED
+  adminNotes      String?  @db.Text
+  price           Float    @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  vendor          Vendor   @relation(fields: [vendorId], references: [id])
+
+  @@index([vendorId])
 }
 
 model Product {
   id               String             @id @default(cuid())
   title            String
-  description      String
+  description      String             @db.LongText
   price            Float
   stock            Int                @default(0)
-  images           String?
+  images           String?            @db.Text
   sizes            String?
   colors           String?
-  status           String             @default("PENDING")
+  status           String             @default( "APPROVED")
   vendorId         String
   categoryId       String?
   purchaseCount    Int                @default(0)
@@ -135,26 +194,29 @@ model Product {
   height           Float?
   length           Float?
   range            String?
-  shortDescription String?
+  shortDescription String?            @db.Text
   sku              String?
   type             String             @default("SIMPLE")
   weight           Float?
   width            Float?
   discountPrice    Float?
   discountType     String?
+  rejectionReason  String?            @db.Text
+  specifications   String?            @db.Text
   orderItems       OrderItem[]
   category         Category?          @relation(fields: [categoryId], references: [id])
   vendor           Vendor             @relation(fields: [vendorId], references: [id])
   attributes       ProductAttribute[]
   variations       ProductVariation[]
   reviews          Review[]
+  supplyRequestItems SupplyRequestItem[]
 }
 
 model ProductAttribute {
   id        String   @id @default(cuid())
   productId String
   name      String
-  values    String[]
+  values    Json
   product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
 }
 
@@ -191,8 +253,8 @@ model AttributeOption {
 model Category {
   id           String     @id @default(cuid())
   name         String     @unique
-  icon         String?
-  image        String?
+  icon         String?    @db.Text
+  image        String?    @db.Text
   parentId     String?
   showInNavbar Boolean    @default(false)
   parent       Category?  @relation("SubCategories", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
@@ -213,18 +275,37 @@ model Order {
   phone             String
   customerEmail     String?
   customerName      String?
-  notes             String?
-  paymentScreenshot String?
+  notes             String?         @db.Text
+  paymentScreenshot String?         @db.Text
   paymentVerified   Boolean         @default(false)
-  paymentNote       String?
+  paymentNote       String?         @db.Text
   trackingLat       Float?
   trackingLng       Float?
   trackingNumber    String?
-  trackingUrl       String?
+  trackingUrl       String?         @db.Text
   estimatedDays     Int?
   createdAt         DateTime        @default(now())
   updatedAt         DateTime        @updatedAt
   driverId          String?
+  assignedAt        DateTime?
+  pickedUpAt        DateTime?
+  deliveredAt       DateTime?
+  codCollected      Boolean         @default(false)
+  branchId          String?
+  source            String          @default("STORE")
+  createdBy         String?
+
+  // Logistics tracking fields
+  packageContent            String?         @db.Text
+  weight                    Float?
+  otherFees                 Float           @default(0)
+  additionalFees            Float           @default(0)
+  consignmentNumber         String?
+  providerConsignmentNumber String?
+  customerReference         String?
+  pendingAttempts           Int             @default(0)
+  shipmentType              String?
+
   customer          User            @relation(fields: [customerId], references: [id])
   driver            DeliveryDriver? @relation(fields: [driverId], references: [id])
   items             OrderItem[]
@@ -260,6 +341,8 @@ model Settings {
   exchangeRate        Float   @default(1.0)
   baseCurrency        String  @default("SDG")
   platformCommission  Float   @default(10.0)
+  commissionType      String  @default("PERCENTAGE")
+  fixedCommission     Float   @default(0.0)
   maintenanceMode     Boolean @default(false)
   maintenanceMessage  String  @default("هناك خطأ تقني يجري إصلاحه")
   codEnabled          Boolean @default(true)
@@ -306,6 +389,7 @@ model Employee {
   email     String   @unique
   role      String
   isActive  Boolean  @default(true)
+  permissions Json?
   createdAt DateTime @default(now())
 }
 
@@ -328,13 +412,36 @@ model ShippingProvider {
 }
 
 model DeliveryDriver {
-  id          String   @id @default(cuid())
-  name        String
-  phone       String
-  vehicleType String
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  orders      Order[]
+  id                String                    @id @default(cuid())
+  name              String
+  phone             String                    @unique
+  vehicleType       String
+  isActive          Boolean                   @default(true)
+  isOnline          Boolean                   @default(false)
+  balance           Float                     @default(0)
+  createdAt         DateTime                  @default(now())
+  orders            Order[]
+  walletTransactions DriverWalletTransaction[]
+}
+
+model DriverWalletTransaction {
+  id          String         @id @default(cuid())
+  driverId    String
+  amount      Float
+  type        String         // COLLECTION (COD), SETTLEMENT, COMMISSION
+  description String?
+  orderId     String?
+  createdAt   DateTime       @default(now())
+  driver      DeliveryDriver @relation(fields: [driverId], references: [id])
+}
+
+model Branch {
+  id        String   @id @default(cuid())
+  name      String
+  location  String
+  phone     String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
 }
 
 model Review {
@@ -371,4 +478,97 @@ model Coupon {
   vendorId       String
   createdAt      DateTime  @default(now())
   vendor         Vendor    @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+}
+
+model SupplyRequest {
+  id          String              @id @default(cuid())
+  vendorId    String
+  status      String              @default("PENDING") // PENDING, RECEIVED, CANCELLED
+  totalItems  Int                 @default(0)
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  items       SupplyRequestItem[]
+  vendor      Vendor              @relation(fields: [vendorId], references: [id])
+}
+
+model SupplyRequestItem {
+  id              String        @id @default(cuid())
+  supplyRequestId String
+  productId       String
+  expectedQty     Int
+  receivedQty     Int           @default(0)
+  damagedQty      Int           @default(0)
+  supplyRequest   SupplyRequest @relation(fields: [supplyRequestId], references: [id], onDelete: Cascade)
+  product         Product       @relation(fields: [productId], references: [id])
+}
+
+// الباب الرابع: حفظ عناوين العملاء تلقائياً
+model SavedAddress {
+  id        String   @id @default(cuid())
+  userId    String
+  city      String
+  district  String
+  street    String
+  label     String?  // "المنزل" أو "العمل"
+  isDefault Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+// الباب الثالث: نظام تسوية كاش المناديب
+model DriverSettlement {
+  id          String   @id @default(cuid())
+  driverId    String
+  totalCash   Float    // الكاش الإجمالي النظري
+  actualCash  Float    // الكاش الفعلي المسلّم
+  difference  Float    // الفرق (يجب أن يكون صفر)
+  notes       String?  @db.Text
+  settledBy   String?  // ID الموظف المحاسب
+  orderIds    String   @db.Text  // JSON array of order IDs
+  status      String   @default("PENDING") // PENDING, SETTLED, DISPUTED
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([driverId])
+}
+
+// نظام الإشعارات الفوري
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String?
+  role      String?  // "ADMIN", "VENDOR", "DRIVER", "ALL"
+  title     String
+  message   String   @db.Text
+  type      String   // "order", "withdrawal", "payment", "vendor", "system", "transfer"
+  link      String?  // URL للتنقل عند الضغط
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([role])
+  @@index([createdAt])
+}
+
+// الباب الأول: طلبات استيراد الطلبات الخارجية
+model ImportedOrder {
+  id            String   @id @default(cuid())
+  supplierId    String?
+  supplierName  String
+  customerName  String
+  phone         String
+  city          String
+  district      String?
+  street        String?
+  productName   String
+  quantity      Int      @default(1)
+  price         Float
+  notes         String?  @db.Text
+  status        String   @default("PENDING") // PENDING, PROCESSED, CANCELLED
+  source        String   @default("IMPORT") // FACEBOOK, WHATSAPP, IMPORT
+  createdAt     DateTime @default(now())
+  processedAt   DateTime?
+
+  @@index([supplierId])
 }

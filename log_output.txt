@@ -1,0 +1,274 @@
+4458241/domains/morsall.com/public_html/server.js
+- /usr/local/lsws/fcgi-bin/lsnode.js
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1212:15)
+    at Module._load (node:internal/modules/cjs/loader:1043:27)
+    at Module.require (node:internal/modules/cjs/loader:1298:19)
+    at require (node:internal/modules/helpers:182:18)
+    at Object.<anonymous> (/home/u754458241/domains/morsall.com/public_html/server.js:37:14)
+    at Module._compile (node:internal/modules/cjs/loader:1529:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1613:10)
+    at Module.load (node:internal/modules/cjs/loader:1275:32)
+    at Module._load (node:internal/modules/cjs/loader:1096:12)
+    at Module.require (node:internal/modules/cjs/loader:1298:19) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    '/home/u754458241/domains/morsall.com/public_html/server.js',
+    '/usr/local/lsws/fcgi-bin/lsnode.js'
+  ]
+}
+
+Node.js v20.19.4
+node:internal/modules/cjs/loader:1215
+  throw err;
+  ^
+
+Error: Cannot find module 'next'
+Require stack:
+- /home/u754458241/domains/morsall.com/public_html/server.js
+- /usr/local/lsws/fcgi-bin/lsnode.js
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1212:15)
+    at Module._load (node:internal/modules/cjs/loader:1043:27)
+    at Module.require (node:internal/modules/cjs/loader:1298:19)
+    at require (node:internal/modules/helpers:182:18)
+    at Object.<anonymous> (/home/u754458241/domains/morsall.com/public_html/server.js:37:14)
+    at Module._compile (node:internal/modules/cjs/loader:1529:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1613:10)
+    at Module.load (node:internal/modules/cjs/loader:1275:32)
+    at Module._load (node:internal/modules/cjs/loader:1096:12)
+    at Module.require (node:internal/modules/cjs/loader:1298:19) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    '/home/u754458241/domains/morsall.com/public_html/server.js',
+    '/usr/local/lsws/fcgi-bin/lsnode.js'
+  ]
+}
+
+Node.js v20.19.4
+node:internal/modules/cjs/loader:1215
+  throw err;
+  ^
+
+Error: Cannot find module 'next'
+Require stack:
+- /home/u754458241/domains/morsall.com/public_html/server.js
+- /usr/local/lsws/fcgi-bin/lsnode.js
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1212:15)
+    at Module._load (node:internal/modules/cjs/loader:1043:27)
+    at Module.require (node:internal/modules/cjs/loader:1298:19)
+    at require (node:internal/modules/helpers:182:18)
+    at Object.<anonymous> (/home/u754458241/domains/morsall.com/public_html/server.js:37:14)
+    at Module._compile (node:internal/modules/cjs/loader:1529:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1613:10)
+    at Module.load (node:internal/modules/cjs/loader:1275:32)
+    at Module._load (node:internal/modules/cjs/loader:1096:12)
+    at Module.require (node:internal/modules/cjs/loader:1298:19) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    '/home/u754458241/domains/morsall.com/public_html/server.js',
+    '/usr/local/lsws/fcgi-bin/lsnode.js'
+  ]
+}
+
+Node.js v20.19.4
+node:internal/modules/cjs/loader:1215
+  throw err;
+  ^
+
+Error: Cannot find module 'next'
+Require stack:
+- /home/u754458241/domains/morsall.com/public_html/server.js
+- /usr/local/lsws/fcgi-bin/lsnode.js
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1212:15)
+    at Module._load (node:internal/modules/cjs/loader:1043:27)
+    at Module.require (node:internal/modules/cjs/loader:1298:19)
+    at require (node:internal/modules/helpers:182:18)
+    at Object.<anonymous> (/home/u754458241/domains/morsall.com/public_html/server.js:37:14)
+    at Module._compile (node:internal/modules/cjs/loader:1529:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1613:10)
+    at Module.load (node:internal/modules/cjs/loader:1275:32)
+    at Module._load (node:internal/modules/cjs/loader:1096:12)
+    at Module.require (node:internal/modules/cjs/loader:1298:19) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    '/home/u754458241/domains/morsall.com/public_html/server.js',
+    '/usr/local/lsws/fcgi-bin/lsnode.js'
+  ]
+}
+
+Node.js v20.19.4
+node:internal/modules/cjs/loader:1215
+  throw err;
+  ^
+
+Error: Cannot find module 'next'
+Require stack:
+- /home/u754458241/domains/morsall.com/public_html/server.js
+- /usr/local/lsws/fcgi-bin/lsnode.js
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1212:15)
+    at Module._load (node:internal/modules/cjs/loader:1043:27)
+    at Module.require (node:internal/modules/cjs/loader:1298:19)
+    at require (node:internal/modules/helpers:182:18)
+    at Object.<anonymous> (/home/u754458241/domains/morsall.com/public_html/server.js:37:14)
+    at Module._compile (node:internal/modules/cjs/loader:1529:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1613:10)
+    at Module.load (node:internal/modules/cjs/loader:1275:32)
+    at Module._load (node:internal/modules/cjs/loader:1096:12)
+    at Module.require (node:internal/modules/cjs/loader:1298:19) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    '/home/u754458241/domains/morsall.com/public_html/server.js',
+    '/usr/local/lsws/fcgi-bin/lsnode.js'
+  ]
+}
+
+Node.js v20.19.4
+/home/u754458241/nodeapp/node_modules/next/dist/server/lib/router-utils/filesystem.js:159
+            throw Object.defineProperty(new Error(`Could not find a production build in the '${opts.config.distDir}' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id`), "__NEXT_ERROR_CODE", {
+                                        ^
+
+Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+    at setupFsCheck (/home/u754458241/nodeapp/node_modules/next/dist/server/lib/router-utils/filesystem.js:159:41)
+    at async initialize (/home/u754458241/nodeapp/node_modules/next/dist/server/lib/router-server.js:112:23)
+    at async NextCustomServer.prepare (/home/u754458241/nodeapp/node_modules/next/dist/server/next.js:287:28)
+
+Node.js v20.19.4
+/home/u754458241/nodeapp/node_modules/next/dist/server/lib/router-utils/filesystem.js:159
+            throw Object.defineProperty(new Error(`Could not find a production build in the '${opts.config.distDir}' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id`), "__NEXT_ERROR_CODE", {
+                                        ^
+
+Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+    at setupFsCheck (/home/u754458241/nodeapp/node_modules/next/dist/server/lib/router-utils/filesystem.js:159:41)
+    at async initialize (/home/u754458241/nodeapp/node_modules/next/dist/server/lib/router-server.js:112:23)
+    at async NextCustomServer.prepare (/home/u754458241/nodeapp/node_modules/next/dist/server/next.js:287:28)
+
+Node.js v20.19.4
+/home/u754458241/nodeapp/node_modules/next/dist/server/lib/router-utils/filesystem.js:159
+            throw Object.defineProperty(new Error(`Could not find a production build in the '${opts.config.distDir}' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id`), "__NEXT_ERROR_CODE", {
+                                        ^
+
+Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+    at setupFsCheck (/home/u754458241/nodeapp/node_modules/next/dist/server/lib/router-utils/filesystem.js:159:41)
+    at async initialize (/home/u754458241/nodeapp/node_modules/next/dist/server/lib/router-server.js:112:23)
+    at async NextCustomServer.prepare (/home/u754458241/nodeapp/node_modules/next/dist/server/next.js:287:28)
+
+Node.js v20.19.4
+/home/u754458241/nodeapp/node_modules/next/dist/server/lib/router-utils/filesystem.js:159
+            throw Object.defineProperty(new Error(`Could not find a production build in the '${opts.config.distDir}' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id`), "__NEXT_ERROR_CODE", {
+                                        ^
+
+Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+    at setupFsCheck (/home/u754458241/nodeapp/node_modules/next/dist/server/lib/router-utils/filesystem.js:159:41)
+    at async initialize (/home/u754458241/nodeapp/node_modules/next/dist/server/lib/router-server.js:112:23)
+    at async NextCustomServer.prepare (/home/u754458241/nodeapp/node_modules/next/dist/server/next.js:287:28)
+
+Node.js v20.19.4
+/home/u754458241/nodeapp/node_modules/next/dist/server/lib/router-utils/filesystem.js:159
+            throw Object.defineProperty(new Error(`Could not find a production build in the '${opts.config.distDir}' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id`), "__NEXT_ERROR_CODE", {
+                                        ^
+
+Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+    at setupFsCheck (/home/u754458241/nodeapp/node_modules/next/dist/server/lib/router-utils/filesystem.js:159:41)
+    at async initialize (/home/u754458241/nodeapp/node_modules/next/dist/server/lib/router-server.js:112:23)
+    at async NextCustomServer.prepare (/home/u754458241/nodeapp/node_modules/next/dist/server/next.js:287:28)
+
+Node.js v20.19.4
+/home/u754458241/nodeapp/node_modules/next/dist/server/lib/router-utils/filesystem.js:159
+            throw Object.defineProperty(new Error(`Could not find a production build in the '${opts.config.distDir}' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id`), "__NEXT_ERROR_CODE", {
+                                        ^
+
+Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+    at setupFsCheck (/home/u754458241/nodeapp/node_modules/next/dist/server/lib/router-utils/filesystem.js:159:41)
+    at async initialize (/home/u754458241/nodeapp/node_modules/next/dist/server/lib/router-server.js:112:23)
+    at async NextCustomServer.prepare (/home/u754458241/nodeapp/node_modules/next/dist/server/next.js:287:28)
+
+Node.js v20.19.4
+/home/u754458241/nodeapp/node_modules/next/dist/server/lib/router-utils/filesystem.js:159
+            throw Object.defineProperty(new Error(`Could not find a production build in the '${opts.config.distDir}' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id`), "__NEXT_ERROR_CODE", {
+                                        ^
+
+Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+    at setupFsCheck (/home/u754458241/nodeapp/node_modules/next/dist/server/lib/router-utils/filesystem.js:159:41)
+    at async initialize (/home/u754458241/nodeapp/node_modules/next/dist/server/lib/router-server.js:112:23)
+    at async NextCustomServer.prepare (/home/u754458241/nodeapp/node_modules/next/dist/server/next.js:287:28)
+
+Node.js v20.19.4
+/home/u754458241/nodeapp/node_modules/next/dist/server/lib/router-utils/filesystem.js:159
+            throw Object.defineProperty(new Error(`Could not find a production build in the '${opts.config.distDir}' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id`), "__NEXT_ERROR_CODE", {
+                                        ^
+
+Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+    at setupFsCheck (/home/u754458241/nodeapp/node_modules/next/dist/server/lib/router-utils/filesystem.js:159:41)
+    at async initialize (/home/u754458241/nodeapp/node_modules/next/dist/server/lib/router-server.js:112:23)
+    at async NextCustomServer.prepare (/home/u754458241/nodeapp/node_modules/next/dist/server/next.js:287:28)
+
+Node.js v20.19.4
+/home/u754458241/nodeapp/node_modules/next/dist/server/lib/router-utils/filesystem.js:159
+            throw Object.defineProperty(new Error(`Could not find a production build in the '${opts.config.distDir}' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id`), "__NEXT_ERROR_CODE", {
+                                        ^
+
+Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+    at setupFsCheck (/home/u754458241/nodeapp/node_modules/next/dist/server/lib/router-utils/filesystem.js:159:41)
+    at async initialize (/home/u754458241/nodeapp/node_modules/next/dist/server/lib/router-server.js:112:23)
+    at async NextCustomServer.prepare (/home/u754458241/nodeapp/node_modules/next/dist/server/next.js:287:28)
+
+Node.js v20.19.4
+/home/u754458241/nodeapp/node_modules/next/dist/server/lib/router-utils/filesystem.js:159
+            throw Object.defineProperty(new Error(`Could not find a production build in the '${opts.config.distDir}' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id`), "__NEXT_ERROR_CODE", {
+                                        ^
+
+Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+    at setupFsCheck (/home/u754458241/nodeapp/node_modules/next/dist/server/lib/router-utils/filesystem.js:159:41)
+    at async initialize (/home/u754458241/nodeapp/node_modules/next/dist/server/lib/router-server.js:112:23)
+    at async NextCustomServer.prepare (/home/u754458241/nodeapp/node_modules/next/dist/server/next.js:287:28)
+
+Node.js v20.19.4
+/home/u754458241/nodeapp/node_modules/next/dist/server/lib/router-utils/filesystem.js:159
+            throw Object.defineProperty(new Error(`Could not find a production build in the '${opts.config.distDir}' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id`), "__NEXT_ERROR_CODE", {
+                                        ^
+
+Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+    at setupFsCheck (/home/u754458241/nodeapp/node_modules/next/dist/server/lib/router-utils/filesystem.js:159:41)
+    at async initialize (/home/u754458241/nodeapp/node_modules/next/dist/server/lib/router-server.js:112:23)
+    at async NextCustomServer.prepare (/home/u754458241/nodeapp/node_modules/next/dist/server/next.js:287:28)
+
+Node.js v20.19.4
+/home/u754458241/nodeapp/node_modules/next/dist/server/lib/router-utils/filesystem.js:159
+            throw Object.defineProperty(new Error(`Could not find a production build in the '${opts.config.distDir}' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id`), "__NEXT_ERROR_CODE", {
+                                        ^
+
+Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+    at setupFsCheck (/home/u754458241/nodeapp/node_modules/next/dist/server/lib/router-utils/filesystem.js:159:41)
+    at async initialize (/home/u754458241/nodeapp/node_modules/next/dist/server/lib/router-server.js:112:23)
+    at async NextCustomServer.prepare (/home/u754458241/nodeapp/node_modules/next/dist/server/next.js:287:28)
+
+Node.js v20.19.4
+/home/u754458241/nodeapp/node_modules/next/dist/server/lib/router-utils/filesystem.js:159
+            throw Object.defineProperty(new Error(`Could not find a production build in the '${opts.config.distDir}' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id`), "__NEXT_ERROR_CODE", {
+                                        ^
+
+Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+    at setupFsCheck (/home/u754458241/nodeapp/node_modules/next/dist/server/lib/router-utils/filesystem.js:159:41)
+    at async initialize (/home/u754458241/nodeapp/node_modules/next/dist/server/lib/router-server.js:112:23)
+    at async NextCustomServer.prepare (/home/u754458241/nodeapp/node_modules/next/dist/server/next.js:287:28)
+
+Node.js v20.19.4
+/home/u754458241/nodeapp/node_modules/next/dist/server/lib/router-utils/filesystem.js:159
+            throw Object.defineProperty(new Error(`Could not find a production build in the '${opts.config.distDir}' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id`), "__NEXT_ERROR_CODE", {
+                                        ^
+
+Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+    at setupFsCheck (/home/u754458241/nodeapp/node_modules/next/dist/server/lib/router-utils/filesystem.js:159:41)
+    at async initialize (/home/u754458241/nodeapp/node_modules/next/dist/server/lib/router-server.js:112:23)
+    at async NextCustomServer.prepare (/home/u754458241/nodeapp/node_modules/next/dist/server/next.js:287:28)
+
+Node.js v20.19.4
+/home/u754458241/nodeapp/node_modules/next/dist/server/lib/router-utils/filesystem.js:159
+            throw Object.defineProperty(new Error(`Could not find a production build in the '${opts.config.distDir}' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id`), "__NEXT_ERROR_CODE", {
+                                        ^
+
+Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+    at setupFsCheck (/home/u754458241/nodeapp/node_modules/next/dist/server/lib/router-utils/filesystem.js:159:41)
+    at async initialize (/home/u754458241/nodeapp/node_modules/next/dist/server/lib/router-server.js:112:23)
+    at async NextCustomServer.prepare (/home/u754458241/nodeapp/node_modules/next/dist/server/next.js:287:28)
+
+Node.js v20.19.4

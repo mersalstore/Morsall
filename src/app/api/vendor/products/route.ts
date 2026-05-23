@@ -52,6 +52,32 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Vendor profile not found" }, { status: 404 });
     }
 
+    // SaaS Paywall: check if vendor can upload products
+    const tier = vendor.tier || "FREEMIUM";
+    const isSubActive = vendor.subscriptionEndsAt
+      ? new Date(vendor.subscriptionEndsAt) > new Date()
+      : tier === "FREEMIUM";
+
+    if (tier === "FREEMIUM" && !isSubActive) {
+      return NextResponse.json({
+        error: "يجب ترقية حسابك لرفع المنتجات. اختر باقة Premium Builder من قسم الخطط.",
+        code: "PLAN_UPGRADE_REQUIRED",
+      }, { status: 403 });
+    }
+
+    if (tier === "FREEMIUM") {
+      // Count existing products to enforce maxProducts limit
+      const productCount = await prisma.product.count({
+        where: { vendorId: vendor.id },
+      });
+      if (productCount >= 0) {
+        return NextResponse.json({
+          error: "حسابك المجاني لا يدعم رفع المنتجات. قم بالترقية لإحدى الباقات المدفوعة.",
+          code: "PLAN_UPGRADE_REQUIRED",
+        }, { status: 403 });
+      }
+    }
+
     const body = await req.json();
     const { 
       title, description, shortDescription, price, stock, images, categoryId, 

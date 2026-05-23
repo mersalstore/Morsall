@@ -30,7 +30,7 @@ import { useSession, signOut } from "next-auth/react";
 export type TabId =
   | "overview" | "approvals" | "users" | "vendors"
   | "categories" | "employees" | "orders" | "payments"
-  | "logistics" | "delivery" | "shipping" | "finance" | "settings" | "inventory" | "drivers" | "subscriptions" | "attributes" | "globalSettings" | "appearance" | "offersAds" | "importedOrders" | "wms";
+  | "logistics" | "delivery" | "shipping" | "finance" | "settings" | "inventory" | "drivers" | "subscriptions" | "subscriptionRequests" | "siteSections" | "attributes" | "globalSettings" | "appearance" | "offersAds" | "importedOrders" | "wms";
 
 interface SidebarProps {
   activeTab: TabId;
@@ -59,16 +59,18 @@ const NAV_ITEMS: { id: TabId; icon: any; label: string; group?: string }[] = [
   { id: "importedOrders", icon: PackageSearch,  label: "استيراد طلبات", group: "عمليات" },
   { id: "finance",     icon: CreditCard,       label: "المالية", group: "عمليات" },
   { id: "payments",    icon: CreditCard,       label: "طرق الدفع الإلكتروني", group: "عمليات" },
-  { id: "subscriptions",icon: Gem,               label: "الاشتراكات", group: "عمليات" },
+  { id: "subscriptions",icon: Gem,               label: "باقات الاشتراك", group: "عمليات" },
+  { id: "subscriptionRequests",icon: CreditCard,  label: "طلبات الاشتراك", group: "عمليات" },
   { id: "delivery",    icon: MapPin,           label: "مناطق التوصيل", group: "عمليات" },
   
   { id: "appearance",  icon: Palette,          label: "المظهر والصور", group: "إعدادات" },
+  { id: "siteSections",icon: LayoutDashboard,  label: "أقسام الصفحة الرئيسية", group: "إعدادات" },
   { id: "offersAds",   icon: TrendingUp,        label: "العروض والإعلانات", group: "إعدادات" },
   { id: "globalSettings", icon: Settings,      label: "الإعدادات العامة", group: "إعدادات" },
 ];
 
 const ROLE_PERMISSIONS: Record<string, TabId[]> = {
-  ADMIN: ["overview", "approvals", "users", "vendors", "categories", "employees", "orders", "payments", "logistics", "importedOrders", "delivery", "shipping", "finance", "settings", "inventory", "drivers", "subscriptions", "attributes", "globalSettings", "appearance", "offersAds", "wms"],
+  ADMIN: ["overview", "approvals", "users", "vendors", "categories", "employees", "orders", "payments", "logistics", "importedOrders", "delivery", "shipping", "finance", "settings", "inventory", "drivers", "subscriptions", "subscriptionRequests", "attributes", "globalSettings", "appearance", "siteSections", "offersAds", "wms"],
   PACKING: ["orders", "inventory"],
   SHIPPING: ["logistics", "drivers", "vendors", "importedOrders"],
   CUSTOMER_SERVICE: ["overview", "approvals", "orders", "users"],
@@ -130,7 +132,7 @@ export default function AdminSidebar({ activeTab, setActiveTab, userRole, isOpen
         <div className="absolute top-0 right-0 w-32 h-32 bg-[#C5A021]/10 blur-[60px] rounded-full -translate-y-1/2 translate-x-1/2 group-hover:bg-[#C5A021]/20 transition-all duration-1000" />
         <div className="relative w-full h-14 mb-4 transform group-hover:scale-105 transition-transform duration-500">
           <Image 
-            src="/logo-navbar-final.png" 
+            src="/logo.png?v=6" 
             alt="Morsall Logo" 
             fill 
             className="object-contain filter drop-shadow-[0_0_8px_rgba(197,160,33,0.3)]" 

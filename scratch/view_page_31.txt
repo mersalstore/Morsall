@@ -1,0 +1,94 @@
+Created At: 2026-05-19T18:58:12Z
+Completed At: 2026-05-19T18:58:12Z
+File Path: `file:///C:/Users/hazem/Downloads/matger2/src/app/vendor/dashboard/page.tsx`
+Total Lines: 910
+Total Bytes: 54993
+Showing lines 111 to 910
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+111:     } catch (err) {
+112:       alert("حدث خطأ أثناء التصدير");
+113:     }
+114:   };
+115: 
+116:   const [actionLoading, setActionLoading] = useState<string | null>(null);
+117: 
+118:   useEffect(() => {
+119:     async function fetchData() {
+120:       setLoading(true);
+121:       try {
+122:         const [sRes, pRes, oRes, wRes] = await Promise.all([
+123:           fetch("/api/vendor/stats"),
+124:           fetch("/api/vendor/products"),
+125:           fetch("/api/vendor/orders"),
+126:           fetch("/api/vendor/withdrawals")
+127:         ]);
+128: 
+129:         if (sRes.ok) setStatsData(await sRes.json());
+130:         if (pRes.ok) setProducts(await pRes.json());
+131:         if (oRes.ok) setOrders(await oRes.json());
+132:         if (wRes.ok) setWithdrawals(await wRes.json());
+133:       } catch (err) {
+134:         console.error("Dashboard fetch error:", err);
+135:       } finally {
+136:         setLoading(false);
+137:       }
+138:     }
+139:     fetchData();
+140:   }, []);
+141: 
+142:   const handleDeleteProduct = async (id: string) => {
+143:     if (!confirm("هل أنت متأكد من حذف هذا المنتج؟")) return;
+144:     try {
+145:       const res = await fetch(`/api/vendor/products/${id}`, { method: "DELETE" });
+146:       if (res.ok) setProducts(prev => prev.filter(p => p.id !== id));
+147:     } catch (err) {
+148:       alert("فشل حذف المنتج");
+149:     }
+150:   };
+151: 
+152:   const handleWithdrawalRequest = async () => {
+153:     if (!statsData?.netProfit || statsData.netProfit < 1000) {
+154:       alert("ع
+<truncated 45282 bytes>
+          { title: "الباقة الذهبية", desc: "إعلان بانر في الصفحة الرئيسية وظهور مميز لمدة شهر", price: "35,000 ج.س", color: "from-[#021D24] to-[#010E12]" },
+790:               ].map((pkg, i) => (
+791:                 <div key={i} className="bg-white p-8 rounded-3xl border border-border shadow-sm flex flex-col justify-between gap-8 group hover:border-[#1089A4] transition-all">
+792:                   <div>
+793:                     <h4 className="text-xl font-black text-[#021D24] mb-2">{pkg.title}</h4>
+794:                     <p className="text-gray-400 font-bold text-sm leading-relaxed">{pkg.desc}</p>
+795:                   </div>
+796:                   <div>
+797:                     <p className="text-2xl font-black text-[#1089A4] mb-4">{pkg.price}</p>
+798:                     <button className="w-full bg-[#021D24] text-white py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-[#1089A4] transition-colors">طلب الباقة</button>
+799:                   </div>
+800:                 </div>
+801:               ))}
+802:             </div>
+803:           )}
+804: 
+805:         </div>
+806:       </main>
+807: 
+808:       <VendorOrderModal 
+809:         isOpen={isOrderModalOpen} 
+810:         order={selectedOrder} 
+811:         onClose={() => setIsOrderModalOpen(false)}
+812:         onSuccess={() => {
+813:           // Refresh orders after status change
+814:           fetch("/api/vendor/orders").then(res => res.json()).then(setOrders);
+815:         }}
+816:       />
+817: 
+818:       <VendorInvoiceModal
+819:         isOpen={isInvoiceModalOpen}
+820:         order={selectedOrder}
+821:         onClose={() => setIsInvoiceModalOpen(false)}
+822:         storeName={statsData?.storeName}
+823:       />
+824: 
+825:       <VendorShippingPolicyModal
+826:         isOpen={isPolicyModalOpen}
+827:         order
+<truncated 5599 bytes>
+
+NOTE: The output was truncated because it was too long. Use a more targeted query or a smaller range to get the information you need.

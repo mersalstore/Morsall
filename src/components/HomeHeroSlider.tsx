@@ -46,7 +46,7 @@ export default function HomeHeroSlider() {
   }, []);
 
   return (
-    <section className="pt-20 md:pt-28 pb-6 px-4 lg:px-8 max-w-[1600px] mx-auto w-full">
+    <section className="pt-28 md:pt-36 pb-6 px-4 lg:px-8 max-w-[1600px] mx-auto w-full">
       <div className="bg-[#0F172A] rounded-2xl overflow-hidden shadow-sm h-[380px] md:h-[430px] lg:h-[480px] relative">
         {HERO_SLIDES.map((slide, idx) => {
           const isActive = idx === activeSlide;

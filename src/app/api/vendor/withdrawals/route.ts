@@ -53,11 +53,12 @@ export async function POST(req: Request) {
     }
 
     // 1. Calculate available balance
+    const COMPLETED_STATUSES = ["CONFIRMED", "PROCESSING", "PENDING_PICKUP", "AT_BRANCH", "SHIPPED", "DELIVERED"];
     const orderItems = await prisma.orderItem.findMany({
       where: {
         vendorId: vendor.id,
         order: {
-          status: { in: ["APPROVED", "PACKING", "SHIPPED", "DELIVERED"] }
+          status: { in: COMPLETED_STATUSES }
         }
       },
       select: { priceAtTime: true, quantity: true }
@@ -102,6 +103,17 @@ export async function POST(req: Request) {
         status: "PENDING"
       }
     });
+
+    // Notify admins
+    try {
+      const { notifyAdmins } = await import("@/lib/notification");
+      await notifyAdmins(
+        "طلب سحب جديد",
+        `طلب سحب بمبلغ ${amount.toLocaleString()} ج.س من ${vendor.storeName}`,
+        "withdrawal",
+        "/admin/dashboard"
+      );
+    } catch {}
 
     return NextResponse.json(withdrawal);
   } catch (error: any) {

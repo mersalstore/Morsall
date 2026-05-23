@@ -1,15 +1,33 @@
-"use client"
+"use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 
-export default function ProductGallery({ images }: { images: string[] }) {
+export default function ProductGallery({ images, activeVariationImage }: { images: string[]; activeVariationImage?: string | null }) {
   const [activeImage, setActiveImage] = useState(0);
   
-  const displayImages = images && images.length > 0 ? images : [
-    "https://placehold.co/1200x1200/F3F4F6/1089A4?text=No+Product+Image"
-  ];
+  // Combine variation image at the beginning if present
+  const displayImages = [];
+  if (activeVariationImage) {
+    displayImages.push(activeVariationImage);
+  }
+  images.forEach(img => {
+    if (img && img !== activeVariationImage) {
+      displayImages.push(img);
+    }
+  });
+
+  if (displayImages.length === 0) {
+    displayImages.push("https://placehold.co/1200x1200/F3F4F6/1089A4?text=No+Product+Image");
+  }
+
+  // When variation image changes, switch active view to the first image (which is the variation image)
+  useEffect(() => {
+    if (activeVariationImage) {
+      setActiveImage(0);
+    }
+  }, [activeVariationImage]);
 
   return (
     <div className="flex flex-col-reverse lg:flex-row gap-6 md:gap-8">

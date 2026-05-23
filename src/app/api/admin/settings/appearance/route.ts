@@ -6,7 +6,9 @@ export async function GET() {
   try {
     const settings = await prisma.settings.findUnique({ where: { id: "global" } });
     const banners = await prisma.siteBanner.findMany({ orderBy: { order: "asc" } });
-    return NextResponse.json({ settings, banners });
+    const dp = await prisma.siteConfig.findUnique({ where: { key: "designPricing" } });
+    const designPricing = dp ? JSON.parse(dp.value) : null;
+    return NextResponse.json({ settings, banners, designPricing });
   } catch (error) {
     return NextResponse.json({ error: "Failed to fetch settings" }, { status: 500 });
   }
@@ -54,6 +56,16 @@ export async function PATCH(req: Request) {
 
     // Global settings update - construct update object
     const payload = body.settings || data;
+
+    // Handle design pricing separately
+    if (payload.designPricing) {
+      await prisma.siteConfig.upsert({
+        where: { key: "designPricing" },
+        update: { value: JSON.stringify(payload.designPricing) },
+        create: { key: "designPricing", value: JSON.stringify(payload.designPricing) },
+      });
+    }
+
     const updateSettings: any = {};
     if (payload.siteTitle !== undefined) updateSettings.siteTitle = payload.siteTitle;
     if (payload.siteDescription !== undefined) updateSettings.siteDescription = payload.siteDescription;

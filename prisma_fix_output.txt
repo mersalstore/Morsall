@@ -1,0 +1,38 @@
+
+Executing: export PATH=/opt/alt/alt-nodejs22/root/usr/bin:/usr/local/bin:/usr/bin:/bin:$PATH && cd /home/u754458241/domains/morsall.com/nodejs && npx prisma generate
+STDOUT:
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+
+✔ Generated Prisma Client (v6.2.1) to ./../../../nodeapp/node_modules/@prisma/client in 2.27s
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+Tip: Want real-time updates to your database without manual polling? Discover how with Pulse: https://pris.ly/tip-0-pulse
+
+
+STDERR:
+
+
+Executing: export PATH=/opt/alt/alt-nodejs22/root/usr/bin:/usr/local/bin:/usr/bin:/bin:$PATH && cd /home/u754458241/domains/morsall.com/nodejs && npx prisma db push --accept-data-loss
+STDOUT:
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": MySQL database "u754458241_Kanan" at "127.0.0.1"
+
+The database is already in sync with the Prisma schema.
+
+Running generate... (Use --skip-generate to skip the generators)
+[2K[1A[2K[GRunning generate... - Prisma Client
+[2K[1A[2K[G✔ Generated Prisma Client (v6.2.1) to ./../../../nodeapp/node_modules/@prisma/cl
+ient in 2.28s
+
+
+STDERR:
+
+
+Executing: mkdir -p /home/u754458241/domains/morsall.com/nodejs/tmp && touch /home/u754458241/domains/morsall.com/nodejs/tmp/restart.txt
+STDOUT:
+
+STDERR:
+

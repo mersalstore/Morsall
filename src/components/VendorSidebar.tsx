@@ -2,24 +2,10 @@
 
 import React from "react";
 import { cn } from "../lib/utils";
-import { 
-  LayoutDashboard, 
-  BarChart3, 
-  Box, 
-  ShoppingBasket, 
-  Tag, 
-  MessageSquare, 
-  Megaphone, 
-  CreditCard, 
-  Settings, 
-  Store,
-  LogOut,
-  ChevronRight,
-  Truck,
-  Palette,
-  Layers,
-  Zap,
-  MapPin
+import {
+  LayoutDashboard, BarChart3, Box, ShoppingBasket, Layers,
+  Palette, Tag, MessageSquare, CreditCard, Settings, Truck, Megaphone,
+  Crown, Store, ChevronRight, LogOut
 } from "lucide-react";
 import Image from "next/image";
 import { signOut } from "next-auth/react";
@@ -35,12 +21,12 @@ interface SidebarProps {
 const NAV_ITEMS = [
   { id: "overview",  icon: LayoutDashboard, label: "لوحة التحكم", group: "عام" },
   { id: "analytics", icon: BarChart3,      label: "التحليلات", group: "عام" },
+  { id: "subscription", icon: Crown,         label: "الاشتراك", group: "عام" },
   
   { id: "products",  icon: Box,              label: "المنتجات", group: "إدارة" },
   { id: "orders",    icon: ShoppingBasket,   label: "الطلبات", group: "إدارة" },
   { id: "wms",       icon: Layers,           label: "طلبات التوريد (WMS)", group: "إدارة" },
   { id: "logistics", icon: Truck,            label: "تتبع التوصيل", group: "إدارة" },
-  { id: "shipping",  icon: MapPin,           label: "إعدادات الشحن", group: "إدارة" },
   
   { id: "design",    icon: Palette,          label: "تصميم المتجر", group: "المتجر" },
   { id: "coupons",   icon: Tag,             label: "الكوبونات", group: "المتجر" },
@@ -73,7 +59,7 @@ export default function VendorSidebar({ activeTab, setActiveTab, slug, isOpen, o
       <div className="p-8 border-b border-white/5 shrink-0">
         <div className="flex items-center gap-3">
           <div className="relative w-10 h-10 rounded-xl overflow-hidden bg-white/10 p-1 border border-white/10">
-             <Image src="/logo.png" alt="Logo" fill className="object-contain" />
+             <Image src="/logo.png?v=6" alt="Logo" fill className="object-contain" />
           </div>
           <div>
             <p className="font-black text-white text-lg leading-none">مرسال</p>

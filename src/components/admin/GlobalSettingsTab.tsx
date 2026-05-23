@@ -1,19 +1,25 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Settings, Save, Bell, Shield, Percent, Globe } from "lucide-react";
+import { Settings, Save, Percent, Globe, Palette, Crown, Sparkles, Store } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export default function GlobalSettingsTab() {
+export default function GlobalSettingsTab({ showToast }: { showToast?: (msg: string, type?: "success" | "error" | "info") => void }) {
   const [settings, setSettings] = useState<any>(null);
+  const [designPricing, setDesignPricing] = useState<any>({
+    basic: { price: 0, label: "مجاني", sections: 4 },
+    premium: { price: 15000, label: "بريميوم", sections: 6 },
+    custom: { price: 35000, label: "مخصص", sections: 10 },
+  });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    fetch("/api/admin/settings/appearance") // Assuming it returns global settings too
+    fetch("/api/admin/settings/appearance")
       .then(res => res.json())
       .then(data => {
         setSettings(data.settings || {});
+        if (data.designPricing) setDesignPricing(data.designPricing);
         setLoading(false);
       });
   }, []);
@@ -24,10 +30,21 @@ export default function GlobalSettingsTab() {
     await fetch("/api/admin/settings/appearance", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ settings })
+      body: JSON.stringify({ settings, designPricing })
     });
     setSaving(false);
-    alert("تم حفظ الإعدادات بنجاح");
+    if (showToast) {
+      showToast("تم حفظ الإعدادات بنجاح ✨", "success");
+    } else {
+      alert("تم حفظ الإعدادات بنجاح");
+    }
+  };
+
+  const updateDesignPrice = (tier: string, field: string, value: any) => {
+    setDesignPricing((prev: any) => ({
+      ...prev,
+      [tier]: { ...prev[tier], [field]: value }
+    }));
   };
 
   if (loading) return <div className="p-20 text-center font-black text-gray-400 uppercase tracking-widest">جاري تحميل إعدادات النظام...</div>;
@@ -174,6 +191,67 @@ export default function GlobalSettingsTab() {
                   />
                   <p className="text-[9px] text-gray-400 px-2 leading-relaxed">اكتب تفاصيل الحسابات البنكية التي ستظهر للعملاء عند اختيار التحويل البنكي.</p>
                </div>
+            </div>
+         </div>
+
+         {/* Store Design Pricing (Odoo System) */}
+         <div className="bg-white p-12 rounded-[3.5rem] border border-gray-100 shadow-2xl space-y-10 md:col-span-2">
+            <div className="flex items-center gap-4 text-[#C5A021]">
+               <Palette size={24} />
+               <h3 className="text-xl font-black text-[#0F172A]">أسعار تصميم المتاجر (نظام أودو)</h3>
+               <span className="bg-[#C5A021]/10 text-[#C5A021] text-[9px] font-black px-3 py-1 rounded-full">Odoo-Style Store Designer</span>
+            </div>
+            <p className="text-[10px] text-gray-400 font-bold px-2 -mt-6">حدد أسعار الباقات التي يمكن للتجار الاشتراك بها لتصميم متجر خاص بهم</p>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+               {["basic", "premium", "custom"].map((tier) => {
+                 const t = designPricing[tier] || { price: 0, label: tier, sections: 4 };
+                 const icons: Record<string, any> = { basic: Store, premium: Crown, custom: Sparkles };
+                 const Icon = icons[tier] || Store;
+                 const colors: Record<string, string> = { basic: "from-gray-500 to-gray-600", premium: "from-[#C5A021] to-[#F29124]", custom: "from-[#0F172A] to-[#1a2744]" };
+                 return (
+                   <div key={tier} className="bg-gray-50 rounded-[2.5rem] p-8 border border-gray-200 space-y-6">
+                     <div className="flex items-center gap-3">
+                       <div className={cn("w-10 h-10 rounded-xl bg-gradient-to-br flex items-center justify-center", colors[tier])}>
+                         <Icon size={18} className="text-white" />
+                       </div>
+                       <div>
+                         <h4 className="font-black text-[#0F172A]">{t.label || tier}</h4>
+                         <p className="text-[9px] text-gray-400 font-bold">الباقة {tier === "basic" ? "الأساسية" : tier === "premium" ? "المتقدمة" : "المخصصة"}</p>
+                       </div>
+                     </div>
+                     <div className="space-y-4">
+                       <div className="space-y-2">
+                         <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest">السعر (ج.س)</label>
+                         <input
+                           type="number"
+                           value={t.price || 0}
+                           onChange={e => updateDesignPrice(tier, "price", parseFloat(e.target.value) || 0)}
+                           className="w-full bg-white border-2 border-gray-200 rounded-xl px-4 py-3 text-lg font-black text-[#0F172A] outline-none focus:border-[#C5A021] transition-all"
+                         />
+                       </div>
+                       <div className="space-y-2">
+                         <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest">عدد الأقسام المسموحة</label>
+                         <input
+                           type="number"
+                           value={t.sections || 4}
+                           onChange={e => updateDesignPrice(tier, "sections", parseInt(e.target.value) || 4)}
+                           className="w-full bg-white border-2 border-gray-200 rounded-xl px-4 py-3 text-lg font-black text-[#0F172A] outline-none focus:border-[#C5A021] transition-all"
+                         />
+                       </div>
+                       <div className="space-y-2">
+                         <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest">اسم الباقة</label>
+                         <input
+                           type="text"
+                           value={t.label || ""}
+                           onChange={e => updateDesignPrice(tier, "label", e.target.value)}
+                           className="w-full bg-white border-2 border-gray-200 rounded-xl px-4 py-3 text-sm font-black outline-none focus:border-[#C5A021] transition-all"
+                         />
+                       </div>
+                     </div>
+                   </div>
+                 );
+               })}
             </div>
          </div>
       </div>

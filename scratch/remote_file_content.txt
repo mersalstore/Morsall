@@ -1,0 +1,53 @@
+Testing Connection with URL: mysql://u754458241_Kanan:Code2252@127.0.0.1/u754458241_Kanan?connection_limit=10
+Banners: [
+  {
+    "id": "cmp3dowh100003wyzp24q7x7h",
+    "title": "عرض جديد وحصري",
+    "subtitle": "تسوق أفضل الماركات العالمية الآن",
+    "imageUrl": "/uploads/1778635563708-1000500642.jpg",
+    "link": "",
+    "type": "HOME_HERO",
+    "targetId": null,
+    "isActive": true,
+    "order": 0,
+    "createdAt": "2026-05-13T01:26:03.878Z"
+  },
+  {
+    "id": "cmp3dpzps00013wyz98y3g16y",
+    "title": "عرض جديد وحصري",
+    "subtitle": "تسوق أفضل الماركات العالمية الآن",
+    "imageUrl": "/uploads/1778635614578-1000471440.webp",
+    "link": "",
+    "type": "HOME_HERO",
+    "targetId": null,
+    "isActive": true,
+    "order": 1,
+    "createdAt": "2026-05-13T01:26:54.736Z"
+  }
+]
+Settings: {
+  "id": "global",
+  "exchangeRate": 1,
+  "baseCurrency": "SDG",
+  "platformCommission": 10,
+  "maintenanceMode": false,
+  "maintenanceMessage": "هناك خطأ تقني يجري إصلاحه",
+  "codEnabled": true,
+  "codExtraFee": 2000,
+  "codCitiesOnly": "الخرطوم",
+  "bankTransferEnabled": true,
+  "bankName": "",
+  "bankAccountNumber": "",
+  "bankAccountName": "",
+  "contactEmail": null,
+  "contactPhone": null,
+  "facebookUrl": null,
+  "instagramUrl": null,
+  "logo": null,
+  "primaryColor": "#1089A4",
+  "secondaryColor": "#F29124",
+  "siteDescription": "أكبر منصة تسوق في السودان",
+  "siteTitle": "مرسال - تسوق بذكاء",
+  "whatsappNumber": null,
+  "bankAccounts": "[{\"id\":\"1778936481648\",\"bankName\":\"بنك الخرطوم \",\"accountName\":\"محمد بدوي عبدالله \",\"accountNumber\":\"9014744\",\"instructions\":\"الرجاء كتابة رقم الطلب في الاشعار \",\"qrCode\":\"/uploads/1778936587022-1000506779.jpg\",\"isActive\":true}]"
+}

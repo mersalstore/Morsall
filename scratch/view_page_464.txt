@@ -1,0 +1,39 @@
+Created At: 2026-05-19T19:26:22Z
+Completed At: 2026-05-19T19:26:22Z
+File Path: `file:///C:/Users/hazem/Downloads/matger2/src/app/admin/dashboard/page.tsx`
+Total Lines: 506
+Total Bytes: 29273
+Showing lines 60 to 90
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+60:   DELIVERED:         { label: "تم التسليم",               cls: "badge-active",  icon: "check_circle",      color: "from-green-400 to-green-600" },
+61:   CANCELLED:         { label: "ملغي",                     cls: "badge-pending", icon: "cancel",            color: "from-red-400 to-red-600" },
+62:   RETURNED:          { label: "مرجع",                     cls: "badge-pending", icon: "keyboard_return",   color: "from-pink-400 to-pink-600" },
+63:   NO_ANSWER:         { label: "لم يتم الرد",              cls: "badge-pending", icon: "phone_missed",      color: "from-amber-400 to-amber-600" },
+64:   POSTPONED:         { label: "مؤجل",                     cls: "badge-pending", icon: "event_repeat",      color: "from-purple-400 to-purple-600" },
+65:   ON_HOLD:           { label: "معلق - مشكلة",             cls: "badge-pending", icon: "pause_circle",      color: "from-rose-400 to-rose-600" },
+66:   READY_FOR_SHIPPING:{ label: "جاهز للشحن",               cls: "badge-active",  icon: "inventory",         color: "from-teal-400 to-teal-600" },
+67: };
+68: 
+69: export default function AdminDashboard() {
+70:   const { data: session, status } = useSession();
+71:   const router = useRouter();
+72:   const userRole = (session?.user as any)?.role || "CUSTOMER";
+73:   const userPermissions = (session?.user as any)?.permissions;
+74:   const allowedTabs = (userRole === "ADMIN") 
+75:     ? ROLE_PERMISSIONS["ADMIN"] 
+76:     : (userPermissions || ROLE_PERMISSIONS[userRole] || []);
+77: 
+78:   // Initial tab = first allowed tab for this role
+79:   const [activeTab, setActiveTab] = useState<any>(null);
+80: 
+81:   useEffect(() => {
+82:     if (allowedTabs.length > 0 && !activeTab) {
+83:       setActiveTab(allowedTabs[0]);
+84:     }
+85:   }, [allowedTabs]);
+86:   const [orders, setOrders] = useState<any[]>([]);
+87:   const [logisticsOrders, setLogisticsOrders] = useState<any[]>([]);
+88:   const [inventoryProducts, setInventoryProducts] = useState<any[]>([]);
+89:   const [pendingVendors, setPendingVendors] = useState<any[]>([]);
+90:   const [pendingProducts, setPendingProducts] = useState<any[]>([]);
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.
