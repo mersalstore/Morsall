@@ -121,7 +121,7 @@ export default function AddProductModal({ isOpen, onClose, editingProduct }: Add
               if (Array.isArray(data.images)) {
                 setPreviews(data.images);
               } else if (typeof data.images === "string" && data.images.trim()) {
-                setPreviews(data.images.split(",").map(u => u.trim()).filter(Boolean));
+                setPreviews(data.images.split(",").map((u: string) => u.trim()).filter(Boolean));
               }
             }
           })

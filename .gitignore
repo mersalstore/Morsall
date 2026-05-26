@@ -15,6 +15,7 @@
 
 # next.js
 /.next/
+/_next/
 /out/
 
 # production
@@ -66,3 +67,10 @@ client_secret_*.json
 *.db-journal
 
 .vercel
+
+# deploy and config envs
+emergency_deploy.php
+remote_env.txt
+scratch/
+scripts/nodejs.env
+final.env

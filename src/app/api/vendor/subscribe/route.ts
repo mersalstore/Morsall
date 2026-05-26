@@ -8,7 +8,8 @@ const STRIPE_SECRET = process.env.STRIPE_SECRET_KEY;
 export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
+    const userId = (session?.user as any)?.id;
+    if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -23,7 +24,7 @@ export async function POST(req: Request) {
     }
 
     const vendor = await prisma.vendor.findUnique({
-      where: { userId: session.user.id },
+      where: { userId },
     });
 
     if (!vendor) {
@@ -74,8 +75,8 @@ export async function POST(req: Request) {
     let stripeCustomerId = vendor.stripeCustomerId;
     if (!stripeCustomerId) {
       const customer = await stripe.customers.create({
-        email: session.user.email,
-        metadata: { vendorId: vendor.id, userId: session.user.id },
+        email: session?.user?.email || undefined,
+        metadata: { vendorId: vendor.id, userId: userId },
       });
       stripeCustomerId = customer.id;
       await prisma.vendor.update({

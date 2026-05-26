@@ -6,7 +6,8 @@ import { authOptions } from "@/lib/auth";
 export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
+    const userId = (session?.user as any)?.id;
+    if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -21,7 +22,7 @@ export async function POST(req: NextRequest) {
     }
 
     const vendor = await prisma.vendor.findUnique({
-      where: { userId: session.user.id },
+      where: { userId },
     });
 
     if (!vendor) {
@@ -86,7 +87,7 @@ export async function POST(req: NextRequest) {
           try {
             const { createNotification } = await import("@/lib/notification");
             createNotification({
-              userId: session.user.id,
+              userId: userId,
               title: "✅ تم تفعيل الاشتراك تلقائياً",
               message: `تم تأكيد الدفع وتفعيل باقة ${plan.name}`,
               type: "payment",

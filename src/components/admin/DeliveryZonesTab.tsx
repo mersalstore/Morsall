@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { Plus, Trash2, MapPin, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export default function DeliveryZonesTab() {
+export default function DeliveryZonesTab({ showToast }: { showToast?: (message: string, type?: "info" | "error" | "success") => void } = {}) {
   const [zones, setZones] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);

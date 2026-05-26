@@ -204,7 +204,7 @@ export default function ProductDetails({
               {/* Variant Price Change indicator */}
               {currentVariation && isColorAttr(attr.name) && currentVariation.price !== product.price && (
                 <p className="text-[11px] text-gray-500 font-bold bg-gray-50 w-fit px-2 py-1 rounded-md border border-gray-100">
-                  سعر <span className="text-[#0F172A]">{val}</span>: <span className="text-[#C5A021]">{currentVariation.price?.toLocaleString()} ج.س</span>
+                  سعر <span className="text-[#0F172A]">{selectedOptions[attr.name]}</span>: <span className="text-[#C5A021]">{currentVariation.price?.toLocaleString()} ج.س</span>
                 </p>
               )}
             </div>

@@ -6,12 +6,13 @@ import { authOptions } from "@/lib/auth";
 export async function GET() {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
+    const userId = (session?.user as any)?.id;
+    if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const vendor = await prisma.vendor.findUnique({
-      where: { userId: session.user.id },
+      where: { userId },
       include: { plan: true },
     });
 

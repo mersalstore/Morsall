@@ -24,14 +24,14 @@ export async function GET(
         vendor: { select: { userId: true } },
         productAttributes: true,
         variations: true,
-      },
-    });
+      } as any,
+    }) as any;
 
-    if (!product || product.vendor.userId !== userId) {
+    if (!product || product.vendor?.userId !== userId) {
       return NextResponse.json({ error: "Product not found or access denied" }, { status: 403 });
     }
 
-    const { vendor, ...data } = product;
+    const { vendor: _vendor, ...data } = product;
     return NextResponse.json(data);
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });

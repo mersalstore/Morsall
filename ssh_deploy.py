@@ -15,7 +15,7 @@ try:
                    look_for_keys=False, allow_agent=False, timeout=20)
     print("Connected!")
     
-    cmd = "cd /home/u754458241/domains/morsall.com/nodejs && unzip -o Morsall_Hostinger_Deploy.zip && mkdir -p tmp && touch tmp/restart.txt && echo DEPLOY_SUCCESS"
+    cmd = "cd /home/u754458241/domains/morsall.com/nodejs && unzip -o Morsall_Hostinger_Deploy.zip && npm install && npm run build && mkdir -p tmp && touch tmp/restart.txt && echo DEPLOY_SUCCESS"
     print(f"Executing: {cmd}")
     stdin, stdout, stderr = client.exec_command(cmd)
     

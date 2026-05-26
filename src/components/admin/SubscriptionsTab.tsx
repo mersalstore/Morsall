@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { Gem, Check, X, ShieldCheck, Plus, Trash2, Edit2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export default function SubscriptionsTab() {
+export default function SubscriptionsTab({ showToast }: { showToast?: (message: string, type?: "info" | "error" | "success") => void } = {}) {
   const [plans, setPlans] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);

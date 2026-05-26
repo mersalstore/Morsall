@@ -157,7 +157,7 @@ export default function AdminDashboard() {
     }
     
     fetchData();
-  }, [status, session?.user?.role]);
+  }, [status, (session?.user as any)?.role]);
 
   const fetchData = async (range?: string, from?: string, to?: string) => {
     if (!initialLoaded) {

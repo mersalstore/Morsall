@@ -48,7 +48,7 @@ const defaultAdLinks: AdLink[] = [
 const STORAGE_KEY_CONFIG = "mersal_offers_config";
 const STORAGE_KEY_ADS = "mersal_ad_links";
 
-export default function OffersAdsTab() {
+export default function OffersAdsTab({ showToast }: { showToast?: (message: string, type?: "info" | "error" | "success") => void } = {}) {
   const [config, setConfig] = useState<OfferConfig>(defaultConfig);
   const [adLinks, setAdLinks] = useState<AdLink[]>(defaultAdLinks);
   const [saving, setSaving] = useState(false);

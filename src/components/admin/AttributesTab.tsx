@@ -13,7 +13,7 @@ interface Attribute {
   options?: Array<{ value: string }>;
 }
 
-export default function AttributesTab() {
+export default function AttributesTab({ showToast }: { showToast?: (message: string, type?: "info" | "error" | "success") => void } = {}) {
   const [attributes, setAttributes] = useState<Attribute[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);

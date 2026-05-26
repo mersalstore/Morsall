@@ -34,7 +34,7 @@ interface Category {
   };
 }
 
-export default function CategoriesTab() {
+export default function CategoriesTab({ showToast }: { showToast?: (message: string, type?: "info" | "error" | "success") => void } = {}) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");

@@ -77,9 +77,10 @@ interface LogisticsTabProps {
   fetchData?: any;
   ORDER_STATUSES?: any;
   classes?: any;
+  showToast?: (message: string, type?: "info" | "error" | "success") => void;
 }
 
-export default function LogisticsTab({ orders, users, vendors, fetchData: parentFetchData, ORDER_STATUSES, classes }: LogisticsTabProps = {}) {
+export default function LogisticsTab({ orders, users, vendors, fetchData: parentFetchData, ORDER_STATUSES, classes, showToast }: LogisticsTabProps = {}) {
   const [activeSubTab, setActiveSubTab] = useState<"fleet" | "financials" | "branches" | "dispatch">("fleet");
   const [loading, setLoading] = useState(false);
   const [drivers, setDrivers] = useState<Driver[]>([]);

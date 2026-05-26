@@ -10,8 +10,9 @@ interface UsersVendorsTabProps {
   data: any[];
   onAction?: (id: string, action: string) => void;
   classes: any;
-  fetchData?: () => void;
+  fetchData?: (range?: string, from?: string, to?: string) => Promise<void> | void;
   onAddProduct?: (vendorId: string) => void;
+  showToast?: (message: string, type?: "info" | "error" | "success") => void;
 }
 
 export default function UsersVendorsTab({ type, data, onAction, classes, fetchData, onAddProduct }: UsersVendorsTabProps) {

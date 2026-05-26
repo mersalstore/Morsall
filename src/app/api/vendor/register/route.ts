@@ -61,6 +61,7 @@ export async function POST(req: Request) {
         // Create the plan with that name if it doesn't exist
         const newPlan = await prisma.subscriptionPlan.create({
           data: {
+            slug: `plan-${targetPlanId.toLowerCase()}-${Date.now()}`,
             name: targetPlanId === "ELITE" ? "باقة النخبة الفاخرة (Elite)" : targetPlanId === "PRO" ? "الباقة الاحترافية (Pro)" : "الباقة التجريبية (Free Trial)",
             price: targetPlanId === "ELITE" ? 75000 : targetPlanId === "PRO" ? 25000 : 0,
             durationDays: 30,
@@ -80,6 +81,7 @@ export async function POST(req: Request) {
         // Create a default trial plan
         const newTrial = await prisma.subscriptionPlan.create({
           data: {
+            slug: `trial-free-${Date.now()}`,
             name: "الباقة التجريبية المجانية",
             price: 0,
             durationDays: 30,

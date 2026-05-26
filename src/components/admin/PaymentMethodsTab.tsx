@@ -13,7 +13,7 @@ interface PaymentAccount {
   isActive: boolean;
 }
 
-export default function PaymentMethodsTab() {
+export default function PaymentMethodsTab({ showToast }: { showToast?: (message: string, type?: "info" | "error" | "success") => void } = {}) {
   const [accounts, setAccounts] = useState<PaymentAccount[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);

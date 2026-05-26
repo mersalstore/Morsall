@@ -10,6 +10,7 @@ import {
 
 interface WarehouseTabProps {
   classes: any;
+  showToast?: (message: string, type?: "info" | "error" | "success") => void;
 }
 
 export default function WarehouseTab({ classes }: WarehouseTabProps) {

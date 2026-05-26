@@ -6,6 +6,7 @@ import { Upload, FileSpreadsheet, Plus, AlertCircle, CheckCircle2, Trash2 } from
 interface ImportedOrdersTabProps {
   classes: any;
   vendors: any[];
+  showToast?: (message: string, type?: "info" | "error" | "success") => void;
 }
 
 export default function ImportedOrdersTab({ classes, vendors }: ImportedOrdersTabProps) {

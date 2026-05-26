@@ -27,6 +27,7 @@ export async function POST(req: Request) {
 
     const plan = await prisma.subscriptionPlan.create({
       data: {
+        slug: name.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\w-]/g, '') + '-' + Date.now(),
         name,
         price: parseFloat(price),
         durationDays: parseInt(durationDays),

@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export default function FinanceTab() {
+export default function FinanceTab({ showToast }: { showToast?: (message: string, type?: "info" | "error" | "success") => void } = {}) {
   const [withdrawals, setWithdrawals] = useState<any[]>([]);
   const [settlements, setSettlements] = useState<{ vendors: any[], drivers: any[] }>({ vendors: [], drivers: [] });
   const [history, setHistory] = useState<any[]>([]);

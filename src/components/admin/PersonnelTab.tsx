@@ -9,6 +9,7 @@ import EditPermissionsModal from "./EditPermissionsModal";
 
 interface PersonnelTabProps {
   type: "employees" | "drivers";
+  showToast?: (message: string, type?: "info" | "error" | "success") => void;
 }
 
 export default function PersonnelTab({ type }: PersonnelTabProps) {
