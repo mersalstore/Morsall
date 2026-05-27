@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getAdminSession, adminOnlyResponse } from "@/lib/session";
+import { ensureBasePlans } from "@/lib/subscription-plans";
 
 export async function GET() {
   try {
@@ -8,7 +9,21 @@ export async function GET() {
     const banners = await prisma.siteBanner.findMany({ orderBy: { order: "asc" } });
     const dp = await prisma.siteConfig.findUnique({ where: { key: "designPricing" } });
     const designPricing = dp ? JSON.parse(dp.value) : null;
-    return NextResponse.json({ settings, banners, designPricing });
+
+    const tmpTrial = await prisma.siteConfig.findUnique({ where: { key: "trialMaxProducts" } });
+    const tmpPremium = await prisma.siteConfig.findUnique({ where: { key: "premiumMaxProducts" } });
+    const trialMaxProducts = tmpTrial ? parseInt(tmpTrial.value) : 10;
+    const premiumMaxProducts = tmpPremium ? parseInt(tmpPremium.value) : 50;
+
+    return NextResponse.json({ 
+      settings: {
+        ...settings,
+        trialMaxProducts,
+        premiumMaxProducts
+      }, 
+      banners, 
+      designPricing 
+    });
   } catch (error) {
     return NextResponse.json({ error: "Failed to fetch settings" }, { status: 500 });
   }
@@ -63,6 +78,27 @@ export async function PATCH(req: Request) {
         where: { key: "designPricing" },
         update: { value: JSON.stringify(payload.designPricing) },
         create: { key: "designPricing", value: JSON.stringify(payload.designPricing) },
+      });
+      // Sync SubscriptionPlan prices to the updated designPricing
+      try {
+        await ensureBasePlans();
+      } catch (e) {
+        console.error("ensureBasePlans sync failed:", e);
+      }
+    }
+
+    if (payload.trialMaxProducts !== undefined) {
+      await prisma.siteConfig.upsert({
+        where: { key: "trialMaxProducts" },
+        update: { value: String(payload.trialMaxProducts) },
+        create: { key: "trialMaxProducts", value: String(payload.trialMaxProducts) },
+      });
+    }
+    if (payload.premiumMaxProducts !== undefined) {
+      await prisma.siteConfig.upsert({
+        where: { key: "premiumMaxProducts" },
+        update: { value: String(payload.premiumMaxProducts) },
+        create: { key: "premiumMaxProducts", value: String(payload.premiumMaxProducts) },
       });
     }
 

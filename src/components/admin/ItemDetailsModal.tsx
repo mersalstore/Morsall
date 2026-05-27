@@ -11,6 +11,12 @@ interface ItemDetailsModalProps {
   onClose: () => void;
 }
 
+const PLAN_BADGE_MAP: Record<string, { label: string; cls: string }> = {
+  freemium: { label: "تجريبية 14 يوم", cls: "bg-emerald-100 text-emerald-700" },
+  "premium-builder": { label: "Premium Builder", cls: "bg-amber-100 text-amber-700" },
+  "custom-design": { label: "Custom Design", cls: "bg-purple-100 text-purple-700" },
+};
+
 export default function ItemDetailsModal({ isOpen, type, item, onClose }: ItemDetailsModalProps) {
   const [products, setProducts] = useState<any[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(false);
@@ -191,16 +197,38 @@ export default function ItemDetailsModal({ isOpen, type, item, onClose }: ItemDe
                 {/* Subscription Section */}
                 <div className="bg-[#0F172A] rounded-[2rem] p-6 text-white relative overflow-hidden">
                   <div className="absolute top-[-20%] right-[-10%] w-32 h-32 bg-[#C5A021]/20 blur-3xl rounded-full" />
-                  <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-6">
-                    <div>
+                  <div className="relative z-10 flex flex-col md:flex-row justify-between items-start gap-6">
+                    <div className="flex-1">
                       <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] mb-2">حالة الاشتراك</p>
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-3 flex-wrap">
                         <span className="w-3 h-3 bg-green-500 rounded-full animate-pulse" />
                         <h4 className="text-lg font-black">{item.plan?.name || "خطة احترافية"}</h4>
+                        {item.plan?.slug && (() => {
+                          const def = PLAN_BADGE_MAP[item.plan.slug] ?? { label: item.plan.slug, cls: "bg-white/10 text-white" };
+                          return <span className={cn("text-[10px] font-black px-2 py-0.5 rounded-md", def.cls)}>{def.label}</span>;
+                        })()}
                       </div>
                       <p className="text-xs text-white/60 mt-2 font-bold">
                         ينتهي في: {item.subscriptionEndsAt ? new Date(item.subscriptionEndsAt).toLocaleDateString("ar-EG") : "غير محدد"}
                       </p>
+                      <div className="grid grid-cols-3 gap-3 mt-4 pt-4 border-t border-white/10">
+                        <div>
+                          <p className="text-[9px] font-black text-white/40 uppercase">السعر</p>
+                          <p className="text-sm font-black text-[#C5A021]">
+                            {item.plan?.price != null ? `${item.plan.price.toLocaleString()} ج.س` : "—"}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-[9px] font-black text-white/40 uppercase">المدة</p>
+                          <p className="text-sm font-black">{item.plan?.durationDays ?? "—"} يوم</p>
+                        </div>
+                        <div>
+                          <p className="text-[9px] font-black text-white/40 uppercase">حد المنتجات</p>
+                          <p className="text-sm font-black">
+                            {item.plan?.maxProducts && item.plan.maxProducts >= 99999 ? "غير محدود" : (item.plan?.maxProducts ?? "—")}
+                          </p>
+                        </div>
+                      </div>
                     </div>
                     
                     {!editSubscription ? (

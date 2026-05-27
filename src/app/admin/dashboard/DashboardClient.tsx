@@ -18,6 +18,7 @@ import PersonnelTab from "../../../components/admin/PersonnelTab";
 import GlobalSettingsTab from "../../../components/admin/GlobalSettingsTab";
 import SubscriptionsTab from "../../../components/admin/SubscriptionsTab";
 import AdminSubscriptionRequests from "../../../components/admin/AdminSubscriptionRequests";
+import CustomDesignRequestsTab from "../../../components/admin/CustomDesignRequestsTab";
 import SiteSectionsEditor from "../../../components/admin/SiteSectionsEditor";
 import OffersAdsTab from "../../../components/admin/OffersAdsTab";
 import LogisticsTab from "../../../components/admin/LogisticsTab";
@@ -36,7 +37,7 @@ import PrintPolicyModal from "../../../components/admin/PrintPolicyModal";
 
 // صلاحيات كل دور - يجب أن تتطابق مع AdminSidebar
 const ROLE_PERMISSIONS: Record<string, string[]> = {
-  ADMIN: ["overview", "approvals", "users", "vendors", "categories", "employees", "orders", "payments", "logistics", "importedOrders", "delivery", "shipping", "finance", "settings", "inventory", "drivers", "subscriptions", "subscriptionRequests", "attributes", "globalSettings", "appearance", "siteSections", "offersAds", "wms"],
+  ADMIN: ["overview", "approvals", "users", "vendors", "categories", "employees", "orders", "payments", "logistics", "importedOrders", "delivery", "shipping", "finance", "settings", "inventory", "drivers", "subscriptions", "subscriptionRequests", "customDesignRequests", "attributes", "globalSettings", "appearance", "siteSections", "offersAds", "wms"],
   PACKING: ["orders", "inventory"],
   SHIPPING: ["logistics", "drivers", "vendors", "importedOrders"],
   CUSTOMER_SERVICE: ["overview", "approvals", "orders", "users"],
@@ -278,6 +279,7 @@ export default function AdminDashboard() {
                    activeTab === "logistics" ? "النظام اللوجستي" :
                    activeTab === "importedOrders" ? "استيراد الطلبات الخارجية" :
                    activeTab === "subscriptionRequests" ? "طلبات الاشتراك" :
+                   activeTab === "customDesignRequests" ? "طلبات التصميم المخصص" :
                    activeTab === "siteSections" ? "أقسام الصفحة الرئيسية" : "الإعدادات"}
                 </h1>
              </div>
@@ -519,6 +521,7 @@ export default function AdminDashboard() {
             {activeTab === "drivers" && <PersonnelTab type="drivers" showToast={showToast} />}
             {activeTab === "subscriptions" && <SubscriptionsTab showToast={showToast} />}
             {activeTab === "subscriptionRequests" && <AdminSubscriptionRequests showToast={showToast} />}
+            {activeTab === "customDesignRequests" && <CustomDesignRequestsTab showToast={showToast} />}
             {activeTab === "globalSettings" && <GlobalSettingsTab showToast={showToast} />}
             {activeTab === "categories" && <CategoriesTab showToast={showToast} />}
             {activeTab === "users" && <UsersVendorsTab type="users" data={users} classes={classes} fetchData={fetchData} showToast={showToast} />}

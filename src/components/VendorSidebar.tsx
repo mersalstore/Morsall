@@ -29,6 +29,7 @@ const NAV_ITEMS = [
   { id: "logistics", icon: Truck,            label: "تتبع التوصيل", group: "إدارة" },
   
   { id: "design",    icon: Palette,          label: "تصميم المتجر", group: "المتجر" },
+  { id: "customDesign", icon: Crown,         label: "طلبات Vixcell", group: "المتجر" },
   { id: "coupons",   icon: Tag,             label: "الكوبونات", group: "المتجر" },
   
   { id: "reviews",   icon: MessageSquare,       label: "التقييمات", group: "تواصل" },

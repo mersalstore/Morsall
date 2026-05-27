@@ -5,6 +5,26 @@ import { cn } from "@/lib/utils";
 import ItemDetailsModal from "./ItemDetailsModal";
 import ProductDetailsModal from "./ProductDetailsModal";
 
+const PLAN_BADGE_MAP: Record<string, { label: string; cls: string }> = {
+  freemium: { label: "تجريبية 14 يوم", cls: "bg-emerald-100 text-emerald-700" },
+  "premium-builder": { label: "Premium Builder", cls: "bg-amber-100 text-amber-700" },
+  "custom-design": { label: "Custom Design", cls: "bg-purple-100 text-purple-700" },
+};
+
+function PlanBadge({ vendor }: { vendor: any }) {
+  const slug = vendor?.plan?.slug || (
+    vendor?.tier === "PREMIUM_BUILDER" ? "premium-builder" :
+    vendor?.tier === "CUSTOM_DESIGN" ? "custom-design" :
+    "freemium"
+  );
+  const def = PLAN_BADGE_MAP[slug] ?? { label: slug, cls: "bg-gray-100 text-gray-600" };
+  return (
+    <span className={cn("text-[10px] font-black px-2 py-0.5 rounded-md inline-block", def.cls)}>
+      {def.label}
+    </span>
+  );
+}
+
 interface ApprovalsTabProps {
   pendingVendors: any[];
   pendingProducts: any[];
@@ -102,7 +122,8 @@ export default function ApprovalsTab({ pendingVendors, pendingProducts, onVendor
                 </div>
                 <div>
                   <p className="font-black text-[#0F172A] text-base leading-tight mb-1">{v.storeName || v.store}</p>
-                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">{v.city || "الخرطوم"} • {v.name}</p>
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-1.5">{v.location || v.city || "الخرطوم"} • {v.user?.name || v.name}</p>
+                  <PlanBadge vendor={v} />
                 </div>
               </div>
               <div className="flex gap-3 transition-all">

@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { adminOnlyResponse } from "@/lib/session";
+import { notifyVendorByUserId } from "@/lib/notification";
 
 export async function GET() {
   try {
@@ -134,6 +135,39 @@ export async function PATCH(req: Request) {
         where: { id: updatedVendor.userId },
         data: { role: 'VENDOR' }
       });
+    }
+
+    try {
+      const messages: Record<string, { title: string; body: string }> = {
+        APPROVE: {
+          title: "✅ تم قبول متجرك",
+          body: "تم قبول حسابك في مرسال. يمكنك الآن البدء بإضافة منتجاتك.",
+        },
+        REJECT: {
+          title: "❌ تم رفض طلب التسجيل",
+          body: reason ? `سبب الرفض: ${reason}` : "لم يتم قبول حسابك. يرجى التواصل مع الدعم.",
+        },
+        SUSPEND: {
+          title: "⛔ تم إيقاف متجرك",
+          body: "تم إيقاف حسابك مؤقتاً. للاستفسار يرجى التواصل مع الإدارة.",
+        },
+        ACTIVATE: {
+          title: "✅ تم إعادة تفعيل متجرك",
+          body: "تمت إعادة تفعيل حسابك. يمكنك الآن الوصول للوحة التحكم.",
+        },
+      };
+      const msg = messages[action];
+      if (msg) {
+        await notifyVendorByUserId(
+          updatedVendor.userId,
+          msg.title,
+          msg.body,
+          "vendor",
+          "/vendor/dashboard",
+        );
+      }
+    } catch (notifyErr) {
+      console.error("notify vendor failed:", notifyErr);
     }
 
     return NextResponse.json(updatedVendor);

@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import AddProductModal from "../../../components/AddProductModal";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { signOut } from "next-auth/react";
 
 import VendorStoreSettings from "../../../components/VendorStoreSettings";
 import StoreAnalytics from "../../../components/StoreAnalytics";
@@ -16,6 +17,7 @@ import VendorLogisticsTab from "../../../components/VendorLogisticsTab";
 import VendorOrderModal from "../../../components/VendorOrderModal";
 import VendorInvoiceModal from "../../../components/VendorInvoiceModal";
 import VendorDesignTab from "../../../components/VendorDesignTab";
+import CustomDesignRequestTab from "../../../components/vendor/CustomDesignRequestTab";
 import VendorShippingPolicyModal from "../../../components/VendorShippingPolicyModal";
 import VendorSubscriptionTab from "../../../components/VendorSubscriptionTab";
 import VendorWMSTab from "../../../components/vendor/VendorWMSTab";
@@ -131,6 +133,15 @@ export default function VendorDashboard() {
           fetch("/api/vendor/orders"),
           fetch("/api/vendor/withdrawals")
         ]);
+
+        if (sRes.status === 401) {
+          router.replace("/login");
+          return;
+        }
+        if (sRes.status === 404) {
+          router.replace("/vendor/register");
+          return;
+        }
 
         if (sRes.ok) setStatsData(await sRes.json());
         if (pRes.ok) setProducts(await pRes.json());
@@ -272,6 +283,96 @@ export default function VendorDashboard() {
     { label: "الطلبات النشطة", value: statsData?.activeOrdersCount || 0, icon: "local_shipping", color: "bg-orange-50 text-orange-600" },
   ];
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center font-sans" dir="rtl">
+        <div className="text-center space-y-4">
+          <div className="w-16 h-16 border-4 border-[#C5A021] border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="text-sm font-black text-gray-500">جاري تحميل لوحة التحكم...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!statsData) {
+    return (
+      <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center font-sans" dir="rtl">
+        <div className="text-center space-y-4">
+          <p className="text-red-500 font-bold">فشل تحميل بيانات المتجر.</p>
+          <button onClick={() => window.location.reload()} className="bg-[#0F172A] text-white px-4 py-2 rounded-xl text-xs">إعادة المحاولة</button>
+        </div>
+      </div>
+    );
+  }
+
+  if (statsData.status !== "APPROVED") {
+    const handleLogout = async () => {
+      await signOut({ callbackUrl: "/login" });
+    };
+
+    return (
+      <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center p-4 font-sans" dir="rtl">
+        <div className="max-w-md w-full bg-white rounded-[2.5rem] p-10 border border-slate-100 shadow-2xl text-center space-y-6">
+          {statsData.status === "PENDING" && (
+            <>
+              <div className="w-20 h-20 bg-orange-50 text-orange-500 rounded-3xl flex items-center justify-center mx-auto animate-bounce">
+                <span className="material-symbols-rounded text-4xl">pending_actions</span>
+              </div>
+              <h2 className="text-2xl font-black text-[#0F172A]">حسابك قيد المراجعة</h2>
+              <p className="text-xs text-gray-500 leading-relaxed">
+                شكراً لتسجيلك معنا! تم استلام طلبك بنجاح وجاري مراجعته من قبل إدارة المنصة. 
+                سيتم تفعيل حسابك وإرسال إشعار لك فور الموافقة.
+              </p>
+              <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 text-right space-y-2">
+                <p className="text-[10px] font-bold text-gray-400">تفاصيل المتجر المقدمة:</p>
+                <p className="text-xs font-black text-[#0F172A]"><span className="text-gray-400 font-bold">اسم المتجر:</span> {statsData.storeName}</p>
+                <p className="text-xs font-black text-[#0F172A]"><span className="text-gray-400 font-bold">حالة التوثيق:</span> قيد التدقيق</p>
+              </div>
+            </>
+          )}
+
+          {statsData.status === "REJECTED" && (
+            <>
+              <div className="w-20 h-20 bg-red-50 text-red-500 rounded-3xl flex items-center justify-center mx-auto">
+                <span className="material-symbols-rounded text-4xl">error</span>
+              </div>
+              <h2 className="text-2xl font-black text-[#0F172A]">تم رفض طلب الانضمام</h2>
+              <p className="text-xs text-gray-500 leading-relaxed">
+                مع الأسف، تم رفض طلبك للانضمام إلى منصة مرسال للتجار بسبب عدم استيفاء الشروط.
+              </p>
+              {statsData.rejectionReason && (
+                <div className="bg-red-50/50 p-4 rounded-2xl border border-red-100 text-right space-y-2">
+                  <p className="text-[10px] font-bold text-red-500">سبب الرفض المذكور من الإدارة:</p>
+                  <p className="text-xs font-bold text-[#0F172A] leading-relaxed">{statsData.rejectionReason}</p>
+                </div>
+              )}
+              <p className="text-[10px] text-gray-400">يرجى التواصل مع الدعم الفني لتعديل البيانات وإعادة تقديم الطلب.</p>
+            </>
+          )}
+
+          {statsData.status === "SUSPENDED" && (
+            <>
+              <div className="w-20 h-20 bg-slate-100 text-slate-600 rounded-3xl flex items-center justify-center mx-auto">
+                <span className="material-symbols-rounded text-4xl">block</span>
+              </div>
+              <h2 className="text-2xl font-black text-[#0F172A]">تم إيقاف الحساب مؤقتاً</h2>
+              <p className="text-xs text-gray-500 leading-relaxed">
+                عذراً، لقد تم إيقاف حساب متجرك مؤقتاً من قبل الإدارة. يرجى مراجعة الدعم الفني للاستفسار.
+              </p>
+            </>
+          )}
+
+          <button 
+            onClick={handleLogout}
+            className="w-full bg-[#0F172A] text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-[#C5A021] transition-all shadow-xl shadow-black/10"
+          >
+            تسجيل الخروج
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#F8FAFC] flex font-sans">
       <VendorSidebar 
@@ -404,6 +505,7 @@ export default function VendorDashboard() {
           {activeTab === "logistics" && <VendorLogisticsTab orders={orders} />}
           {activeTab === "wms" && <VendorWMSTab products={products} />}
           {activeTab === "design" && <VendorDesignTab />}
+          {activeTab === "customDesign" && <CustomDesignRequestTab />}
           {activeTab === "subscription" && <VendorSubscriptionTab />}
           {activeTab === "coupons" && <VendorCoupons />}
           {activeTab === "reviews" && <VendorReviews />}
