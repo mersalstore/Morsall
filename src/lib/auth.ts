@@ -5,6 +5,40 @@ import { prisma } from "@/lib/db"
 import CredentialsProvider from "next-auth/providers/credentials"
 import bcrypt from "bcryptjs"
 
+function extractClientIp(req: any): string | null {
+  if (!req) return null;
+  const headers = req.headers || {};
+  const get = (key: string) => {
+    const v = headers[key] || headers[key.toLowerCase()];
+    if (!v) return null;
+    return Array.isArray(v) ? v[0] : v;
+  };
+  const candidates = [
+    get('x-forwarded-for'),
+    get('x-real-ip'),
+    get('cf-connecting-ip'),
+    get('x-client-ip'),
+    req.socket?.remoteAddress,
+    req.connection?.remoteAddress,
+  ].filter(Boolean) as string[];
+  for (const raw of candidates) {
+    const ip = raw.split(',')[0].trim();
+    if (ip) return ip.slice(0, 45); // IPv6 max length
+  }
+  return null;
+}
+
+async function recordLogin(userId: string, ip: string | null) {
+  try {
+    await prisma.user.update({
+      where: { id: userId },
+      data: { lastIp: ip || undefined, lastLogin: new Date() },
+    });
+  } catch (e) {
+    console.error('[AUTH] Failed to record login IP:', e);
+  }
+}
+
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
@@ -30,10 +64,11 @@ export const authOptions: NextAuthOptions = {
         email: { label: "Email", type: "text" },
         password: { label: "Password", type: "password" }
       },
-      async authorize(credentials) {
+      async authorize(credentials, req) {
         if (!credentials?.email || !credentials?.password) {
           throw new Error('الرجاء إدخال البريد الإلكتروني وكلمة المرور');
         }
+        const clientIp = extractClientIp(req);
 
         console.log("[AUTH] Login attempt for:", credentials.email);
 
@@ -66,7 +101,10 @@ export const authOptions: NextAuthOptions = {
           const SUPER_ADMIN_EMAILS = ["blackhatsd.sd@gmail.com", "system@mersal.com", "hazem@mersal.com", "zomatube2012@gmail.com"];
           const isSuperAdmin = SUPER_ADMIN_EMAILS.includes(emailLower);
 
-          console.log("[AUTH] Login SUCCESS for:", emailLower, "Role:", isSuperAdmin ? "ADMIN" : user.role);
+          console.log("[AUTH] Login SUCCESS for:", emailLower, "Role:", isSuperAdmin ? "ADMIN" : user.role, "IP:", clientIp);
+
+          // Record IP + login time (fire-and-forget)
+          recordLogin(user.id, clientIp);
 
           return {
             id: user.id,
@@ -93,6 +131,20 @@ export const authOptions: NextAuthOptions = {
   session: { strategy: "jwt" },
   callbacks: {
     async signIn({ user, account, profile }: any) {
+      // Capture IP via Next.js headers (available in server context)
+      let clientIp: string | null = null;
+      try {
+        const { headers } = await import('next/headers');
+        const h = await headers();
+        clientIp = (
+          h.get('x-forwarded-for')?.split(',')[0].trim() ||
+          h.get('x-real-ip') ||
+          h.get('cf-connecting-ip') ||
+          h.get('x-client-ip') ||
+          null
+        );
+      } catch {}
+
       if (account?.provider === "google" && profile?.email_verified) {
         // Ensure user has emailVerified set so account linking works
         if (!user.emailVerified) {
@@ -101,8 +153,23 @@ export const authOptions: NextAuthOptions = {
             data: { emailVerified: new Date() }
           });
         }
-        return true;
       }
+
+      // Record IP and lastLogin for any successful sign-in (Google + Credentials)
+      if (user?.email) {
+        try {
+          const data: any = { lastLogin: new Date() };
+          if (clientIp) data.lastIp = clientIp.slice(0, 45);
+          await prisma.user.updateMany({
+            where: { email: user.email.trim().toLowerCase() },
+            data,
+          });
+          console.log('[AUTH] signIn IP recorded:', clientIp, 'for', user.email);
+        } catch (e) {
+          console.error('[AUTH] Failed to record signIn IP:', e);
+        }
+      }
+
       return true;
     },
     async jwt({ token, user, trigger, session }: any) {

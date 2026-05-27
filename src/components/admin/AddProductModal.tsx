@@ -185,6 +185,31 @@ export default function AddProductModal({
     }
   };
 
+  const [isDragging, setIsDragging] = useState(false);
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    const files = Array.from(e.dataTransfer.files || []).filter(f => f.type.startsWith("image/"));
+    if (files.length > 0) {
+      const newItems = files.map(file => ({
+        url: URL.createObjectURL(file),
+        file
+      }));
+      setPreviews(prev => [...prev, ...newItems]);
+    }
+  };
+
   const removeFile = (index: number) => {
     setPreviews(prev => prev.filter((_, i) => i !== index));
   };
@@ -388,7 +413,18 @@ export default function AddProductModal({
                 <div className="p-6">
                   <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
                     {/* Upload Button Box */}
-                    <label className="aspect-square border-2 border-dashed border-gray-300 hover:border-[#C5A021] rounded-xl flex flex-col items-center justify-center bg-gray-50 hover:bg-[#C5A021]/5 transition-all cursor-pointer group">
+                    <label
+                      onDragOver={handleDragOver}
+                      onDragEnter={handleDragOver}
+                      onDragLeave={handleDragLeave}
+                      onDrop={handleDrop}
+                      className={cn(
+                        "aspect-square border-2 border-dashed rounded-xl flex flex-col items-center justify-center transition-all cursor-pointer group",
+                        isDragging
+                          ? "border-[#C5A021] bg-[#C5A021]/20 scale-105"
+                          : "border-gray-300 hover:border-[#C5A021] bg-gray-50 hover:bg-[#C5A021]/5"
+                      )}
+                    >
                       <input type="file" multiple accept="image/*" onChange={handleFileChange} className="hidden" />
                       <div className="w-10 h-10 bg-white rounded-full shadow-sm flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
                         <Upload size={18} className="text-[#C5A021]" />

@@ -39,10 +39,9 @@ export default function VendorRegister() {
     }
   }, [session]);
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: "bankStatementUrl" | "commercialRegUrl") => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const [dragType, setDragType] = useState<"bankStatementUrl" | "commercialRegUrl" | null>(null);
 
+  const uploadFile = async (file: File, type: "bankStatementUrl" | "commercialRegUrl") => {
     setIsUploading(type);
     const formDataUpload = new FormData();
     formDataUpload.append("file", file);
@@ -61,6 +60,30 @@ export default function VendorRegister() {
     } finally {
       setIsUploading(null);
     }
+  };
+
+  const handleDocDrop = (e: React.DragEvent, type: "bankStatementUrl" | "commercialRegUrl") => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragType(null);
+    const file = Array.from(e.dataTransfer.files || [])[0];
+    if (file) uploadFile(file, type);
+  };
+  const handleDocDragOver = (e: React.DragEvent, type: "bankStatementUrl" | "commercialRegUrl") => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragType(type);
+  };
+  const handleDocDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragType(null);
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: "bankStatementUrl" | "commercialRegUrl") => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    await uploadFile(file, type);
   };
 
   const nextStep = () => {
@@ -314,11 +337,17 @@ export default function VendorRegister() {
                   <p className="text-[10px] font-black text-[#CB2E26] uppercase tracking-[0.4em]">تحميل الأوراق الثبوتية للمتجر</p>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <div 
+                    <div
                       onClick={() => document.getElementById('bank-upload')?.click()}
+                      onDragOver={(e) => handleDocDragOver(e, "bankStatementUrl")}
+                      onDragEnter={(e) => handleDocDragOver(e, "bankStatementUrl")}
+                      onDragLeave={handleDocDragLeave}
+                      onDrop={(e) => handleDocDrop(e, "bankStatementUrl")}
                       className={cn(
                         "p-10 border-4 border-dashed rounded-[3rem] text-center transition-all cursor-pointer group relative overflow-hidden",
-                        formData.bankStatementUrl && formData.bankStatementUrl !== "placeholder_url" ? "border-[#10B981] bg-green-50" : "border-gray-100 bg-muted/10 hover:border-[#C5A021] hover:bg-sky-50"
+                        dragType === "bankStatementUrl"
+                          ? "border-[#C5A021] bg-[#C5A021]/10 scale-[1.02]"
+                          : formData.bankStatementUrl && formData.bankStatementUrl !== "placeholder_url" ? "border-[#10B981] bg-green-50" : "border-gray-100 bg-muted/10 hover:border-[#C5A021] hover:bg-sky-50"
                       )}
                     >
                       <input 
@@ -343,11 +372,17 @@ export default function VendorRegister() {
                       </h4>
                     </div>
 
-                    <div 
+                    <div
                       onClick={() => document.getElementById('comm-upload')?.click()}
+                      onDragOver={(e) => handleDocDragOver(e, "commercialRegUrl")}
+                      onDragEnter={(e) => handleDocDragOver(e, "commercialRegUrl")}
+                      onDragLeave={handleDocDragLeave}
+                      onDrop={(e) => handleDocDrop(e, "commercialRegUrl")}
                       className={cn(
                         "p-10 border-4 border-dashed rounded-[3rem] text-center transition-all cursor-pointer group relative overflow-hidden",
-                        formData.commercialRegUrl ? "border-[#F29124] bg-orange-50" : "border-gray-100 bg-muted/10 hover:border-[#F29124] hover:bg-orange-50"
+                        dragType === "commercialRegUrl"
+                          ? "border-[#F29124] bg-[#F29124]/15 scale-[1.02]"
+                          : formData.commercialRegUrl ? "border-[#F29124] bg-orange-50" : "border-gray-100 bg-muted/10 hover:border-[#F29124] hover:bg-orange-50"
                       )}
                     >
                       <input 

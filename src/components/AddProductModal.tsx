@@ -172,6 +172,29 @@ export default function AddProductModal({ isOpen, onClose, editingProduct }: Add
     }
   };
 
+  const [isDragging, setIsDragging] = useState(false);
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    const files = Array.from(e.dataTransfer.files || []).filter(f => f.type.startsWith("image/"));
+    if (files.length > 0) {
+      setLocalFiles(prev => [...prev, ...files]);
+      const newPreviews = files.map(file => URL.createObjectURL(file));
+      setPreviews(prev => [...prev, ...newPreviews]);
+    }
+  };
+
   const removeFile = (index: number) => {
     setLocalFiles(prev => prev.filter((_, i) => i !== index));
     setPreviews(prev => prev.filter((_, i) => i !== index));
@@ -634,10 +657,23 @@ export default function AddProductModal({ isOpen, onClose, editingProduct }: Add
                           <button onClick={() => removeFile(idx)} className="absolute top-2 right-2 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"><span className="material-symbols-rounded text-sm">close</span></button>
                         </div>
                       ))}
-                      <label className="aspect-square border-4 border-dashed border-[#C5A021]/20 rounded-3xl flex flex-col items-center justify-center bg-[#C5A021]/5 hover:bg-[#C5A021]/10 transition-all cursor-pointer">
+                      <label
+                        onDragOver={handleDragOver}
+                        onDragEnter={handleDragOver}
+                        onDragLeave={handleDragLeave}
+                        onDrop={handleDrop}
+                        className={cn(
+                          "aspect-square border-4 border-dashed rounded-3xl flex flex-col items-center justify-center transition-all cursor-pointer",
+                          isDragging
+                            ? "border-[#C5A021] bg-[#C5A021]/20 scale-105"
+                            : "border-[#C5A021]/20 bg-[#C5A021]/5 hover:bg-[#C5A021]/10"
+                        )}
+                      >
                         <input type="file" multiple accept="image/*" onChange={handleFileChange} className="hidden" />
                         <span className="material-symbols-rounded text-3xl text-[#C5A021]">add_photo_alternate</span>
-                        <span className="text-[10px] font-black mt-2">رفع صور</span>
+                        <span className="text-[10px] font-black mt-2">
+                          {isDragging ? "أفلت الصور هنا" : "اضغط أو اسحب الصور"}
+                        </span>
                       </label>
                     </div>
                   </div>

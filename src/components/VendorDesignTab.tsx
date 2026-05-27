@@ -164,6 +164,15 @@ export default function VendorDesignTab() {
     }
   };
 
+  const [bannerDrag, setBannerDrag] = useState(false);
+  const onBannerDragOver = (e: React.DragEvent) => { e.preventDefault(); e.stopPropagation(); setBannerDrag(true); };
+  const onBannerDragLeave = (e: React.DragEvent) => { e.preventDefault(); e.stopPropagation(); setBannerDrag(false); };
+  const onBannerDrop = (e: React.DragEvent) => {
+    e.preventDefault(); e.stopPropagation(); setBannerDrag(false);
+    const file = Array.from(e.dataTransfer.files || []).find(f => f.type.startsWith("image/"));
+    if (file) handleBannerUpload(file);
+  };
+
   const toggleFeatured = (productId: string) => {
     setFeaturedProductIds(prev => {
       const max = vendorTier === "CUSTOM_DESIGN" ? 12 : 6;
@@ -322,7 +331,18 @@ export default function VendorDesignTab() {
                   </button>
                 </div>
               ) : (
-                <label className="flex flex-col items-center justify-center h-40 border-2 border-dashed border-gray-200 rounded-2xl cursor-pointer hover:border-[#C5A021] hover:bg-[#C5A021]/5 transition-all">
+                <label
+                  onDragOver={onBannerDragOver}
+                  onDragEnter={onBannerDragOver}
+                  onDragLeave={onBannerDragLeave}
+                  onDrop={onBannerDrop}
+                  className={cn(
+                    "flex flex-col items-center justify-center h-40 border-2 border-dashed rounded-2xl cursor-pointer transition-all",
+                    bannerDrag
+                      ? "border-[#C5A021] bg-[#C5A021]/20 scale-[1.02]"
+                      : "border-gray-200 hover:border-[#C5A021] hover:bg-[#C5A021]/5"
+                  )}
+                >
                   <input
                     type="file"
                     accept="image/*"
@@ -337,7 +357,9 @@ export default function VendorDesignTab() {
                   ) : (
                     <>
                       <Upload size={24} className="text-gray-300 mb-2" />
-                      <span className="text-xs font-black text-gray-400">اضغط لرفع صورة البانر</span>
+                      <span className="text-xs font-black text-gray-400">
+                        {bannerDrag ? "أفلت الصورة هنا" : "اضغط أو اسحب صورة البانر"}
+                      </span>
                       <span className="text-[10px] text-gray-300">JPG / PNG حتى 10MB</span>
                     </>
                   )}
