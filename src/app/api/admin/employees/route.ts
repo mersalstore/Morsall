@@ -30,13 +30,7 @@ export async function POST(req: Request) {
 
     const lowerEmail = email.toLowerCase();
 
-    // 1. التحقق من وجود الموظف مسبقاً
-    const existing = await db.employee.findUnique({ where: { email: lowerEmail } });
-    if (existing) {
-      return NextResponse.json({ error: "هذا البريد الإلكتروني مسجل كموظف بالفعل" }, { status: 400 });
-    }
-
-    // 2. التحقق من وجود حساب User — إذا لم يكن موجوداً نصنعه
+    // التحقق من وجود حساب User — إذا لم يكن موجوداً نصنعه (وإلا نحدّثه/نعيد ضبط كلمته)
     const bcrypt = await import("bcryptjs");
     const tempPassword = password || `Morsall@${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
     const hashedPassword = await bcrypt.hash(tempPassword, 12);
@@ -70,12 +64,17 @@ export async function POST(req: Request) {
       });
     }
 
-    // 3. إنشاء الموظف في جدول الموظفين
-    const employee = await db.employee.create({ data: { name, email: lowerEmail, role, permissions: permissions || null } });
+    // 3. إنشاء/تحديث الموظف في جدول الموظفين (إعادة الإضافة بنفس الإيميل تحدّثه وتفعّله)
+    const employee = await db.employee.upsert({
+      where: { email: lowerEmail },
+      update: { name, role, permissions: permissions || null, isActive: true },
+      create: { name, email: lowerEmail, role, permissions: permissions || null },
+    });
 
     return NextResponse.json({
       ...employee,
-      tempPassword: existingUser ? null : tempPassword, // نرسل الباسورد المؤقتة للعرض
+      // أظهر كلمة المرور لو الحساب جديد أو لو الأدمن حدّد كلمة مرور جديدة
+      tempPassword: (!existingUser || password) ? tempPassword : null,
       userCreated: !existingUser,
     });
   } catch (error: any) {

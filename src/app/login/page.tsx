@@ -79,9 +79,21 @@ function LoginContent() {
               : result.error;
             setError(errorMsg);
           }
-        } else { 
-          router.push("/"); 
-          router.refresh(); 
+        } else {
+          // Route staff to their dashboard, customers to the homepage
+          try {
+            const { getSession } = await import("next-auth/react");
+            const sess = await getSession();
+            const r = (sess?.user as any)?.role;
+            const perms = (sess?.user as any)?.permissions;
+            const hasPerms = Array.isArray(perms) && perms.length > 0;
+            if (r === "DRIVER") router.push("/delivery");
+            else if ((r && r !== "CUSTOMER") || hasPerms) router.push("/admin/dashboard");
+            else router.push("/");
+          } catch {
+            router.push("/");
+          }
+          router.refresh();
         }
       } else {
         const res = await fetch("/api/auth/register", {
