@@ -102,6 +102,17 @@ export default function PurchaseBox({
           {displayPrice.toLocaleString()}{" "}
           <span className="text-lg font-bold text-gray-500">ج.س</span>
         </p>
+        {!currentVariation?.price && product.discountPrice && product.discountPrice < product.price && (
+          <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+            <span className="text-sm text-gray-400 line-through">{product.price.toLocaleString()} ج.س</span>
+            <span className="text-[11px] font-black text-white bg-[#CC0C39] px-2 py-0.5 rounded-md">
+              خصم {Math.round((1 - product.discountPrice / product.price) * 100)}%
+            </span>
+            <span className="text-[11px] font-bold text-emerald-600">
+              توفّر {(product.price - product.discountPrice).toLocaleString()} ج.س
+            </span>
+          </div>
+        )}
         {currentVariation?.price && currentVariation.price !== product.price && (
           <p className="text-xs text-[#C5A021] font-bold mt-1 bg-[#C5A021]/10 w-fit px-2 py-0.5 rounded-md">
             السعر المخصص لهذه النسخة

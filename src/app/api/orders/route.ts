@@ -94,7 +94,7 @@ export async function POST(req: Request) {
         finalItems.push({
           productId: selectedProduct.id,
           vendorId: selectedProduct.vendorId,
-          quantity: 1,
+          quantity: Math.max(1, parseInt(body.quantity) || 1),
           priceAtTime: totalAmount,
           size: null,
           color: null,
@@ -187,9 +187,24 @@ export async function POST(req: Request) {
         paymentMethod,
         paymentScreenshot: paymentScreenshot || null,
         totalAmount,
-        shippingCost: isExternalImport ? 0 : (shippingCost || 0),
+        shippingCost: shippingCost ? (parseFloat(shippingCost) || 0) : 0,
         status: isExternalImport ? status : "PENDING_APPROVAL",
         source,
+        // Logistics fields carried over from an external (e.g. far-mile) import
+        ...(isExternalImport ? {
+          trackingNumber: body.trackingNumber || null,
+          packageContent: body.packageContent || null,
+          weight: body.weight !== undefined && body.weight !== null && body.weight !== ""
+            ? (parseFloat(body.weight) || null)
+            : null,
+          otherFees: parseFloat(body.otherFees) || 0,
+          additionalFees: parseFloat(body.additionalFees) || 0,
+          consignmentNumber: body.consignmentNumber || null,
+          providerConsignmentNumber: body.providerConsignmentNumber || null,
+          customerReference: body.customerReference || null,
+          pendingAttempts: parseInt(body.pendingAttempts) || 0,
+          shipmentType: body.shipmentType || null,
+        } : {}),
         items: {
           create: finalItems,
         },
@@ -227,27 +242,48 @@ export async function POST(req: Request) {
       }
     }
 
-    // Notify admins and vendors about new order
-    try {
-      const { notifyAdmins, notifyVendor } = await import("@/lib/notification");
-      notifyAdmins(
-        "📦 طلب جديد",
-        `طلب جديد #${order.id.slice(-8)} بمبلغ ${totalAmount.toLocaleString()} ج.س`,
-        "order",
-        "/admin/dashboard"
-      );
-      for (const item of finalItems) {
-        if (item.vendorId) {
-          notifyVendor(
-            item.vendorId,
-            "📦 طلب جديد في متجرك",
-            `لديك طلب جديد #${order.id.slice(-8)} بقيمة ${totalAmount.toLocaleString()} ج.س`,
-            "order",
-            "/vendor/dashboard"
-          );
+    // Notify admins and vendors about new order (skipped for bulk external imports to avoid spam)
+    if (!isExternalImport) {
+      try {
+        const { notifyAdmins, notifyVendor } = await import("@/lib/notification");
+        notifyAdmins(
+          "📦 طلب جديد",
+          `طلب جديد #${order.id.slice(-8)} بمبلغ ${totalAmount.toLocaleString()} ج.س`,
+          "order",
+          "/admin/dashboard"
+        );
+        for (const item of finalItems) {
+          if (item.vendorId) {
+            notifyVendor(
+              item.vendorId,
+              "📦 طلب جديد في متجرك",
+              `لديك طلب جديد #${order.id.slice(-8)} بقيمة ${totalAmount.toLocaleString()} ج.س`,
+              "order",
+              "/vendor/dashboard"
+            );
+          }
         }
+      } catch {}
+    }
+
+    // Send an order confirmation email from support@morsall.com (fire-and-forget)
+    if (!isExternalImport) {
+      const customerEmailAddr = order.customerEmail || (session?.user as any)?.email;
+      if (customerEmailAddr) {
+        import("@/lib/mail").then(({ sendMail, emailLayout }) =>
+          sendMail({
+            to: customerEmailAddr,
+            subject: `تأكيد طلبك #${order.id.slice(-8).toUpperCase()} - مرسال`,
+            html: emailLayout(
+              "تم استلام طلبك بنجاح 🎉",
+              `<p style="margin:0 0 12px;line-height:1.8">شكراً لطلبك من مرسال. رقم الطلب: <b>#${order.id.slice(-8).toUpperCase()}</b></p>
+               <p style="margin:0 0 12px;line-height:1.8">الإجمالي: <b>${totalAmount.toLocaleString()} ج.س</b></p>
+               <p style="margin:0;line-height:1.8">سنخطرك عند تجهيز الطلب وشحنه. يمكنك متابعة حالة طلبك من حسابك.</p>`
+            ),
+          })
+        ).catch(() => {});
       }
-    } catch {}
+    }
 
     return NextResponse.json({
       success: true,

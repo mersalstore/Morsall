@@ -1,21 +1,25 @@
 "use client";
 
 import React, { useState } from "react";
-import { Upload, FileSpreadsheet, Plus, AlertCircle, CheckCircle2, Trash2 } from "lucide-react";
+import { Upload, FileSpreadsheet, Plus, AlertCircle, CheckCircle2, Trash2, Loader2 } from "lucide-react";
+import { importFromExcel } from "@/lib/excel";
 
 interface ImportedOrdersTabProps {
   classes: any;
   vendors: any[];
   showToast?: (message: string, type?: "info" | "error" | "success") => void;
+  fetchData?: () => Promise<void> | void;
 }
 
-export default function ImportedOrdersTab({ classes, vendors }: ImportedOrdersTabProps) {
+export default function ImportedOrdersTab({ classes, vendors, showToast, fetchData }: ImportedOrdersTabProps) {
   const [dragActive, setDragActive] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [manualOrders, setManualOrders] = useState<any[]>([]);
   const [selectedVendorId, setSelectedVendorId] = useState("");
   const [importStatus, setImportStatus] = useState<"idle" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
+  const [importing, setImporting] = useState(false);
+  const [progress, setProgress] = useState<{ done: number; total: number; failed: number } | null>(null);
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
@@ -72,7 +76,7 @@ export default function ImportedOrdersTab({ classes, vendors }: ImportedOrdersTa
 
   const downloadTemplate = () => {
     // Generate a simple CSV template and download it
-    const headers = "اسم المستلم,الهاتف,المدينة,الحي,الشارع,اسم المنتج,الكمية,السعر,ملاحظات\n";
+    const headers = "باركود الشحنة,اسم المستلم,هاتف المستلم,المدينة,الحي,الشارع,قيمة الشحنة,السعر (سعر التوصيل),طريقة الدفع,الحالة,محتوى الطرد,الكمية,الوزن,نوع الشحنة,الملاحظات\n";
     const blob = new Blob([new Uint8Array([0xEF, 0xBB, 0xBF]), headers], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -83,24 +87,174 @@ export default function ImportedOrdersTab({ classes, vendors }: ImportedOrdersTa
     document.body.removeChild(link);
   };
 
+  // ── Column-mapping helpers (supports the far-mile export and the platform template) ──
+  const norm = (s: any) => String(s ?? "").replace(/\s+/g, " ").trim();
+  const parseNum = (v: any): number => {
+    const n = parseFloat(String(v ?? "").replace(/[^\d.\-]/g, ""));
+    return isNaN(n) ? 0 : n;
+  };
+  const getField = (row: any, candidates: string[]): string => {
+    const keys = Object.keys(row || {});
+    for (const cand of candidates) {
+      const target = norm(cand);
+      const key = keys.find((k) => norm(k) === target);
+      if (key !== undefined && row[key] !== null && String(row[key]).trim() !== "") {
+        return String(row[key]).trim();
+      }
+    }
+    return "";
+  };
+  const mapStatus = (raw: string): string => {
+    const s = norm(raw);
+    if (!s) return "AWAITING_PICKUP";
+    if (/ملغ/.test(s)) return "CANCELLED";
+    if (/مسلم|تم التسليم/.test(s)) return "DELIVERED";
+    if (/مرتجع|مرجع/.test(s)) return "RETURNED";
+    if (/جاري التوصيل|قيد التوصيل/.test(s)) return "SHIPPED";
+    if (/في الفرع/.test(s)) return "AT_BRANCH";
+    if (/التحميل/.test(s)) return "PENDING_PICKUP";
+    if (/لم يتم الرد|لا يرد/.test(s)) return "NO_ANSWER";
+    if (/مؤجل/.test(s)) return "POSTPONED";
+    return "AWAITING_PICKUP";
+  };
+  const mapPayment = (raw: string): string => {
+    const s = norm(raw);
+    if (/كاش|نقد|تحصيل/.test(s)) return "COD";
+    if (/حوالة|تحويل|بنك/.test(s)) return "BANK_TRANSFER";
+    return raw || "COD";
+  };
+
+  const buildPayloadFromExcelRow = (row: any) => {
+    const city = getField(row, ["المدينة", "المدينه"]) || "غير محدد";
+    const supplier = getField(row, ["إسم المرسل (المورد)", "اسم المرسل (المورد)", "المورد"]);
+    const baseNotes = getField(row, ["الملاحظات", "ملاحظات"]);
+    return {
+      source: "EXTERNAL_IMPORT",
+      vendorId: selectedVendorId,
+      name: getField(row, ["اسم المستلم", "اسم العميل"]) || "عميل مستورد",
+      phone: getField(row, ["هاتف المستلم", "الهاتف", "رقم الهاتف"]) || "0000000000",
+      city,
+      district: getField(row, ["الحي", "الحى"]) || city,
+      street: getField(row, ["الشارع", "العنوان"]) || city,
+      totalAmount: parseNum(getField(row, ["قيمة الشحنة", "السعر"])),
+      shippingCost: parseNum(getField(row, ["السعر (سعر التوصيل)", "سعر التوصيل", "رسوم التوصيل"])),
+      otherFees: parseNum(getField(row, ["رسوم أخرى", "رسوم اخرى"])),
+      additionalFees: parseNum(getField(row, ["رسوم إضافية", "رسوم اضافية"])),
+      paymentMethod: mapPayment(getField(row, ["طريقة الدفع"])),
+      status: mapStatus(getField(row, ["الحالة"])),
+      packageContent: getField(row, ["محتوى الطرد", "اسم المنتج", "المنتج"]),
+      quantity: parseInt(getField(row, ["الكمية"])) || 1,
+      weight: parseNum(getField(row, ["الوزن"])),
+      trackingNumber: getField(row, ["باركود الشحنة", "الباركود"]),
+      consignmentNumber: getField(row, ["رقم الإرسالية", "رقم الارسالية"]),
+      providerConsignmentNumber: getField(row, ["رقم ارسالية المزود", "رقم إرسالية المزود"]),
+      customerReference: getField(row, ["رقم المرجع للعميل", "المرجع"]),
+      pendingAttempts: parseInt(getField(row, ["عدد محاولات العالق", "محاولات"])) || 0,
+      shipmentType: getField(row, ["نوع الشحنة"]),
+      notes: [baseNotes, supplier ? `المورد: ${supplier}` : ""].filter(Boolean).join(" | ") || null,
+    };
+  };
+
+  const buildPayloadFromManualRow = (row: any) => ({
+    source: "EXTERNAL_IMPORT",
+    vendorId: selectedVendorId,
+    name: row.customerName || "عميل مستورد",
+    phone: row.phone || "0000000000",
+    city: row.city || "غير محدد",
+    district: row.city || "غير محدد",
+    street: row.city || "غير محدد",
+    totalAmount: parseNum(row.price),
+    quantity: parseInt(row.quantity) || 1,
+    packageContent: row.productName || "",
+    paymentMethod: "COD",
+    status: "AWAITING_PICKUP",
+    notes: row.notes || null,
+  });
+
   const handleProcessImport = async () => {
     if (!selectedVendorId) {
       setImportStatus("error");
       setMessage("يرجى اختيار المورد/التاجر أولاً قبل الاستيراد!");
       return;
     }
-
     if (!file && manualOrders.length === 0) {
       setImportStatus("error");
       setMessage("يرجى رفع ملف الاستيراد أو إدخال طلبات يدوية!");
       return;
     }
 
-    // Process manual or file orders
-    setImportStatus("success");
-    setMessage("تم استيراد الطلبات بنجاح وجاري إضافتها إلى شاشة تتبع الشحنات واللوجستيات!");
-    setManualOrders([]);
-    setFile(null);
+    setImporting(true);
+    setImportStatus("idle");
+    setMessage("");
+    setProgress(null);
+
+    try {
+      const payloads: any[] = [];
+
+      if (file) {
+        const rows = await importFromExcel(file, { raw: false, defval: "" });
+        for (const row of rows) {
+          // Skip completely empty rows
+          if (!row || Object.values(row).every((v) => String(v ?? "").trim() === "")) continue;
+          payloads.push(buildPayloadFromExcelRow(row));
+        }
+      }
+      for (const row of manualOrders) {
+        payloads.push(buildPayloadFromManualRow(row));
+      }
+
+      if (payloads.length === 0) {
+        setImportStatus("error");
+        setMessage("الملف لا يحتوي على صفوف صالحة للاستيراد.");
+        return;
+      }
+
+      setProgress({ done: 0, total: payloads.length, failed: 0 });
+      let done = 0;
+      let failed = 0;
+
+      // Post in small batches to avoid overwhelming the server
+      const BATCH = 5;
+      for (let i = 0; i < payloads.length; i += BATCH) {
+        const batch = payloads.slice(i, i + BATCH);
+        const results = await Promise.all(
+          batch.map((p) =>
+            fetch("/api/orders", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(p),
+            })
+              .then((r) => r.ok)
+              .catch(() => false)
+          )
+        );
+        for (const ok of results) {
+          if (ok) done++;
+          else failed++;
+        }
+        setProgress({ done, total: payloads.length, failed });
+      }
+
+      if (done > 0) {
+        setImportStatus("success");
+        setMessage(
+          `تم استيراد ${done} شحنة بنجاح${failed > 0 ? ` (فشل ${failed} شحنة)` : ""} وإضافتها إلى نظام اللوجستيات.`
+        );
+        setManualOrders([]);
+        setFile(null);
+        showToast?.(`تم استيراد ${done} شحنة بنجاح`, "success");
+        if (fetchData) await fetchData();
+      } else {
+        setImportStatus("error");
+        setMessage(`فشل استيراد جميع الشحنات (${failed}). تأكد من تنسيق الملف ووجود مورد نشط في النظام.`);
+      }
+    } catch (err: any) {
+      console.error("Import error:", err);
+      setImportStatus("error");
+      setMessage("حدث خطأ أثناء قراءة الملف أو الاستيراد: " + (err?.message || "خطأ غير معروف"));
+    } finally {
+      setImporting(false);
+    }
   };
 
   return (
@@ -330,9 +484,13 @@ export default function ImportedOrdersTab({ classes, vendors }: ImportedOrdersTa
       <div className="flex justify-end gap-4">
         <button
           onClick={handleProcessImport}
-          className="bg-gradient-to-r from-[#C5A021] to-[#A9841B] text-white px-8 py-4 rounded-2xl font-black text-sm transition-all duration-500 shadow-xl shadow-[#C5A021]/10 hover:brightness-105 active:scale-[0.98]"
+          disabled={importing}
+          className="bg-gradient-to-r from-[#C5A021] to-[#A9841B] text-white px-8 py-4 rounded-2xl font-black text-sm transition-all duration-500 shadow-xl shadow-[#C5A021]/10 hover:brightness-105 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2"
         >
-          معالجة وإدراج الطلبات المستوردة
+          {importing && <Loader2 size={16} className="animate-spin" />}
+          {importing
+            ? (progress ? `جاري الاستيراد... ${progress.done}/${progress.total}` : "جاري المعالجة...")
+            : "معالجة وإدراج الطلبات المستوردة"}
         </button>
       </div>
     </div>

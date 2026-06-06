@@ -530,7 +530,7 @@ export default function AdminDashboard() {
             {activeTab === "siteSections" && <SiteSectionsEditor showToast={showToast} />}
             {activeTab === "offersAds" && <OffersAdsTab showToast={showToast} />}
             {activeTab === "wms" && <WarehouseTab classes={classes} showToast={showToast} />}
-            {activeTab === "importedOrders" && <ImportedOrdersTab classes={classes} vendors={vendors} showToast={showToast} />}
+            {activeTab === "importedOrders" && <ImportedOrdersTab classes={classes} vendors={vendors} showToast={showToast} fetchData={fetchData} />}
           </motion.div>
         </AnimatePresence>
         </div>

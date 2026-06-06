@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useCart } from "@/lib/CartContext";
 import { useWishlist } from "@/lib/WishlistContext";
+import { getProductRating, getProductReviewCount } from "@/lib/productRating";
 
 export interface ProductCardProps {
   id: string;
@@ -14,6 +15,8 @@ export interface ProductCardProps {
   vendor: string;
   vendorLocation: string;
   discount?: number;
+  /** Absolute discounted price stored on the product (takes precedence over `discount`). */
+  discountPrice?: number;
   badge?: string;
   sold?: number;
   vendorId?: string;
@@ -34,12 +37,19 @@ function Stars({ rating = 4.3, count = 128 }: { rating?: number; count?: number 
   );
 }
 
-export default function ProductCard({ id, title, price, image, vendor, vendorLocation, discount, badge, vendorId, stock }: ProductCardProps) {
+export default function ProductCard({ id, title, price, image, vendor, vendorLocation, discount, discountPrice, badge, vendorId, stock }: ProductCardProps) {
   const [added, setAdded] = useState(false);
   const { addItem } = useCart();
   const { toggleFavorite, toggleCompare, isInFavorites, isInCompare } = useWishlist();
 
-  const discountedPrice = discount ? Math.floor(price * (1 - discount / 100)) : price;
+  // Support both an absolute discountPrice (from the DB) and a percentage `discount` (e.g. offers page).
+  const hasAbsoluteDiscount = typeof discountPrice === "number" && discountPrice > 0 && discountPrice < price;
+  const discountPct = hasAbsoluteDiscount
+    ? Math.round((1 - discountPrice / price) * 100)
+    : (discount && discount > 0 ? discount : 0);
+  const discountedPrice = hasAbsoluteDiscount
+    ? discountPrice
+    : (discount && discount > 0 ? Math.floor(price * (1 - discount / 100)) : price);
   const isOutOfStock = stock !== undefined && stock <= 0;
 
   const handleAdd = (e: React.MouseEvent) => {
@@ -50,10 +60,9 @@ export default function ProductCard({ id, title, price, image, vendor, vendorLoc
     setTimeout(() => setAdded(false), 1500);
   };
 
-  // Deterministic "fake" rating from product id to avoid hydration mismatch
-  const idHash = id.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0);
-  const fakeRating = 4 + (idHash % 10) / 10;
-  const fakeCount = 50 + (idHash % 251);
+  // Deterministic display rating (shared with the Shop rating filter) to avoid hydration mismatch
+  const fakeRating = getProductRating(id);
+  const fakeCount = getProductReviewCount(id);
 
   return (
     <div className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:border-gray-300 transition-colors flex flex-row sm:flex-col h-full relative">
@@ -68,9 +77,9 @@ export default function ProductCard({ id, title, price, image, vendor, vendorLoc
             className="object-cover"
           />
         </Link>
-        {discount && discount > 0 ? (
+        {discountPct > 0 ? (
           <div className="absolute top-2 left-2 bg-[#CC0C39] text-white text-[10px] font-bold px-2 py-1 rounded-sm z-10">
-            خصم {discount}%
+            خصم {discountPct}%
           </div>
         ) : badge ? (
           <div className="absolute top-2 left-2 bg-[#1E3A8A] text-white text-[10px] font-bold px-2 py-1 rounded-sm z-10">
@@ -100,7 +109,7 @@ export default function ProductCard({ id, title, price, image, vendor, vendorLoc
               <span className="text-xl font-bold">{discountedPrice.toLocaleString()}</span>
               <span className="text-[10px] mt-1 mr-0.5">ج.س</span>
             </div>
-            {discount && discount > 0 && (
+            {discountPct > 0 && (
               <span className="text-xs text-gray-500 line-through">
                 {price.toLocaleString()} ج.س
               </span>

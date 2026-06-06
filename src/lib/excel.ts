@@ -43,7 +43,10 @@ export function exportToExcel(data: any[], fileName: string) {
  * Parses an Excel file and returns its content as an array of objects.
  * @param file The File object from an input element
  */
-export function importFromExcel(file: File): Promise<any[]> {
+export function importFromExcel(
+  file: File,
+  options?: { raw?: boolean; defval?: any }
+): Promise<any[]> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
 
@@ -56,8 +59,12 @@ export function importFromExcel(file: File): Promise<any[]> {
         const sheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[sheetName];
 
-        // Convert sheet to JSON
-        const json = XLSX.utils.sheet_to_json(worksheet);
+        // Convert sheet to JSON. Pass `raw: false` to get formatted text, which
+        // preserves leading zeros in phone numbers and similar fields.
+        const json = XLSX.utils.sheet_to_json(worksheet, {
+          raw: options?.raw ?? true,
+          defval: options?.defval,
+        });
         resolve(json);
       } catch (err) {
         reject(err);

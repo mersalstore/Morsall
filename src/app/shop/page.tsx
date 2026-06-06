@@ -4,16 +4,28 @@ import Image from "next/image";
 import ShopFilters from "@/components/ShopFilters";
 import ProductCard from "@/components/ProductCard";
 import ShopClientControls from "@/components/ShopClientControls";
+import { getProductRating } from "@/lib/productRating";
 
 export const dynamic = "force-dynamic";
 
 export default async function ShopPage(props: {
-  searchParams: Promise<{ q?: string; category?: string; sort?: string }>;
+  searchParams: Promise<{
+    q?: string;
+    category?: string;
+    sort?: string;
+    minPrice?: string;
+    maxPrice?: string;
+    brand?: string;
+    minRating?: string;
+    includeOutOfStock?: string;
+    nextDay?: string;
+  }>;
 }) {
   const sp = await props.searchParams;
-  const query    = sp.q;
-  const category = sp.category;
-  const sort     = sp.sort;
+  const query     = sp.q;
+  const category  = sp.category;
+  const sort      = sp.sort;
+  const minRating = sp.minRating ? parseFloat(sp.minRating) : 0;
 
   const orderBy: any = sort === "price_asc"
     ? { price: "asc" }
@@ -23,34 +35,72 @@ export default async function ShopPage(props: {
     ? { createdAt: "desc" }
     : { purchaseCount: "desc" };
 
+  // ── Build the Prisma filter from the active query params ──
+  const where: any = {
+    status: "APPROVED",
+    vendor: { status: "APPROVED" },
+  };
+
+  if (query) {
+    where.OR = [
+      { title: { contains: query } },
+      { description: { contains: query } },
+    ];
+  }
+
+  if (category) where.categoryId = category;
+
+  const selectedBrands = (sp.brand || "").split(",").map((b) => b.trim()).filter(Boolean);
+  if (selectedBrands.length) where.brand = { in: selectedBrands };
+
+  const priceFilter: { gte?: number; lte?: number } = {};
+  if (sp.minPrice) priceFilter.gte = parseFloat(sp.minPrice);
+  if (sp.maxPrice) priceFilter.lte = parseFloat(sp.maxPrice);
+  if (priceFilter.gte !== undefined || priceFilter.lte !== undefined) where.price = priceFilter;
+
+  // Show only in-stock items by default; "include out of stock" relaxes it.
+  // "Next-day delivery" always requires stock on hand.
+  if (sp.nextDay === "1" || sp.includeOutOfStock !== "1") {
+    where.stock = { gt: 0 };
+  }
+
   const dbProducts = await prisma.product.findMany({
-    where: {
-      status: "APPROVED",
-      vendor: {
-        status: "APPROVED"
-      },
-      ...(query && {
-        OR: [
-          { title: { contains: query } },
-          { description: { contains: query } },
-        ],
-      }),
-    },
+    where,
     orderBy,
     include: { vendor: { select: { storeName: true, location: true } } },
-    take: 48,
+    // Fetch a wider window when a rating filter is active (rating is computed in JS below).
+    take: minRating > 0 ? 200 : 48,
   });
 
-  const products = dbProducts.map((p: any) => ({
+  // Distinct brands for the sidebar filter (real brand values from approved products only).
+  const brandRows = await prisma.product.findMany({
+    where: { status: "APPROVED", vendor: { status: "APPROVED" }, brand: { not: null } },
+    select: { brand: true },
+    distinct: ["brand"],
+    take: 50,
+  });
+  const brands = brandRows
+    .map((b: any) => b.brand)
+    .filter((b: string | null): b is string => !!b && b.trim().length > 0);
+
+  let mapped = dbProducts.map((p: any) => ({
     id: p.id,
     title: p.title,
     price: p.price,
+    discountPrice: p.discountPrice ?? undefined,
     vendor: p.vendor.storeName,
     vendorLocation: p.vendor.location ?? "",
     image: p.images?.split(",")[0] || "https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&q=80&w=800",
     badge: p.purchaseCount > 5 ? "الأكثر مبيعاً" : undefined,
     stock: p.stock,
   }));
+
+  // Rating filter — display rating is deterministic per product id (see lib/productRating).
+  if (minRating > 0) {
+    mapped = mapped.filter((p) => getProductRating(p.id) >= minRating);
+  }
+
+  const products = mapped.slice(0, 48);
 
   return (
     <div className="min-h-screen bg-[#F3F4F6]" dir="rtl">
@@ -71,7 +121,7 @@ export default async function ShopPage(props: {
         {/* Sidebar */}
         <aside className="hidden md:block">
           <div className="sticky top-28">
-            <ShopFilters />
+            <ShopFilters brands={brands} />
           </div>
         </aside>
 

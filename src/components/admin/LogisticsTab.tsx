@@ -93,6 +93,11 @@ export default function LogisticsTab({ orders, users, vendors, fetchData: parent
   const [activeDispatchBranchId, setActiveDispatchBranchId] = useState<string>("");
   const [dispatchBarcode, setDispatchBarcode] = useState<string>("");
 
+  // Bulk selection + assignment of active shipments
+  const [selectedShipmentIds, setSelectedShipmentIds] = useState<Set<string>>(new Set());
+  const [bulkAssigning, setBulkAssigning] = useState(false);
+  const [dispatchStatusFilter, setDispatchStatusFilter] = useState<string>("ACTIVE");
+
   // Dynamic stats
   const [unsettledOrdersCount, setUnsettledOrdersCount] = useState(0);
   const [shippingProfitToday, setShippingProfitToday] = useState(0);
@@ -385,6 +390,70 @@ export default function LogisticsTab({ orders, users, vendors, fetchData: parent
       }
     } else {
       alert("لم يتم العثور على شحنة أو مندوب أو فرع بهذا الباركود");
+    }
+  };
+
+  // Shipments shown in the dispatch table, filtered by the selected status view.
+  // "ACTIVE" = in transit / at branch / awaiting pickup; "ALL" = every shipment
+  // (including imported & cancelled); otherwise filter by a specific status.
+  const ACTIVE_DISPATCH_STATUSES = ["PENDING_PICKUP", "AT_BRANCH", "SHIPPED"];
+  const activeShipments = (orders || []).filter((o: any) => {
+    if (dispatchStatusFilter === "ALL") return true;
+    if (dispatchStatusFilter === "ACTIVE") return ACTIVE_DISPATCH_STATUSES.includes(o.status);
+    return o.status === dispatchStatusFilter;
+  });
+  const allActiveSelected =
+    activeShipments.length > 0 && activeShipments.every((o: any) => selectedShipmentIds.has(o.id));
+
+  const toggleSelectShipment = (id: string) => {
+    setSelectedShipmentIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAllShipments = () => {
+    setSelectedShipmentIds(allActiveSelected ? new Set() : new Set(activeShipments.map((o: any) => o.id)));
+  };
+
+  // Bulk assign all selected shipments to a driver (drv_<id>) or a branch (br_<id>)
+  const handleBulkAssign = async (val: string) => {
+    if (!val || selectedShipmentIds.size === 0) return;
+    const isDriver = val.startsWith("drv_");
+    const targetId = val.replace(/^drv_|^br_/, "");
+    const count = selectedShipmentIds.size;
+    setBulkAssigning(true);
+    try {
+      await Promise.all(
+        Array.from(selectedShipmentIds).map((orderId) => {
+          const payload: any = { id: orderId };
+          if (isDriver) {
+            payload.driverId = targetId;
+            payload.branchId = null;
+            payload.status = "SHIPPED";
+          } else {
+            payload.branchId = targetId;
+            payload.driverId = null;
+            payload.status = "AT_BRANCH";
+          }
+          return fetch("/api/admin/orders", {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+        })
+      );
+      if (parentFetchData) await parentFetchData();
+      await fetchData();
+      setSelectedShipmentIds(new Set());
+      alert(`تم إسناد ${count} شحنة بنجاح`);
+    } catch (err) {
+      console.error(err);
+      alert("فشل الإسناد الجماعي لبعض الشحنات");
+    } finally {
+      setBulkAssigning(false);
     }
   };
 
@@ -834,10 +903,21 @@ export default function LogisticsTab({ orders, users, vendors, fetchData: parent
               <div className="bg-white rounded-[3rem] border border-gray-100 shadow-xl overflow-hidden">
                 <div className="p-8 border-b border-gray-50 flex items-center justify-between">
                   <div>
-                    <h3 className="text-lg font-black text-[#0F172A]">شحنات اللوجستيات النشطة</h3>
-                    <p className="text-xs text-gray-400 mt-1">قائمة بجميع الطلبيات قيد النقل، التوزيع، أو بانتظار استلام المندوب.</p>
+                    <h3 className="text-lg font-black text-[#0F172A]">شحنات اللوجستيات</h3>
+                    <p className="text-xs text-gray-400 mt-1">استخدم الفلتر لعرض الشحنات النشطة أو كل الشحنات (بما فيها المستوردة والملغاة).</p>
                   </div>
-                  <div className="flex gap-4">
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <select
+                      value={dispatchStatusFilter}
+                      onChange={(e) => { setDispatchStatusFilter(e.target.value); setSelectedShipmentIds(new Set()); }}
+                      className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-[11px] font-black outline-none text-slate-700"
+                    >
+                      <option value="ACTIVE">النشطة فقط</option>
+                      <option value="ALL">كل الشحنات ({orders?.length || 0})</option>
+                      {Object.entries(ORDER_STATUSES).map(([key, s]: any) => (
+                        <option key={key} value={key}>{s.label}</option>
+                      ))}
+                    </select>
                     <span className="px-4 py-2 rounded-2xl bg-orange-50 text-orange-600 text-xs font-black">
                       بانتظار الاستلام: {orders?.filter(o => o.status === "PENDING_PICKUP").length || 0}
                     </span>
@@ -850,55 +930,137 @@ export default function LogisticsTab({ orders, users, vendors, fetchData: parent
                   </div>
                 </div>
 
+                {/* Bulk selection & assignment toolbar */}
+                {selectedShipmentIds.size > 0 && (
+                  <div className="px-8 py-4 bg-[#0F172A] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <span className="text-white text-xs font-black flex items-center gap-2">
+                      <CheckCircle2 size={16} className="text-[#C5A021]" />
+                      تم تحديد {selectedShipmentIds.size} شحنة للإسناد الجماعي
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <select
+                        value=""
+                        disabled={bulkAssigning}
+                        onChange={(e) => handleBulkAssign(e.target.value)}
+                        className="bg-white text-slate-800 rounded-xl px-3 py-2 text-[11px] font-black outline-none disabled:opacity-60"
+                      >
+                        <option value="">إسناد المحدد إلى...</option>
+                        <optgroup label="المناديب">
+                          {drivers.map(d => (
+                            <option key={d.id} value={`drv_${d.id}`}>🚗 {d.name}</option>
+                          ))}
+                        </optgroup>
+                        <optgroup label="الفروع">
+                          {branches.map(b => (
+                            <option key={b.id} value={`br_${b.id}`}>🏢 {b.name}</option>
+                          ))}
+                        </optgroup>
+                      </select>
+                      {bulkAssigning && <Loader2 size={14} className="animate-spin text-white" />}
+                      <button
+                        onClick={() => setSelectedShipmentIds(new Set())}
+                        className="text-white/70 hover:text-white text-[11px] font-black px-2"
+                      >
+                        إلغاء التحديد
+                      </button>
+                    </div>
+                  </div>
+                )}
+
                 <div className="overflow-x-auto">
                   <table className="w-full border-collapse text-right">
                     <thead>
-                      <tr className="bg-slate-50 border-b border-slate-100 text-xs font-black text-gray-400">
-                        <th className="p-6">رقم الشحنة</th>
-                        <th className="p-6">العميل والمدينة</th>
-                        <th className="p-6">الحالة الحالية</th>
-                        <th className="p-6">المندوب الحالي</th>
-                        <th className="p-6">الفرع الحالي</th>
-                        <th className="p-6">تحديث التوجيه</th>
+                      <tr className="bg-slate-50 border-b border-slate-100 text-[11px] font-black text-gray-400 whitespace-nowrap">
+                        <th className="p-4 w-10">
+                          <input
+                            type="checkbox"
+                            checked={allActiveSelected}
+                            onChange={toggleSelectAllShipments}
+                            className="w-4 h-4 rounded border-gray-300 accent-[#C5A021] cursor-pointer"
+                          />
+                        </th>
+                        <th className="p-4">رقم الشحنة / الباركود</th>
+                        <th className="p-4">المستلم</th>
+                        <th className="p-4">الوجهة</th>
+                        <th className="p-4">محتوى الطرد / الكمية</th>
+                        <th className="p-4">قيمة الشحنة</th>
+                        <th className="p-4">التوصيل / الوزن</th>
+                        <th className="p-4">الدفع</th>
+                        <th className="p-4">الحالة</th>
+                        <th className="p-4">المندوب / الفرع</th>
+                        <th className="p-4">إسناد إلى</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
-                      {(orders || []).filter(o => ["PENDING_PICKUP", "AT_BRANCH", "SHIPPED"].includes(o.status)).length === 0 ? (
+                      {activeShipments.length === 0 ? (
                         <tr>
-                          <td colSpan={6} className="p-12 text-center text-gray-400 font-bold">لا توجد شحنات نشطة حالياً</td>
+                          <td colSpan={11} className="p-12 text-center text-gray-400 font-bold">لا توجد شحنات نشطة حالياً</td>
                         </tr>
                       ) : (
-                        (orders || []).filter(o => ["PENDING_PICKUP", "AT_BRANCH", "SHIPPED"].includes(o.status)).map((o) => (
-                          <tr key={o.id} className="hover:bg-slate-50/50 transition-all text-xs font-black">
-                            <td className="p-6">
-                              <span className="text-slate-800">#{o.id.slice(-8).toUpperCase()}</span>
-                              {o.trackingNumber && (
-                                <div className="text-[10px] text-gray-400 mt-1 font-mono">{o.trackingNumber}</div>
+                        activeShipments.map((o: any) => {
+                          const qty = (o.items?.reduce((s: number, i: any) => s + (i.quantity || 0), 0)) || 0;
+                          const content = o.packageContent
+                            || (o.items?.map((i: any) => i.product?.title).filter(Boolean).join("، "))
+                            || "—";
+                          const isSelected = selectedShipmentIds.has(o.id);
+                          const currentBranch = branches.find(b => b.id === o.branchId)?.name;
+                          return (
+                          <tr key={o.id} className={cn("hover:bg-slate-50/50 transition-all text-[11px] font-black align-top", isSelected && "bg-[#C5A021]/5")}>
+                            <td className="p-4">
+                              <input
+                                type="checkbox"
+                                checked={isSelected}
+                                onChange={() => toggleSelectShipment(o.id)}
+                                className="w-4 h-4 rounded border-gray-300 accent-[#C5A021] cursor-pointer"
+                              />
+                            </td>
+                            <td className="p-4">
+                              <span className="text-slate-800 font-mono">{o.trackingNumber || o.consignmentNumber || `#${o.id.slice(-8).toUpperCase()}`}</span>
+                              {o.source && o.source !== "STORE" && (
+                                <div className="text-[9px] text-[#C5A021] mt-1">{o.source}</div>
                               )}
                             </td>
-                            <td className="p-6">
-                              <div>{o.customerName || o.customer?.name || "عميل"}</div>
-                              <div className="text-[10px] text-gray-400 mt-1">{o.city} - {o.district}</div>
+                            <td className="p-4">
+                              <div className="text-slate-800">{o.customerName || o.customer?.name || "عميل"}</div>
+                              <div className="text-[10px] text-gray-400 mt-1 font-mono" dir="ltr">{o.phone || o.customer?.phone || "—"}</div>
                             </td>
-                            <td className="p-6">
+                            <td className="p-4 max-w-[180px]">
+                              <div className="text-slate-700">{o.city || "—"}{o.district ? ` - ${o.district}` : ""}</div>
+                              {o.street && <div className="text-[10px] text-gray-400 mt-1 truncate" title={o.street}>{o.street}</div>}
+                            </td>
+                            <td className="p-4 max-w-[160px]">
+                              <div className="text-slate-700 truncate" title={content}>{content}</div>
+                              {qty > 0 && <div className="text-[10px] text-gray-400 mt-1">الكمية: {qty}</div>}
+                            </td>
+                            <td className="p-4">
+                              <div className="text-slate-800">{(o.totalAmount || 0).toLocaleString()} <span className="text-[9px] text-gray-400">ج.س</span></div>
+                              {o.shipmentType && <div className="text-[9px] text-gray-400 mt-1">{o.shipmentType}</div>}
+                            </td>
+                            <td className="p-4">
+                              <div className="text-slate-700">{(o.shippingCost || 0).toLocaleString()} <span className="text-[9px] text-gray-400">ج.س</span></div>
+                              <div className="text-[10px] text-gray-400 mt-1">{o.weight ? `${o.weight} كجم` : "—"}</div>
+                            </td>
+                            <td className="p-4 text-gray-500">{o.paymentMethod || "—"}</td>
+                            <td className="p-4">
                               <span className={cn(
-                                "px-3 py-1 rounded-full text-[10px]",
-                                o.status === "PENDING_PICKUP" && "bg-orange-50 text-orange-600",
-                                o.status === "AT_BRANCH" && "bg-purple-50 text-purple-600",
-                                o.status === "SHIPPED" && "bg-blue-50 text-blue-600"
+                                "px-3 py-1 rounded-full text-[10px] whitespace-nowrap",
+                                o.status === "PENDING_PICKUP" ? "bg-orange-50 text-orange-600"
+                                  : o.status === "AT_BRANCH" ? "bg-purple-50 text-purple-600"
+                                  : o.status === "SHIPPED" ? "bg-blue-50 text-blue-600"
+                                  : o.status === "DELIVERED" ? "bg-green-50 text-green-600"
+                                  : o.status === "CANCELLED" ? "bg-red-50 text-red-600"
+                                  : "bg-slate-100 text-slate-500"
                               )}>
                                 {ORDER_STATUSES[o.status]?.label || o.status}
                               </span>
                             </td>
-                            <td className="p-6 text-gray-500">
-                              {o.driver?.name ? `🚗 ${o.driver.name}` : "—"}
+                            <td className="p-4 text-gray-500 whitespace-nowrap">
+                              {o.driver?.name ? `🚗 ${o.driver.name}` : currentBranch ? `🏢 ${currentBranch}` : "—"}
                             </td>
-                            <td className="p-6 text-gray-500">
-                              {branches.find(b => b.id === o.branchId)?.name ? `🏢 ${branches.find(b => b.id === o.branchId)?.name}` : "—"}
-                            </td>
-                            <td className="p-6">
-                              <div className="flex gap-2">
+                            <td className="p-4">
+                              <div className="flex gap-2 items-center">
                                 <select
+                                  value=""
                                   onChange={async (e) => {
                                     const val = e.target.value;
                                     if (!val) return;
@@ -934,7 +1096,8 @@ export default function LogisticsTab({ orders, users, vendors, fetchData: parent
                               </div>
                             </td>
                           </tr>
-                        ))
+                          );
+                        })
                       )}
                     </tbody>
                   </table>
