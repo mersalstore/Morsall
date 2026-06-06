@@ -29,6 +29,7 @@ import {
   QrCode
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { paymentDisplay } from "@/lib/payment";
 
 interface Driver {
   id: string;
@@ -1040,16 +1041,32 @@ export default function LogisticsTab({ orders, users, vendors, fetchData: parent
                               <div className="text-slate-700">{(o.shippingCost || 0).toLocaleString()} <span className="text-[9px] text-gray-400">ج.س</span></div>
                               <div className="text-[10px] text-gray-400 mt-1">{o.weight ? `${o.weight} كجم` : "—"}</div>
                             </td>
-                            <td className="p-4 text-gray-500">{o.paymentMethod || "—"}</td>
+                            <td className="p-4">
+                              {(() => {
+                                const pay = paymentDisplay(o.paymentMethod, o.paymentVerified, o.shipmentType);
+                                return (
+                                  <span className={cn(
+                                    "px-2.5 py-1 rounded-full text-[10px] whitespace-nowrap",
+                                    pay.tone === "green" && "bg-green-50 text-green-600",
+                                    pay.tone === "amber" && "bg-amber-50 text-amber-600",
+                                    pay.tone === "blue" && "bg-blue-50 text-blue-600",
+                                    pay.tone === "slate" && "bg-slate-100 text-slate-500"
+                                  )}>
+                                    {pay.label}
+                                  </span>
+                                );
+                              })()}
+                            </td>
                             <td className="p-4">
                               <span className={cn(
-                                "px-3 py-1 rounded-full text-[10px] whitespace-nowrap",
-                                o.status === "PENDING_PICKUP" ? "bg-orange-50 text-orange-600"
-                                  : o.status === "AT_BRANCH" ? "bg-purple-50 text-purple-600"
-                                  : o.status === "SHIPPED" ? "bg-blue-50 text-blue-600"
-                                  : o.status === "DELIVERED" ? "bg-green-50 text-green-600"
-                                  : o.status === "CANCELLED" ? "bg-red-50 text-red-600"
-                                  : "bg-slate-100 text-slate-500"
+                                "px-3 py-1 rounded-full text-[10px] whitespace-nowrap border block text-center w-24",
+                                o.status === "PENDING_PICKUP" ? "bg-orange-50 text-orange-600 border-orange-100"
+                                  : o.status === "AT_BRANCH" ? "bg-purple-50 text-purple-600 border-purple-100"
+                                  : o.status === "SHIPPED" ? "bg-blue-50 text-blue-600 border-blue-100"
+                                  : o.status === "DELIVERED" ? "bg-green-50 text-green-600 border-green-100"
+                                  : o.status === "CANCELLED" ? "bg-red-50 text-red-600 border-red-100 font-bold"
+                                  : o.status === "RETURNED" ? "bg-rose-50 text-rose-600 border-rose-100 font-bold"
+                                  : "bg-slate-100 text-slate-500 border-slate-200"
                               )}>
                                 {ORDER_STATUSES[o.status]?.label || o.status}
                               </span>
