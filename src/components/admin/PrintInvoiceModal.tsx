@@ -46,17 +46,21 @@ export default function PrintInvoiceModal({ isOpen, order, onClose }: PrintInvoi
             }
           </style>
         </head>
-        <body>
+        <body class="print-area" dir="rtl">
           <div class="w-full max-w-2xl mx-auto p-4 border border-gray-200 rounded-2xl">
             \${printEl.innerHTML}
           </div>
           <script>
+            function doPrint() {
+              if (window.hasPrinted) return;
+              window.hasPrinted = true;
+              window.print();
+              window.close();
+            }
             window.onload = function() {
-              setTimeout(function() {
-                window.print();
-                window.close();
-              }, 500);
+              setTimeout(doPrint, 500);
             };
+            setTimeout(doPrint, 2500);
           </script>
         </body>
       </html>

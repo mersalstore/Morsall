@@ -22,6 +22,8 @@ import VendorShippingPolicyModal from "../../../components/VendorShippingPolicyM
 import VendorSubscriptionTab from "../../../components/VendorSubscriptionTab";
 import VendorWMSTab from "../../../components/vendor/VendorWMSTab";
 import NotificationBell from "../../../components/NotificationBell";
+import ReturnsTab from "../../../components/admin/ReturnsTab";
+import { exportToExcel } from "../../../lib/excel";
 
 
 export default function VendorDashboard() {
@@ -34,6 +36,12 @@ export default function VendorDashboard() {
   const [statsData, setStatsData] = useState<any>(null);
   const [products, setProducts] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
+
+  const [toastMsg, setToastMsg] = useState<{msg:string;type:string}|null>(null);
+  const showToast = (msg: string, type: "success"|"error"|"info" = "info") => {
+    setToastMsg({msg, type});
+    setTimeout(() => setToastMsg(null), 3500);
+  };
 
   const [productSearch, setProductSearch] = useState("");
   const [productStatusFilter, setProductStatusFilter] = useState("all");
@@ -80,10 +88,8 @@ export default function VendorDashboard() {
     else setSelectedOrders(new Set(filteredOrders.map(o => o.id)));
   };
 
-  const handleExportExcel = async (type: "products" | "orders" = "products") => {
+  const handleExportExcel = (type: "products" | "orders" = "products") => {
     try {
-      const { exportToExcel } = await import("@/lib/excel");
-      
       if (type === "products") {
         const dataToExport = selectedProducts.size > 0 
           ? products.filter(p => selectedProducts.has(p.id))
@@ -399,7 +405,23 @@ export default function VendorDashboard() {
               </div>
            </div>
            <div className="flex items-center gap-2">
-             <NotificationBell />
+              <a
+                href="/"
+                className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white border border-gray-200 text-[#0F172A] font-black text-xs hover:bg-gray-50 transition-all shrink-0"
+                title="العودة لموقع مرسال الرئيسي"
+              >
+                <span className="material-symbols-rounded text-base">storefront</span>
+                الموقع الرئيسي
+              </a>
+              <button
+                onClick={() => signOut({ callbackUrl: "/login" })}
+                className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 font-black text-xs hover:bg-slate-200 transition-all shrink-0"
+                title="تسجيل الخروج والتبديل لحساب آخر"
+              >
+                <span className="material-symbols-rounded text-base">swap_horiz</span>
+                تبديل الحساب
+              </button>
+              <NotificationBell />
              <button onClick={() => { setEditingProduct(null); setIsModalOpen(true); }} className="bg-[#C5A021] text-white px-4 md:px-8 py-2 md:py-3 rounded-xl font-black text-[10px] md:text-sm shadow-lg shadow-[#C5A021]/20 hover:scale-105 transition-all shrink-0">
                إضافة منتج
              </button>
@@ -434,7 +456,7 @@ export default function VendorDashboard() {
                           <p className="text-sm font-black text-white">{new Date(statsData.subscriptionEndsAt).toLocaleDateString("ar-EG")}</p>
                        </div>
                     )}
-                    <button onClick={() => setActiveTab("promotion")} className="bg-[#C5A021] hover:bg-[#0d6e84] text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-xl shadow-black/20 hover:scale-105">
+                    <button onClick={() => setActiveTab("subscription")} className="bg-[#C5A021] hover:bg-[#0d6e84] text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-xl shadow-black/20 hover:scale-105">
                        ترقية المتجر 🚀
                     </button>
                  </div>
@@ -508,6 +530,7 @@ export default function VendorDashboard() {
           {activeTab === "customDesign" && <CustomDesignRequestTab />}
           {activeTab === "subscription" && <VendorSubscriptionTab />}
           {activeTab === "coupons" && <VendorCoupons />}
+          {activeTab === "returns" && <ReturnsTab showToast={showToast} />}
           {activeTab === "reviews" && <VendorReviews />}
           {activeTab === "settings" && <VendorStoreSettings />}
 
@@ -575,6 +598,14 @@ export default function VendorDashboard() {
                      <table className="w-full text-right min-w-[700px] md:min-w-0">
                         <thead>
                            <tr className="text-[10px] font-black text-gray-400 uppercase tracking-widest border-b">
+                              <th className="pb-4 pr-2 w-10">
+                                 <input 
+                                   type="checkbox" 
+                                   className="w-4 h-4 rounded-md border-gray-300 text-[#C5A021] focus:ring-[#C5A021]"
+                                   checked={selectedProducts.size === filteredProducts.length && filteredProducts.length > 0}
+                                   onChange={toggleAllProducts}
+                                 />
+                              </th>
                               <th className="pb-4 pr-2">المنتج</th>
                               <th className="pb-4">القسم</th>
                               <th className="pb-4">المخزون</th>
@@ -585,7 +616,18 @@ export default function VendorDashboard() {
                         </thead>
                         <tbody>
                            {filteredProducts.map(p => (
-                              <tr key={p.id} className="border-b last:border-0 hover:bg-gray-50/30 transition-colors group">
+                              <tr key={p.id} className={cn(
+                                "border-b last:border-0 hover:bg-gray-50/30 transition-colors group",
+                                selectedProducts.has(p.id) && "bg-[#C5A021]/5"
+                              )}>
+                                 <td className="py-4 pr-2">
+                                    <input 
+                                      type="checkbox" 
+                                      className="w-4 h-4 rounded-md border-gray-300 text-[#C5A021] focus:ring-[#C5A021]"
+                                      checked={selectedProducts.has(p.id)}
+                                      onChange={() => toggleProductSelection(p.id)}
+                                    />
+                                 </td>
                                  <td className="py-4 pr-2 flex items-center gap-3">
                                     <div className="relative w-10 h-10 rounded-lg overflow-hidden bg-gray-50 border border-gray-100 shrink-0">
                                        <Image src={p.images?.split(",")[0] || "/placeholder.png"} alt={p.title} fill className="object-cover" />
@@ -810,6 +852,8 @@ export default function VendorDashboard() {
             </div>
           )}
 
+          {activeTab === "returns" && <ReturnsTab showToast={showToast} />}
+
           {activeTab === "finance" && (
             <div className="space-y-8">
                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -833,7 +877,14 @@ export default function VendorDashboard() {
                      <p className="text-3xl font-black text-[#0F172A]">{statsData?.totalSales?.toLocaleString() || 0} <span className="text-sm font-bold opacity-40">ج.س</span></p>
                      <div className="mt-4 flex items-center gap-2 text-green-500 bg-green-50 w-fit px-2 py-1 rounded-lg">
                         <span className="material-symbols-rounded text-sm">trending_up</span>
-                        <span className="text-[10px] font-black">+12% هذا الشهر</span>
+                         <span className="text-[10px] font-black">
+                           {statsData?.netProfitPercentage != null 
+                             ? `${statsData.netProfitPercentage > 0 ? '+' : ''}${statsData.netProfitPercentage.toFixed(1)}%`
+                             : statsData?.totalSales > 0 
+                               ? `${(((statsData?.netProfit || 0) / statsData.totalSales) * 100).toFixed(1)}% من المبيعات`
+                               : '—'
+                           } هذا الشهر
+                         </span>
                      </div>
                   </div>
 
@@ -1079,6 +1130,16 @@ export default function VendorDashboard() {
             </div>
           )}
        </AnimatePresence>
+
+      {/* Toast Notification */}
+      {toastMsg && (
+        <div className={cn(
+          "fixed bottom-6 left-1/2 -translate-x-1/2 z-[999] px-6 py-3 rounded-2xl shadow-2xl font-black text-sm text-white transition-all animate-bounce",
+          toastMsg.type === 'error' ? 'bg-red-500' : toastMsg.type === 'success' ? 'bg-green-600' : 'bg-[#0F172A]'
+        )}>
+          {toastMsg.msg}
+        </div>
+      )}
     </div>
   );
 }

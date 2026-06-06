@@ -150,6 +150,10 @@ model PaymentTransaction {
   stripePaymentIntentId  String?
   stripeSubscriptionId   String?
   paymentMethod          String?  // "stripe", "bank_transfer", "wallet"
+  screenshotUrl          String?  @db.Text   // URL of bank transfer screenshot
+  aiConfidence           Float?              // 0-100 OCR confidence
+  aiData                 Json?               // { details, flags, ocrTextHash, ... }
+  notes                  String?  @db.Text   // Admin notes
   createdAt              DateTime @default(now())
   completedAt            DateTime?
   vendor                 Vendor   @relation(fields: [vendorId], references: [id])
@@ -210,6 +214,7 @@ model Product {
   variations       ProductVariation[]
   reviews          Review[]
   supplyRequestItems SupplyRequestItem[]
+  returnItems      ReturnItem[]
 }
 
 model ProductAttribute {
@@ -309,6 +314,7 @@ model Order {
   customer          User            @relation(fields: [customerId], references: [id])
   driver            DeliveryDriver? @relation(fields: [driverId], references: [id])
   items             OrderItem[]
+  returns           Return[]
 }
 
 model OrderItem {
@@ -502,6 +508,36 @@ model SupplyRequestItem {
   product         Product       @relation(fields: [productId], references: [id])
 }
 
+// المرتجعات (Returns) — طلبات إرجاع الطلبات من العملاء
+model Return {
+  id           String       @id @default(cuid())
+  orderId      String
+  vendorId     String?
+  customerId   String?
+  reason       String       @db.Text
+  status       String       @default("REQUESTED") // REQUESTED, APPROVED, REJECTED, RECEIVED, REFUNDED
+  refundAmount Float        @default(0)
+  restock      Boolean      @default(true)
+  adminNote    String?      @db.Text
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  resolvedAt   DateTime?
+  order        Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  items        ReturnItem[]
+
+  @@index([orderId])
+  @@index([vendorId])
+}
+
+model ReturnItem {
+  id        String  @id @default(cuid())
+  returnId  String
+  productId String
+  quantity  Int     @default(1)
+  return    Return  @relation(fields: [returnId], references: [id], onDelete: Cascade)
+  product   Product @relation(fields: [productId], references: [id])
+}
+
 // الباب الرابع: حفظ عناوين العملاء تلقائياً
 model SavedAddress {
   id        String   @id @default(cuid())
@@ -549,6 +585,60 @@ model Notification {
   @@index([userId])
   @@index([role])
   @@index([createdAt])
+}
+
+// نظام أمان شامل - سجل الأنشطة المشبوهة والهجمات
+model SecurityLog {
+  id          String   @id @default(cuid())
+  // Event categorization
+  type        String   // LOGIN_FAIL, LOGIN_SUCCESS, PAYMENT_FAIL, PAYMENT_SUCCESS,
+                      // FAKE_RECEIPT, FAKE_CARD, RATE_LIMIT, SUSPICIOUS_PATTERN,
+                      // SQL_INJECTION_ATTEMPT, XSS_ATTEMPT, UNAUTHORIZED_ACCESS,
+                      // PASSWORD_RESET_ABUSE, PERMISSION_VIOLATION, API_ABUSE
+  severity    String   @default("INFO") // INFO, WARN, ALERT, CRITICAL
+
+  // Source identification
+  ip          String?
+  userAgent   String?  @db.Text
+  userId      String?
+  userEmail   String?
+  vendorId    String?
+
+  // Request context
+  endpoint    String?  @db.VarChar(500)
+  method      String?  // GET/POST/PUT/PATCH/DELETE
+
+  // Free-form details (e.g. error messages, attempted payload, fraud flags)
+  message     String?  @db.Text
+  details     Json?
+
+  // Admin actions
+  resolved    Boolean  @default(false)
+  resolvedBy  String?
+  resolvedAt  DateTime?
+  blocked     Boolean  @default(false)  // is the source IP now blocked
+
+  createdAt   DateTime @default(now())
+
+  @@index([type])
+  @@index([severity])
+  @@index([ip])
+  @@index([userEmail])
+  @@index([createdAt])
+}
+
+// قائمة الحظر للـ IPs المشبوهة
+model BlockedIp {
+  id        String   @id @default(cuid())
+  ip        String   @unique
+  reason    String?  @db.Text
+  attempts  Int      @default(0)
+  blockedAt DateTime @default(now())
+  expiresAt DateTime? // null = permanent
+  blockedBy String?
+
+  @@index([ip])
+  @@index([expiresAt])
 }
 
 // الباب الأول: طلبات استيراد الطلبات الخارجية

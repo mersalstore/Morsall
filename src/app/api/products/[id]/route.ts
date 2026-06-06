@@ -12,10 +12,11 @@ export async function GET(
       where: { id },
       include: {
         vendor: {
-          select: { 
-            storeName: true, 
+          select: {
+            storeName: true,
             location: true,
-            userId: true
+            userId: true,
+            slug: true
           }
         },
         category: {
@@ -46,6 +47,7 @@ export async function GET(
       category: p.category?.name || "غير مصنف",
       categoryId: p.categoryId || "others",
       vendor: p.vendor.storeName,
+      vendorSlug: p.vendor.slug || null,
       vendorLocation: p.vendor.location || "السودان",
       vendorId: p.vendorId,
       rating: 4.5, // Default for now

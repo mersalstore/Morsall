@@ -43,6 +43,10 @@ export default function EditOrderModal({
 
   if (!isOpen || !order) return null;
 
+  // paymentMethod is stored uppercase in the DB ("COD", "BANK_TRANSFER", ...) but some
+  // checkout/legacy rows are lowercase — normalize before comparing.
+  const pm = (order.paymentMethod || "").toLowerCase();
+
   // نسخ بيانات الطلب كاملاً
   const copyOrderData = () => {
     const text = `#${order.id?.slice(-8).toUpperCase()}
@@ -247,9 +251,9 @@ export default function EditOrderModal({
                 <div>
                   <p className="text-[10px] font-bold text-white/60 uppercase tracking-widest mb-1">طريقة الدفع</p>
                   <p className="text-base font-black text-white mt-1">
-                    {order.paymentMethod === "cod" ? "الدفع عند الاستلام (COD)" :
-                     order.paymentMethod === "bank_transfer" ? "حوالة بنكية" :
-                     order.paymentMethod === "prepaid" ? "دفع إلكتروني مسبق" : order.paymentMethod}
+                    {pm === "cod" ? "الدفع عند الاستلام (COD)" :
+                     pm === "bank_transfer" ? "حوالة بنكية" :
+                     pm === "prepaid" || pm === "stripe" ? "دفع إلكتروني مسبق" : order.paymentMethod}
                   </p>
                 </div>
 
@@ -260,12 +264,12 @@ export default function EditOrderModal({
                       "px-3 py-1 rounded-xl text-xs font-black shadow-lg",
                       order.paymentVerified ? "bg-green-500 text-white shadow-green-500/20" :
                       order.codCollected ? "bg-blue-500 text-white shadow-blue-500/20" :
-                      order.paymentMethod === "cod" ? "bg-amber-500 text-white shadow-amber-500/20" :
+                      pm === "cod" ? "bg-amber-500 text-white shadow-amber-500/20" :
                       "bg-orange-500 text-white shadow-orange-500/20"
                     )}>
                       {order.paymentVerified ? "✓ مدفوع (مؤكد)" :
                        order.codCollected ? "✓ مدفوع كاش" :
-                       order.paymentMethod === "cod" ? "⏳ COD - عند الاستلام" :
+                       pm === "cod" ? "⏳ COD - عند الاستلام" :
                        "⏳ حوالة - بانتظار التأكيد"}
                     </span>
                   </div>
@@ -274,7 +278,7 @@ export default function EditOrderModal({
             </div>
 
             {/* إيصال الدفع */}
-            {order.paymentMethod !== "cod" && (
+            {pm !== "cod" && (
               <div className="bg-orange-50/50 rounded-3xl p-5 border border-orange-100 space-y-3">
                 <div className="flex items-center justify-between">
                   <p className="text-[10px] font-black text-orange-600 uppercase tracking-widest flex items-center gap-2">

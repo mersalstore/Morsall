@@ -76,6 +76,9 @@ export async function GET(req: Request) {
       currency: "ج.س",
       commissionRate: vendor.commissionRate,
       commissionType: vendor.commissionType,
+      status: vendor.status,
+      storeName: vendor.storeName,
+      rejectionReason: vendor.rejectionReason,
     });
   } catch (error: any) {
     console.error("Vendor Stats API Error:", error);

@@ -33,7 +33,7 @@ export async function GET(req: Request) {
         items: {
           where: { vendorId: vendor.id },
           include: {
-            product: { select: { title: true, images: true } },
+            product: { select: { title: true, images: true, length: true, width: true, height: true, weight: true } },
             variation: true
           }
         }
@@ -42,13 +42,7 @@ export async function GET(req: Request) {
 
     // Map to a more vendor-friendly format
     const vendorOrders = orders.map(order => ({
-      id: order.id,
-      customerName: order.customerName,
-      phone: order.phone,
-      city: order.city,
-      status: order.status,
-      createdAt: order.createdAt,
-      totalAmount: order.totalAmount, // Note: This is the total order amount, maybe vendor just wants their portion?
+      ...order,
       vendorItems: order.items.map(item => ({
         id: item.id,
         productTitle: item.product.title,

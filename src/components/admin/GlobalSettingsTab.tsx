@@ -194,6 +194,43 @@ export default function GlobalSettingsTab({ showToast }: { showToast?: (msg: str
             </div>
          </div>
 
+         {/* Vendor Product Limits Configuration */}
+         <div className="bg-white p-12 rounded-[3.5rem] border border-gray-100 shadow-2xl space-y-10 md:col-span-2">
+            <div className="flex items-center gap-4 text-[#F29124]">
+               <div className="w-10 h-10 rounded-xl bg-[#F29124]/10 flex items-center justify-center text-[#F29124]">
+                  <Settings size={20} />
+               </div>
+               <h3 className="text-xl font-black text-[#0F172A]">إعدادات حدود رفع المنتجات للتجار</h3>
+            </div>
+            <p className="text-[10px] text-gray-400 font-bold px-2 -mt-6">حدد الحد الأقصى للمنتجات التي يمكن للتاجر نشرها بناءً على باقة اشتراكه</p>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+               <div className="space-y-4">
+                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2">الحد الأقصى لمنتجات الفترة التجريبية (Freemium)</label>
+                  <input 
+                     type="number"
+                     value={settings.trialMaxProducts !== undefined ? settings.trialMaxProducts : 10}
+                     onChange={e => setSettings({...settings, trialMaxProducts: parseInt(e.target.value) || 0})}
+                     className="w-full bg-gray-50 border border-transparent focus:border-[#C5A021] rounded-2xl px-6 py-5 text-lg font-black outline-none transition-all"
+                     placeholder="10"
+                  />
+                  <p className="text-[9px] text-gray-400 px-2 leading-relaxed">الحد الأقصى لعدد المنتجات التي يمكن رفعها خلال فترة التجربة المجانية (14 يوم).</p>
+               </div>
+
+               <div className="space-y-4">
+                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2">الحد الأقصى لمنتجات باقة منشئ المتاجر (Premium Builder)</label>
+                  <input 
+                     type="number"
+                     value={settings.premiumMaxProducts !== undefined ? settings.premiumMaxProducts : 50}
+                     onChange={e => setSettings({...settings, premiumMaxProducts: parseInt(e.target.value) || 0})}
+                     className="w-full bg-gray-50 border border-transparent focus:border-[#C5A021] rounded-2xl px-6 py-5 text-lg font-black outline-none transition-all"
+                     placeholder="50"
+                  />
+                  <p className="text-[9px] text-gray-400 px-2 leading-relaxed">الحد الأقصى لعدد المنتجات التي يمكن رفعها في باقة منشئ المتاجر المدفوعة.</p>
+               </div>
+            </div>
+         </div>
+
          {/* Store Design Pricing (Odoo System) */}
          <div className="bg-white p-12 rounded-[3.5rem] border border-gray-100 shadow-2xl space-y-10 md:col-span-2">
             <div className="flex items-center gap-4 text-[#C5A021]">

@@ -17,15 +17,17 @@ def upload_large_file():
         print("Login successful!")
         print(f"Initial PWD: {ftp.pwd()}")
         
-        # Navigate to the correct directory!
+        # Navigate to the nodejs directory to upload the zip
         try:
-            ftp.cwd('domains/morsall.com/public_html')
-            print("Successfully navigated to domains/morsall.com/public_html")
+            ftp.cwd('/nodejs')
+            print("Successfully navigated to /nodejs")
         except Exception as e:
-            print(f"Warning: could not change directory to public_html: {e}")
+            print(f"Error: could not change directory to /nodejs: {e}")
+            ftp.quit()
+            return
 
-        # Upload zip to current dir
-        print(f"Target PWD: {ftp.pwd()}")
+        # Upload zip to nodejs dir
+        print(f"Target PWD for zip: {ftp.pwd()}")
         filesize = os.path.getsize(filename)
         print(f"Uploading {filename} ({filesize / 1024 / 1024:.2f} MB)...")
         
@@ -38,12 +40,22 @@ def upload_large_file():
             
             callback.uploaded = 0
             ftp.storbinary(f"STOR {filename}", file, blocksize=1024*1024, callback=callback)
-            print(f"\nSuccessfully uploaded {filename}")
+            print(f"\nSuccessfully uploaded {filename} to /nodejs")
             
+        # Navigate to public_html to upload emergency_deploy.php
+        try:
+            ftp.cwd('/public_html')
+            print("Successfully navigated to /public_html")
+        except Exception as e:
+            print(f"Error: could not change directory to /public_html: {e}")
+            ftp.quit()
+            return
+
+        print(f"Target PWD for deploy script: {ftp.pwd()}")
         print("Uploading emergency_deploy.php...")
         with open("emergency_deploy.php", "rb") as f2:
             ftp.storbinary("STOR emergency_deploy.php", f2)
-            print("Successfully uploaded emergency_deploy.php")
+            print("Successfully uploaded emergency_deploy.php to /public_html")
             
         ftp.quit()
     except Exception as e:
@@ -51,3 +63,4 @@ def upload_large_file():
 
 if __name__ == "__main__":
     upload_large_file()
+

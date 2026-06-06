@@ -33,6 +33,9 @@ export async function GET(req: Request) {
     const orders = await db.order.findMany({
       where,
       orderBy: { createdAt: "desc" },
+      // Cap the result set: loading every order (with product images) at once can
+      // exceed Hostinger's request timeout and return a 408 on the admin dashboard.
+      take: 500,
       include: {
         customer: { select: { name: true, email: true, phone: true } },
         driver: { select: { name: true, phone: true, vehicleType: true } },
@@ -48,7 +51,7 @@ export async function GET(req: Request) {
                 width: true,
               },
             },
-            vendor: { select: { storeName: true } },
+            vendor: { select: { storeName: true, address: true, phone: true } },
             // جلب السمات المحددة للمتغير (الباب الخامس - المتطلب 2)
             variation: { select: { combination: true, sku: true, price: true } },
           },

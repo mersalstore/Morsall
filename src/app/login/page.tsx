@@ -12,6 +12,7 @@ function LoginContent() {
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const router = useRouter();
 
   const [email, setEmail] = useState("");
@@ -22,6 +23,21 @@ function LoginContent() {
     const tab = searchParams.get("tab");
     if (tab === "register") {
       setIsLogin(false);
+    }
+
+    const verified = searchParams.get("verified");
+    if (verified === "true") {
+      setSuccessMessage("تم تفعيل حسابك بنجاح! يمكنك الآن تسجيل الدخول.");
+    }
+
+    const reset = searchParams.get("reset");
+    if (reset === "true") {
+      setSuccessMessage("تم إعادة تعيين كلمة المرور بنجاح! يرجى تسجيل الدخول.");
+    }
+
+    const emailParam = searchParams.get("email");
+    if (emailParam) {
+      setEmail(emailParam);
     }
     
     // Handle NextAuth URL errors
@@ -43,6 +59,7 @@ function LoginContent() {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setSuccessMessage(null);
     try {
       if (isLogin) {
         const result = await signIn("credentials", { 
@@ -52,11 +69,16 @@ function LoginContent() {
         });
         
         if (result?.error) {
-          // Use the actual error from NextAuth if it's not a generic one
-          const errorMsg = result.error === "CredentialsSignin" 
-            ? "بيانات الدخول غير صحيحة. يرجى التأكد من البريد الإلكتروني وكلمة المرور."
-            : result.error;
-          setError(errorMsg);
+          if (result.error.includes("EMAIL_NOT_VERIFIED")) {
+            // Redirect to verify email page
+            router.push(`/verify-email?email=${encodeURIComponent(email)}`);
+          } else {
+            // Use the actual error from NextAuth if it's not a generic one
+            const errorMsg = result.error === "CredentialsSignin" 
+              ? "بيانات الدخول غير صحيحة. يرجى التأكد من البريد الإلكتروني وكلمة المرور."
+              : result.error;
+            setError(errorMsg);
+          }
         } else { 
           router.push("/"); 
           router.refresh(); 
@@ -68,8 +90,12 @@ function LoginContent() {
           body: JSON.stringify({ email, password, name }),
         });
         const data = await res.json();
-        if (!res.ok) setError(data.error || "فشل إنشاء الحساب. يرجى المحاولة لاحقاً.");
-        else await signIn("credentials", { email, password, callbackUrl: "/" });
+        if (!res.ok) {
+          setError(data.error || "فشل إنشاء الحساب. يرجى المحاولة لاحقاً.");
+        } else {
+          // Registration successful, redirect to verification page
+          router.push(`/verify-email?email=${encodeURIComponent(email)}`);
+        }
       }
     } catch (err) {
       setError("حدث خطأ في النظام. يرجى المحاولة مرة أخرى.");
@@ -139,6 +165,18 @@ function LoginContent() {
                       {isLogin ? "أدخل بياناتك للمتابعة إلى حسابك" : "الرجاء إدخال بياناتك لإنشاء حساب جديد"}
                    </p>
                 </div>
+
+                {successMessage && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
+                    className="bg-green-50 text-green-700 text-sm font-medium p-4 rounded-xl border border-green-100 mb-6 flex items-center gap-3"
+                   >
+                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 shrink-0 text-green-600" viewBox="0 0 20 20" fill="currentColor">
+                       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                     </svg>
+                     {successMessage}
+                  </motion.div>
+                )}
 
                 {error && (
                   <motion.div 

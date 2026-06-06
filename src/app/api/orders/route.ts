@@ -1,13 +1,31 @@
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { scanForAttacks, logSecurity, isIpBlocked, autoBlockIfAbusive, extractIp } from "@/lib/security-log";
 
 // POST — إنشاء طلب جديد من صفحة الـ Checkout
 export async function POST(req: Request) {
   try {
+    const clientIp = extractIp(req);
+    
+    // 1. Check if IP is blocked
+    if (await isIpBlocked(clientIp)) {
+      await logSecurity({
+        type: "UNAUTHORIZED_ACCESS",
+        severity: "CRITICAL",
+        ip: clientIp,
+        endpoint: "/api/orders",
+        method: "POST",
+        message: "Blocked IP attempted checkout",
+      });
+      return NextResponse.json(
+        { error: "تم تعطيل الوصول لهذا الـ IP بسبب نشاط مشبوه. للاستفسار تواصل مع الدعم." },
+        { status: 403 }
+      );
+    }
+
     const session = await getServerSession(authOptions);
     const customerId = (session?.user as any)?.id as string | undefined;
 
@@ -19,6 +37,53 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
+
+    // 2. Scan request payload for SQL injection / XSS
+    const attack = scanForAttacks(body);
+    if (attack) {
+      await logSecurity({
+        type: attack,
+        severity: "CRITICAL",
+        ip: clientIp,
+        userId: customerId,
+        endpoint: "/api/orders",
+        method: "POST",
+        message: `Threat payload detected: ${JSON.stringify(body).slice(0, 1000)}`,
+        details: { body },
+      });
+      await autoBlockIfAbusive(clientIp, attack, 3, 24); // Block after 3 threat attempts
+      return NextResponse.json(
+        { error: "تم رفض الطلب لوجود محتوى غير صالح أو محاولة اختراق." },
+        { status: 400 }
+      );
+    }
+
+    // 3. Checkout Rate Limiting (max 10 orders per 10 minutes per user/IP)
+    const since = new Date(Date.now() - 10 * 60 * 1000);
+    const recentOrdersCount = await prisma.order.count({
+      where: {
+        customerId,
+        createdAt: { gte: since },
+      },
+    });
+
+    if (recentOrdersCount >= 10) {
+      await logSecurity({
+        type: "RATE_LIMIT",
+        severity: "ALERT",
+        ip: clientIp,
+        userId: customerId,
+        endpoint: "/api/orders",
+        method: "POST",
+        message: `Brute force order creation: ${recentOrdersCount} orders created in 10m`,
+      });
+      await autoBlockIfAbusive(clientIp, "RATE_LIMIT", 1, 12); // Auto-block IP for 12h
+      return NextResponse.json(
+        { error: "لقد تجاوزت الحد الأقصى لإنشاء الطلبات. يرجى المحاولة لاحقاً." },
+        { status: 429 }
+      );
+    }
+
     const {
       name,
       phone,

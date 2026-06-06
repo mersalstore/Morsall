@@ -52,30 +52,50 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Vendor profile not found" }, { status: 404 });
     }
 
-    // SaaS Paywall: check if vendor can upload products
-    const tier = vendor.tier || "FREEMIUM";
-    const isSubActive = vendor.subscriptionEndsAt
-      ? new Date(vendor.subscriptionEndsAt) > new Date()
-      : tier === "FREEMIUM";
-
-    if (tier === "FREEMIUM" && !isSubActive) {
+    // Block unapproved vendors from uploading products
+    if (vendor.status !== "APPROVED") {
       return NextResponse.json({
-        error: "يجب ترقية حسابك لرفع المنتجات. اختر باقة Premium Builder من قسم الخطط.",
+        error: "حسابك قيد المراجعة حالياً. لا يمكنك رفع منتجات حتى يتم قبول حسابك من قبل الإدارة.",
+        code: "PENDING_APPROVAL",
+      }, { status: 403 });
+    }
+
+    // SaaS Paywall: check if subscription/trial is active
+    const tier = vendor.tier || "FREEMIUM";
+    const isSubActive = (tier === "CUSTOM_DESIGN") || (vendor.subscriptionEndsAt
+      ? new Date(vendor.subscriptionEndsAt) > new Date()
+      : false);
+
+    if (!isSubActive) {
+      return NextResponse.json({
+        error: "انتهت فترة اشتراكك أو الفترة التجريبية. يرجى تجديد الاشتراك أو الترقية لبدء البيع مجدداً.",
         code: "PLAN_UPGRADE_REQUIRED",
       }, { status: 403 });
     }
 
-    if (tier === "FREEMIUM") {
-      // Count existing products to enforce maxProducts limit
-      const productCount = await prisma.product.count({
-        where: { vendorId: vendor.id },
-      });
-      if (productCount >= 0) {
-        return NextResponse.json({
-          error: "حسابك المجاني لا يدعم رفع المنتجات. قم بالترقية لإحدى الباقات المدفوعة.",
-          code: "PLAN_UPGRADE_REQUIRED",
-        }, { status: 403 });
-      }
+    // Count existing products to enforce maxProducts limit
+    const productCount = await prisma.product.count({
+      where: { vendorId: vendor.id },
+    });
+
+    // Fetch limits from SiteConfig
+    const tmpTrial = await prisma.siteConfig.findUnique({ where: { key: "trialMaxProducts" } });
+    const tmpPremium = await prisma.siteConfig.findUnique({ where: { key: "premiumMaxProducts" } });
+    const trialMaxProducts = tmpTrial ? parseInt(tmpTrial.value) : 10;
+    const premiumMaxProducts = tmpPremium ? parseInt(tmpPremium.value) : 50;
+
+    if (tier === "FREEMIUM" && productCount >= trialMaxProducts) {
+      return NextResponse.json({
+        error: `لقد تجاوزت الحد الأقصى للمنتجات المسموح بها في الباقة التجريبية وهو ${trialMaxProducts} منتجات. يرجى الترقية إلى باقة Premium Builder للحصول على حد أعلى.`,
+        code: "PLAN_UPGRADE_REQUIRED",
+      }, { status: 403 });
+    }
+
+    if (tier === "PREMIUM_BUILDER" && productCount >= premiumMaxProducts) {
+      return NextResponse.json({
+        error: `لقد تجاوزت الحد الأقصى للمنتجات المسموح بها في الباقة الاحترافية وهو ${premiumMaxProducts} منتجات. يرجى الترقية إلى الباقة المخصصة للحصول على منتجات غير محدودة.`,
+        code: "PLAN_UPGRADE_REQUIRED",
+      }, { status: 403 });
     }
 
     const body = await req.json();

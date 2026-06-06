@@ -2,18 +2,70 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { extractIp, isIpBlocked, logSecurity, scanForAttacks, autoBlockIfAbusive } from "@/lib/security-log";
 
 const STRIPE_SECRET = process.env.STRIPE_SECRET_KEY;
 
 export async function POST(req: Request) {
   try {
+    const clientIp = extractIp(req);
+
+    // 1. Check if IP is blocked
+    if (await isIpBlocked(clientIp)) {
+      await logSecurity({
+        type: "UNAUTHORIZED_ACCESS",
+        severity: "CRITICAL",
+        ip: clientIp,
+        endpoint: "/api/vendor/subscribe",
+        method: "POST",
+        message: "Blocked IP attempted vendor subscription",
+      });
+      return NextResponse.json(
+        { error: "تم تعطيل الوصول لهذا الـ IP بسبب نشاط مشبوه. للاستفسار تواصل مع الدعم." },
+        { status: 403 }
+      );
+    }
+
     const session = await getServerSession(authOptions);
     const userId = (session?.user as any)?.id;
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { planSlug } = await req.json();
+    const body = await req.json();
+
+    // 2. Scan body for security threats (XSS / SQL injection)
+    const attack = scanForAttacks(body);
+    if (attack) {
+      await logSecurity({
+        type: attack,
+        severity: "CRITICAL",
+        ip: clientIp,
+        userId,
+        endpoint: "/api/vendor/subscribe",
+        method: "POST",
+        message: `Threat payload detected: ${JSON.stringify(body).slice(0, 1000)}`,
+        details: { body },
+      });
+      await autoBlockIfAbusive(clientIp, attack, 3, 24);
+      return NextResponse.json(
+        { error: "تم رفض الطلب لوجود محتوى غير صالح أو محاولة اختراق." },
+        { status: 400 }
+      );
+    }
+
+    const { planSlug } = body;
+
+    // Log subscription attempt
+    await logSecurity({
+      type: "ADMIN_ACTION",
+      severity: "INFO",
+      ip: clientIp,
+      userId,
+      endpoint: "/api/vendor/subscribe",
+      method: "POST",
+      message: `Vendor subscription session requested for plan: ${planSlug}`,
+    });
 
     const plan = await prisma.subscriptionPlan.findUnique({
       where: { slug: planSlug },

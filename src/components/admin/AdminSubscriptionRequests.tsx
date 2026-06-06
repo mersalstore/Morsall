@@ -4,7 +4,8 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   CreditCard, Check, X, AlertCircle, Search,
-  Clock, ShieldCheck, Eye, ExternalLink, FileText, Phone, Mail, MapPin, User, Sparkles, Crown, Store
+  Clock, ShieldCheck, Eye, ExternalLink, FileText, Phone, Mail, MapPin, User, Sparkles, Crown, Store,
+  CheckSquare, Square, AlertTriangle, Brain
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
@@ -65,6 +66,10 @@ export default function AdminSubscriptionRequests({
   const [selectedReq, setSelectedReq] = useState<UnifiedRequest | null>(null);
   const [rejectingReq, setRejectingReq] = useState<UnifiedRequest | null>(null);
   const [rejectReason, setRejectReason] = useState("");
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkAction, setBulkAction] = useState<"APPROVED" | "REJECTED" | null>(null);
+  const [bulkReason, setBulkReason] = useState("");
+  const [bulkLoading, setBulkLoading] = useState(false);
 
   useEffect(() => {
     fetchRequests();
@@ -105,6 +110,59 @@ export default function AdminSubscriptionRequests({
     setActionLoading(null);
     setRejectingReq(null);
     setRejectReason("");
+  };
+
+  const handleBulk = async (action: "APPROVED" | "REJECTED", reason?: string) => {
+    const ids = Array.from(selectedIds);
+    if (ids.length === 0) return;
+    setBulkLoading(true);
+    try {
+      const res = await fetch("/api/admin/subscription-transactions", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ transactionIds: ids, status: action, reason }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok) {
+        const msg = action === "APPROVED"
+          ? `✅ تم تفعيل ${data.succeeded ?? ids.length} اشتراك`
+          : `❌ تم رفض ${data.succeeded ?? ids.length} طلب`;
+        if (showToast) showToast(msg, "success");
+        setSelectedIds(new Set());
+        fetchRequests();
+      } else if (showToast) {
+        showToast("حدث خطأ في العملية المجمعة", "error");
+      }
+    } catch {
+      if (showToast) showToast("حدث خطأ", "error");
+    }
+    setBulkLoading(false);
+    setBulkAction(null);
+    setBulkReason("");
+  };
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAllPending = (pendingIds: string[]) => {
+    setSelectedIds(prev => {
+      if (pendingIds.every(id => prev.has(id)) && pendingIds.length > 0) {
+        // Deselect all
+        const next = new Set(prev);
+        pendingIds.forEach(id => next.delete(id));
+        return next;
+      }
+      // Select all pending
+      const next = new Set(prev);
+      pendingIds.forEach(id => next.add(id));
+      return next;
+    });
   };
 
   const filtered = requests.filter((r) => {
@@ -273,6 +331,49 @@ export default function AdminSubscriptionRequests({
         ))}
       </div>
 
+      {/* Bulk action bar (visible when any pending row is selected) */}
+      {selectedIds.size > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-gradient-to-l from-[#0F172A] to-[#1a2744] text-white rounded-2xl p-4 flex items-center justify-between flex-wrap gap-3 shadow-xl"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-[#C5A021] flex items-center justify-center">
+              <CheckSquare size={20} />
+            </div>
+            <div>
+              <p className="text-sm font-black">{selectedIds.size} طلب محدد</p>
+              <p className="text-[10px] text-white/60 font-bold">اختر إجراء جماعي</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              disabled={bulkLoading}
+              onClick={() => handleBulk("APPROVED")}
+              className="bg-green-500 hover:bg-green-600 text-white px-5 py-2.5 rounded-xl font-black text-xs flex items-center gap-2 transition-all disabled:opacity-50"
+            >
+              {bulkLoading ? <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <Check size={14} />}
+              قبول الكل
+            </button>
+            <button
+              disabled={bulkLoading}
+              onClick={() => setBulkAction("REJECTED")}
+              className="bg-red-500 hover:bg-red-600 text-white px-5 py-2.5 rounded-xl font-black text-xs flex items-center gap-2 transition-all disabled:opacity-50"
+            >
+              <X size={14} />
+              رفض الكل
+            </button>
+            <button
+              onClick={() => setSelectedIds(new Set())}
+              className="bg-white/10 hover:bg-white/20 text-white px-4 py-2.5 rounded-xl font-black text-xs transition-all"
+            >
+              إلغاء التحديد
+            </button>
+          </div>
+        </motion.div>
+      )}
+
       {/* Requests Table */}
       <div className="bg-white rounded-[2rem] border border-gray-100 overflow-hidden shadow-sm">
         {filtered.length === 0 ? (
@@ -285,6 +386,22 @@ export default function AdminSubscriptionRequests({
             <table className="w-full">
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-100">
+                  <th className="p-4 w-12">
+                    {(() => {
+                      const pendingIds = filtered.filter(r => r.status === "PENDING").map(r => r.id);
+                      const allSelected = pendingIds.length > 0 && pendingIds.every(id => selectedIds.has(id));
+                      return (
+                        <button
+                          onClick={() => toggleSelectAllPending(pendingIds)}
+                          disabled={pendingIds.length === 0}
+                          className="w-5 h-5 flex items-center justify-center text-[#C5A021] disabled:opacity-30"
+                          title={allSelected ? "إلغاء تحديد الكل" : "اختيار كل الطلبات قيد المراجعة"}
+                        >
+                          {allSelected ? <CheckSquare size={18} /> : <Square size={18} />}
+                        </button>
+                      );
+                    })()}
+                  </th>
                   <th className="text-right p-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">
                     التاجر
                   </th>
@@ -296,6 +413,9 @@ export default function AdminSubscriptionRequests({
                   </th>
                   <th className="text-right p-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">
                     السعر
+                  </th>
+                  <th className="text-right p-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                    تحليل AI
                   </th>
                   <th className="text-right p-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">
                     الحالة
@@ -314,8 +434,23 @@ export default function AdminSubscriptionRequests({
                     key={req.id}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    className="border-b border-gray-50 hover:bg-gray-50/50 transition-all"
+                    className={cn(
+                      "border-b border-gray-50 transition-all",
+                      selectedIds.has(req.id) ? "bg-[#C5A021]/5" : "hover:bg-gray-50/50",
+                    )}
                   >
+                    <td className="p-4 w-12">
+                      {req.status === "PENDING" ? (
+                        <button
+                          onClick={() => toggleSelect(req.id)}
+                          className="w-5 h-5 flex items-center justify-center text-[#C5A021]"
+                        >
+                          {selectedIds.has(req.id) ? <CheckSquare size={18} /> : <Square size={18} />}
+                        </button>
+                      ) : (
+                        <span className="w-5 h-5 inline-block" />
+                      )}
+                    </td>
                     <td className="p-4">
                       <p className="font-black text-sm text-[#0F172A]">{req.vendor.storeName}</p>
                       <p className="text-[10px] text-gray-400 font-bold">
@@ -328,6 +463,25 @@ export default function AdminSubscriptionRequests({
                       <p className="font-black text-sm text-[#C5A021]">
                         {req.plan ? `${req.plan.price.toLocaleString()} ج.س` : "—"}
                       </p>
+                    </td>
+                    <td className="p-4">
+                      {req.aiConfidence != null ? (
+                        <div className="flex items-center gap-1.5">
+                          <Brain size={12} className={cn(
+                            req.aiConfidence >= 85 ? "text-green-500" :
+                            req.aiConfidence >= 50 ? "text-amber-500" : "text-red-500"
+                          )} />
+                          <span className={cn(
+                            "text-xs font-black",
+                            req.aiConfidence >= 85 ? "text-green-600" :
+                            req.aiConfidence >= 50 ? "text-amber-600" : "text-red-600"
+                          )}>
+                            {Math.round(req.aiConfidence)}%
+                          </span>
+                        </div>
+                      ) : (
+                        <span className="text-[10px] text-gray-300">—</span>
+                      )}
                     </td>
                     <td className="p-4">{statusBadge(req.status)}</td>
                     <td className="p-4">
@@ -544,21 +698,80 @@ export default function AdminSubscriptionRequests({
                 )}
 
                 {selectedReq.aiConfidence != null && (
-                  <div className="bg-gray-50 rounded-2xl p-4 space-y-2">
-                    <div className="flex items-center justify-between">
+                  <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-2xl p-5 space-y-3 border border-indigo-100">
+                    <div className="flex items-center justify-between flex-wrap gap-2">
                       <span className="text-sm font-black text-[#0F172A] flex items-center gap-2">
-                        <ShieldCheck size={16} className="text-[#C5A021]" />
-                        تحليل الذكاء الاصطناعي
+                        <Brain size={16} className="text-indigo-600" />
+                        تحليل الذكاء الاصطناعي للإيصال
                       </span>
-                      <span
-                        className={cn(
-                          "text-sm font-black",
-                          selectedReq.aiConfidence >= 70 ? "text-green-600" : "text-amber-600",
-                        )}
-                      >
+                      <div className={cn(
+                        "px-4 py-1.5 rounded-full text-sm font-black flex items-center gap-2",
+                        selectedReq.aiConfidence >= 85 ? "bg-green-100 text-green-700" :
+                        selectedReq.aiConfidence >= 50 ? "bg-amber-100 text-amber-700" : "bg-red-100 text-red-700"
+                      )}>
+                        <ShieldCheck size={14} />
                         {selectedReq.aiConfidence.toFixed(1)}% ثقة
-                      </span>
+                      </div>
                     </div>
+
+                    {/* Comparison details */}
+                    {selectedReq.aiData && (
+                      <div className="grid grid-cols-2 gap-3 pt-2 border-t border-indigo-100">
+                        {selectedReq.aiData.expectedAmount != null && (
+                          <div className="bg-white/60 rounded-xl p-3">
+                            <p className="text-[10px] font-black text-gray-400 uppercase">المبلغ المطلوب</p>
+                            <p className="text-sm font-black text-[#0F172A]">
+                              {Number(selectedReq.aiData.expectedAmount).toLocaleString()} ج.س
+                            </p>
+                          </div>
+                        )}
+                        {selectedReq.aiData.amountInReceipt != null && (
+                          <div className="bg-white/60 rounded-xl p-3">
+                            <p className="text-[10px] font-black text-gray-400 uppercase">المبلغ في الإيصال</p>
+                            <p className={cn(
+                              "text-sm font-black",
+                              selectedReq.aiData.details?.amountMatch ? "text-green-600" : "text-amber-600"
+                            )}>
+                              {Number(selectedReq.aiData.amountInReceipt).toLocaleString()} ج.س
+                            </p>
+                          </div>
+                        )}
+                        {selectedReq.aiData.details?.bankNameInReceipt && (
+                          <div className="bg-white/60 rounded-xl p-3 col-span-2">
+                            <p className="text-[10px] font-black text-gray-400 uppercase">البنك المكتشف</p>
+                            <p className="text-sm font-black text-[#0F172A]">
+                              {selectedReq.aiData.details.bankNameInReceipt}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Flags list */}
+                    {Array.isArray(selectedReq.aiData?.flags) && selectedReq.aiData.flags.length > 0 && (
+                      <div className="space-y-1 pt-2 border-t border-indigo-100">
+                        <p className="text-[10px] font-black text-gray-500 uppercase">تفاصيل التحليل:</p>
+                        {selectedReq.aiData.flags.slice(0, 10).map((flag: string, i: number) => (
+                          <p key={i} className="text-xs font-bold text-[#0F172A] leading-relaxed">
+                            {flag}
+                          </p>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Verdict */}
+                    {selectedReq.aiData?.suggestion && (
+                      <div className={cn(
+                        "rounded-xl p-3 text-center text-xs font-black",
+                        selectedReq.aiData.suggestion === "APPROVE" ? "bg-green-500 text-white" :
+                        selectedReq.aiData.suggestion === "REVIEW" ? "bg-amber-500 text-white" : "bg-red-500 text-white"
+                      )}>
+                        توصية الذكاء الاصطناعي: {
+                          selectedReq.aiData.suggestion === "APPROVE" ? "✅ معتمد" :
+                          selectedReq.aiData.suggestion === "REVIEW" ? "🔍 مراجعة" : "❌ مرفوض"
+                        }
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -586,6 +799,63 @@ export default function AdminSubscriptionRequests({
                   </button>
                 </div>
               )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Bulk Rejection Modal */}
+      <AnimatePresence>
+        {bulkAction === "REJECTED" && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[60] flex items-center justify-center p-4"
+          >
+            <div
+              className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+              onClick={() => { setBulkAction(null); setBulkReason(""); }}
+            />
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white rounded-3xl p-8 max-w-md w-full relative z-10"
+            >
+              <h3 className="text-xl font-black text-[#0F172A] mb-2 flex items-center gap-2">
+                <AlertTriangle className="text-red-500" size={20} /> رفض {selectedIds.size} طلب
+              </h3>
+              <p className="text-xs text-gray-500 mb-5">
+                سيتم رفض كل الطلبات المحدّدة بنفس السبب وإرساله للتاجر.
+              </p>
+              <textarea
+                value={bulkReason}
+                onChange={(e) => setBulkReason(e.target.value)}
+                placeholder="اكتب سبب الرفض المشترك..."
+                className="w-full h-32 bg-gray-50 border border-gray-200 rounded-2xl p-4 text-xs font-bold outline-none focus:border-red-500 text-[#0F172A] mb-5 resize-none"
+              />
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    if (!bulkReason.trim()) {
+                      if (showToast) showToast("الرجاء كتابة سبب الرفض", "error");
+                      return;
+                    }
+                    handleBulk("REJECTED", bulkReason.trim());
+                  }}
+                  disabled={bulkLoading}
+                  className="flex-1 bg-red-500 text-white py-3 rounded-xl font-black text-sm hover:bg-red-600 transition-all disabled:opacity-50"
+                >
+                  {bulkLoading ? "جاري..." : `تأكيد رفض ${selectedIds.size} طلب`}
+                </button>
+                <button
+                  onClick={() => { setBulkAction(null); setBulkReason(""); }}
+                  className="w-24 bg-gray-100 text-gray-600 py-3 rounded-xl font-black text-sm hover:bg-gray-200 transition-all"
+                >
+                  إلغاء
+                </button>
+              </div>
             </motion.div>
           </motion.div>
         )}

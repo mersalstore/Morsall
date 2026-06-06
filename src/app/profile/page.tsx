@@ -36,6 +36,25 @@ export default function ProfilePage() {
   const [saved,     setSaved]     = useState(false);
   const [formData, setFormData]   = useState({ name: "", phone: "" });
 
+  // Security Tab States
+  const [securityStep, setSecurityStep] = useState<"idle" | "verify" | "success">("idle");
+  const [securityLoading, setSecurityLoading] = useState(false);
+  const [securityError, setSecurityError] = useState<string | null>(null);
+  const [securityCode, setSecurityCode] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [resendTimer, setResendTimer] = useState(0);
+
+  // Security OTP Resend Countdown
+  useEffect(() => {
+    let t: any;
+    if (resendTimer > 0) {
+      t = setInterval(() => setResendTimer(prev => prev - 1), 1000);
+    }
+    return () => clearInterval(t);
+  }, [resendTimer]);
+
+
   /* ── Load user data ── */
   useEffect(() => {
     if (session?.user) {
@@ -73,6 +92,74 @@ export default function ProfilePage() {
       setTimeout(() => setSaved(false), 3000);
     } finally { setIsSaving(false); }
   };
+
+  /* ── Send Password Reset Code (From Profile) ── */
+  const handleSendCode = async () => {
+    setSecurityLoading(true);
+    setSecurityError(null);
+    try {
+      const res = await fetch("/api/auth/forgot-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: user?.email }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setSecurityError(data.error || "فشل إرسال رمز التحقق");
+        return;
+      }
+      setSecurityStep("verify");
+      setResendTimer(60);
+    } catch (err) {
+      setSecurityError("حدث خطأ في الاتصال بالسيرفر، يرجى المحاولة لاحقاً");
+    } finally {
+      setSecurityLoading(false);
+    }
+  };
+
+  /* ── Reset Password (From Profile) ── */
+  const handleResetPassword = async () => {
+    if (!securityCode || !newPassword || !confirmPassword) {
+      setSecurityError("يرجى ملء جميع الحقول المطلوبة");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setSecurityError("كلمتا المرور الجديدتان غير متطابقتين");
+      return;
+    }
+    if (newPassword.length < 6) {
+      setSecurityError("كلمة المرور يجب أن لا تقل عن 6 أحرف");
+      return;
+    }
+
+    setSecurityLoading(true);
+    setSecurityError(null);
+    try {
+      const res = await fetch("/api/auth/reset-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: user?.email,
+          code: securityCode,
+          newPassword: newPassword,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setSecurityError(data.error || "رمز التحقق غير صحيح أو منتهي الصلاحية");
+        return;
+      }
+      setSecurityStep("success");
+      setSecurityCode("");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (err) {
+      setSecurityError("حدث خطأ في الاتصال، يرجى المحاولة لاحقاً");
+    } finally {
+      setSecurityLoading(false);
+    }
+  };
+
 
   /* ── Guards ── */
   if (status === "loading") return (
@@ -280,7 +367,7 @@ export default function ProfilePage() {
 
         {/* ══════════ SECURITY TAB ══════════ */}
         {tab === "security" && (
-          <div className="space-y-4">
+          <div className="space-y-6">
             <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-8 space-y-4">
               <h2 className="text-xl font-black text-[#0F172A]">أمان الحساب</h2>
               <div className="divide-y divide-gray-50">
@@ -289,6 +376,149 @@ export default function ProfilePage() {
                 <InfoRow label="آخر دخول" value={user?.name ? "اليوم" : "—"} />
               </div>
             </div>
+
+            {/* Change Password Section */}
+            {!user?.image?.includes("google") ? (
+              <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-8 space-y-6">
+                <div className="flex items-center gap-3">
+                  <span className="material-symbols-rounded text-[#C5A021]">lock_reset</span>
+                  <h2 className="text-lg font-black text-[#0F172A]">تغيير كلمة المرور</h2>
+                </div>
+
+                {securityStep === "idle" && (
+                  <div className="space-y-4">
+                    <p className="text-sm text-gray-500 leading-relaxed">
+                      لحماية حسابك وتأكيد هويتك، سنقوم بإرسال رمز تحقق مكون من 6 أرقام (OTP) إلى بريدك الإلكتروني قبل السماح لك بتعيين كلمة مرور جديدة.
+                    </p>
+                    {securityError && (
+                      <div className="bg-red-50 text-red-600 text-sm font-bold p-4 rounded-xl border border-red-100 flex items-center gap-2">
+                        <span className="material-symbols-rounded text-base">error</span>
+                        {securityError}
+                      </div>
+                    )}
+                    <button
+                      onClick={handleSendCode}
+                      disabled={securityLoading}
+                      className="bg-[#0F172A] text-white px-8 py-3.5 rounded-2xl font-bold text-sm hover:bg-[#C5A021] transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+                    >
+                      {securityLoading ? (
+                        <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <span className="material-symbols-rounded text-base">send</span>
+                      )}
+                      إرسال رمز التحقق للبريد
+                    </button>
+                  </div>
+                )}
+
+                {securityStep === "verify" && (
+                  <div className="space-y-5">
+                    <div className="bg-blue-50 text-blue-700 text-sm p-4 rounded-xl border border-blue-100 leading-relaxed">
+                      تم إرسال رمز التحقق إلى بريدك الإلكتروني **{user?.email}**. الرمز صالح لمدة 15 دقيقة.
+                    </div>
+
+                    {securityError && (
+                      <div className="bg-red-50 text-red-600 text-sm font-bold p-4 rounded-xl border border-red-100 flex items-center gap-2">
+                        <span className="material-symbols-rounded text-base">error</span>
+                        {securityError}
+                      </div>
+                    )}
+
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <label className="text-xs font-black text-gray-400 uppercase tracking-widest block">رمز التحقق (OTP)</label>
+                        <input
+                          value={securityCode}
+                          onChange={e => setSecurityCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                          placeholder="أدخل الرمز المكون من 6 أرقام"
+                          className="profile-input text-center tracking-widest text-lg font-bold"
+                          maxLength={6}
+                          dir="ltr"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="text-xs font-black text-gray-400 uppercase tracking-widest block">كلمة المرور الجديدة</label>
+                        <input
+                          value={newPassword}
+                          onChange={e => setNewPassword(e.target.value)}
+                          type="password"
+                          placeholder="لا تقل عن 6 أحرف"
+                          className="profile-input"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="text-xs font-black text-gray-400 uppercase tracking-widest block">تأكيد كلمة المرور الجديدة</label>
+                        <input
+                          value={confirmPassword}
+                          onChange={e => setConfirmPassword(e.target.value)}
+                          type="password"
+                          placeholder="أعد إدخال كلمة المرور لتأكيدها"
+                          className="profile-input"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-3 pt-2">
+                      <button
+                        onClick={handleResetPassword}
+                        disabled={securityLoading}
+                        className="flex-1 bg-[#0F172A] text-white py-3.5 rounded-2xl font-bold text-sm hover:bg-[#C5A021] transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+                      >
+                        {securityLoading ? (
+                          <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        ) : (
+                          <span className="material-symbols-rounded text-base">verified_user</span>
+                        )}
+                        تحديث كلمة المرور
+                      </button>
+
+                      <button
+                        onClick={handleSendCode}
+                        disabled={securityLoading || resendTimer > 0}
+                        className="px-6 py-3.5 rounded-2xl font-bold text-sm border border-gray-200 text-gray-500 hover:bg-gray-50 transition-colors disabled:opacity-40"
+                      >
+                        {resendTimer > 0 ? `إعادة الإرسال خلال (${resendTimer}ث)` : "إعادة إرسال الرمز"}
+                      </button>
+
+                      <button
+                        onClick={() => { setSecurityStep("idle"); setSecurityError(null); }}
+                        className="w-full text-center py-2 text-sm text-gray-400 hover:text-gray-600 font-bold mt-2"
+                      >
+                        إلغاء
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {securityStep === "success" && (
+                  <div className="space-y-4 text-center py-4">
+                    <div className="w-16 h-16 bg-green-50 text-green-600 rounded-full flex items-center justify-center mx-auto shadow-sm border border-green-100">
+                      <span className="material-symbols-rounded text-3xl">verified</span>
+                    </div>
+                    <h3 className="text-lg font-black text-[#0F172A]">تم تحديث كلمة المرور بنجاح!</h3>
+                    <p className="text-sm text-gray-400">تم تغيير كلمة مرور حسابك بنجاح وأصبح حسابك محمياً بكلمة المرور الجديدة.</p>
+                    <button
+                      onClick={() => { setSecurityStep("idle"); setSecurityError(null); }}
+                      className="bg-[#0f172a] text-white px-8 py-3 rounded-xl font-bold text-sm hover:bg-[#C5A021] transition-colors mt-2"
+                    >
+                      إغلاق
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-8 space-y-3">
+                <div className="flex items-center gap-3">
+                  <span className="material-symbols-rounded text-blue-500">info</span>
+                  <h2 className="text-lg font-black text-[#0F172A]">الدخول بواسطة جوجل</h2>
+                </div>
+                <p className="text-sm text-gray-400 leading-relaxed">
+                  هذا الحساب مرتبط بحسابك في جوجل ويتم تأمين الدخول وإدارته بواسطة نظام حماية جوجل، لذلك لا توجد كلمة مرور محلية لتغييرها.
+                </p>
+              </div>
+            )}
 
             <div className="bg-red-50 rounded-3xl border border-red-100 p-8 space-y-4">
               <div className="flex items-center gap-3">

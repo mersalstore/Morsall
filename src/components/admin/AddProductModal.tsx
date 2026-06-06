@@ -872,15 +872,49 @@ export default function AddProductModal({
                       className="w-full bg-white border border-gray-300 rounded-lg px-4 py-2 focus:border-[#C5A021] focus:ring-1 focus:ring-[#C5A021] outline-none transition-all text-sm font-mono text-gray-900"
                     />
                   </div>
-                  <div>
-                    <label className="block text-xs font-bold text-gray-700 mb-1.5">الوزن التقريبي (كجم)</label>
-                    <input
-                      type="number"
-                      value={formData.weight}
-                      onChange={e => setFormData({ ...formData, weight: e.target.value })}
-                      placeholder="مثال: 0.5"
-                      className="w-full bg-white border border-gray-300 rounded-lg px-4 py-2 focus:border-[#C5A021] focus:ring-1 focus:ring-[#C5A021] outline-none transition-all text-sm text-gray-900"
-                    />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 mb-1.5">الوزن التقريبي (كجم)</label>
+                      <input
+                        type="number"
+                        value={formData.weight}
+                        onChange={e => setFormData({ ...formData, weight: e.target.value })}
+                        placeholder="مثال: 0.5"
+                        className="w-full bg-white border border-gray-300 rounded-lg px-4 py-2 focus:border-[#C5A021] focus:ring-1 focus:ring-[#C5A021] outline-none transition-all text-sm text-gray-900"
+                      />
+                    </div>
+                    <div className="grid grid-cols-3 gap-2">
+                      <div>
+                        <label className="block text-[10px] font-bold text-gray-700 mb-1.5">الطول (سم)</label>
+                        <input
+                          type="number"
+                          value={formData.length}
+                          onChange={e => setFormData({ ...formData, length: e.target.value })}
+                          placeholder="0"
+                          className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2.5 focus:border-[#C5A021] focus:ring-1 focus:ring-[#C5A021] outline-none transition-all text-sm text-gray-900"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-bold text-gray-700 mb-1.5">العرض (سم)</label>
+                        <input
+                          type="number"
+                          value={formData.width}
+                          onChange={e => setFormData({ ...formData, width: e.target.value })}
+                          placeholder="0"
+                          className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2.5 focus:border-[#C5A021] focus:ring-1 focus:ring-[#C5A021] outline-none transition-all text-sm text-gray-900"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-bold text-gray-700 mb-1.5">الارتفاع (سم)</label>
+                        <input
+                          type="number"
+                          value={formData.height}
+                          onChange={e => setFormData({ ...formData, height: e.target.value })}
+                          placeholder="0"
+                          className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2.5 focus:border-[#C5A021] focus:ring-1 focus:ring-[#C5A021] outline-none transition-all text-sm text-gray-900"
+                        />
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>

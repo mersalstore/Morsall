@@ -1,10 +1,13 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/db";
+import { logSecurity, extractIp } from "@/lib/security-log";
 
 const STRIPE_SECRET = process.env.STRIPE_SECRET_KEY;
 const WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
 
 export async function POST(req: Request) {
+  const clientIp = extractIp(req);
+  const userAgent = req.headers.get("user-agent") || "";
   try {
     if (!STRIPE_SECRET || !WEBHOOK_SECRET) {
       return NextResponse.json({ error: "Stripe not configured" }, { status: 200 });
@@ -17,7 +20,17 @@ export async function POST(req: Request) {
     let event: any;
     try {
       event = stripe.webhooks.constructEvent(body, signature, WEBHOOK_SECRET);
-    } catch {
+    } catch (e: any) {
+      await logSecurity({
+        type: "UNAUTHORIZED_ACCESS",
+        severity: "WARN",
+        ip: clientIp,
+        userAgent,
+        endpoint: "/api/stripe/webhook",
+        method: "POST",
+        message: `Stripe webhook invalid signature validation failure: ${e.message || "Invalid signature"}`,
+        details: { signature, bodySnippet: body.slice(0, 500) },
+      });
       return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
     }
 
@@ -59,6 +72,19 @@ export async function POST(req: Request) {
             completedAt: now,
           },
         });
+
+        // Log security PAYMENT_SUCCESS
+        await logSecurity({
+          type: "PAYMENT_SUCCESS",
+          severity: "INFO",
+          ip: clientIp,
+          userAgent,
+          vendorId,
+          endpoint: "/api/stripe/webhook",
+          method: "POST",
+          message: `Stripe checkout subscription succeeded. Plan: ${plan.name}, Amount: ${session.amount_total / 100} ${session.currency}`,
+          details: { sessionId: session.id, planSlug },
+        });
         break;
       }
 
@@ -99,6 +125,45 @@ export async function POST(req: Request) {
             paymentMethod: "stripe",
             completedAt: now,
           },
+        });
+
+        // Log security PAYMENT_SUCCESS
+        await logSecurity({
+          type: "PAYMENT_SUCCESS",
+          severity: "INFO",
+          ip: clientIp,
+          userAgent,
+          vendorId: vendor.id,
+          userEmail: invoice.customer_email || null,
+          endpoint: "/api/stripe/webhook",
+          method: "POST",
+          message: `Stripe recurring invoice payment succeeded. Amount: ${invoice.amount_paid / 100} ${invoice.currency}`,
+          details: { invoiceId: invoice.id, subscriptionId },
+        });
+        break;
+      }
+
+      case "invoice.payment_failed": {
+        const invoice = event.data.object;
+        const subscriptionId = invoice.subscription;
+        const customerId = invoice.customer;
+
+        const vendor = await prisma.vendor.findFirst({
+          where: { stripeCustomerId: customerId },
+        });
+
+        // Log security PAYMENT_FAIL
+        await logSecurity({
+          type: "PAYMENT_FAIL",
+          severity: "WARN",
+          ip: clientIp,
+          userAgent,
+          vendorId: vendor?.id || null,
+          userEmail: invoice.customer_email || null,
+          endpoint: "/api/stripe/webhook",
+          method: "POST",
+          message: `Stripe invoice payment failed. Amount: ${invoice.amount_due / 100} ${invoice.currency}`,
+          details: { invoiceId: invoice.id, subscriptionId, customerId },
         });
         break;
       }

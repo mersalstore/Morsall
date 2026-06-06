@@ -15,7 +15,10 @@ echo "<pre style='font-family:monospace;font-size:14px;direction:ltr'>";
 echo "=== SET ADMIN PASSWORD ===\n\n";
 
 // Read DB Config from .env file
-$envPath = __DIR__ . '/app_new/.env';
+$envPath = __DIR__ . '/../nodejs/.env';
+if (!file_exists($envPath)) {
+    $envPath = __DIR__ . '/.env';
+}
 $envVars = [];
 if (file_exists($envPath)) {
     foreach (file($envPath) as $line) {
@@ -28,14 +31,14 @@ if (file_exists($envPath)) {
 }
 
 // Parse DATABASE_URL: mysql://user:pass@host/dbname
-$dbUrl = $envVars['DATABASE_URL'] ?? 'mysql://u754458241_Kanan:Code_2252@127.0.0.1/u754458241_Kanan';
+$dbUrl = $envVars['DATABASE_URL'] ?? 'mysql://u754458241_Kanan:CODe_2222@127.0.0.1/u754458241_Kanan';
 echo "DB URL: " . preg_replace('/:[^:@]+@/', ':***@', $dbUrl) . "\n";
 
 $parsed = parse_url($dbUrl);
 $host   = $parsed['host'] ?? '127.0.0.1';
 $dbname = ltrim($parsed['path'] ?? '/u754458241_Kanan', '/');
 $user   = urldecode($parsed['user'] ?? 'u754458241_Kanan');
-$pass   = urldecode($parsed['pass'] ?? 'Code_2252');
+$pass   = urldecode($parsed['pass'] ?? 'CODe_2222');
 
 $email = 'blackhatsd.sd@gmail.com';
 // كلمة المرور الجديدة

@@ -22,7 +22,9 @@ import {
   ArrowUpRight,
   TrendingUp,
   PackageSearch,
-  LogOut
+  LogOut,
+  ShieldAlert,
+  Undo2
 } from "lucide-react";
 import Image from "next/image";
 import { useSession, signOut } from "next-auth/react";
@@ -30,7 +32,7 @@ import { useSession, signOut } from "next-auth/react";
 export type TabId =
   | "overview" | "approvals" | "users" | "vendors"
   | "categories" | "employees" | "orders" | "payments"
-  | "logistics" | "delivery" | "shipping" | "finance" | "settings" | "inventory" | "drivers" | "subscriptions" | "subscriptionRequests" | "customDesignRequests" | "siteSections" | "attributes" | "globalSettings" | "appearance" | "offersAds" | "importedOrders" | "wms";
+  | "logistics" | "delivery" | "shipping" | "finance" | "settings" | "inventory" | "drivers" | "subscriptions" | "subscriptionRequests" | "customDesignRequests" | "siteSections" | "attributes" | "globalSettings" | "appearance" | "offersAds" | "importedOrders" | "wms" | "security" | "returns";
 
 interface SidebarProps {
   activeTab: TabId;
@@ -48,6 +50,7 @@ const NAV_ITEMS: { id: TabId; icon: any; label: string; group?: string }[] = [
   { id: "inventory",   icon: Box,               label: "المنتجات", group: "إدارة" },
   { id: "categories",  icon: Layers,           label: "الأقسام", group: "إدارة" },
   { id: "attributes",  icon: Settings2,         label: "سمات المنتجات", group: "إدارة" },
+  { id: "returns",     icon: Undo2,            label: "المرتجع", group: "إدارة" },
   
   { id: "users",       icon: Users,            label: "العملاء", group: "الأعضاء" },
   { id: "vendors",     icon: Store,            label: "الموردون", group: "الأعضاء" },
@@ -67,14 +70,15 @@ const NAV_ITEMS: { id: TabId; icon: any; label: string; group?: string }[] = [
   { id: "appearance",  icon: Palette,          label: "المظهر والصور", group: "إعدادات" },
   { id: "siteSections",icon: LayoutDashboard,  label: "أقسام الصفحة الرئيسية", group: "إعدادات" },
   { id: "offersAds",   icon: TrendingUp,        label: "العروض والإعلانات", group: "إعدادات" },
+  { id: "security",    icon: ShieldAlert,      label: "الأمان ونظام الحماية", group: "إعدادات" },
   { id: "globalSettings", icon: Settings,      label: "الإعدادات العامة", group: "إعدادات" },
 ];
 
 const ROLE_PERMISSIONS: Record<string, TabId[]> = {
-  ADMIN: ["overview", "approvals", "users", "vendors", "categories", "employees", "orders", "payments", "logistics", "importedOrders", "delivery", "shipping", "finance", "settings", "inventory", "drivers", "subscriptions", "subscriptionRequests", "customDesignRequests", "attributes", "globalSettings", "appearance", "siteSections", "offersAds", "wms"],
+  ADMIN: ["overview", "approvals", "users", "vendors", "categories", "employees", "orders", "payments", "logistics", "importedOrders", "returns", "delivery", "shipping", "finance", "settings", "inventory", "drivers", "subscriptions", "subscriptionRequests", "customDesignRequests", "attributes", "globalSettings", "appearance", "siteSections", "offersAds", "wms", "security"],
   PACKING: ["orders", "inventory"],
   SHIPPING: ["logistics", "drivers", "vendors", "importedOrders"],
-  CUSTOMER_SERVICE: ["overview", "approvals", "orders", "users"],
+  CUSTOMER_SERVICE: ["overview", "approvals", "orders", "returns", "users"],
   INVENTORY: ["inventory", "categories", "vendors", "attributes", "wms"],
 };
 

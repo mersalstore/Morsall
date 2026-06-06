@@ -156,30 +156,8 @@ export default function PurchaseBox({
         )}
       </div>
 
-      {/* Attribute Selector in Box (mirror of details for mobile UX) */}
-      {isVariable && (
-        <div className="space-y-3 border-t border-gray-100 pt-4">
-          {product.productAttributes.map((attr: any) => (
-            <div key={attr.id} className="flex items-center gap-3">
-              <span className="text-xs font-black text-[#0F172A] w-12 shrink-0">
-                {attr.name}:
-              </span>
-              <select
-                value={selectedOptions[attr.name] || ""}
-                onChange={(e) => onOptionChange(attr.name, e.target.value)}
-                className="flex-1 text-xs font-bold border border-gray-200 rounded-lg px-3 py-2 bg-gray-50 focus:outline-none focus:border-[#C5A021] focus:ring-1 focus:ring-[#C5A021] transition-all"
-              >
-                <option value="">-- اختر من القائمة --</option>
-                {attr.values.map((val: string) => (
-                  <option key={val} value={val}>
-                    {val}
-                  </option>
-                ))}
-              </select>
-            </div>
-          ))}
-        </div>
-      )}
+      {/* Variant options are selected in ProductDetails (column 2). The duplicate selector
+          that used to live here next to the cart button was removed per client feedback. */}
 
       {/* Quantity */}
       <div className="flex items-center gap-3">
@@ -240,9 +218,13 @@ export default function PurchaseBox({
         </p>
         <p className="flex justify-between">
           <span className="text-gray-400">يباع بواسطة:</span>
-          <a href="#vendor" className="text-[#C5A021] hover:underline underline-offset-2">
-            {product.vendor || "بائع معتمد"}
-          </a>
+          {product.vendorSlug ? (
+            <Link href={`/store/${product.vendorSlug}`} className="text-[#C5A021] hover:underline underline-offset-2">
+              {product.vendor || "بائع معتمد"}
+            </Link>
+          ) : (
+            <span className="text-[#0F172A]">{product.vendor || "بائع معتمد"}</span>
+          )}
         </p>
         
         <div className="flex gap-2 pt-2">

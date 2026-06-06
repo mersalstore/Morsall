@@ -18,6 +18,7 @@ import PersonnelTab from "../../../components/admin/PersonnelTab";
 import GlobalSettingsTab from "../../../components/admin/GlobalSettingsTab";
 import SubscriptionsTab from "../../../components/admin/SubscriptionsTab";
 import AdminSubscriptionRequests from "../../../components/admin/AdminSubscriptionRequests";
+import ReturnsTab from "../../../components/admin/ReturnsTab";
 import CustomDesignRequestsTab from "../../../components/admin/CustomDesignRequestsTab";
 import SiteSectionsEditor from "../../../components/admin/SiteSectionsEditor";
 import OffersAdsTab from "../../../components/admin/OffersAdsTab";
@@ -26,7 +27,7 @@ import AddProductModal from "../../../components/admin/AddProductModal";
 import EditOrderModal from "../../../components/admin/EditOrderModal";
 import PrintInvoiceModal from "../../../components/admin/PrintInvoiceModal";
 import { cn } from "../../../lib/utils";
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import NotificationBell from "../../../components/NotificationBell";
 
@@ -34,10 +35,11 @@ import NotificationBell from "../../../components/NotificationBell";
 import ImportedOrdersTab from "../../../components/admin/ImportedOrdersTab";
 import WarehouseTab from "../../../components/admin/WarehouseTab";
 import PrintPolicyModal from "../../../components/admin/PrintPolicyModal";
+import SecurityTab from "../../../components/admin/SecurityTab";
 
 // صلاحيات كل دور - يجب أن تتطابق مع AdminSidebar
 const ROLE_PERMISSIONS: Record<string, string[]> = {
-  ADMIN: ["overview", "approvals", "users", "vendors", "categories", "employees", "orders", "payments", "logistics", "importedOrders", "delivery", "shipping", "finance", "settings", "inventory", "drivers", "subscriptions", "subscriptionRequests", "customDesignRequests", "attributes", "globalSettings", "appearance", "siteSections", "offersAds", "wms"],
+  ADMIN: ["overview", "approvals", "users", "vendors", "categories", "employees", "orders", "payments", "logistics", "importedOrders", "returns", "delivery", "shipping", "finance", "settings", "inventory", "drivers", "subscriptions", "subscriptionRequests", "customDesignRequests", "attributes", "globalSettings", "appearance", "siteSections", "offersAds", "wms", "security"],
   PACKING: ["orders", "inventory"],
   SHIPPING: ["logistics", "drivers", "vendors", "importedOrders"],
   CUSTOMER_SERVICE: ["overview", "approvals", "orders", "users"],
@@ -279,8 +281,10 @@ export default function AdminDashboard() {
                    activeTab === "logistics" ? "النظام اللوجستي" :
                    activeTab === "importedOrders" ? "استيراد الطلبات الخارجية" :
                    activeTab === "subscriptionRequests" ? "طلبات الاشتراك" :
+                   activeTab === "returns" ? "المرتجع" :
                    activeTab === "customDesignRequests" ? "طلبات التصميم المخصص" :
-                   activeTab === "siteSections" ? "أقسام الصفحة الرئيسية" : "الإعدادات"}
+                   activeTab === "siteSections" ? "أقسام الصفحة الرئيسية" :
+                   activeTab === "security" ? "الأمان ونظام الحماية (Firewall)" : "الإعدادات"}
                 </h1>
              </div>
              <p className="text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em] flex items-center gap-2">
@@ -291,6 +295,22 @@ export default function AdminDashboard() {
           </div>
           
            <div className="flex items-center gap-3 bg-white p-2 pr-5 rounded-2xl border border-slate-100 shadow-[0_4px_20px_rgba(15,23,42,0.02)] w-full md:w-auto justify-between md:justify-start">
+              <a
+                href="/"
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#0F172A] text-white font-black text-[10px] hover:bg-[#C5A021] transition-all shrink-0"
+                title="العودة لموقع مرسال الرئيسي"
+              >
+                <span className="material-symbols-rounded text-base">storefront</span>
+                المتجر
+              </a>
+              <button
+                onClick={() => signOut({ callbackUrl: "/login" })}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 font-black text-[10px] transition-all shrink-0"
+                title="تسجيل الخروج والتبديل لحساب آخر"
+              >
+                <span className="material-symbols-rounded text-base">swap_horiz</span>
+                تبديل الحساب
+              </button>
               <NotificationBell />
               <div className="text-right">
                  <p className="font-black text-[#0F172A] text-xs leading-tight">{session?.user?.name || "الموظف"}</p>
@@ -448,23 +468,42 @@ export default function AdminDashboard() {
                   classes={classes} 
                   ORDER_STATUSES={ORDER_STATUSES}
                   defaultStatusFilter={statusFilter}
+                  onRefresh={fetchData}
                   onAssignDriver={async (orderId, driverId) => {
-                    await fetch("/api/admin/orders", {
-                      method: "PATCH",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({ id: orderId, driverId, status: "SHIPPED" })
-                    });
-                    if (showToast) showToast("تم تعيين الطلب للسائق بنجاح! 🚗", "success");
-                    fetchData();
+                    try {
+                      const res = await fetch("/api/admin/orders", {
+                        method: "PATCH",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ id: orderId, driverId, status: "SHIPPED" })
+                      });
+                      if (!res.ok) {
+                        const data = await res.json().catch(() => ({}));
+                        if (showToast) showToast(`فشل تعيين الطلب: ${data.error || res.status}`, "error");
+                        return;
+                      }
+                      if (showToast) showToast("تم تعيين الطلب للسائق بنجاح! 🚗", "success");
+                      fetchData();
+                    } catch (err: any) {
+                      if (showToast) showToast(`خطأ في الاتصال: ${err?.message || "تعذّر الوصول للخادم"}`, "error");
+                    }
                   }}
                   onAssignBranch={async (orderId, branchId) => {
-                    await fetch("/api/admin/orders", {
-                      method: "PATCH",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({ id: orderId, branchId, status: "AT_BRANCH" })
-                    });
-                    if (showToast) showToast("تم توجيه الطلب للفرع بنجاح! 🏢", "success");
-                    fetchData();
+                    try {
+                      const res = await fetch("/api/admin/orders", {
+                        method: "PATCH",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ id: orderId, branchId, status: "AT_BRANCH" })
+                      });
+                      if (!res.ok) {
+                        const data = await res.json().catch(() => ({}));
+                        if (showToast) showToast(`فشل توجيه الطلب: ${data.error || res.status}`, "error");
+                        return;
+                      }
+                      if (showToast) showToast("تم توجيه الطلب للفرع بنجاح! 🏢", "success");
+                      fetchData();
+                    } catch (err: any) {
+                      if (showToast) showToast(`خطأ في الاتصال: ${err?.message || "تعذّر الوصول للخادم"}`, "error");
+                    }
                   }}
                   showToast={showToast}
                 />
@@ -521,6 +560,7 @@ export default function AdminDashboard() {
             {activeTab === "drivers" && <PersonnelTab type="drivers" showToast={showToast} />}
             {activeTab === "subscriptions" && <SubscriptionsTab showToast={showToast} />}
             {activeTab === "subscriptionRequests" && <AdminSubscriptionRequests showToast={showToast} />}
+            {activeTab === "returns" && <ReturnsTab showToast={showToast} />}
             {activeTab === "customDesignRequests" && <CustomDesignRequestsTab showToast={showToast} />}
             {activeTab === "globalSettings" && <GlobalSettingsTab showToast={showToast} />}
             {activeTab === "categories" && <CategoriesTab showToast={showToast} />}
@@ -531,6 +571,7 @@ export default function AdminDashboard() {
             {activeTab === "offersAds" && <OffersAdsTab showToast={showToast} />}
             {activeTab === "wms" && <WarehouseTab classes={classes} showToast={showToast} />}
             {activeTab === "importedOrders" && <ImportedOrdersTab classes={classes} vendors={vendors} showToast={showToast} fetchData={fetchData} />}
+            {activeTab === "security" && <SecurityTab showToast={showToast} />}
           </motion.div>
         </AnimatePresence>
         </div>

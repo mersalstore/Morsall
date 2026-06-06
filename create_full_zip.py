@@ -4,7 +4,7 @@ import zipfile
 def create_full_deploy():
     zip_name = 'fast_update.zip'
     dirs_to_zip = ['.next', '_next', 'src', 'public', 'prisma']
-    files_to_zip = ['server.js', 'server-hostinger.js', 'emergency_deploy.php', 'package.json', 'next.config.js']
+    files_to_zip = ['server.js', 'server-hostinger.js', 'emergency_deploy.php', 'package.json', 'next.config.js', '.env.production', 'mail_proxy.php']
     
     with zipfile.ZipFile(zip_name, 'w', zipfile.ZIP_DEFLATED) as zipf:
         for d in dirs_to_zip:

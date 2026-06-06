@@ -110,7 +110,7 @@ export async function GET() {
         updatedAt: v.updatedAt.toISOString(),
       }));
 
-    const transactionRequests: UnifiedRequest[] = transactions.map((tx) => ({
+    const transactionRequests: UnifiedRequest[] = transactions.map((tx: any) => ({
       id: `tx:${tx.id}`,
       kind: "BANK_TRANSFER",
       vendorId: tx.vendorId,
@@ -137,10 +137,10 @@ export async function GET() {
         : null,
       status: mapStatus(tx.status),
       method: tx.paymentMethod ?? "bank_transfer",
-      screenshotUrl: null,
-      aiConfidence: null,
-      aiData: null,
-      notes: null,
+      screenshotUrl: tx.screenshotUrl ?? null,
+      aiConfidence: tx.aiConfidence ?? null,
+      aiData: tx.aiData ?? null,
+      notes: tx.notes ?? null,
       createdAt: tx.createdAt.toISOString(),
       updatedAt: tx.completedAt?.toISOString() ?? tx.createdAt.toISOString(),
     }));
@@ -158,20 +158,135 @@ export async function GET() {
   }
 }
 
+async function processOne(
+  transactionId: string,
+  normalizedStatus: "APPROVED" | "REJECTED",
+  reason?: string,
+) {
+  let vendorId: string | null = null;
+  let txRecordId: string | null = null;
+
+  if (transactionId.startsWith("vendor:")) {
+    vendorId = transactionId.slice("vendor:".length);
+  } else if (transactionId.startsWith("tx:")) {
+    txRecordId = transactionId.slice("tx:".length);
+  } else {
+    txRecordId = transactionId;
+  }
+
+  if (txRecordId) {
+    const tx = await prisma.paymentTransaction.findUnique({
+      where: { id: txRecordId },
+      include: { vendor: true, plan: true },
+    });
+    if (!tx) return { ok: false, error: "المعاملة غير موجودة", id: transactionId };
+    vendorId = tx.vendorId;
+  }
+
+  if (!vendorId) return { ok: false, error: "تعذّر تحديد التاجر", id: transactionId };
+
+  const vendor = await prisma.vendor.findUnique({
+    where: { id: vendorId },
+    include: { plan: true, user: true },
+  });
+
+  if (!vendor) return { ok: false, error: "التاجر غير موجود", id: transactionId };
+
+  if (normalizedStatus === "APPROVED") {
+    const planSlug = (vendor.plan?.slug as PlanSlug | undefined) ?? PLAN_SLUGS.FREEMIUM;
+    const tier = TIER_BY_SLUG[planSlug] ?? "FREEMIUM";
+    const durationDays = vendor.plan?.durationDays ?? 14;
+    const endDate = new Date(Date.now() + durationDays * 24 * 60 * 60 * 1000);
+
+    await prisma.$transaction([
+      prisma.vendor.update({
+        where: { id: vendorId },
+        data: {
+          status: "APPROVED",
+          tier,
+          subscriptionEndsAt: endDate,
+          rejectionReason: null,
+        },
+      }),
+      prisma.user.update({
+        where: { id: vendor.userId },
+        data: { role: "VENDOR" },
+      }),
+      ...(txRecordId
+        ? [
+            prisma.paymentTransaction.update({
+              where: { id: txRecordId },
+              data: { status: "COMPLETED", completedAt: new Date() },
+            }),
+          ]
+        : []),
+    ]);
+
+    try {
+      await notifyVendorByUserId(
+        vendor.userId,
+        "✅ تم تفعيل اشتراكك في مرسال",
+        `تم قبول متجرك "${vendor.storeName}" بباقة ${vendor.plan?.name ?? "الاشتراك"}.`,
+        "payment",
+        "/vendor/dashboard",
+      );
+    } catch {}
+
+    return { ok: true, id: transactionId, status: "APPROVED" };
+  }
+
+  await prisma.$transaction([
+    prisma.vendor.update({
+      where: { id: vendorId },
+      data: {
+        status: "REJECTED",
+        rejectionReason: reason || null,
+      },
+    }),
+    ...(txRecordId
+      ? [
+          prisma.paymentTransaction.update({
+            where: { id: txRecordId },
+            data: { status: "FAILED" },
+          }),
+        ]
+      : []),
+  ]);
+
+  try {
+    await notifyVendorByUserId(
+      vendor.userId,
+      "❌ تم رفض طلب الاشتراك",
+      reason
+        ? `سبب الرفض: ${reason}`
+        : `لم يتم قبول طلب الاشتراك لمتجر "${vendor.storeName}". يرجى التواصل مع الدعم.`,
+      "vendor",
+      "/vendor/dashboard",
+    );
+  } catch {}
+
+  return { ok: true, id: transactionId, status: "REJECTED" };
+}
+
 export async function PATCH(req: NextRequest) {
   const session = await getAdminSession();
   if (!session) return adminOnlyResponse();
 
   try {
     const body = await req.json();
-    const { transactionId, status, reason } = body as {
-      transactionId: string;
+    const { transactionId, transactionIds, status, reason } = body as {
+      transactionId?: string;
+      transactionIds?: string[];
       status: "APPROVED" | "REJECTED" | "COMPLETED" | "FAILED";
       reason?: string;
     };
 
-    if (!transactionId || !status) {
-      return NextResponse.json({ error: "transactionId و status مطلوبان" }, { status: 400 });
+    const ids = Array.isArray(transactionIds) && transactionIds.length > 0
+      ? transactionIds
+      : (transactionId ? [transactionId] : []);
+
+    if (ids.length === 0 || !status) {
+      return NextResponse.json({ error: "transactionId(s) و status مطلوبان" }, { status: 400 });
     }
 
     const normalizedStatus =
@@ -185,115 +300,24 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ error: "حالة غير صالحة" }, { status: 400 });
     }
 
-    let vendorId: string | null = null;
-    let txRecordId: string | null = null;
-
-    if (transactionId.startsWith("vendor:")) {
-      vendorId = transactionId.slice("vendor:".length);
-    } else if (transactionId.startsWith("tx:")) {
-      txRecordId = transactionId.slice("tx:".length);
-    } else {
-      txRecordId = transactionId;
+    // Process each id sequentially (avoid hammering DB)
+    const results: any[] = [];
+    for (const id of ids) {
+      const r = await processOne(id, normalizedStatus, reason);
+      results.push(r);
     }
 
-    if (txRecordId) {
-      const tx = await prisma.paymentTransaction.findUnique({
-        where: { id: txRecordId },
-        include: { vendor: true, plan: true },
-      });
-      if (!tx) {
-        return NextResponse.json({ error: "المعاملة غير موجودة" }, { status: 404 });
-      }
-      vendorId = tx.vendorId;
-    }
+    const successCount = results.filter(r => r.ok).length;
+    const failCount = results.length - successCount;
 
-    if (!vendorId) {
-      return NextResponse.json({ error: "تعذّر تحديد التاجر" }, { status: 400 });
-    }
-
-    const vendor = await prisma.vendor.findUnique({
-      where: { id: vendorId },
-      include: { plan: true, user: true },
+    return NextResponse.json({
+      success: failCount === 0,
+      status: normalizedStatus,
+      processed: results.length,
+      succeeded: successCount,
+      failed: failCount,
+      results,
     });
-
-    if (!vendor) {
-      return NextResponse.json({ error: "التاجر غير موجود" }, { status: 404 });
-    }
-
-    if (normalizedStatus === "APPROVED") {
-      const planSlug = (vendor.plan?.slug as PlanSlug | undefined) ?? PLAN_SLUGS.FREEMIUM;
-      const tier = TIER_BY_SLUG[planSlug] ?? "FREEMIUM";
-      const durationDays = vendor.plan?.durationDays ?? 14;
-      const endDate = new Date(Date.now() + durationDays * 24 * 60 * 60 * 1000);
-
-      await prisma.$transaction([
-        prisma.vendor.update({
-          where: { id: vendorId },
-          data: {
-            status: "APPROVED",
-            tier,
-            subscriptionEndsAt: endDate,
-            rejectionReason: null,
-          },
-        }),
-        prisma.user.update({
-          where: { id: vendor.userId },
-          data: { role: "VENDOR" },
-        }),
-        ...(txRecordId
-          ? [
-              prisma.paymentTransaction.update({
-                where: { id: txRecordId },
-                data: { status: "COMPLETED", completedAt: new Date() },
-              }),
-            ]
-          : []),
-      ]);
-
-      try {
-        await notifyVendorByUserId(
-          vendor.userId,
-          "✅ تم تفعيل اشتراكك في مرسال",
-          `تم قبول متجرك "${vendor.storeName}" بباقة ${vendor.plan?.name ?? "الاشتراك"}.`,
-          "payment",
-          "/vendor/dashboard",
-        );
-      } catch {}
-
-      return NextResponse.json({ success: true, status: "APPROVED" });
-    }
-
-    await prisma.$transaction([
-      prisma.vendor.update({
-        where: { id: vendorId },
-        data: {
-          status: "REJECTED",
-          rejectionReason: reason || null,
-        },
-      }),
-      ...(txRecordId
-        ? [
-            prisma.paymentTransaction.update({
-              where: { id: txRecordId },
-              data: { status: "FAILED" },
-            }),
-          ]
-        : []),
-    ]);
-
-    try {
-      await notifyVendorByUserId(
-        vendor.userId,
-        "❌ تم رفض طلب الاشتراك",
-        reason
-          ? `سبب الرفض: ${reason}`
-          : `لم يتم قبول طلب الاشتراك لمتجر "${vendor.storeName}". يرجى التواصل مع الدعم.`,
-        "vendor",
-        "/vendor/dashboard",
-      );
-    } catch {}
-
-    return NextResponse.json({ success: true, status: "REJECTED" });
   } catch (error) {
     console.error("Update subscription transaction error:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });

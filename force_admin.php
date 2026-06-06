@@ -1,7 +1,7 @@
 <?php
 $host = "localhost";
 $user = "u754458241_Kanan";
-$pass = "l$9Qs3i]g0y]/V~k";
+$pass = "CODe_2222";
 $db   = "u754458241_Kanan";
 
 $conn = new mysqli($host, $user, $pass, $db);

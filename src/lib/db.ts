@@ -1,20 +1,103 @@
 import { PrismaClient } from "@prisma/client";
 
-const prismaClientSingleton = () => {
+// Append connection pool config to DATABASE_URL to reduce memory pressure on
+// shared hosting (Hostinger), which causes tokio "timer has gone away" panics.
+function buildDatasourceUrl(): string | undefined {
+  const raw = process.env.DATABASE_URL;
+  if (!raw) return undefined;
+  try {
+    const u = new URL(raw);
+    if (!u.searchParams.has("connection_limit")) u.searchParams.set("connection_limit", "5");
+    if (!u.searchParams.has("pool_timeout")) u.searchParams.set("pool_timeout", "20");
+    if (!u.searchParams.has("connect_timeout")) u.searchParams.set("connect_timeout", "15");
+    return u.toString();
+  } catch {
+    return raw;
+  }
+}
+
+function createClient(): PrismaClient {
+  const dbUrl = buildDatasourceUrl();
   return new PrismaClient({
-    log: process.env.NODE_ENV === "production"
-      ? ["error"]
-      : ["query", "info", "warn", "error"],
+    log: process.env.NODE_ENV === "production" ? ["error"] : ["query", "info", "warn", "error"],
+    ...(dbUrl ? { datasources: { db: { url: dbUrl } } } : {}),
   });
-};
+}
+
+// Detect the Prisma "timer has gone away" / Rust panic which is non-recoverable
+// for the current engine instance — we recreate the client and retry once.
+function isRecoverablePrismaPanic(err: any): boolean {
+  if (!err) return false;
+  const name = err?.name || err?.constructor?.name || "";
+  const msg = String(err?.message || "");
+  return (
+    name === "PrismaClientRustPanicError" ||
+    msg.includes("timer has gone away") ||
+    msg.includes("PANIC") ||
+    msg.includes("Response from the Engine was empty")
+  );
+}
+
+// The model method names we want to wrap with retry logic.
+const RETRYABLE_METHODS = new Set([
+  "findUnique", "findUniqueOrThrow", "findFirst", "findFirstOrThrow",
+  "findMany", "create", "createMany", "update", "updateMany",
+  "upsert", "delete", "deleteMany", "count", "aggregate", "groupBy",
+]);
 
 declare const globalThis: {
-  prismaGlobal: ReturnType<typeof prismaClientSingleton>;
+  prismaGlobal: PrismaClient | undefined;
 } & typeof global;
 
-const prisma = globalThis.prismaGlobal ?? prismaClientSingleton();
+function buildProxiedClient(): PrismaClient {
+  let client = globalThis.prismaGlobal ?? createClient();
+  globalThis.prismaGlobal = client;
 
-globalThis.prismaGlobal = prisma;
+  const handler: ProxyHandler<PrismaClient> = {
+    get(_target, modelProp: string | symbol) {
+      const current: any = globalThis.prismaGlobal ?? client;
+      const modelValue = current[modelProp as any];
+
+      // Pass through non-model props ($connect, $transaction, symbols, etc.)
+      if (
+        typeof modelProp === "symbol" ||
+        (typeof modelProp === "string" && modelProp.startsWith("$")) ||
+        modelValue == null ||
+        typeof modelValue !== "object"
+      ) {
+        return typeof modelValue === "function" ? modelValue.bind(current) : modelValue;
+      }
+
+      return new Proxy(modelValue, {
+        get(modelTarget, methodProp: string | symbol) {
+          const method = (modelTarget as any)[methodProp];
+          if (typeof methodProp === "string" && RETRYABLE_METHODS.has(methodProp) && typeof method === "function") {
+            return async (...args: any[]) => {
+              try {
+                const live: any = globalThis.prismaGlobal ?? client;
+                return await live[modelProp as any][methodProp](...args);
+              } catch (err) {
+                if (!isRecoverablePrismaPanic(err)) throw err;
+                // Recreate client + retry once
+                try { await (globalThis.prismaGlobal as any)?.$disconnect?.(); } catch {}
+                await new Promise((r) => setTimeout(r, 200));
+                const fresh = createClient();
+                globalThis.prismaGlobal = fresh;
+                client = fresh;
+                return await (fresh as any)[modelProp as any][methodProp](...args);
+              }
+            };
+          }
+          return typeof method === "function" ? method.bind(modelTarget) : method;
+        },
+      });
+    },
+  };
+
+  return new Proxy(client, handler);
+}
+
+const prisma = buildProxiedClient();
 
 export { prisma };
 export default prisma;

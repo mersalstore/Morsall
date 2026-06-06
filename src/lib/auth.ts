@@ -4,6 +4,7 @@ import { PrismaAdapter } from "@next-auth/prisma-adapter"
 import { prisma } from "@/lib/db"
 import CredentialsProvider from "next-auth/providers/credentials"
 import bcrypt from "bcryptjs"
+import { logSecurity, isIpBlocked, autoBlockIfAbusive } from "@/lib/security-log"
 
 function extractClientIp(req: any): string | null {
   if (!req) return null;
@@ -69,6 +70,22 @@ export const authOptions: NextAuthOptions = {
           throw new Error('الرجاء إدخال البريد الإلكتروني وكلمة المرور');
         }
         const clientIp = extractClientIp(req);
+        const userAgent = (req as any)?.headers?.['user-agent'] || null;
+
+        // Block authentication attempts from IPs flagged as abusive
+        if (await isIpBlocked(clientIp)) {
+          await logSecurity({
+            type: "UNAUTHORIZED_ACCESS",
+            severity: "CRITICAL",
+            ip: clientIp,
+            userEmail: credentials.email,
+            userAgent,
+            endpoint: "/api/auth/callback/credentials",
+            method: "POST",
+            message: "Blocked IP attempted login",
+          });
+          throw new Error('تم تعطيل هذا الـ IP مؤقتاً بسبب نشاط مشبوه. حاول لاحقاً.');
+        }
 
         console.log("[AUTH] Login attempt for:", credentials.email);
 
@@ -83,6 +100,18 @@ export const authOptions: NextAuthOptions = {
 
           if (!user) {
             console.log("[AUTH] User not found:", emailLower);
+            // Log the failed attempt + maybe auto-block IP after too many
+            logSecurity({
+              type: "LOGIN_FAIL",
+              severity: "WARN",
+              ip: clientIp,
+              userAgent,
+              userEmail: emailLower,
+              endpoint: "/api/auth/callback/credentials",
+              method: "POST",
+              message: "Login attempted for non-existent email",
+            });
+            autoBlockIfAbusive(clientIp, "LOGIN_FAIL");
             throw new Error('البريد الإلكتروني غير مسجل لدينا');
           }
 
@@ -90,12 +119,29 @@ export const authOptions: NextAuthOptions = {
             console.log("[AUTH] User has no password (maybe Google only?):", emailLower);
             throw new Error('هذا الحساب مسجل عبر جوجل، يرجى استخدامه للدخول');
           }
-          
+
           console.log("[AUTH] Verifying password...");
           const isPasswordCorrect = await bcrypt.compare(credentials.password, user.password);
           if (!isPasswordCorrect) {
             console.log("[AUTH] Invalid password for:", emailLower);
+            logSecurity({
+              type: "LOGIN_FAIL",
+              severity: "ALERT",
+              ip: clientIp,
+              userAgent,
+              userId: user.id,
+              userEmail: emailLower,
+              endpoint: "/api/auth/callback/credentials",
+              method: "POST",
+              message: "Wrong password",
+            });
+            autoBlockIfAbusive(clientIp, "LOGIN_FAIL");
             throw new Error('كلمة المرور غير صحيحة');
+          }
+
+          if (!user.emailVerified) {
+            console.log("[AUTH] User email is not verified:", emailLower);
+            throw new Error('EMAIL_NOT_VERIFIED:الرجاء تفعيل الحساب أولاً. لقد تم إرسال رمز التحقق إلى بريدك الإلكتروني.');
           }
 
           const SUPER_ADMIN_EMAILS = ["blackhatsd.sd@gmail.com", "system@mersal.com", "hazem@mersal.com", "zomatube2012@gmail.com"];
@@ -105,6 +151,19 @@ export const authOptions: NextAuthOptions = {
 
           // Record IP + login time (fire-and-forget)
           recordLogin(user.id, clientIp);
+
+          // Log successful login for audit trail
+          logSecurity({
+            type: "LOGIN_SUCCESS",
+            severity: "INFO",
+            ip: clientIp,
+            userAgent,
+            userId: user.id,
+            userEmail: emailLower,
+            endpoint: "/api/auth/callback/credentials",
+            method: "POST",
+            message: `Login success — role: ${isSuperAdmin ? "ADMIN" : user.role}`,
+          });
 
           return {
             id: user.id,

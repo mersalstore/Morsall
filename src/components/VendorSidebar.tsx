@@ -5,7 +5,7 @@ import { cn } from "../lib/utils";
 import {
   LayoutDashboard, BarChart3, Box, ShoppingBasket, Layers,
   Palette, Tag, MessageSquare, CreditCard, Settings, Truck, Megaphone,
-  Crown, Store, ChevronRight, LogOut
+  Crown, Store, ChevronRight, LogOut, RotateCcw
 } from "lucide-react";
 import Image from "next/image";
 import { signOut } from "next-auth/react";
@@ -31,6 +31,7 @@ const NAV_ITEMS = [
   { id: "design",    icon: Palette,          label: "تصميم المتجر", group: "المتجر" },
   { id: "customDesign", icon: Crown,         label: "طلبات Vixcell", group: "المتجر" },
   { id: "coupons",   icon: Tag,             label: "الكوبونات", group: "المتجر" },
+  { id: "returns",   icon: RotateCcw,        label: "المرتجع", group: "المتجر" },
   
   { id: "reviews",   icon: MessageSquare,       label: "التقييمات", group: "تواصل" },
   { id: "promotion", icon: Megaphone,         label: "الترويج", group: "تواصل" },

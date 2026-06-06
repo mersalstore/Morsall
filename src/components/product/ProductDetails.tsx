@@ -100,9 +100,15 @@ export default function ProductDetails({
           </div>
           <div>
             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">البائع المعتمد</p>
-            <a href="#vendor" className="text-sm font-black text-[#0F172A] hover:text-[#C5A021] transition-colors line-clamp-1">
-              {product.vendor || product.brand || "متجر مرسال الموثوق"}
-            </a>
+            {product.vendorSlug ? (
+              <Link href={`/store/${product.vendorSlug}`} className="text-sm font-black text-[#0F172A] hover:text-[#C5A021] transition-colors line-clamp-1">
+                {product.vendor || product.brand || "متجر مرسال الموثوق"}
+              </Link>
+            ) : (
+              <span className="text-sm font-black text-[#0F172A] line-clamp-1">
+                {product.vendor || product.brand || "متجر مرسال الموثوق"}
+              </span>
+            )}
           </div>
         </div>
         <div className="text-right">

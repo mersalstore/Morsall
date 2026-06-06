@@ -2,12 +2,42 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { logSecurity, extractIp, extractUserAgent, autoBlockIfAbusive, isIpBlocked } from "@/lib/security-log";
 
 export async function POST(req: NextRequest) {
+  const clientIp = extractIp(req);
+  const userAgent = extractUserAgent(req);
+  
+  // 1. Check if IP is blocked
+  if (await isIpBlocked(clientIp)) {
+    await logSecurity({
+      type: "UNAUTHORIZED_ACCESS",
+      severity: "CRITICAL",
+      ip: clientIp,
+      userAgent,
+      endpoint: "/api/vendor/subscribe-bank",
+      method: "POST",
+      message: "Blocked IP attempted bank-transfer subscription",
+    });
+    return NextResponse.json(
+      { error: "تم تعطيل الوصول لهذا الـ IP بسبب نشاط مشبوه. للاستفسار تواصل مع الدعم." },
+      { status: 403 }
+    );
+  }
+
   try {
     const session = await getServerSession(authOptions);
     const userId = (session?.user as any)?.id;
     if (!userId) {
+      logSecurity({
+        type: "UNAUTHORIZED_ACCESS",
+        severity: "WARN",
+        ip: clientIp,
+        userAgent,
+        endpoint: "/api/vendor/subscribe-bank",
+        method: "POST",
+        message: "Anonymous attempted bank-transfer subscribe",
+      });
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -58,6 +88,18 @@ export async function POST(req: NextRequest) {
           bankAccounts
         );
 
+        // Build aiData JSON to persist with the transaction
+        const aiDataPayload = {
+          ocrLength: result.ocrText?.length || 0,
+          details: result.details,
+          flags: result.flags,
+          suggestion: result.suggestion,
+          amountInReceipt: result.details?.amountInReceipt,
+          expectedAmount: plan.price,
+          senderNameInReceipt: result.details?.senderNameInReceipt,
+          analyzedAt: new Date().toISOString(),
+        };
+
         if (result.confidence >= 85) {
           // Auto-activate
           const now = new Date();
@@ -81,7 +123,26 @@ export async function POST(req: NextRequest) {
               status: "COMPLETED",
               paymentMethod: "bank_transfer",
               completedAt: now,
+              screenshotUrl: paymentScreenshot,
+              aiConfidence: result.confidence,
+              aiData: aiDataPayload as any,
+              notes: "✅ تم التحقق تلقائياً بنسبة ثقة عالية",
             },
+          });
+
+          // Log security PAYMENT_SUCCESS
+          await logSecurity({
+            type: "PAYMENT_SUCCESS",
+            severity: "INFO",
+            ip: clientIp,
+            userAgent,
+            userId,
+            userEmail: (session?.user as any)?.email ?? null,
+            vendorId: vendor.id,
+            endpoint: "/api/vendor/subscribe-bank",
+            method: "POST",
+            message: `Bank transfer subscription auto-activated. Plan: ${plan.name}, Price: ${plan.price} SDG. Confidence: ${result.confidence}%`,
+            details: { planSlug },
           });
 
           try {
@@ -105,7 +166,104 @@ export async function POST(req: NextRequest) {
           });
         }
 
-        // Not enough confidence - save for admin review
+        // ===== REJECT: image is clearly NOT a valid receipt =====
+        // Reject immediately if the amount isn't found at all, OR confidence is very low,
+        // OR the engine's verdict is REJECT. This stops random/non-receipt images from
+        // being accepted as "pending review".
+        const amountMissing = !result.details?.amountFound;
+        const veryLowConfidence = result.confidence < 45;
+        const shouldReject = result.suggestion === "REJECT" || amountMissing || veryLowConfidence;
+
+        if (shouldReject) {
+          // Log fake/invalid receipt attempt — for security dashboard
+          logSecurity({
+            type: "FAKE_RECEIPT",
+            severity: result.confidence < 20 ? "CRITICAL" : "ALERT",
+            ip: clientIp,
+            userAgent,
+            userId,
+            userEmail: (session?.user as any)?.email ?? null,
+            vendorId: vendor.id,
+            endpoint: "/api/vendor/subscribe-bank",
+            method: "POST",
+            message: `Invalid receipt submitted — confidence ${result.confidence}%`,
+            details: {
+              planSlug,
+              expectedAmount: plan.price,
+              confidence: result.confidence,
+              suggestion: result.suggestion,
+              amountFound: result.details?.amountFound,
+              amountInReceipt: result.details?.amountInReceipt,
+              bankNameFound: result.details?.bankNameFound,
+              accountNameFound: result.details?.accountNameFound,
+            },
+          });
+          
+          // Log security PAYMENT_FAIL
+          logSecurity({
+            type: "PAYMENT_FAIL",
+            severity: "WARN",
+            ip: clientIp,
+            userAgent,
+            userId,
+            userEmail: (session?.user as any)?.email ?? null,
+            vendorId: vendor.id,
+            endpoint: "/api/vendor/subscribe-bank",
+            method: "POST",
+            message: `Bank transfer subscription payment failed (invalid receipt)`,
+            details: { planSlug, confidence: result.confidence },
+          });
+
+          autoBlockIfAbusive(clientIp, "FAKE_RECEIPT", 5, 24);
+
+          // Build a clear reason list for the vendor
+          const reasons: string[] = [];
+          if (amountMissing) {
+            reasons.push(`المبلغ المطلوب (${Math.round(plan.price).toLocaleString()} ج.س) غير موجود في الصورة`);
+          } else if (!result.details?.amountMatch) {
+            reasons.push("المبلغ في الإيصال لا يطابق سعر الباقة");
+          }
+          if (!result.details?.bankNameFound) {
+            reasons.push("لم يتم التعرف على اسم بنك معروف في الصورة");
+          }
+          if (!result.details?.accountNameFound && !result.details?.accountNumberFound) {
+            reasons.push("بيانات الحساب المستفيد غير موجودة في الإيصال");
+          }
+          if (reasons.length === 0) {
+            reasons.push("الصورة لا تبدو كإيصال تحويل بنكي صحيح");
+          }
+
+          // Record a FAILED transaction for audit (so admin can still see attempts)
+          try {
+            await prisma.paymentTransaction.create({
+              data: {
+                vendorId: vendor.id,
+                planId: plan.id,
+                amount: plan.price,
+                status: "FAILED",
+                paymentMethod: "bank_transfer",
+                screenshotUrl: paymentScreenshot,
+                aiConfidence: result.confidence,
+                aiData: aiDataPayload as any,
+                notes: "❌ مرفوض تلقائياً: الإيصال غير صحيح",
+              },
+            });
+          } catch {}
+
+          return NextResponse.json(
+            {
+              success: false,
+              rejected: true,
+              confidence: result.confidence,
+              reasons,
+              flags: result.flags,
+              error: `❌ الإيصال غير صحيح. ${reasons.join("، ")}. يرجى رفع صورة إيصال التحويل البنكي الصحيحة بوضوح.`,
+            },
+            { status: 400 },
+          );
+        }
+
+        // ===== REVIEW: partially matched (45-85%) - save for admin review =====
         await prisma.paymentTransaction.create({
           data: {
             vendorId: vendor.id,
@@ -113,14 +271,10 @@ export async function POST(req: NextRequest) {
             amount: plan.price,
             status: "PENDING",
             paymentMethod: "bank_transfer",
-          },
-        });
-
-        // Save payment screenshot note on vendor
-        await prisma.vendor.update({
-          where: { id: vendor.id },
-          data: {
-            bankStatementUrl: paymentScreenshot,
+            screenshotUrl: paymentScreenshot,
+            aiConfidence: result.confidence,
+            aiData: aiDataPayload as any,
+            notes: "🔍 يحتاج مراجعة الإدارة - تطابق جزئي",
           },
         });
 
@@ -131,7 +285,7 @@ export async function POST(req: NextRequest) {
             title: "🔍 طلب اشتراك يحتاج مراجعة",
             message: `طلب اشتراك باقة ${plan.name} من ${vendor.storeName} - نسبة المطابقة ${result.confidence}%`,
             type: "payment",
-            link: "/admin/dashboard",
+            link: "/admin/dashboard?tab=subscriptionRequests",
           });
         } catch {}
 
@@ -139,6 +293,8 @@ export async function POST(req: NextRequest) {
           success: true,
           autoVerified: false,
           confidence: result.confidence,
+          suggestion: result.suggestion,
+          flags: result.flags,
           message: "📤 تم استلام طلب الاشتراك، سيتم مراجعته من الإدارة قريباً.",
         });
       } catch (aiErr) {

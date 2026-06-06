@@ -1,96 +1,80 @@
+"""
+Deploy v2: takes zip + uploads via FTP + triggers extraction via emergency_deploy.php
+(no SSH dependency - emergency_deploy.php handles unzip + restart).
+"""
+import ftplib
 import os
-import zipfile
-import paramiko
-import time
+import sys
+import urllib.request
+import ssl
+sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 
-# --- Configuration ---
-SSH_HOST = '82.198.228.182'
-SSH_PORT = 65002
-SSH_USER = 'u754458241'
-SSH_PASS = '@n9qe3KgL'
+host = "82.198.228.182"
+user = "u754458241.morsall.com"
+pasw = "l$9Qs3i]g0y]/V~k"
 
-REMOTE_APP_DIR = 'domains/morsall.com/public_html/app_new'
-REMOTE_NODE_MODULES = '/home/u754458241/nodeapp/node_modules'
+zip_file = "fast_update.zip"
 
-ZIP_NAME = "deploy_morsall.zip"
-FIX_ZIP_NAME = "styled_jsx_fix.zip"
+print("Connecting to FTP...")
+ftp = ftplib.FTP(host)
+ftp.login(user, pasw)
+ftp.voidcmd("TYPE I")
+print(f"PWD: {ftp.pwd()}")
 
-def create_zips():
-    print("Creating main deployment zip...")
-    dirs_to_zip = ['.next', '_next', 'public', 'src']
-    files_to_zip = ['server-hostinger.js', '.env.production', 'package.json', 'next.config.js', 'app.js', '.htaccess']
-    
-    with zipfile.ZipFile(ZIP_NAME, 'w', zipfile.ZIP_DEFLATED) as zipf:
-        for d in dirs_to_zip:
-            if os.path.exists(d):
-                for root, _, files in os.walk(d):
-                    if '.next' in root and 'cache' in root:
-                        continue
-                    for file in files:
-                        file_path = os.path.join(root, file)
-                        arc_name = os.path.relpath(file_path, os.getcwd())
-                        zipf.write(file_path, arc_name)
-        for f in files_to_zip:
-            if os.path.exists(f):
-                zipf.write(f, f)
-    print(f"Created {ZIP_NAME}")
+# Upload zip
+filesize = os.path.getsize(zip_file)
+print(f"Uploading {zip_file} ({filesize / 1024 / 1024:.2f} MB)...")
 
-    print("Creating fix zip (styled-jsx)...")
-    with zipfile.ZipFile(FIX_ZIP_NAME, 'w', zipfile.ZIP_DEFLATED) as zipf:
-        path = "node_modules/styled-jsx"
-        if os.path.exists(path):
-            for root, _, files in os.walk(path):
-                for file in files:
-                    file_path = os.path.join(root, file)
-                    arc_name = os.path.relpath(file_path, os.getcwd())
-                    zipf.write(file_path, arc_name)
-    print(f"Created {FIX_ZIP_NAME}")
+with open(zip_file, "rb") as f:
+    last_pct = [0]
+    def callback(data):
+        callback.uploaded += len(data)
+        pct = int((callback.uploaded / filesize) * 100)
+        if pct >= last_pct[0] + 10:
+            sys.stdout.write(f"\r{pct}% ")
+            sys.stdout.flush()
+            last_pct[0] = pct
+    callback.uploaded = 0
+    ftp.storbinary("STOR fast_update.zip", f, blocksize=1024*1024, callback=callback)
+print("\nUploaded zip")
 
-def upload_and_deploy():
-    client = paramiko.SSHClient()
-    client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    
-    try:
-        print(f"Connecting to {SSH_HOST}...")
-        client.connect(SSH_HOST, port=SSH_PORT, username=SSH_USER, password=SSH_PASS)
-        print("Connected.")
+# Make sure emergency_deploy.php is present
+need_emergency = True
+try:
+    files = ftp.nlst()
+    if "emergency_deploy.php" in files:
+        need_emergency = False
+except:
+    pass
 
-        sftp = client.open_sftp()
-        
-        # Upload main zip
-        remote_zip = f"{REMOTE_APP_DIR}/{ZIP_NAME}"
-        print(f"Uploading {ZIP_NAME} to {remote_zip}...")
-        sftp.put(ZIP_NAME, remote_zip)
-        
-        # Upload fix zip
-        remote_fix_zip = f"{REMOTE_APP_DIR}/{FIX_ZIP_NAME}"
-        print(f"Uploading {FIX_ZIP_NAME} to {remote_fix_zip}...")
-        sftp.put(FIX_ZIP_NAME, remote_fix_zip)
-        
-        sftp.close()
+if need_emergency:
+    print("Uploading emergency_deploy.php...")
+    with open("emergency_deploy.php", "rb") as f:
+        ftp.storbinary("STOR emergency_deploy.php", f)
+    print("Uploaded emergency_deploy.php")
 
-        # Extract
-        print("Extracting files...")
-        cmds = [
-            f"cd {REMOTE_APP_DIR} && unzip -o {ZIP_NAME}",
-            f"cd {REMOTE_APP_DIR} && unzip -o {FIX_ZIP_NAME}", # This might unzip into app_new/node_modules which is a symlink
-            f"cd {REMOTE_APP_DIR} && touch tmp/restart.txt",
-            f"cd {REMOTE_APP_DIR} && rm {ZIP_NAME} {FIX_ZIP_NAME}"
-        ]
-        
-        for cmd in cmds:
-            print(f"Running: {cmd}")
-            stdin, stdout, stderr = client.exec_command(cmd)
-            out = stdout.read().decode()
-            err = stderr.read().decode()
-            if out: print("OUT:", out)
-            if err: print("ERR:", err)
+ftp.quit()
 
-        print("Deployment finished successfully!")
-        client.close()
-    except Exception as e:
-        print(f"Error during deployment: {e}")
+# Trigger extraction
+print("\nTriggering extraction via emergency_deploy.php...")
+ctx = ssl.create_default_context()
+ctx.check_hostname = False
+ctx.verify_mode = ssl.CERT_NONE
 
-if __name__ == "__main__":
-    create_zips()
-    upload_and_deploy()
+try:
+    req = urllib.request.Request(
+        "https://morsall.com/emergency_deploy.php?v=2026",
+        headers={"User-Agent": "Mozilla/5.0"}
+    )
+    res = urllib.request.urlopen(req, context=ctx, timeout=180)
+    body = res.read().decode("utf-8", errors="ignore")
+    print(body)
+except Exception as e:
+    print(f"Extract error: {e}")
+    if hasattr(e, 'read'):
+        try:
+            print(e.read().decode("utf-8", errors="ignore")[:2000])
+        except:
+            pass
+
+print("DONE")

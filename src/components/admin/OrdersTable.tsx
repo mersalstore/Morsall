@@ -17,11 +17,12 @@ interface OrdersTableProps {
   branches?: any[];
   onAssignBranch?: (orderId: string, branchId: string) => Promise<void>;
   showToast?: (message: string, type?: "success" | "error" | "info") => void;
+  onRefresh?: () => void;
 }
 
 export default function OrdersTable({
   orders, onEdit, onPrint, onPrintBulk, classes, ORDER_STATUSES, defaultStatusFilter,
-  drivers = [], onAssignDriver, branches = [], onAssignBranch, showToast
+  drivers = [], onAssignDriver, branches = [], onAssignBranch, showToast, onRefresh
 }: OrdersTableProps) {
 
   const [orderSearch, setOrderSearch] = useState("");
@@ -32,6 +33,17 @@ export default function OrdersTable({
   const [activeQuickBranchId, setActiveQuickBranchId] = useState<string>("");
   const [quickBarcode, setQuickBarcode] = useState<string>("");
   const [assigningLoading, setAssigningLoading] = useState<boolean>(false);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  // Odoo style states
+  const [viewMode, setViewMode] = useState<"list" | "card">("list");
+  const [isDirectMode, setIsDirectMode] = useState(false);
+  const [isEditableMode, setIsEditableMode] = useState(true);
+  const [groupBy, setGroupBy] = useState<"none" | "status" | "city" | "sender">("none");
+  const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
+
+  // Dropdown states for Filters, GroupBy, Favorites
+  const [activeDropdown, setActiveDropdown] = useState<"filters" | "groupby" | "favorites" | null>(null);
 
   // Sync defaultStatusFilter from overview click
   useEffect(() => {
@@ -42,7 +54,8 @@ export default function OrdersTable({
     const matchesSearch =
       o.id?.toLowerCase().includes(orderSearch.toLowerCase()) ||
       o.customerName?.toLowerCase().includes(orderSearch.toLowerCase()) ||
-      o.phone?.includes(orderSearch);
+      o.phone?.includes(orderSearch) ||
+      o.trackingNumber?.toLowerCase().includes(orderSearch.toLowerCase());
     const matchesStatus = oStatusFilter === "الكل" || o.status === oStatusFilter;
     return matchesSearch && matchesStatus;
   });
@@ -67,9 +80,62 @@ export default function OrdersTable({
     setSelectedIds(next);
   };
 
+  // Grouping logic
+  const groupedOrders = React.useMemo(() => {
+    if (groupBy === "none") return null;
+    const groups: Record<string, any[]> = {};
+    filteredOrders.forEach(o => {
+      let key = "";
+      if (groupBy === "status") {
+        key = ORDER_STATUSES[o.status]?.label || o.status;
+      } else if (groupBy === "city") {
+        key = o.city || "غير محدد";
+      } else if (groupBy === "sender") {
+        const firstVendor = o.items?.[0]?.vendor || o.orderItems?.[0]?.vendor;
+        key = o.storeName || o.vendorName || firstVendor?.storeName || "متجر مرسال";
+      }
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(o);
+    });
+    return groups;
+  }, [filteredOrders, groupBy, ORDER_STATUSES]);
+
+  const toggleGroup = (key: string) => {
+    const next = new Set(collapsedGroups);
+    if (next.has(key)) next.delete(key); else next.add(key);
+    setCollapsedGroups(next);
+  };
+
+  const getRequiredAction = (status: string) => {
+    switch (status) {
+      case "AWAITING_PICKUP": return "تجهيز واستلام";
+      case "READY_FOR_SHIPPING": return "جاهز للشحن";
+      case "CONFIRMED": return "تأكيد الطلب";
+      case "PROCESSING": return "فرز وتجهيز";
+      case "PENDING_PICKUP": return "تحميل الشحنة";
+      case "AT_BRANCH": return "فرز بالفرع";
+      case "SHIPPED": return "توصيل للعميل";
+      case "DELIVERED": return "تسليم وتحصيل";
+      case "CANCELLED": return "إرجاع شحنة";
+      case "RETURNED": return "مرتجع للمستودع";
+      default: return "توصيل";
+    }
+  };
+
+  const getMerchantStatus = (status: string) => {
+    switch (status) {
+      case "DELIVERED": return "تم التوصيل";
+      case "SHIPPED": return "جاري التوصيل";
+      case "PROCESSING": return "قيد المعالجة";
+      case "AT_BRANCH": return "في الفرع";
+      case "CANCELLED": return "ملغي";
+      case "RETURNED": return "مرتجع";
+      default: return "قيد المراجعة";
+    }
+  };
+
   const handleQuickAssignBarcode = async (val: string) => {
     if (!val) return;
-    // Check if it matches a driver
     const matchedDriver = drivers.find(d => 
       d.id.toLowerCase() === val.toLowerCase() || 
       d.phone?.includes(val) || 
@@ -80,15 +146,10 @@ export default function OrdersTable({
     if (matchedDriver) {
       setActiveQuickDriverId(matchedDriver.id);
       setRoutingMode("DRIVER");
-      if (showToast) {
-        showToast(`تم تعيين السائق النشط للتوجيه المباشر: ${matchedDriver.name} 🚗`, "success");
-      } else {
-        alert(`تم تعيين السائق النشط للتوجيه المباشر: ${matchedDriver.name}`);
-      }
+      showToast?.(`تم تعيين السائق النشط للتوجيه المباشر: ${matchedDriver.name} خ`, "success");
       return;
     }
 
-    // Check if it matches a branch
     const matchedBranch = branches.find(b => 
       b.id.toLowerCase() === val.toLowerCase() || 
       b.name.toLowerCase().includes(val.toLowerCase())
@@ -97,15 +158,10 @@ export default function OrdersTable({
     if (matchedBranch) {
       setActiveQuickBranchId(matchedBranch.id);
       setRoutingMode("BRANCH");
-      if (showToast) {
-        showToast(`تم تعيين الفرع النشط للتوجيه المباشر: ${matchedBranch.name} 🏢`, "success");
-      } else {
-        alert(`تم تعيين الفرع النشط للتوجيه المباشر: ${matchedBranch.name}`);
-      }
+      showToast?.(`تم تعيين الفرع النشط للتوجيه المباشر: ${matchedBranch.name} خ`, "success");
       return;
     }
 
-    // Check if it matches an order
     const matchedOrder = orders.find(o => 
       o.id.toLowerCase() === val.toLowerCase() || 
       o.trackingNumber?.toLowerCase() === val.toLowerCase() ||
@@ -122,79 +178,41 @@ export default function OrdersTable({
           setAssigningLoading(true);
           try {
             await onAssignDriver(matchedOrder.id, activeQuickDriverId);
-            if (showToast) {
-              showToast(`تم تعيين الطلب #${matchedOrder.id.slice(-6).toUpperCase()} للسائق بنجاح! 📦`, "success");
-            } else {
-              alert(`تم تعيين الطلب #${matchedOrder.id.slice(-6).toUpperCase()} للسائق بنجاح!`);
-            }
+            showToast?.(`تم تعيين الطلب #${matchedOrder.id.slice(-6).toUpperCase()} للسائق بنجاح! خ`, "success");
           } catch (err) {
-            console.error(err);
-            if (showToast) {
-              showToast("حدث خطأ أثناء التعيين", "error");
-            } else {
-              alert("حدث خطأ أثناء التعيين");
-            }
+            showToast?.("حدث خطأ أثناء التعيين", "error");
           }
           setAssigningLoading(false);
         } else {
-          if (showToast) {
-            showToast(`تم تحديد الطلب #${matchedOrder.id.slice(-6).toUpperCase()} للطباعة 🖨️`, "info");
-          } else {
-            alert(`تم تحديد الطلب #${matchedOrder.id.slice(-6).toUpperCase()} للطباعة`);
-          }
+          showToast?.(`تم تحديد الطلب #${matchedOrder.id.slice(-6).toUpperCase()} للطباعة خ`, "info");
         }
       } else {
         if (activeQuickBranchId && onAssignBranch) {
           setAssigningLoading(true);
           try {
             await onAssignBranch(matchedOrder.id, activeQuickBranchId);
-            if (showToast) {
-              showToast(`تم توجيه الطلب #${matchedOrder.id.slice(-6).toUpperCase()} للفرع بنجاح! 🏢`, "success");
-            } else {
-              alert(`تم توجيه الطلب #${matchedOrder.id.slice(-6).toUpperCase()} للفرع بنجاح!`);
-            }
+            showToast?.(`تم توجيه الطلب #${matchedOrder.id.slice(-6).toUpperCase()} للفرع بنجاح! خ`, "success");
           } catch (err) {
-            console.error(err);
-            if (showToast) {
-              showToast("حدث خطأ أثناء التوجيه للفرع", "error");
-            } else {
-              alert("حدث خطأ أثناء التوجيه للفرع");
-            }
+            showToast?.("حدث خطأ أثناء التوجيه للفرع", "error");
           }
           setAssigningLoading(false);
         } else {
-          if (showToast) {
-            showToast(`تم تحديد الطلب #${matchedOrder.id.slice(-6).toUpperCase()} للطباعة 🖨️`, "info");
-          } else {
-            alert(`تم تحديد الطلب #${matchedOrder.id.slice(-6).toUpperCase()} للطباعة`);
-          }
+          showToast?.(`تم تحديد الطلب #${matchedOrder.id.slice(-6).toUpperCase()} للطباعة خ`, "info");
         }
       }
     } else {
-      if (showToast) {
-        showToast("لم يتم العثور على طلب أو سائق أو فرع بهذا الباركود 🔍", "error");
-      } else {
-        alert("لم يتم العثور على طلب أو سائق أو فرع بهذا الباركود");
-      }
+      showToast?.("لم يتم العثور على طلب أو سائق أو فرع بهذا الباركود خ", "error");
     }
   };
 
   const handleAssignSelectedToActive = async () => {
     if (routingMode === "DRIVER") {
       if (!activeQuickDriverId) {
-        if (showToast) {
-          showToast("الرجاء اختيار السائق أولاً 🚗", "error");
-        } else {
-          alert("الرجاء اختيار السائق أولاً");
-        }
+        showToast?.("الرجاء اختيار السائق أولاً خ", "error");
         return;
       }
       if (selectedIds.size === 0) {
-        if (showToast) {
-          showToast("الرجاء تحديد طلب واحد على الأقل 📦", "error");
-        } else {
-          alert("الرجاء تحديد طلب واحد على الأقل");
-        }
+        showToast?.("الرجاء تحديد طلب واحد على الأقل خ", "error");
         return;
       }
 
@@ -203,28 +221,16 @@ export default function OrdersTable({
         for (const id of Array.from(selectedIds)) {
           await onAssignDriver(id, activeQuickDriverId);
         }
-        if (showToast) {
-          showToast(`تم تعيين جميع الطلبات المحددة (${selectedIds.size}) للسائق بنجاح! 🎉`, "success");
-        } else {
-          alert(`تم تعيين جميع الطلبات المحددة (${selectedIds.size}) للسائق بنجاح!`);
-        }
+        showToast?.(`تم تعيين جميع الطلبات المحددة (${selectedIds.size}) للسائق بنجاح! خ`, "success");
       }
       setAssigningLoading(false);
     } else {
       if (!activeQuickBranchId) {
-        if (showToast) {
-          showToast("الرجاء اختيار الفرع أولاً 🏢", "error");
-        } else {
-          alert("الرجاء اختيار الفرع أولاً");
-        }
+        showToast?.("الرجاء اختيار الفرع أولاً خ", "error");
         return;
       }
       if (selectedIds.size === 0) {
-        if (showToast) {
-          showToast("الرجاء تحديد طلب واحد على الأقل 📦", "error");
-        } else {
-          alert("الرجاء تحديد طلب واحد على الأقل");
-        }
+        showToast?.("الرجاء تحديد طلب واحد على الأقل خ", "error");
         return;
       }
 
@@ -233,17 +239,68 @@ export default function OrdersTable({
         for (const id of Array.from(selectedIds)) {
           await onAssignBranch(id, activeQuickBranchId);
         }
-        if (showToast) {
-          showToast(`تم توجيه جميع الطلبات المحددة (${selectedIds.size}) للفرع بنجاح! 🎉`, "success");
-        } else {
-          alert(`تم توجيه جميع الطلبات المحددة (${selectedIds.size}) للفرع بنجاح!`);
-        }
+        showToast?.(`تم توجيه جميع الطلبات المحددة (${selectedIds.size}) للفرع بنجاح! خ`, "success");
       }
       setAssigningLoading(false);
     }
   };
 
-  // Export selected (or all filtered) as CSV
+  const handleBulkAssignDriver = async (driverId: string) => {
+    setAssigningLoading(true);
+    try {
+      const updates = Array.from(selectedIds).map(id => ({
+        id,
+        driverId,
+        status: "SHIPPED"
+      }));
+      const res = await fetch("/api/admin/orders/bulk-update", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ updates })
+      });
+      if (res.ok) {
+        showToast?.(`تم تعيين ${selectedIds.size} طلبات للسائق بنجاح! خ`, "success");
+        setSelectedIds(new Set());
+        onRefresh?.();
+      } else {
+        const err = await res.json().catch(() => ({}));
+        showToast?.(`فشل التعيين الجماعي: ${err.error || "خطأ غير معروف"}`, "error");
+      }
+    } catch (error: any) {
+      showToast?.(`خطأ في الاتصال: ${error.message}`, "error");
+    } finally {
+      setAssigningLoading(false);
+    }
+  };
+
+  const handleBulkAssignBranch = async (branchId: string) => {
+    setAssigningLoading(true);
+    try {
+      const updates = Array.from(selectedIds).map(id => ({
+        id,
+        branchId,
+        status: "AT_BRANCH"
+      }));
+      const res = await fetch("/api/admin/orders/bulk-update", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ updates })
+      });
+      if (res.ok) {
+        showToast?.(`تم تحويل ${selectedIds.size} طلبات للفرع بنجاح! خ`, "success");
+        setSelectedIds(new Set());
+        onRefresh?.();
+      } else {
+        const err = await res.json().catch(() => ({}));
+        showToast?.(`فشل التحويل الجماعي: ${err.error || "خطأ غير معروف"}`, "error");
+      }
+    } catch (error: any) {
+      showToast?.(`خطأ في الاتصال: ${error.message}`, "error");
+    } finally {
+      setAssigningLoading(false);
+    }
+  };
+
   const exportCSV = () => {
     const toExport = filteredOrders.filter(o => selectedIds.size === 0 || selectedIds.has(o.id));
     const headers = ["رقم الطلب", "اسم العميل", "الهاتف", "المدينة", "المبلغ", "الحالة", "التاريخ"];
@@ -257,13 +314,11 @@ export default function OrdersTable({
       new Date(o.createdAt).toLocaleDateString("ar-EG")
     ]);
     const csv = [headers, ...rows].map(r => r.map(c => `"${c}"`).join(",")).join("\n");
-    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+    const blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8;" });
     const a = document.createElement("a"); a.href = URL.createObjectURL(blob);
     a.download = `orders_${new Date().toISOString().slice(0,10)}.csv`;
     a.click();
   };
-
-  const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const copyOrderDetails = (order: any) => {
     const text = `طلب #${order.id?.slice(-8).toUpperCase()}
@@ -278,9 +333,198 @@ export default function OrdersTable({
     });
   };
 
+  // Close dropdowns on click outside
+  useEffect(() => {
+    const handleOutsideClick = () => setActiveDropdown(null);
+    document.addEventListener("click", handleOutsideClick);
+    return () => document.removeEventListener("click", handleOutsideClick);
+  }, []);
+
   return (
-    <div className="space-y-6 md:space-y-8">
-      {/* Quick Assignment & Barcode Dispatch Banner */}
+    <div className="space-y-6 md:space-y-8 font-sans" dir="rtl">
+      
+      {/* Odoo Style Header Section */}
+      <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm p-6 space-y-4">
+        
+        {/* Top Header: Title and Search Input */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div>
+              <h3 className="text-xl md:text-2xl font-black text-[#0F172A] tracking-tight">الطلبيات النشطة</h3>
+              <select 
+                value={oStatusFilter} 
+                onChange={e => setOStatusFilter(e.target.value)} 
+                className="mt-1 bg-transparent text-[#C5A021] text-xs font-black outline-none border-b border-transparent hover:border-[#C5A021] cursor-pointer pb-0.5"
+              >
+                <option value="الكل">افتراضي (جميع الحالات)</option>
+                {Object.keys(ORDER_STATUSES).map(key => (
+                  <option key={key} value={key} className="text-slate-800 font-bold">{ORDER_STATUSES[key].label}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* Odoo Search Bar */}
+          <div className="relative w-full md:w-96 flex items-center bg-[#F1F5F9] rounded-2xl border border-slate-200/50 focus-within:bg-white focus-within:border-[#C5A021] focus-within:ring-4 focus-within:ring-[#C5A021]/15 transition-all">
+            <span className="material-symbols-rounded text-slate-400 mr-4">search</span>
+            <input
+              type="text"
+              value={orderSearch}
+              onChange={e => setOrderSearch(e.target.value)}
+              placeholder="البحث بالرقم، العميل، الهاتف، التتبع..."
+              className="w-full bg-transparent border-0 outline-none text-xs font-black text-slate-800 pr-2 pl-4 py-3.5 placeholder:text-slate-400"
+            />
+            <span className="material-symbols-rounded text-slate-400 ml-4 cursor-pointer hover:text-slate-600">settings</span>
+          </div>
+        </div>
+
+        {/* Filter Controls & Actions Bar */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2 border-t border-slate-100">
+          
+          {/* View switcher & Filters */}
+          <div className="flex items-center gap-3 flex-wrap text-xs">
+            {/* View Mode Icons */}
+            <div className="flex bg-slate-100 p-1 rounded-xl">
+              <button 
+                onClick={() => setViewMode("list")} 
+                className={cn("p-2 rounded-lg transition-all", viewMode === "list" ? "bg-white text-[#0F172A] shadow-sm" : "text-slate-400 hover:text-slate-600")}
+              >
+                <span className="material-symbols-rounded text-base block">view_list</span>
+              </button>
+              <button 
+                onClick={() => setViewMode("card")} 
+                className={cn("p-2 rounded-lg transition-all", viewMode === "card" ? "bg-white text-[#0F172A] shadow-sm" : "text-slate-400 hover:text-slate-600")}
+              >
+                <span className="material-symbols-rounded text-base block">grid_view</span>
+              </button>
+            </div>
+
+            {/* Toggles */}
+            <div className="flex items-center gap-4 bg-slate-50 border border-slate-100 px-4 py-2 rounded-xl">
+              <label className="flex items-center gap-2 cursor-pointer select-none">
+                <input 
+                  type="checkbox" 
+                  checked={isDirectMode} 
+                  onChange={e => setIsDirectMode(e.target.checked)} 
+                  className="w-3.5 h-3.5 rounded accent-[#C5A021]" 
+                />
+                <span className="font-bold text-slate-600">مباشر</span>
+              </label>
+              <div className="w-px h-4 bg-slate-200" />
+              <label className="flex items-center gap-2 cursor-pointer select-none">
+                <input 
+                  type="checkbox" 
+                  checked={isEditableMode} 
+                  onChange={e => setIsEditableMode(e.target.checked)} 
+                  className="w-3.5 h-3.5 rounded accent-[#C5A021]" 
+                />
+                <span className="font-bold text-slate-600">قابل للتعديل</span>
+              </label>
+            </div>
+
+            {/* Dropdown Filters (Favorites, GroupBy, Filters) */}
+            <div className="flex items-center gap-2 relative">
+              
+              {/* Group By Dropdown */}
+              <div className="relative" onClick={e => e.stopPropagation()}>
+                <button 
+                  onClick={() => setActiveDropdown(activeDropdown === "groupby" ? null : "groupby")}
+                  className={cn("flex items-center gap-1.5 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-600 hover:bg-slate-100 transition-all", groupBy !== "none" && "border-[#C5A021]/50 text-[#C5A021] bg-[#C5A021]/5")}
+                >
+                  <span className="material-symbols-rounded text-base">group_work</span>
+                  <span>تجميع حسب: {groupBy === "status" ? "الحالة" : groupBy === "city" ? "المدينة" : groupBy === "sender" ? "المرسل" : "بدون"}</span>
+                  <span className="material-symbols-rounded text-xs">keyboard_arrow_down</span>
+                </button>
+                {activeDropdown === "groupby" && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white border border-slate-100 rounded-2xl shadow-xl z-30 py-2">
+                    <button onClick={() => { setGroupBy("none"); setActiveDropdown(null); }} className={cn("w-full text-right px-4 py-2 hover:bg-slate-50 font-bold", groupBy === "none" && "text-[#C5A021]")}>بدون تجميع</button>
+                    <button onClick={() => { setGroupBy("status"); setActiveDropdown(null); }} className={cn("w-full text-right px-4 py-2 hover:bg-slate-50 font-bold", groupBy === "status" && "text-[#C5A021]")}>الحالة</button>
+                    <button onClick={() => { setGroupBy("city"); setActiveDropdown(null); }} className={cn("w-full text-right px-4 py-2 hover:bg-slate-50 font-bold", groupBy === "city" && "text-[#C5A021]")}>المدينة</button>
+                    <button onClick={() => { setGroupBy("sender"); setActiveDropdown(null); }} className={cn("w-full text-right px-4 py-2 hover:bg-slate-50 font-bold", groupBy === "sender" && "text-[#C5A021]")}>المرسل</button>
+                  </div>
+                )}
+              </div>
+
+              {/* Status Filters Dropdown */}
+              <div className="relative" onClick={e => e.stopPropagation()}>
+                <button 
+                  onClick={() => setActiveDropdown(activeDropdown === "filters" ? null : "filters")}
+                  className={cn("flex items-center gap-1.5 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-600 hover:bg-slate-100 transition-all", oStatusFilter !== "الكل" && "border-[#C5A021]/50 text-[#C5A021] bg-[#C5A021]/5")}
+                >
+                  <span className="material-symbols-rounded text-base">filter_alt</span>
+                  <span>الفلاتر: {oStatusFilter === "الكل" ? "الكل" : ORDER_STATUSES[oStatusFilter]?.label}</span>
+                  <span className="material-symbols-rounded text-xs">keyboard_arrow_down</span>
+                </button>
+                {activeDropdown === "filters" && (
+                  <div className="absolute right-0 mt-2 w-56 bg-white border border-slate-100 rounded-2xl shadow-xl z-30 py-2 max-h-72 overflow-y-auto">
+                    <button onClick={() => { setOStatusFilter("الكل"); setActiveDropdown(null); }} className={cn("w-full text-right px-4 py-2 hover:bg-slate-50 font-bold", oStatusFilter === "الكل" && "text-[#C5A021]")}>جميع الحالات (الكل)</button>
+                    {Object.keys(ORDER_STATUSES).map(key => (
+                      <button 
+                        key={key} 
+                        onClick={() => { setOStatusFilter(key); setActiveDropdown(null); }} 
+                        className={cn("w-full text-right px-4 py-2 hover:bg-slate-50 font-bold", oStatusFilter === key && "text-[#C5A021]")}
+                      >
+                        {ORDER_STATUSES[key].label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Favorites Dropdown */}
+              <div className="relative" onClick={e => e.stopPropagation()}>
+                <button 
+                  onClick={() => setActiveDropdown(activeDropdown === "favorites" ? null : "favorites")}
+                  className="flex items-center gap-1.5 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-600 hover:bg-slate-100 transition-all"
+                >
+                  <span className="material-symbols-rounded text-base text-amber-400">star</span>
+                  <span>المفضلات</span>
+                  <span className="material-symbols-rounded text-xs">keyboard_arrow_down</span>
+                </button>
+                {activeDropdown === "favorites" && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white border border-slate-100 rounded-2xl shadow-xl z-30 py-2">
+                    <p className="px-4 py-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-50 mb-1">تفضيلاتي</p>
+                    <button className="w-full text-right px-4 py-2 hover:bg-slate-50 font-bold text-slate-700">شحنات الخرطوم</button>
+                    <button className="w-full text-right px-4 py-2 hover:bg-slate-50 font-bold text-slate-700">الطلبات العاجلة</button>
+                  </div>
+                )}
+              </div>
+
+            </div>
+
+          </div>
+
+          {/* Action Buttons: Create Order & Quick Order */}
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={() => {
+                showToast?.("يمكنك إنشاء طلب جديد من خلال تبويب المزامنة أو لوحة التحكم خ", "info");
+              }}
+              className="flex items-center gap-1.5 bg-[#C5A021] text-white px-5 py-2.5 rounded-xl font-black text-xs hover:bg-[#0F172A] transition-all shadow-md shadow-[#C5A021]/15"
+            >
+              <span className="material-symbols-rounded text-sm">add</span>
+              إنشاء
+            </button>
+            <button 
+              onClick={() => {
+                const scannerInput = document.getElementById("barcode-scanner-input");
+                if (scannerInput) {
+                  scannerInput.focus();
+                  showToast?.("يرجى البدء في مسح الباركود للطلب السريع! خ", "info");
+                }
+              }}
+              className="flex items-center gap-1.5 bg-[#0F172A] text-white px-4 py-2.5 rounded-xl font-black text-xs hover:bg-[#C5A021] transition-all shadow-md shadow-[#0F172A]/10"
+            >
+              <span className="material-symbols-rounded text-sm text-[#C5A021]">bolt</span>
+              طلبية سريعة
+            </button>
+          </div>
+
+        </div>
+
+      </div>
+
+      {/* Barcode Quick Assignment Banner */}
       <div className="bg-gradient-to-r from-[#0F172A] to-[#C5A021] rounded-[2.5rem] p-6 md:p-8 text-white shadow-2xl relative overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-white/10 via-transparent to-transparent pointer-events-none" />
         <div className="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
@@ -348,6 +592,7 @@ export default function OrdersTable({
             <div className="w-full sm:w-72 relative">
               <span className="absolute right-4 top-1/2 -translate-y-1/2 material-symbols-rounded text-[#F29124]">qr_code_scanner</span>
               <input
+                id="barcode-scanner-input"
                 placeholder="مسح باركود طلب أو سائق أو فرع..."
                 value={quickBarcode}
                 onChange={e => setQuickBarcode(e.target.value)}
@@ -405,58 +650,10 @@ export default function OrdersTable({
         ))}
       </div>
 
-      <div className={cn(classes.card, "border border-slate-100 shadow-sm")}>
-        {/* Toolbar */}
-        <div className="p-5 md:p-8 flex flex-col gap-4 bg-slate-50/50 border-b border-slate-100">
-          {/* Search + Status */}
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="relative flex-grow">
-              <span className="absolute right-5 top-1/2 -translate-y-1/2 material-symbols-rounded text-[#C5A021]">search</span>
-              <input
-                value={orderSearch}
-                onChange={e => setOrderSearch(e.target.value)}
-                placeholder="ابحث برقم الطلب أو اسم العميل..."
-                className={cn(classes.input, "pr-14 py-4")}
-              />
-            </div>
-            <div className="relative flex-grow md:max-w-xs">
-              <span className="absolute right-5 top-1/2 -translate-y-1/2 material-symbols-rounded text-slate-400">qr_code_scanner</span>
-              <input
-                placeholder="مسح الباركود لتحديد الطلب..."
-                className={cn(classes.input, "pr-14 py-4 border-dashed border-[#C5A021]/50 bg-[#C5A021]/5")}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    const val = (e.target as HTMLInputElement).value.trim();
-                    if (val) {
-                      // Find order by ID or Tracking number
-                      const matched = orders.find(o => 
-                        o.id.toLowerCase() === val.toLowerCase() || 
-                        o.trackingNumber?.toLowerCase() === val.toLowerCase() ||
-                        o.id.toLowerCase().endsWith(val.toLowerCase().replace('#', ''))
-                      );
-                      if (matched) {
-                        const next = new Set(selectedIds);
-                        next.add(matched.id);
-                        setSelectedIds(next);
-                        (e.target as HTMLInputElement).value = '';
-                      } else {
-                        if (showToast) {
-                          showToast("لم يتم العثور على طلب بهذا الباركود 🔍", "error");
-                        } else {
-                          alert('لم يتم العثور على طلب بهذا الباركود');
-                        }
-                      }
-                    }
-                  }
-                }}
-              />
-            </div>
-            <select value={oStatusFilter} onChange={e => setOStatusFilter(e.target.value)} className={cn(classes.input, "md:w-56 py-4")}>
-              <option value="الكل">جميع الحالات</option>
-              {Object.keys(ORDER_STATUSES).map(key => <option key={key} value={key}>{ORDER_STATUSES[key].label}</option>)}
-            </select>
-          </div>
-          {/* Action Bar */}
+      <div className={cn(classes.card, "border border-slate-100 shadow-sm overflow-hidden")}>
+        
+        {/* Table Toolbar & Grouping Info */}
+        <div className="p-5 md:p-6 flex items-center justify-between gap-4 flex-wrap bg-slate-50/50 border-b border-slate-100">
           <div className="flex items-center gap-4 flex-wrap">
             <span className="text-xs font-black text-slate-400">
               {selectedIds.size > 0 ? `${selectedIds.size} طلب محدد` : `${filteredOrders.length} طلب`}
@@ -468,8 +665,47 @@ export default function OrdersTable({
               <span className="material-symbols-rounded text-base">download</span>
               {selectedIds.size > 0 ? `تصدير (${selectedIds.size})` : "تصدير الكل"} CSV
             </button>
+            
             {selectedIds.size > 0 && (
               <>
+                <div className="flex items-center gap-2 bg-[#C5A021]/5 border border-[#C5A021]/20 px-3 py-1.5 rounded-2xl shrink-0">
+                  <span className="text-[10px] font-black text-[#C5A021]">الإجراءات الجماعية:</span>
+                  
+                  {/* Bulk Assign Driver */}
+                  <select
+                    disabled={assigningLoading}
+                    onChange={async (e) => {
+                      const dId = e.target.value;
+                      if (!dId) return;
+                      if (confirm(`هل أنت متأكد من تعيين ${selectedIds.size} طلبات للمندوب المختار؟`)) {
+                        await handleBulkAssignDriver(dId);
+                      }
+                      e.target.value = "";
+                    }}
+                    className="bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 text-[10px] font-black outline-none text-slate-800 focus:border-[#C5A021] cursor-pointer"
+                  >
+                    <option value="">🚙 تعيين مندوب للمحددة...</option>
+                    {drivers.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
+                  </select>
+
+                  {/* Bulk Assign Branch */}
+                  <select
+                    disabled={assigningLoading}
+                    onChange={async (e) => {
+                      const bId = e.target.value;
+                      if (!bId) return;
+                      if (confirm(`هل أنت متأكد من تحويل ${selectedIds.size} طلبات للفرع المختار؟`)) {
+                        await handleBulkAssignBranch(bId);
+                      }
+                      e.target.value = "";
+                    }}
+                    className="bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 text-[10px] font-black outline-none text-slate-800 focus:border-[#C5A021] cursor-pointer"
+                  >
+                    <option value="">🏢 تحويل فرع للمحددة...</option>
+                    {branches.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
+                  </select>
+                </div>
+
                 <button
                   onClick={() => onPrintBulk(filteredOrders.filter(o => selectedIds.has(o.id)))}
                   className="flex items-center gap-2 bg-[#0F172A] text-white px-4 py-2 rounded-2xl font-black text-xs hover:bg-[#C5A021] transition-all shadow-lg shadow-[#0F172A]/10"
@@ -485,190 +721,360 @@ export default function OrdersTable({
                 </button>
               </>
             )}
-
           </div>
         </div>
 
-        {/* MOBILE: Card Layout */}
-        <div className="md:hidden divide-y divide-slate-100">
-          {filteredOrders.map((order) => (
-            <div key={order.id} className="p-4 space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <input type="checkbox" checked={selectedIds.has(order.id)} onChange={() => toggleOne(order.id)}
-                    className="w-4 h-4 rounded accent-[#C5A021]" />
-                  <span className="font-mono text-xs font-black text-[#C5A021] bg-[#C5A021]/10 px-3 py-1 rounded-xl">
-                    #{order.id?.slice(-8).toUpperCase()}
-                  </span>
-                </div>
-                <span className={cn(
-                  "px-3 py-1 rounded-xl text-[10px] font-black",
-                  ORDER_STATUSES[order.status]?.cls === "badge-active" ? "bg-green-50 text-green-600 border border-green-100" : "bg-orange-50 text-orange-500 border border-orange-100"
-                )}>
-                  {ORDER_STATUSES[order.status]?.label || order.status}
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-black text-[#0F172A] text-sm">{order.customerName || order.customer?.name}</p>
-                  <p className="text-xs text-slate-400 mt-0.5" dir="ltr">{order.phone}</p>
-                </div>
-                <div className="text-right">
-                  <p className="font-black text-[#0F172A]">{order.totalAmount?.toLocaleString()} <span className="text-[10px] text-[#C5A021]">ج.س</span></p>
-                  <p className="text-[10px] text-slate-400 mt-0.5">{order.city}</p>
-                </div>
-              </div>
-              <div className="flex gap-2">
-                <button onClick={() => onEdit(order)} className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-2xl bg-[#C5A021]/10 text-[#C5A021] font-black text-xs hover:bg-[#C5A021] hover:text-white transition-all">
-                  <span className="material-symbols-rounded text-base">edit_note</span>
-                  تعديل الحالة
-                </button>
-                <button onClick={() => copyOrderDetails(order)} className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-2xl bg-[#0F172A]/10 text-[#0F172A] font-black text-xs hover:bg-[#C5A021] hover:text-white transition-all" title="نسخ البيانات">
-                  <span className="material-symbols-rounded text-base">content_copy</span>
-                </button>
-              </div>
-              <div className="flex gap-2">
-                <select 
-                  className="flex-1 bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold outline-none text-slate-800"
-                  onChange={(e) => {
-                    if (e.target.value && onAssignDriver) onAssignDriver(order.id, e.target.value);
-                  }}
-                  value={order.driverId || ""}
-                >
-                  <option value="">تعيين لمندوب...</option>
-                  {drivers.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
-                </select>
-              </div>
-            </div>
-          ))}
-          {filteredOrders.length === 0 && (
-            <div className="py-20 flex flex-col items-center justify-center text-slate-300">
-              <span className="material-symbols-rounded text-[80px] opacity-20">order_approve</span>
-              <p className="font-black text-sm uppercase tracking-widest mt-4 text-slate-400">لا توجد طلبات</p>
-            </div>
-          )}
-        </div>
+        {/* ── VIEW MODES ── */}
 
-        {/* DESKTOP: Table Layout */}
-        <div className="hidden md:block overflow-x-auto">
-          <table className="w-full text-right border-collapse min-w-[1000px]">
-            <thead>
-              <tr className={classes.tableHeader}>
-                <th className="px-6 py-6 rounded-tr-2xl w-12">
-                  <input type="checkbox" checked={allSelected} onChange={toggleAll} className="w-4 h-4 rounded accent-[#C5A021]" />
-                </th>
-                <th className="px-8 py-6">رقم التتبع</th>
-                <th className="px-8 py-6">تفاصيل العميل</th>
-                <th className="px-8 py-6">طريقة الدفع</th>
-                <th className="px-8 py-6">الوجهة</th>
-                <th className="px-8 py-6">القيمة</th>
-                <th className="px-8 py-6 text-center">الحالة</th>
-                <th className="px-8 py-6 text-center rounded-tl-2xl">إجراءات</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {filteredOrders.map((order) => (
-                <tr key={order.id} className={cn(classes.tableRow, selectedIds.has(order.id) && "bg-[#C5A021]/5")}>
-                  <td className="px-6 py-8">
-                    <input type="checkbox" checked={selectedIds.has(order.id)} onChange={() => toggleOne(order.id)}
-                      className="w-4 h-4 rounded accent-[#C5A021]" />
-                  </td>
-                  <td className="px-8 py-10 font-mono text-xs font-black text-[#C5A021] tracking-[0.2em]">
-                    #{order.id?.slice(-8).toUpperCase()}
-                  </td>
-                  {/* Column 2: Customer Details */}
-                  <td className="px-8 py-10">
-                    <div className="flex flex-col">
-                      <span className="font-black text-[#0F172A] text-sm leading-tight mb-1">{order.customerName || order.customer?.name}</span>
-                      <div className="flex items-center gap-2">
-                        <span className="material-symbols-rounded text-[14px] text-slate-400">call</span>
-                        <span className="text-[11px] font-bold text-slate-400" dir="ltr">{order.phone}</span>
-                      </div>
-                    </div>
-                  </td>
-                  {/* Column 3: Payment Method */}
-                  <td className="px-8 py-10">
-                    <div className="flex flex-col gap-1.5">
-                      <span className={cn(
-                        "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-black w-fit border",
-                        order.paymentMethod === "COD" 
-                          ? "bg-amber-50 text-amber-700 border-amber-200" 
-                          : "bg-emerald-50 text-emerald-700 border-emerald-200"
-                      )}>
-                        <span>{order.paymentMethod === "COD" ? "💵" : "🏦"}</span>
-                        <span>{order.paymentMethod === "COD" ? "دفع عند الاستلام" : "تحويل بنكي / حول"}</span>
+        {/* VIEW MODE 1: Odoo Cards (Bento style grid) */}
+        {viewMode === "card" && (
+          <div className="p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 bg-slate-50/30">
+            {filteredOrders.map(order => {
+              const firstVendor = order.items?.[0]?.vendor || order.orderItems?.[0]?.vendor;
+              const senderName = order.storeName || order.vendorName || firstVendor?.storeName || "متجر مرسال";
+              return (
+                <div key={order.id} className="bg-white border border-slate-100 rounded-3xl p-5 shadow-sm space-y-4 hover:shadow-md transition-all relative group">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <input 
+                        type="checkbox" 
+                        checked={selectedIds.has(order.id)} 
+                        onChange={() => toggleOne(order.id)}
+                        className="w-4 h-4 rounded-full border border-[#C5A021] text-[#C5A021] accent-[#C5A021]" 
+                      />
+                      <span className="font-mono text-[10px] font-black text-[#C5A021] bg-[#C5A021]/5 px-2.5 py-1 rounded-xl">
+                        #{order.id?.slice(-8).toUpperCase()}
                       </span>
-                      {order.paymentScreenshot && (
-                        <a 
-                          href={order.paymentScreenshot} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="text-[10px] text-[#C5A021] font-black flex items-center gap-1 hover:underline w-fit"
-                        >
-                          <span className="material-symbols-rounded text-[14px]">image</span>
-                          مشاهدة إشعار الدفع
-                        </a>
-                      )}
                     </div>
-                  </td>
-                  {/* Column 4: Destination */}
-                  <td className="px-8 py-10">
-                    <span className="bg-slate-100 text-slate-700 px-4 py-1.5 rounded-2xl text-[10px] font-black uppercase tracking-[0.1em] border border-slate-200/50">
-                      {order.city}
-                    </span>
-                  </td>
-                  {/* Column 5: Value */}
-                  <td className="px-8 py-10 font-black text-[#0F172A] text-lg whitespace-nowrap">
-                    {order.totalAmount?.toLocaleString()}
-                    <span className="text-[11px] text-[#C5A021] mr-2 font-black">ج.س</span>
-                  </td>
-                  {/* Column 6: Status */}
-                  <td className="px-8 py-10 text-center">
                     <span className={cn(
-                      "px-4 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest block mb-2",
-                      ORDER_STATUSES[order.status]?.cls === "badge-active" ? "bg-green-50 text-green-600 border border-green-100" : "bg-orange-50 text-orange-500 border border-orange-100"
+                      "px-3 py-1 rounded-xl text-[9px] font-black uppercase tracking-widest",
+                      ORDER_STATUSES[order.status]?.cls === "badge-active" ? "bg-green-50 text-green-600 border-green-100" : "bg-orange-50 text-orange-500 border border-orange-100"
                     )}>
                       {ORDER_STATUSES[order.status]?.label || order.status}
                     </span>
-                    <select 
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-2 py-1.5 text-[10px] font-bold outline-none text-slate-800"
-                      onChange={(e) => {
-                        if (e.target.value && onAssignDriver) onAssignDriver(order.id, e.target.value);
-                      }}
-                      value={order.driverId || ""}
-                    >
-                      <option value="">لا يوجد سائق محدد</option>
-                      {drivers.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
-                    </select>
-                  </td>
-                  {/* Column 7: Actions */}
-                  <td className="px-8 py-10">
-                    <div className="flex items-center justify-center gap-2">
-                      <button onClick={() => copyOrderDetails(order)} className={cn("w-10 h-10 rounded-xl bg-white border text-slate-500 flex items-center justify-center transition-all shadow-sm",
-                        copiedId === order.id ? "bg-green-50 border-green-200 text-green-600" : "border-slate-200 hover:bg-[#C5A021] hover:text-white hover:border-[#C5A021]"
-                      )} title="نسخ البيانات">
-                        <span className="material-symbols-rounded text-lg">{copiedId === order.id ? "check_circle" : "content_copy"}</span>
-                      </button>
-                      <button onClick={() => onEdit(order)} className="w-12 h-12 rounded-[1.2rem] bg-white border border-slate-200 text-[#C5A021] flex items-center justify-center hover:bg-[#C5A021] hover:text-white hover:border-[#C5A021] transition-all shadow-md shadow-slate-100/10" title="تعديل الحالة">
-                        <span className="material-symbols-rounded text-xl">edit_note</span>
-                      </button>
-                      <button onClick={() => onPrint(order)} className="w-12 h-12 rounded-[1.2rem] bg-[#0F172A] text-white flex items-center justify-center hover:bg-[#C5A021] hover:text-white transition-all shadow-md shadow-slate-100/10" title="طباعة البوليصة">
-                        <span className="material-symbols-rounded text-xl">print</span>
-                      </button>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] text-slate-400 font-bold">المرسل (التاجر):</span>
+                      <span className="text-xs font-black text-teal-600">{senderName}</span>
                     </div>
-                  </td>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] text-slate-400 font-bold">المستقبل (العميل):</span>
+                      <span className="text-xs font-black text-slate-800">{order.customerName || order.customer?.name}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] text-slate-400 font-bold">الهاتف والوجهة:</span>
+                      <span className="text-xs font-bold text-slate-500">{order.city} | <span dir="ltr">{order.phone}</span></span>
+                    </div>
+                    <div className="flex items-center justify-between border-t border-slate-50 pt-2 mt-2">
+                      <span className="text-[10px] text-slate-400 font-bold">القيمة:</span>
+                      <span className="text-sm font-black text-[#0F172A]">{order.totalAmount?.toLocaleString()} ج.س</span>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2 mt-4 pt-2 border-t border-slate-100">
+                    <button onClick={() => onEdit(order)} className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl bg-slate-50 text-slate-600 hover:bg-[#C5A021] hover:text-white font-bold text-[10px] transition-all">
+                      <span className="material-symbols-rounded text-sm">edit</span>
+                      تعديل
+                    </button>
+                    <button onClick={() => onPrint(order)} className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl bg-[#0F172A] text-white hover:bg-[#C5A021] font-bold text-[10px] transition-all">
+                      <span className="material-symbols-rounded text-sm">print</span>
+                      البوليصة
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* VIEW MODE 2: Odoo Table (desktop) */}
+        {viewMode === "list" && (
+          <div className="overflow-x-auto">
+            <table className="w-full text-right border-collapse min-w-[1250px]">
+              
+              {/* Odoo Style Table Header */}
+              <thead>
+                <tr className="bg-slate-50 border-b border-slate-200 text-slate-700 text-xs font-black">
+                  <th className="px-4 py-4 w-12 text-center">
+                    <input 
+                      type="checkbox" 
+                      checked={allSelected} 
+                      onChange={toggleAll} 
+                      className="w-5 h-5 rounded-full border-2 border-[#C5A021] text-[#C5A021] cursor-pointer accent-[#C5A021]" 
+                    />
+                  </th>
+                  <th className="px-4 py-4 w-12 text-center">ملاحظة</th>
+                  <th className="px-4 py-4">التسلسل</th>
+                  <th className="px-4 py-4">الإجراء المطلوب</th>
+                  <th className="px-4 py-4">رقم المرجع</th>
+                  <th className="px-4 py-4">الحالة</th>
+                  <th className="px-4 py-4">حالة التاجر</th>
+                  <th className="px-4 py-4">المرسل</th>
+                  <th className="px-4 py-4">اسم المرسل إليه</th>
+                  <th className="px-4 py-4">المدينة</th>
+                  <th className="px-4 py-4">الهاتف</th>
+                  <th className="px-4 py-4">القيمة</th>
+                  <th className="px-4 py-4 text-center">إجراءات</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-          {filteredOrders.length === 0 && (
-            <div className="py-40 flex flex-col items-center justify-center text-slate-300">
-              <span className="material-symbols-rounded text-[100px] opacity-20">order_approve</span>
-              <p className="font-black text-lg uppercase tracking-[0.3em] text-slate-400">لا توجد طلبات مطابقة</p>
-            </div>
-          )}
-        </div>
+              </thead>
+
+              <tbody className="divide-y divide-slate-100 text-xs">
+                
+                {/* ── Grouped Rows Rendering ── */}
+                {groupBy !== "none" && groupedOrders && (
+                  Object.keys(groupedOrders).map(groupKey => {
+                    const groupRows = groupedOrders[groupKey];
+                    const isCollapsed = collapsedGroups.has(groupKey);
+                    return (
+                      <React.Fragment key={groupKey}>
+                        
+                        {/* Group Header Row */}
+                        <tr 
+                          onClick={() => toggleGroup(groupKey)}
+                          className="bg-slate-50 hover:bg-slate-100/80 cursor-pointer select-none border-y border-slate-200/50"
+                        >
+                          <td colSpan={13} className="px-4 py-3.5 font-black text-slate-700">
+                            <div className="flex items-center gap-2">
+                              <span className="material-symbols-rounded text-lg text-[#C5A021] transition-transform duration-200" style={{ transform: isCollapsed ? 'rotate(0deg)' : 'rotate(-90deg)' }}>
+                                keyboard_arrow_left
+                              </span>
+                              <span>{groupKey}</span>
+                              <span className="text-[10px] text-slate-400 font-bold bg-slate-200/60 px-2 py-0.5 rounded-md">
+                                {groupRows.length} طلبات
+                              </span>
+                            </div>
+                          </td>
+                        </tr>
+
+                        {/* Group Rows (only if not collapsed) */}
+                        {!isCollapsed && groupRows.map((order) => {
+                          const firstVendor = order.items?.[0]?.vendor || order.orderItems?.[0]?.vendor;
+                          const senderName = order.storeName || order.vendorName || firstVendor?.storeName || "متجر مرسال";
+                          return (
+                            <tr key={order.id} className={cn("hover:bg-slate-50/50 transition-colors", selectedIds.has(order.id) && "bg-[#C5A021]/5")}>
+                              {/* Checkbox */}
+                              <td className="px-4 py-4 text-center">
+                                <input 
+                                  type="checkbox" 
+                                  checked={selectedIds.has(order.id)} 
+                                  onChange={() => toggleOne(order.id)}
+                                  className="w-5 h-5 rounded-full border-2 border-[#C5A021] text-[#C5A021] cursor-pointer accent-[#C5A021]" 
+                                />
+                              </td>
+                              
+                              {/* Notes icon */}
+                              <td className="px-4 py-4 text-center">
+                                {order.notes ? (
+                                  <span className="material-symbols-rounded text-amber-500 cursor-pointer text-base" title={order.notes}>
+                                    description
+                                  </span>
+                                ) : (
+                                  <span className="text-slate-300">-</span>
+                                )}
+                              </td>
+
+                              {/* Sequence */}
+                              <td className="px-4 py-4 font-mono font-black text-[#C5A021] tracking-wider">
+                                #{order.id?.slice(-8).toUpperCase()}
+                              </td>
+
+                              {/* Required Action */}
+                              <td className="px-4 py-4 font-bold text-slate-500">
+                                {getRequiredAction(order.status)}
+                              </td>
+
+                              {/* Reference Number */}
+                              <td className="px-4 py-4 text-slate-600 font-bold font-mono">
+                                {order.customerReference || order.trackingNumber || "-"}
+                              </td>
+
+                              {/* Status Badge */}
+                              <td className="px-4 py-4">
+                                <span className={cn(
+                                  "px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest border block text-center w-28",
+                                  ORDER_STATUSES[order.status]?.cls === "badge-active" ? "bg-green-50 text-green-600 border-green-100" : "bg-orange-50 text-orange-500 border border-orange-100"
+                                )}>
+                                  {ORDER_STATUSES[order.status]?.label || order.status}
+                                </span>
+                              </td>
+
+                              {/* Merchant Status */}
+                              <td className="px-4 py-4 font-bold text-slate-600">
+                                {getMerchantStatus(order.status)}
+                              </td>
+
+                              {/* Sender (Vendor) */}
+                              <td className="px-4 py-4 font-black text-teal-600">
+                                {senderName}
+                              </td>
+
+                              {/* Receiver Name */}
+                              <td className="px-4 py-4 font-black text-slate-800">
+                                {order.customerName || order.customer?.name || "-"}
+                              </td>
+
+                              {/* City */}
+                              <td className="px-4 py-4 font-bold text-slate-600">
+                                {order.city}
+                              </td>
+
+                              {/* Phone */}
+                              <td className="px-4 py-4 font-bold text-slate-500" dir="ltr">
+                                {order.phone}
+                              </td>
+
+                              {/* Value */}
+                              <td className="px-4 py-4 font-black text-slate-800 whitespace-nowrap">
+                                {order.totalAmount?.toLocaleString()} <span className="text-[10px] text-[#C5A021]">ج.س</span>
+                              </td>
+
+                              {/* Actions */}
+                              <td className="px-4 py-4">
+                                <div className="flex items-center justify-center gap-1.5">
+                                  <button onClick={() => copyOrderDetails(order)} className={cn("w-8 h-8 rounded-lg bg-white border text-slate-500 flex items-center justify-center transition-all",
+                                    copiedId === order.id ? "bg-green-50 border-green-200 text-green-600" : "border-slate-200 hover:bg-[#C5A021] hover:text-white"
+                                  )} title="نسخ">
+                                    <span className="material-symbols-rounded text-sm">{copiedId === order.id ? "check_circle" : "content_copy"}</span>
+                                  </button>
+                                  <button onClick={() => onEdit(order)} className="w-8 h-8 rounded-lg bg-white border border-slate-200 text-[#C5A021] flex items-center justify-center hover:bg-[#C5A021] hover:text-white transition-all" title="تعديل">
+                                    <span className="material-symbols-rounded text-sm">edit</span>
+                                  </button>
+                                  <button onClick={() => onPrint(order)} className="w-8 h-8 rounded-lg bg-[#0F172A] text-white flex items-center justify-center hover:bg-[#C5A021] hover:text-white transition-all" title="طباعة">
+                                    <span className="material-symbols-rounded text-sm">print</span>
+                                  </button>
+                                </div>
+                              </td>
+
+                            </tr>
+                          );
+                        })}
+                      </React.Fragment>
+                    );
+                  })
+                )}
+
+                {/* ── Ungrouped Rows Rendering ── */}
+                {groupBy === "none" && filteredOrders.map((order) => {
+                  const firstVendor = order.items?.[0]?.vendor || order.orderItems?.[0]?.vendor;
+                  const senderName = order.storeName || order.vendorName || firstVendor?.storeName || "متجر مرسال";
+                  return (
+                    <tr key={order.id} className={cn("hover:bg-slate-50/50 transition-colors", selectedIds.has(order.id) && "bg-[#C5A021]/5")}>
+                      {/* Checkbox */}
+                      <td className="px-4 py-8 text-center">
+                        <input 
+                          type="checkbox" 
+                          checked={selectedIds.has(order.id)} 
+                          onChange={() => toggleOne(order.id)}
+                          className="w-5 h-5 rounded-full border-2 border-[#C5A021] text-[#C5A021] cursor-pointer accent-[#C5A021]" 
+                        />
+                      </td>
+                      
+                      {/* Notes icon */}
+                      <td className="px-4 py-8 text-center">
+                        {order.notes ? (
+                          <span className="material-symbols-rounded text-amber-500 cursor-pointer text-base" title={order.notes}>
+                            description
+                          </span>
+                        ) : (
+                          <span className="text-slate-300">-</span>
+                        )}
+                      </td>
+
+                      {/* Sequence */}
+                      <td className="px-4 py-8 font-mono font-black text-[#C5A021] tracking-wider">
+                        #{order.id?.slice(-8).toUpperCase()}
+                      </td>
+
+                      {/* Required Action */}
+                      <td className="px-4 py-8 font-bold text-slate-500">
+                        {getRequiredAction(order.status)}
+                      </td>
+
+                      {/* Reference Number */}
+                      <td className="px-4 py-8 text-slate-600 font-bold font-mono">
+                        {order.customerReference || order.trackingNumber || "-"}
+                      </td>
+
+                      {/* Status Badge */}
+                      <td className="px-4 py-8">
+                        <span className={cn(
+                          "px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest border block text-center w-28",
+                          ORDER_STATUSES[order.status]?.cls === "badge-active" ? "bg-green-50 text-green-600 border-green-100" : "bg-orange-50 text-orange-500 border border-orange-100"
+                        )}>
+                          {ORDER_STATUSES[order.status]?.label || order.status}
+                        </span>
+                      </td>
+
+                      {/* Merchant Status */}
+                      <td className="px-4 py-8 font-bold text-slate-600">
+                        {getMerchantStatus(order.status)}
+                      </td>
+
+                      {/* Sender (Vendor) */}
+                      <td className="px-4 py-8 font-black text-teal-600">
+                        {senderName}
+                      </td>
+
+                      {/* Receiver Name */}
+                      <td className="px-4 py-8 font-black text-slate-800">
+                        {order.customerName || order.customer?.name || "-"}
+                      </td>
+
+                      {/* City */}
+                      <td className="px-4 py-8 font-bold text-slate-600">
+                        {order.city}
+                      </td>
+
+                      {/* Phone */}
+                      <td className="px-4 py-8 font-bold text-slate-500" dir="ltr">
+                        {order.phone}
+                      </td>
+
+                      {/* Value */}
+                      <td className="px-4 py-8 font-black text-slate-800 whitespace-nowrap">
+                        {order.totalAmount?.toLocaleString()} <span className="text-[10px] text-[#C5A021]">ج.س</span>
+                      </td>
+
+                      {/* Actions */}
+                      <td className="px-4 py-8">
+                        <div className="flex items-center justify-center gap-1.5">
+                          <button onClick={() => copyOrderDetails(order)} className={cn("w-8 h-8 rounded-lg bg-white border text-slate-500 flex items-center justify-center transition-all",
+                            copiedId === order.id ? "bg-green-50 border-green-200 text-green-600" : "border-slate-200 hover:bg-[#C5A021] hover:text-white"
+                          )} title="نسخ">
+                            <span className="material-symbols-rounded text-sm">{copiedId === order.id ? "check_circle" : "content_copy"}</span>
+                          </button>
+                          <button onClick={() => onEdit(order)} className="w-8 h-8 rounded-lg bg-white border border-slate-200 text-[#C5A021] flex items-center justify-center hover:bg-[#C5A021] hover:text-white transition-all" title="تعديل">
+                            <span className="material-symbols-rounded text-sm">edit</span>
+                          </button>
+                          <button onClick={() => onPrint(order)} className="w-8 h-8 rounded-lg bg-[#0F172A] text-white flex items-center justify-center hover:bg-[#C5A021] hover:text-white transition-all" title="طباعة">
+                            <span className="material-symbols-rounded text-sm">print</span>
+                          </button>
+                        </div>
+                      </td>
+
+                    </tr>
+                  );
+                })}
+
+                {filteredOrders.length === 0 && (
+                  <tr>
+                    <td colSpan={13} className="py-40 text-center text-slate-300">
+                      <span className="material-symbols-rounded text-[100px] opacity-20 block mx-auto">order_approve</span>
+                      <p className="font-black text-lg uppercase tracking-[0.3em] text-slate-400 mt-4">لا توجد طلبات مطابقة</p>
+                    </td>
+                  </tr>
+                )}
+
+              </tbody>
+
+            </table>
+          </div>
+        )}
+
       </div>
+
     </div>
   );
 }

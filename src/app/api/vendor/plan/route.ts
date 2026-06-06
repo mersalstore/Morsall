@@ -25,6 +25,11 @@ export async function GET() {
       ? new Date(vendor.subscriptionEndsAt) > now
       : vendor.tier === "FREEMIUM";
 
+    const tmpTrial = await prisma.siteConfig.findUnique({ where: { key: "trialMaxProducts" } });
+    const tmpPremium = await prisma.siteConfig.findUnique({ where: { key: "premiumMaxProducts" } });
+    const trialMaxProducts = tmpTrial ? parseInt(tmpTrial.value) : 10;
+    const premiumMaxProducts = tmpPremium ? parseInt(tmpPremium.value) : 50;
+
     const planFeatures = vendor.plan
       ? {
           canUploadProducts: vendor.plan.canUploadProducts,
@@ -34,10 +39,10 @@ export async function GET() {
           maxBlocks: vendor.plan.maxBlocks,
         }
       : {
-          canUploadProducts: vendor.tier === "PREMIUM_BUILDER" || vendor.tier === "CUSTOM_DESIGN",
+          canUploadProducts: true,
           canUseBuilder: vendor.tier === "PREMIUM_BUILDER" || vendor.tier === "CUSTOM_DESIGN",
           canCustomDesign: vendor.tier === "CUSTOM_DESIGN",
-          maxProducts: vendor.tier === "FREEMIUM" ? 0 : vendor.tier === "PREMIUM_BUILDER" ? 50 : 200,
+          maxProducts: vendor.tier === "FREEMIUM" ? trialMaxProducts : vendor.tier === "PREMIUM_BUILDER" ? premiumMaxProducts : 99999,
           maxBlocks: vendor.tier === "FREEMIUM" ? 0 : vendor.tier === "PREMIUM_BUILDER" ? 20 : 999,
         };
 

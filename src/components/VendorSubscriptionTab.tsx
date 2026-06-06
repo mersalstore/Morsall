@@ -301,29 +301,43 @@ export default function VendorSubscriptionTab() {
   }
 
   if (step === "result" && verifyResult) {
+    const isRejected = verifyResult.rejected === true || verifyResult.success === false;
+    const isApproved = verifyResult.autoVerified === true;
+    const theme = isRejected
+      ? { bg: "bg-red-50 border-red-200", iconBg: "bg-red-100", iconColor: "text-red-600", titleColor: "text-red-700" }
+      : isApproved
+      ? { bg: "bg-green-50 border-green-200", iconBg: "bg-green-100", iconColor: "text-green-600", titleColor: "text-green-700" }
+      : { bg: "bg-amber-50 border-amber-200", iconBg: "bg-amber-100", iconColor: "text-amber-600", titleColor: "text-amber-700" };
+
     return (
       <div className="max-w-2xl mx-auto space-y-8">
-        <div className={cn(
-          "rounded-[2rem] p-10 text-center border-2",
-          verifyResult.autoVerified ? "bg-green-50 border-green-200" : "bg-amber-50 border-amber-200"
-        )}>
-          <div className={cn(
-            "w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4",
-            verifyResult.autoVerified ? "bg-green-100" : "bg-amber-100"
-          )}>
-            {verifyResult.autoVerified ? (
-              <CheckCircle2 size={40} className="text-green-600" />
+        <div className={cn("rounded-[2rem] p-10 text-center border-2", theme.bg)}>
+          <div className={cn("w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4", theme.iconBg)}>
+            {isRejected ? (
+              <AlertTriangle size={40} className={theme.iconColor} />
+            ) : isApproved ? (
+              <CheckCircle2 size={40} className={theme.iconColor} />
             ) : (
-              <Clock size={40} className="text-amber-600" />
+              <Clock size={40} className={theme.iconColor} />
             )}
           </div>
-          <h3 className={cn(
-            "text-2xl font-black mb-2",
-            verifyResult.autoVerified ? "text-green-700" : "text-amber-700"
-          )}>
-            {verifyResult.autoVerified ? "✅ تم تفعيل الاشتراك بنجاح!" : "📤 تم استلام طلب الاشتراك"}
+          <h3 className={cn("text-2xl font-black mb-2", theme.titleColor)}>
+            {isRejected ? "❌ الإيصال غير صحيح" : isApproved ? "✅ تم تفعيل الاشتراك بنجاح!" : "📤 تم استلام طلب الاشتراك"}
           </h3>
-          <p className="text-sm font-bold text-gray-500">{verifyResult.message}</p>
+          <p className="text-sm font-bold text-gray-600">{verifyResult.error || verifyResult.message}</p>
+
+          {/* Rejection reasons list */}
+          {isRejected && Array.isArray(verifyResult.reasons) && verifyResult.reasons.length > 0 && (
+            <div className="mt-5 bg-white rounded-2xl p-5 border border-red-100 text-right space-y-2">
+              <p className="text-[11px] font-black text-red-500 uppercase tracking-widest">أسباب الرفض:</p>
+              {verifyResult.reasons.map((reason: string, i: number) => (
+                <p key={i} className="text-sm font-bold text-gray-700 flex items-start gap-2">
+                  <span className="text-red-400 mt-0.5">•</span>
+                  <span>{reason}</span>
+                </p>
+              ))}
+            </div>
+          )}
 
           {verifyResult.confidence !== undefined && (
             <div className="mt-4 bg-white rounded-2xl p-4 border border-gray-100 inline-block">
@@ -332,18 +346,27 @@ export default function VendorSubscriptionTab() {
                 "text-2xl font-black",
                 verifyResult.confidence >= 85 ? "text-green-600" : verifyResult.confidence >= 50 ? "text-amber-600" : "text-red-600"
               )}>
-                {verifyResult.confidence}%
+                {Math.round(verifyResult.confidence)}%
               </p>
             </div>
           )}
         </div>
 
-        <button
-          onClick={() => { setStep("plans"); setShowPayment(null); setVerifyResult(null); }}
-          className="w-full py-4 bg-[#0F172A] text-white rounded-2xl font-black text-sm hover:bg-[#C5A021] transition-all"
-        >
-          العودة للخطط
-        </button>
+        {isRejected ? (
+          <button
+            onClick={() => { setStep("payment"); setVerifyResult(null); setPaymentScreenshot(null); }}
+            className="w-full py-4 bg-red-500 text-white rounded-2xl font-black text-sm hover:bg-red-600 transition-all"
+          >
+            إعادة رفع صورة الإيصال الصحيحة
+          </button>
+        ) : (
+          <button
+            onClick={() => { setStep("plans"); setShowPayment(null); setVerifyResult(null); }}
+            className="w-full py-4 bg-[#0F172A] text-white rounded-2xl font-black text-sm hover:bg-[#C5A021] transition-all"
+          >
+            العودة للخطط
+          </button>
+        )}
       </div>
     );
   }
