@@ -52,6 +52,8 @@ export async function POST(req: Request) {
           role,
           permissions: permissions || null,
           isOnboarded: true,
+          // Staff accounts are created by an admin — mark verified so they can log in immediately
+          emailVerified: new Date(),
         },
       });
     } else {
@@ -62,6 +64,7 @@ export async function POST(req: Request) {
           role,
           permissions: permissions || null,
           name: existingUser.name || name,
+          emailVerified: existingUser.emailVerified || new Date(),
           ...(password ? { password: hashedPassword } : {}),
         },
       });
