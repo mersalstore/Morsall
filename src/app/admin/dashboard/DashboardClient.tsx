@@ -75,7 +75,11 @@ export default function AdminDashboard() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const userRole = (session?.user as any)?.role || "CUSTOMER";
-  const allowedTabs = ROLE_PERMISSIONS[userRole] || [];
+  const userPermissions = (session?.user as any)?.permissions;
+  // Custom per-employee permissions take precedence over role defaults
+  const allowedTabs = (Array.isArray(userPermissions) && userPermissions.length > 0)
+    ? userPermissions
+    : (ROLE_PERMISSIONS[userRole] || []);
 
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "info" } | null>(null);
   const hasSetTab = React.useRef(false);
@@ -93,6 +97,8 @@ export default function AdminDashboard() {
 
   // Initial tab = first allowed tab for this role
   const [activeTab, setActiveTab] = useState<any>(() => {
+    const perms = (session?.user as any)?.permissions;
+    if (Array.isArray(perms) && perms.length > 0) return perms[0];
     return ROLE_PERMISSIONS[userRole]?.[0] || "overview";
   });
   const [orders, setOrders] = useState<any[]>([]);
@@ -152,7 +158,7 @@ export default function AdminDashboard() {
     
     // Set the first allowed tab for this role only once
     if (!hasSetTab.current) {
-      const firstAllowed = ROLE_PERMISSIONS[role]?.[0];
+      const firstAllowed = hasPermissions ? userPermissions[0] : ROLE_PERMISSIONS[role]?.[0];
       if (firstAllowed) {
         setActiveTab(firstAllowed);
       }

@@ -14,9 +14,12 @@ export async function getAdminSession() {
   }
 
   const role = (session?.user as any)?.role;
+  const permissions = (session?.user as any)?.permissions;
+  const hasCustomPermissions = Array.isArray(permissions) && permissions.length > 0;
   const ALLOWED_ROLES = ["ADMIN", "PACKING", "SHIPPING", "CUSTOMER_SERVICE", "INVENTORY", "DRIVER"];
 
-  if (!session || !ALLOWED_ROLES.includes(role)) {
+  // Allow staff roles, OR any account that has explicit custom permissions granted
+  if (!session || (!ALLOWED_ROLES.includes(role) && !hasCustomPermissions)) {
     return null;
   }
   

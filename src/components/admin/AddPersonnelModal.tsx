@@ -12,24 +12,33 @@ interface AddPersonnelModalProps {
   type: "employees" | "drivers";
 }
 
+// Must mirror the dashboard tabs (NAV_ITEMS in AdminSidebar / ROLE_PERMISSIONS)
 const ALL_TABS = [
-  { id: "overview", label: "نظرة عامة", icon: "dashboard" },
+  { id: "overview", label: "لوحة التحكم", icon: "dashboard" },
   { id: "approvals", label: "الموافقات", icon: "order_approve" },
-  { id: "users", label: "العملاء والتجار", icon: "group" },
-  { id: "vendors", label: "المتاجر", icon: "store" },
-  { id: "categories", label: "الأقسام", icon: "category" },
-  { id: "employees", label: "الموظفين", icon: "badge" },
   { id: "orders", label: "الطلبات", icon: "shopping_cart" },
-  { id: "payments", label: "طرق الدفع", icon: "credit_card" },
-  { id: "logistics", label: "اللوجستي", icon: "local_shipping" },
-  { id: "delivery", label: "مناطق التوصيل", icon: "map" },
-  { id: "shipping", label: "شركات الشحن", icon: "airport_shuttle" },
-  { id: "finance", label: "المالية", icon: "payments" },
-  { id: "settings", label: "الإعدادات", icon: "settings" },
   { id: "inventory", label: "المنتجات", icon: "inventory_2" },
+  { id: "categories", label: "الأقسام", icon: "category" },
+  { id: "attributes", label: "سمات المنتجات", icon: "tune" },
+  { id: "returns", label: "المرتجع", icon: "keyboard_return" },
+  { id: "users", label: "العملاء", icon: "group" },
+  { id: "vendors", label: "الموردون", icon: "store" },
+  { id: "employees", label: "الموظفون", icon: "badge" },
   { id: "drivers", label: "المناديب", icon: "delivery_dining" },
-  { id: "subscriptions", label: "الاشتراكات", icon: "loyalty" },
-  { id: "attributes", label: "خصائص المنتجات", icon: "tune" },
+  { id: "logistics", label: "النظام اللوجستي", icon: "local_shipping" },
+  { id: "wms", label: "إدارة المستودعات", icon: "warehouse" },
+  { id: "importedOrders", label: "استيراد طلبات", icon: "upload_file" },
+  { id: "finance", label: "المالية", icon: "payments" },
+  { id: "payments", label: "طرق الدفع", icon: "credit_card" },
+  { id: "subscriptions", label: "باقات الاشتراك", icon: "loyalty" },
+  { id: "subscriptionRequests", label: "طلبات الاشتراك", icon: "request_quote" },
+  { id: "customDesignRequests", label: "طلبات التصميم", icon: "palette" },
+  { id: "delivery", label: "مناطق التوصيل", icon: "map" },
+  { id: "appearance", label: "المظهر والصور", icon: "image" },
+  { id: "siteSections", label: "أقسام الرئيسية", icon: "dashboard_customize" },
+  { id: "offersAds", label: "العروض والإعلانات", icon: "campaign" },
+  { id: "security", label: "الأمان والحماية", icon: "shield" },
+  { id: "globalSettings", label: "الإعدادات العامة", icon: "settings" },
 ];
 
 export default function AddPersonnelModal({ isOpen, onClose, onSuccess, type }: AddPersonnelModalProps) {
@@ -108,7 +117,7 @@ export default function AddPersonnelModal({ isOpen, onClose, onSuccess, type }: 
       <motion.div
         initial={{ opacity: 0, scale: 0.9, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        className="relative bg-white w-full max-w-2xl rounded-[3.5rem] shadow-3xl overflow-hidden"
+        className="relative bg-white w-full max-w-2xl rounded-[3.5rem] shadow-2xl max-h-[90vh] overflow-y-auto"
       >
         {/* Success State — show credentials */}
         {createdEmployee ? (
