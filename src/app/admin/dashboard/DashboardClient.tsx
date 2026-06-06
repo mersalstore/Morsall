@@ -57,6 +57,7 @@ const ROLE_LABELS: Record<string, string> = {
 };
 
 const ORDER_STATUSES = {
+  PENDING_APPROVAL: { label: "قيد المراجعة",            cls: "badge-pending", icon: "hourglass_top",     color: "from-yellow-400 to-amber-500" },
   AWAITING_PICKUP:  { label: "في انتظار الاستلام",     cls: "badge-pending", icon: "pending_actions",   color: "from-blue-400 to-indigo-500" },
   READY_FOR_SHIPPING: { label: "جاهز للشحن",         cls: "badge-active",  icon: "hail",              color: "from-purple-400 to-indigo-600" },
   CONFIRMED:        { label: "تم استلام الطلب",          cls: "badge-active",  icon: "task_alt",          color: "from-blue-400 to-blue-600" },
