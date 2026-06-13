@@ -113,6 +113,10 @@ export default function AdminDashboard() {
       const perms = (session?.user as any)?.permissions;
       const allowed = Array.isArray(perms) && perms.length > 0 ? perms : (ROLE_PERMISSIONS[userRole] || []);
       if (tab && allowed.includes(tab)) return tab;
+      try {
+        const cached = localStorage.getItem("mersal_admin_active_tab");
+        if (cached && allowed.includes(cached)) return cached;
+      } catch {}
     }
     const perms = (session?.user as any)?.permissions;
     if (Array.isArray(perms) && perms.length > 0) return perms[0];
@@ -158,6 +162,9 @@ export default function AdminDashboard() {
       const url = new URL(window.location.href);
       url.searchParams.set("tab", tab);
       window.history.replaceState({}, "", url.toString());
+      try {
+        localStorage.setItem("mersal_admin_active_tab", tab);
+      } catch {}
     }
   };
 
@@ -189,22 +196,38 @@ export default function AdminDashboard() {
     if (!hasSetTab.current) {
       if (typeof window !== "undefined") {
         const searchParams = new URLSearchParams(window.location.search);
-        const tab = searchParams.get("tab");
+        let tab = searchParams.get("tab");
+        if (!tab) {
+          try { tab = localStorage.getItem("mersal_admin_active_tab"); } catch {}
+        }
         const allowed = hasPermissions ? userPermissions : (ROLE_PERMISSIONS[role] || []);
         if (tab && allowed.includes(tab)) {
           setActiveTab(tab);
           hasSetTab.current = true;
-          return;
         }
       }
-      const firstAllowed = hasPermissions ? userPermissions[0] : ROLE_PERMISSIONS[role]?.[0];
-      if (firstAllowed) {
-        setActiveTab(firstAllowed);
+      if (!hasSetTab.current) {
+        const firstAllowed = hasPermissions ? userPermissions[0] : ROLE_PERMISSIONS[role]?.[0];
+        if (firstAllowed) {
+          setActiveTab(firstAllowed);
+        }
+        hasSetTab.current = true;
       }
-      hasSetTab.current = true;
     }
     fetchData();
   }, [status, (session?.user as any)?.role]);
+
+  // Background polling for dashboard data every 30 seconds to keep it fresh
+  // without full page reloads or interrupting user flows
+  useEffect(() => {
+    if (status !== "authenticated") return;
+    
+    const interval = setInterval(() => {
+      fetchData();
+    }, 30000); // 30 seconds
+    
+    return () => clearInterval(interval);
+  }, [status, dateRange, customFrom, customTo]);
 
   const fetchData = async (range?: string, from?: string, to?: string) => {
     if (!initialLoaded) {

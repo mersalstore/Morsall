@@ -28,7 +28,30 @@ import { exportToExcel } from "../../../lib/excel";
 
 export default function VendorDashboard() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState("overview");
+  const [activeTab, setActiveTabState] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      const searchParams = new URLSearchParams(window.location.search);
+      const tab = searchParams.get("tab");
+      if (tab) return tab;
+      try {
+        const cached = localStorage.getItem("mersal_vendor_active_tab");
+        if (cached) return cached;
+      } catch {}
+    }
+    return "overview";
+  });
+
+  const setActiveTab = (tab: string) => {
+    setActiveTabState(tab);
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      url.searchParams.set("tab", tab);
+      window.history.replaceState({}, "", url.toString());
+      try {
+        localStorage.setItem("mersal_vendor_active_tab", tab);
+      } catch {}
+    }
+  };
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -129,37 +152,52 @@ export default function VendorDashboard() {
 
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
-  useEffect(() => {
-    async function fetchData() {
+  const fetchData = async (silent = false) => {
+    if (!silent) {
       setLoading(true);
-      try {
-        const [sRes, pRes, oRes, wRes] = await Promise.all([
-          fetch("/api/vendor/stats"),
-          fetch("/api/vendor/products"),
-          fetch("/api/vendor/orders"),
-          fetch("/api/vendor/withdrawals")
-        ]);
+    }
+    try {
+      const [sRes, pRes, oRes, wRes] = await Promise.all([
+        fetch("/api/vendor/stats"),
+        fetch("/api/vendor/products"),
+        fetch("/api/vendor/orders"),
+        fetch("/api/vendor/withdrawals")
+      ]);
 
-        if (sRes.status === 401) {
-          router.replace("/login");
-          return;
-        }
-        if (sRes.status === 404) {
-          router.replace("/vendor/register");
-          return;
-        }
+      if (sRes.status === 401) {
+        router.replace("/login");
+        return;
+      }
+      if (sRes.status === 404) {
+        router.replace("/vendor/register");
+        return;
+      }
 
-        if (sRes.ok) setStatsData(await sRes.json());
-        if (pRes.ok) setProducts(await pRes.json());
-        if (oRes.ok) setOrders(await oRes.json());
-        if (wRes.ok) setWithdrawals(await wRes.json());
-      } catch (err) {
-        console.error("Dashboard fetch error:", err);
-      } finally {
+      if (sRes.ok) setStatsData(await sRes.json());
+      if (pRes.ok) setProducts(await pRes.json());
+      if (oRes.ok) setOrders(await oRes.json());
+      if (wRes.ok) setWithdrawals(await wRes.json());
+    } catch (err) {
+      console.error("Dashboard fetch error:", err);
+    } finally {
+      if (!silent) {
         setLoading(false);
       }
     }
+  };
+
+  useEffect(() => {
     fetchData();
+  }, []);
+
+  // Background polling for vendor dashboard data every 30 seconds to keep it fresh
+  // without full page reloads or interrupting user flows
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchData(true);
+    }, 30000); // 30 seconds
+    
+    return () => clearInterval(interval);
   }, []);
 
   const handleDeleteProduct = async (id: string) => {
