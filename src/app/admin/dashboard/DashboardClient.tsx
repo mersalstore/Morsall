@@ -144,10 +144,81 @@ export default function AdminDashboard() {
   const [editingOrder, setEditingOrder] = useState<any>(null);
   const [printingOrder, setPrintingOrder] = useState<any>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [dateRange, setDateRange] = useState("all"); // today, week, month, all, custom
-  const [customFrom, setCustomFrom] = useState("");
-  const [customTo, setCustomTo] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string | null>(null);
+  const [dateRange, setDateRangeState] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      const searchParams = new URLSearchParams(window.location.search);
+      const range = searchParams.get("range");
+      if (range) return range;
+      try {
+        const cached = localStorage.getItem("mersal_admin_date_range");
+        if (cached) return cached;
+      } catch {}
+    }
+    return "all";
+  });
+  const setDateRange = (val: string) => {
+    setDateRangeState(val);
+    try { localStorage.setItem("mersal_admin_date_range", val); } catch {}
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      url.searchParams.set("range", val);
+      if (val !== "custom") {
+        url.searchParams.delete("from");
+        url.searchParams.delete("to");
+      }
+      window.history.replaceState({}, "", url.toString());
+    }
+  };
+
+  const [customFrom, setCustomFrom] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      const searchParams = new URLSearchParams(window.location.search);
+      const from = searchParams.get("from");
+      if (from) return from;
+    }
+    return "";
+  });
+
+  const [customTo, setCustomTo] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      const searchParams = new URLSearchParams(window.location.search);
+      const to = searchParams.get("to");
+      if (to) return to;
+    }
+    return "";
+  });
+
+  const [statusFilter, setStatusFilterState] = useState<string | null>(() => {
+    if (typeof window !== "undefined") {
+      const searchParams = new URLSearchParams(window.location.search);
+      const status = searchParams.get("status");
+      if (status) return status;
+    }
+    return null;
+  });
+  const setStatusFilter = (val: string | null) => {
+    setStatusFilterState(val);
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      if (val) {
+        url.searchParams.set("status", val);
+      } else {
+        url.searchParams.delete("status");
+      }
+      window.history.replaceState({}, "", url.toString());
+    }
+  };
+
+  const handleCustomDateApply = () => {
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      url.searchParams.set("range", "custom");
+      url.searchParams.set("from", customFrom);
+      url.searchParams.set("to", customTo);
+      window.history.replaceState({}, "", url.toString());
+    }
+    fetchData("custom", customFrom, customTo);
+  };
 
   // Print Policy variables
   const [printingOrders, setPrintingOrders] = useState<any[]>([]);
@@ -467,7 +538,7 @@ export default function AdminDashboard() {
                       <input type="date" value={customFrom} onChange={e => setCustomFrom(e.target.value)} className="bg-slate-50 border border-slate-100 rounded-xl px-3 py-2 text-xs font-bold outline-none" />
                       <span className="text-slate-400">←</span>
                       <input type="date" value={customTo} onChange={e => setCustomTo(e.target.value)} className="bg-slate-50 border border-slate-100 rounded-xl px-3 py-2 text-xs font-bold outline-none" />
-                      <button onClick={() => fetchData("custom", customFrom, customTo)} className="bg-[#C5A021] text-white px-4 py-2 rounded-xl text-xs font-black">تطبيق</button>
+                      <button onClick={handleCustomDateApply} className="bg-[#C5A021] text-white px-4 py-2 rounded-xl text-xs font-black">تطبيق</button>
                     </div>
                   )}
                 </div>

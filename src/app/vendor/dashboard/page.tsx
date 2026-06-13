@@ -67,9 +67,43 @@ export default function VendorDashboard() {
   };
 
   const [productSearch, setProductSearch] = useState("");
-  const [productStatusFilter, setProductStatusFilter] = useState("all");
+  const [productStatusFilter, setProductStatusFilterState] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      const searchParams = new URLSearchParams(window.location.search);
+      const val = searchParams.get("p_status");
+      if (val) return val;
+    }
+    return "all";
+  });
+
+  const setProductStatusFilter = (val: string) => {
+    setProductStatusFilterState(val);
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      url.searchParams.set("p_status", val);
+      window.history.replaceState({}, "", url.toString());
+    }
+  };
+
   const [orderSearch, setOrderSearch] = useState("");
-  const [orderStatusFilter, setOrderStatusFilter] = useState("all");
+
+  const [orderStatusFilter, setOrderStatusFilterState] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      const searchParams = new URLSearchParams(window.location.search);
+      const val = searchParams.get("o_status");
+      if (val) return val;
+    }
+    return "all";
+  });
+
+  const setOrderStatusFilter = (val: string) => {
+    setOrderStatusFilterState(val);
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      url.searchParams.set("o_status", val);
+      window.history.replaceState({}, "", url.toString());
+    }
+  };
   const [selectedProducts, setSelectedProducts] = useState<Set<string>>(new Set());
   const [selectedOrders, setSelectedOrders] = useState<Set<string>>(new Set());
   const [withdrawals, setWithdrawals] = useState<any[]>([]);
