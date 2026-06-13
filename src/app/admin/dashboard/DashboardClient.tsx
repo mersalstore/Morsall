@@ -36,10 +36,11 @@ import ImportedOrdersTab from "../../../components/admin/ImportedOrdersTab";
 import WarehouseTab from "../../../components/admin/WarehouseTab";
 import PrintPolicyModal from "../../../components/admin/PrintPolicyModal";
 import SecurityTab from "../../../components/admin/SecurityTab";
+import VendorCustomSiteEditor from "../../../components/admin/VendorCustomSiteEditor";
 
 // صلاحيات كل دور - يجب أن تتطابق مع AdminSidebar
 const ROLE_PERMISSIONS: Record<string, string[]> = {
-  ADMIN: ["overview", "approvals", "users", "vendors", "categories", "employees", "orders", "payments", "logistics", "importedOrders", "returns", "delivery", "shipping", "finance", "settings", "inventory", "drivers", "subscriptions", "subscriptionRequests", "customDesignRequests", "attributes", "globalSettings", "appearance", "siteSections", "offersAds", "wms", "security"],
+  ADMIN: ["overview", "approvals", "users", "vendors", "categories", "employees", "orders", "payments", "logistics", "importedOrders", "returns", "delivery", "shipping", "finance", "settings", "inventory", "drivers", "subscriptions", "subscriptionRequests", "customDesignRequests", "customSites", "attributes", "globalSettings", "appearance", "siteSections", "offersAds", "wms", "security"],
   PACKING: ["orders", "inventory"],
   SHIPPING: ["logistics", "drivers", "vendors", "importedOrders"],
   CUSTOMER_SERVICE: ["overview", "approvals", "orders", "users"],
@@ -83,6 +84,14 @@ export default function AdminDashboard() {
     : (ROLE_PERMISSIONS[userRole] || []);
 
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "info" } | null>(null);
+  const [showWelcome, setShowWelcome] = useState(false);
+
+  // Show the staff welcome banner once (until dismissed)
+  useEffect(() => {
+    try {
+      if (localStorage.getItem("mersal_admin_welcome_dismissed") !== "1") setShowWelcome(true);
+    } catch {}
+  }, []);
   const hasSetTab = React.useRef(false);
 
   const showToast = (message: string, type: "success" | "error" | "info" = "success") => {
@@ -98,6 +107,13 @@ export default function AdminDashboard() {
 
   // Initial tab = first allowed tab for this role
   const [activeTab, setActiveTab] = useState<any>(() => {
+    if (typeof window !== "undefined") {
+      const searchParams = new URLSearchParams(window.location.search);
+      const tab = searchParams.get("tab");
+      const perms = (session?.user as any)?.permissions;
+      const allowed = Array.isArray(perms) && perms.length > 0 ? perms : (ROLE_PERMISSIONS[userRole] || []);
+      if (tab && allowed.includes(tab)) return tab;
+    }
     const perms = (session?.user as any)?.permissions;
     if (Array.isArray(perms) && perms.length > 0) return perms[0];
     return ROLE_PERMISSIONS[userRole]?.[0] || "overview";
@@ -133,6 +149,18 @@ export default function AdminDashboard() {
   const [printingOrders, setPrintingOrders] = useState<any[]>([]);
   const [isPolicyModalOpen, setIsPolicyModalOpen] = useState(false);
 
+  const handleTabChange = (tab: string) => {
+    const perms = (session?.user as any)?.permissions;
+    const allowed = Array.isArray(perms) && perms.length > 0 ? perms : (ROLE_PERMISSIONS[userRole] || []);
+    if (!allowed.includes(tab)) return;
+    setActiveTab(tab);
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      url.searchParams.set("tab", tab);
+      window.history.replaceState({}, "", url.toString());
+    }
+  };
+
   const classes = {
     card: "bg-white rounded-[2rem] shadow-[0_8px_30px_rgba(15,23,42,0.04)] border border-slate-100 overflow-hidden transition-all duration-500",
     tableHeader: "bg-[#0F172A] text-white/60 text-[10px] font-black uppercase tracking-[0.3em] border-b border-white/10",
@@ -159,13 +187,22 @@ export default function AdminDashboard() {
     
     // Set the first allowed tab for this role only once
     if (!hasSetTab.current) {
+      if (typeof window !== "undefined") {
+        const searchParams = new URLSearchParams(window.location.search);
+        const tab = searchParams.get("tab");
+        const allowed = hasPermissions ? userPermissions : (ROLE_PERMISSIONS[role] || []);
+        if (tab && allowed.includes(tab)) {
+          setActiveTab(tab);
+          hasSetTab.current = true;
+          return;
+        }
+      }
       const firstAllowed = hasPermissions ? userPermissions[0] : ROLE_PERMISSIONS[role]?.[0];
       if (firstAllowed) {
         setActiveTab(firstAllowed);
       }
       hasSetTab.current = true;
     }
-    
     fetchData();
   }, [status, (session?.user as any)?.role]);
 
@@ -227,14 +264,25 @@ export default function AdminDashboard() {
     setActionLoading(null);
   };
 
-  const handleProductAction = async (id: string, action: string) => {
+  const handleProductAction = async (id: string, action: string, reason?: string) => {
     setActionLoading(id);
-    await fetch("/api/admin/products", { 
-      method: "POST", 
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, action }) 
-    });
-    fetchData();
+    try {
+      const res = await fetch("/api/admin/products", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, action, reason })
+      });
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({}));
+        if (showToast) showToast(`فشل تحديث المنتج: ${d.error || res.status}`, "error");
+        setActionLoading(null);
+        return;
+      }
+      if (showToast) showToast(action === "APPROVE" ? "تم اعتماد المنتج ✅" : "تم رفض المنتج", "success");
+      fetchData();
+    } catch (err: any) {
+      if (showToast) showToast(`خطأ في الاتصال: ${err?.message || "تعذّر الوصول للخادم"}`, "error");
+    }
     setActionLoading(null);
   };
 
@@ -256,9 +304,7 @@ export default function AdminDashboard() {
       <AdminSidebar 
         activeTab={activeTab} 
         setActiveTab={(tab) => {
-          // Block switching to unauthorized tabs
-          if (!allowedTabs.includes(tab)) return;
-          setActiveTab(tab);
+          handleTabChange(tab);
           setIsSidebarOpen(false);
         }} 
         userRole={userRole} 
@@ -291,7 +337,8 @@ export default function AdminDashboard() {
                    activeTab === "returns" ? "المرتجع" :
                    activeTab === "customDesignRequests" ? "طلبات التصميم المخصص" :
                    activeTab === "siteSections" ? "أقسام الصفحة الرئيسية" :
-                   activeTab === "security" ? "الأمان ونظام الحماية (Firewall)" : "الإعدادات"}
+                   activeTab === "security" ? "الأمان ونظام الحماية (Firewall)" :
+                   activeTab === "customSites" ? "محرر مواقع التجار (Vixcell)" : "الإعدادات"}
                 </h1>
              </div>
              <p className="text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em] flex items-center gap-2">
@@ -337,6 +384,42 @@ export default function AdminDashboard() {
           <motion.div key={activeTab} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
             {activeTab === "overview" && (
               <div className="space-y-8">
+                {/* Staff Welcome & Instructions banner (dismissible) */}
+                {showWelcome && (
+                  <div className="bg-gradient-to-l from-[#0F172A] to-[#1a2744] text-white rounded-[2rem] p-6 md:p-8 relative overflow-hidden">
+                    <div className="absolute -top-10 -left-10 w-40 h-40 bg-[#C5A021]/20 blur-3xl rounded-full" />
+                    <button
+                      onClick={() => { setShowWelcome(false); try { localStorage.setItem("mersal_admin_welcome_dismissed", "1"); } catch {} }}
+                      className="absolute top-4 left-4 w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center"
+                      title="إخفاء"
+                    >
+                      <span className="material-symbols-rounded text-sm">close</span>
+                    </button>
+                    <div className="relative z-10">
+                      <div className="flex items-center gap-3 mb-3">
+                        <span className="text-2xl">🎉</span>
+                        <h3 className="text-xl md:text-2xl font-black">مرحباً {session?.user?.name?.split(" ")[0] || ""} في فريق مرسال</h3>
+                      </div>
+                      <p className="text-white/60 text-sm font-bold mb-4">
+                        صلاحيتك: <span className="text-[#C5A021]">{ROLE_LABELS[userRole] || userRole}</span> — لديك وصول للأقسام الظاهرة في القائمة الجانبية فقط.
+                      </p>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        {[
+                          { icon: "menu_open", t: "القائمة الجانبية", d: "كل أقسام عملك على اليمين" },
+                          { icon: "task_alt", t: "الموافقات والطلبات", d: "راجع وعالج المهام المسندة لك" },
+                          { icon: "lock_reset", t: "أمان حسابك", d: "غيّر كلمة المرور من حسابك الشخصي" },
+                        ].map((c, i) => (
+                          <div key={i} className="bg-white/5 rounded-2xl p-4 border border-white/5">
+                            <span className="material-symbols-rounded text-[#C5A021] text-xl">{c.icon}</span>
+                            <p className="font-black text-xs mt-1">{c.t}</p>
+                            <p className="text-[10px] text-white/40 font-bold mt-0.5">{c.d}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* Date Filter */}
                 <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-[0_8px_30px_rgba(15,23,42,0.02)] flex flex-wrap gap-3 items-center">
                   <span className="text-xs font-black text-slate-400 uppercase tracking-widest ml-2">الفترة:</span>
@@ -371,14 +454,16 @@ export default function AdminDashboard() {
                   {stats.map((s: any, i: number) => (
                     <div
                       key={i}
-                      onClick={() => s.tab && setActiveTab(s.tab)}
+                      onClick={() => s.tab && handleTabChange(s.tab)}
                       className={cn(classes.card, "p-6 md:p-10 group hover:scale-[1.02] active:scale-95 cursor-pointer")}
                     >
                        <div className="flex items-center justify-between mb-4">
                           <div className={cn("w-12 h-12 md:w-16 md:h-16 rounded-[1.5rem] flex items-center justify-center text-white shadow-2xl transition-all duration-500 group-hover:rotate-12", s.color)}>
                             <span className="material-symbols-rounded text-2xl md:text-3xl">{s.icon}</span>
                           </div>
-                          <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-300 group-hover:bg-[#F29124]/10 group-hover:text-[#F29124] transition-colors">
+                          <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-300 group-hover:bg-[#F29124]/10 group-hover:text-[#F29124] transition-colors"
+                            onClick={(e) => { e.stopPropagation(); if (s.tab) handleTabChange(s.tab); }}
+                          >
                              <span className="material-symbols-rounded text-base md:text-lg">arrow_outward</span>
                           </div>
                        </div>
@@ -393,13 +478,13 @@ export default function AdminDashboard() {
                   <h3 className="text-lg font-black text-[#0F172A] mb-4 flex items-center gap-3">
                     <span className="w-8 h-1.5 bg-[#F29124] rounded-full"/>
                     حالات الطلبات
-                    <button onClick={() => { setStatusFilter(null); setActiveTab("orders"); }} className="text-[10px] font-black text-[#C5A021] bg-[#C5A021]/10 px-3 py-1 rounded-xl mr-2">عرض الكل</button>
+                    <button onClick={() => { setStatusFilter(null); handleTabChange("orders"); }} className="text-[10px] font-black text-[#C5A021] bg-[#C5A021]/10 px-3 py-1 rounded-xl mr-2">عرض الكل</button>
                   </h3>
                   <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
                     {Object.entries(ORDER_STATUSES).map(([key, s]: any) => (
                       <button
                         key={key}
-                        onClick={() => { setStatusFilter(key); setActiveTab("orders"); }}
+                        onClick={() => { setStatusFilter(key); handleTabChange("orders"); }}
                         className="bg-white rounded-[1.5rem] p-4 border border-slate-100 shadow-md hover:shadow-xl hover:border-[#C5A021]/30 transition-all text-center group"
                       >
                         <div className={cn("w-10 h-10 rounded-2xl bg-gradient-to-br flex items-center justify-center text-white mx-auto mb-3 group-hover:scale-110 transition-transform", s.color)}>
@@ -449,7 +534,7 @@ export default function AdminDashboard() {
                       <p className="text-6xl font-black text-[#0F172A]">{activeDrivers}</p>
                       <p className="text-xs font-black text-slate-400 uppercase tracking-widest mt-2">سائق نشط</p>
                     </div>
-                    <button onClick={() => setActiveTab("drivers")} className="w-full mt-4 py-3 rounded-2xl bg-[#C5A021]/10 text-[#C5A021] font-black text-sm hover:bg-[#C5A021] hover:text-white transition-all">
+                    <button onClick={() => handleTabChange("drivers")} className="w-full mt-4 py-3 rounded-2xl bg-[#C5A021]/10 text-[#C5A021] font-black text-sm hover:bg-[#C5A021] hover:text-white transition-all">
                       إدارة المناديب
                     </button>
                   </div>
@@ -562,7 +647,25 @@ export default function AdminDashboard() {
             {activeTab === "delivery" && <DeliveryZonesTab showToast={showToast} />}
             {activeTab === "finance" && <FinanceTab showToast={showToast} />}
             {activeTab === "payments" && <PaymentMethodsTab showToast={showToast} />}
-            {activeTab === "logistics" && <LogisticsTab orders={logisticsOrders} users={users} vendors={vendors} fetchData={fetchData} ORDER_STATUSES={ORDER_STATUSES} classes={classes} showToast={showToast} />}
+            {activeTab === "logistics" && (
+              <LogisticsTab 
+                orders={logisticsOrders} 
+                users={users} 
+                vendors={vendors} 
+                fetchData={fetchData} 
+                ORDER_STATUSES={ORDER_STATUSES} 
+                classes={classes} 
+                showToast={showToast} 
+                onPrint={(order) => {
+                  setPrintingOrders([order]);
+                  setIsPolicyModalOpen(true);
+                }}
+                onPrintBulk={(ords) => {
+                  setPrintingOrders(ords);
+                  setIsPolicyModalOpen(true);
+                }}
+              />
+            )}
             {activeTab === "employees" && <PersonnelTab type="employees" showToast={showToast} />}
             {activeTab === "drivers" && <PersonnelTab type="drivers" showToast={showToast} />}
             {activeTab === "subscriptions" && <SubscriptionsTab showToast={showToast} />}
@@ -572,13 +675,14 @@ export default function AdminDashboard() {
             {activeTab === "globalSettings" && <GlobalSettingsTab showToast={showToast} />}
             {activeTab === "categories" && <CategoriesTab showToast={showToast} />}
             {activeTab === "users" && <UsersVendorsTab type="users" data={users} classes={classes} fetchData={fetchData} showToast={showToast} />}
-            {activeTab === "vendors" && <UsersVendorsTab type="vendors" data={vendors} classes={classes} fetchData={fetchData} onAddProduct={(vId) => { setInitialVendorId(vId); setIsAddProductOpen(true); setActiveTab("inventory"); }} showToast={showToast} />}
+            {activeTab === "vendors" && <UsersVendorsTab type="vendors" data={vendors} classes={classes} fetchData={fetchData} onAddProduct={(vId) => { setInitialVendorId(vId); setIsAddProductOpen(true); handleTabChange("inventory"); }} showToast={showToast} />}
             {activeTab === "appearance" && <AppearanceSettings showToast={showToast} />}
             {activeTab === "siteSections" && <SiteSectionsEditor showToast={showToast} />}
             {activeTab === "offersAds" && <OffersAdsTab showToast={showToast} />}
             {activeTab === "wms" && <WarehouseTab classes={classes} showToast={showToast} />}
             {activeTab === "importedOrders" && <ImportedOrdersTab classes={classes} vendors={vendors} showToast={showToast} fetchData={fetchData} />}
             {activeTab === "security" && <SecurityTab showToast={showToast} />}
+            {activeTab === "customSites" && <VendorCustomSiteEditor showToast={showToast} />}
           </motion.div>
         </AnimatePresence>
         </div>

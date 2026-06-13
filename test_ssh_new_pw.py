@@ -6,14 +6,14 @@ def test_ssh():
     host = '82.198.228.182'
     port = 65002
     user = 'u754458241'
-    pasw = '@n9qe3KgL'
+    pasw = 'Vixcell.eg2'
     
     try:
         print(f"Connecting to {host}...")
         client.connect(host, port=port, username=user, password=pasw)
         print("SSH Connection Successful!")
         
-        stdin, stdout, stderr = client.exec_command("pwd && ls -la")
+        stdin, stdout, stderr = client.exec_command("pwd && ls -la", get_pty=True)
         print("PWD:", stdout.read().decode())
         
         client.close()

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useCart } from "@/lib/CartContext";
+import { useCart } from "../../lib/CartContext";
 import { useRouter } from "next/navigation";
 
 export default function CartPage() {

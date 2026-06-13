@@ -94,18 +94,20 @@ export default function InventoryTable({ products, onEdit, onAdd, classes, onRef
     if (selectedIds.size === 0) return;
     setActionLoading(true);
     try {
-      // Admin product API expects {id, action} to update status for a single product via POST currently.
-      // We can iterate or add bulk status to PATCH. Let's iterate for safety/simplicity.
+      // Admin product API: PATCH {id, status} updates a single product's status.
+      let ok = 0, fail = 0;
       for (const id of Array.from(selectedIds)) {
-         await fetch("/api/admin/products", {
+         const res = await fetch("/api/admin/products", {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ id, status: newStatus })
          });
+         if (res.ok) ok++; else fail++;
       }
       setSelectedIds(new Set());
       if (showToast) {
-        showToast("تم تحديث حالة المنتجات بنجاح! 🔄", "success");
+        if (fail === 0) showToast(`تم تحديث حالة ${ok} منتج بنجاح! 🔄`, "success");
+        else showToast(`تم تحديث ${ok}، فشل ${fail}. حاول مرة أخرى.`, fail > ok ? "error" : "info");
       }
       onRefresh();
     } catch (err) {

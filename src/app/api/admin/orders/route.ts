@@ -77,6 +77,8 @@ export async function PATCH(req: Request) {
       estimatedDays, shippingCost, notes,
       // الباب الأول - المتطلب 5: تعديل العنوان المرن أثناء الشحن
       street, district, city,
+      // مراجعة الدفع بالتحويل البنكي
+      paymentVerified, paymentNote,
     } = body;
 
     if (!id) {
@@ -109,6 +111,9 @@ export async function PATCH(req: Request) {
     if (estimatedDays) updateData.estimatedDays = parseInt(estimatedDays);
     if (shippingCost !== undefined) updateData.shippingCost = parseFloat(shippingCost);
     if (notes !== undefined) updateData.notes = notes;
+    // مراجعة الدفع بالتحويل البنكي - قبول/رفض الإيصال
+    if (paymentVerified !== undefined) updateData.paymentVerified = !!paymentVerified;
+    if (paymentNote !== undefined) updateData.paymentNote = paymentNote || null;
     // تعديل العنوان المرن - الباب الأول المتطلب 5
     if (street !== undefined) updateData.street = street;
     if (district !== undefined) updateData.district = district;
@@ -190,6 +195,35 @@ export async function PATCH(req: Request) {
         },
       },
     });
+
+    // إشعار العميل عند قبول/رفض إيصال التحويل البنكي
+    if (paymentVerified !== undefined && existingOrder.customerId) {
+      try {
+        const { createNotification } = await import("@/lib/notification");
+        const shortId = id.slice(-6).toUpperCase();
+        if (paymentVerified) {
+          await createNotification({
+            userId: existingOrder.customerId,
+            title: "✅ تم تأكيد دفع طلبك",
+            message: `تم تأكيد التحويل البنكي لطلبك #${shortId} وجاري تجهيزه.`,
+            type: "payment",
+            link: "/orders",
+          });
+        } else {
+          await createNotification({
+            userId: existingOrder.customerId,
+            title: "❌ لم يتم تأكيد التحويل",
+            message: paymentNote
+              ? `طلبك #${shortId}: ${paymentNote}`
+              : `لم نتمكن من تأكيد التحويل البنكي لطلبك #${shortId}. يرجى التواصل أو إعادة رفع إيصال صحيح.`,
+            type: "payment",
+            link: "/orders",
+          });
+        }
+      } catch (e) {
+        console.error("payment notification failed:", e);
+      }
+    }
 
     // الباب الثاني - المتطلب 3: إرسال تلقائي لشركة الشحن عند READY_FOR_SHIPPING
     if (status === "READY_FOR_SHIPPING") {

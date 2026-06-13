@@ -127,6 +127,18 @@ export default function GlobalSettingsTab({ showToast }: { showToast?: (msg: str
                   placeholder="1000"
                />
             </div>
+
+            <div className="space-y-4">
+               <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2">رسوم الاشتراك الافتراضية للموردين (ج.س)</label>
+               <input 
+                  type="number"
+                  value={settings.defaultSubscriptionFee !== undefined ? settings.defaultSubscriptionFee : ""}
+                  onChange={e => setSettings({...settings, defaultSubscriptionFee: parseFloat(e.target.value) || 0})}
+                  className="w-full bg-gray-50 border border-transparent focus:border-[#C5A021] rounded-2xl px-6 py-5 text-lg font-black outline-none transition-all"
+                  placeholder="0"
+               />
+               <p className="text-[9px] text-gray-400 px-2 leading-relaxed">قيمة رسوم الاشتراك الافتراضية التي تُقترح عند إنشاء حساب مورد جديد.</p>
+            </div>
          </div>
 
          {/* SEO & Branding */}

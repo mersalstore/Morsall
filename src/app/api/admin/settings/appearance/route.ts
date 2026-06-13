@@ -12,14 +12,17 @@ export async function GET() {
 
     const tmpTrial = await prisma.siteConfig.findUnique({ where: { key: "trialMaxProducts" } });
     const tmpPremium = await prisma.siteConfig.findUnique({ where: { key: "premiumMaxProducts" } });
+    const tmpSub = await prisma.siteConfig.findUnique({ where: { key: "defaultSubscriptionFee" } });
     const trialMaxProducts = tmpTrial ? parseInt(tmpTrial.value) : 10;
     const premiumMaxProducts = tmpPremium ? parseInt(tmpPremium.value) : 50;
+    const defaultSubscriptionFee = tmpSub ? parseFloat(tmpSub.value) : 0;
 
     return NextResponse.json({ 
       settings: {
         ...settings,
         trialMaxProducts,
-        premiumMaxProducts
+        premiumMaxProducts,
+        defaultSubscriptionFee
       }, 
       banners, 
       designPricing 
@@ -99,6 +102,13 @@ export async function PATCH(req: Request) {
         where: { key: "premiumMaxProducts" },
         update: { value: String(payload.premiumMaxProducts) },
         create: { key: "premiumMaxProducts", value: String(payload.premiumMaxProducts) },
+      });
+    }
+    if (payload.defaultSubscriptionFee !== undefined) {
+      await prisma.siteConfig.upsert({
+        where: { key: "defaultSubscriptionFee" },
+        update: { value: String(payload.defaultSubscriptionFee) },
+        create: { key: "defaultSubscriptionFee", value: String(payload.defaultSubscriptionFee) },
       });
     }
 

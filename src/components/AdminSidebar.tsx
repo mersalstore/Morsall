@@ -24,7 +24,8 @@ import {
   PackageSearch,
   LogOut,
   ShieldAlert,
-  Undo2
+  Undo2,
+  Code2
 } from "lucide-react";
 import Image from "next/image";
 import { useSession, signOut } from "next-auth/react";
@@ -32,7 +33,7 @@ import { useSession, signOut } from "next-auth/react";
 export type TabId =
   | "overview" | "approvals" | "users" | "vendors"
   | "categories" | "employees" | "orders" | "payments"
-  | "logistics" | "delivery" | "shipping" | "finance" | "settings" | "inventory" | "drivers" | "subscriptions" | "subscriptionRequests" | "customDesignRequests" | "siteSections" | "attributes" | "globalSettings" | "appearance" | "offersAds" | "importedOrders" | "wms" | "security" | "returns";
+  | "logistics" | "delivery" | "shipping" | "finance" | "settings" | "inventory" | "drivers" | "subscriptions" | "subscriptionRequests" | "customDesignRequests" | "customSites" | "siteSections" | "attributes" | "globalSettings" | "appearance" | "offersAds" | "importedOrders" | "wms" | "security" | "returns";
 
 interface SidebarProps {
   activeTab: TabId;
@@ -71,6 +72,7 @@ const NAV_ITEMS: { id: TabId; icon: any; label: string; group?: string }[] = [
   { id: "siteSections",icon: LayoutDashboard,  label: "أقسام الصفحة الرئيسية", group: "إعدادات" },
   { id: "offersAds",   icon: TrendingUp,        label: "العروض والإعلانات", group: "إعدادات" },
   { id: "security",    icon: ShieldAlert,      label: "الأمان ونظام الحماية", group: "إعدادات" },
+  { id: "customSites", icon: Code2,             label: "محرر مواقع التجار (Vixcell)", group: "إعدادات" },
   { id: "globalSettings", icon: Settings,      label: "الإعدادات العامة", group: "إعدادات" },
 ];
 
@@ -93,16 +95,35 @@ const ROLES: Record<string, string> = {
 export default function AdminSidebar({ activeTab, setActiveTab, userRole, isOpen, onClose }: SidebarProps) {
   const { data: session } = useSession();
   const userPermissions = (session?.user as any)?.permissions;
-  
+
+  // Pin the sidebar open on desktop (persisted) — fixes the "hidden / hover-only" feel
+  const [pinned, setPinned] = React.useState(false);
+  React.useEffect(() => {
+    try { setPinned(localStorage.getItem("mersal_sidebar_pinned") === "1"); } catch {}
+  }, []);
+  const togglePin = () => {
+    setPinned(p => {
+      const next = !p;
+      try { localStorage.setItem("mersal_sidebar_pinned", next ? "1" : "0"); } catch {}
+      return next;
+    });
+  };
+
+  const sessionEmail = (session?.user as any)?.email?.trim().toLowerCase();
+  const isSiteEditor = sessionEmail === "zomatube2012@gmail.com";
+
   const allowedItems = NAV_ITEMS.filter(item => {
-    // If super admin (role ADMIN), show everything
+    // محرر مواقع التجار (Vixcell) حصري لإيميل فريق التطوير فقط
+    if (item.id === "customSites") return isSiteEditor;
+
+    // If super admin (role ADMIN), show everything else
     if (userRole === "ADMIN") return true;
-    
+
     // If specific permissions exist, only show those
     if (userPermissions && userPermissions.length > 0) {
       return userPermissions.includes(item.id);
     }
-    
+
     // Fallback to role-based permissions
     return ROLE_PERMISSIONS[userRole]?.includes(item.id);
   });
@@ -121,16 +142,29 @@ export default function AdminSidebar({ activeTab, setActiveTab, userRole, isOpen
 
       <aside className={cn(
         "fixed inset-y-0 w-80 bg-gradient-to-b from-[#0F172A] via-[#0F172A] to-[#020617] text-white flex flex-col shadow-[0_0_50px_rgba(0,0,0,0.5)] z-[60] transition-all duration-300 border-l border-white/5 group overflow-hidden",
-        "lg:fixed lg:inset-y-0 lg:right-[-295px] lg:hover:right-0 lg:z-[60]",
-        isOpen ? "right-0 h-screen" : "-right-80 lg:right-[-295px]"
+        pinned
+          ? "lg:fixed lg:inset-y-0 lg:right-0 lg:z-[60]"
+          : "lg:fixed lg:inset-y-0 lg:right-[-295px] lg:hover:right-0 lg:z-[60]",
+        isOpen ? "right-0 h-screen" : (pinned ? "-right-80 lg:right-0" : "-right-80 lg:right-[-295px]")
       )} dir="rtl">
       {/* Glowing handle indicator when collapsed on desktop */}
       <div className="absolute left-0 top-0 bottom-0 w-[6px] bg-gradient-to-b from-[#C5A021] via-[#F29124] to-[#C5A021] opacity-90 group-hover:opacity-0 shadow-[0_0_20px_#C5A021] transition-opacity duration-300 z-50 pointer-events-none hidden lg:block" />
 
-      {/* Hover prompt label when collapsed */}
-      <div className="absolute left-2 top-1/2 -translate-y-1/2 [writing-mode:vertical-lr] text-[9px] font-black uppercase tracking-[0.3em] text-[#C5A021] opacity-75 group-hover:opacity-0 transition-opacity duration-300 pointer-events-none hidden lg:block whitespace-nowrap">
-        قائمة النظام ◄
-      </div>
+      {/* Hover prompt label when collapsed (hidden when pinned) */}
+      {!pinned && (
+        <div className="absolute left-2 top-1/2 -translate-y-1/2 [writing-mode:vertical-lr] text-[9px] font-black uppercase tracking-[0.3em] text-[#C5A021] opacity-75 group-hover:opacity-0 transition-opacity duration-300 pointer-events-none hidden lg:block whitespace-nowrap">
+          قائمة النظام ◄
+        </div>
+      )}
+
+      {/* Pin / unpin toggle (desktop only) */}
+      <button
+        onClick={togglePin}
+        className="hidden lg:flex absolute top-4 left-4 z-50 w-9 h-9 rounded-xl bg-white/5 hover:bg-[#C5A021] text-white/60 hover:text-white items-center justify-center transition-all border border-white/5"
+        title={pinned ? "إلغاء تثبيت القائمة" : "تثبيت القائمة مفتوحة"}
+      >
+        <span className="material-symbols-rounded text-lg">{pinned ? "keep" : "keep_off"}</span>
+      </button>
 
       {/* Logo Section - Fixed Top */}
       <div className="p-10 border-b border-white/5 bg-white/5 backdrop-blur-sm relative overflow-hidden group shrink-0">

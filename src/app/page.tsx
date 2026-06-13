@@ -17,25 +17,22 @@ export default function Home() {
       {/* ── 1. HERO CAROUSEL ── */}
       <HomeHeroSlider />
 
-      {/* ── 2. CATEGORIES WALL ── */}
+      {/* ── 2. CATEGORIES WALL (أقسام رئيسية فقط) ── */}
       <CategoryWall />
 
-      {/* ── 3. PRODUCT TAB HUB (best) ── */}
-      <ProductTabHub filter="best" />
-
-      {/* ── 4. ADS SLIDER A ── */}
+      {/* ── 3. ADS SLIDER A ── */}
       <AdsSlider set="A" />
 
-      {/* ── 5. PRODUCT TAB HUB (new) ── */}
-      <ProductTabHub filter="new" />
+      {/* ── 4. PRODUCT TAB HUB (best sellers) ── */}
+      <ProductTabHub filter="best" />
 
-      {/* ── 6. ADS SLIDER B ── */}
+      {/* ── 5. ADS SLIDER B ── */}
       <AdsSlider set="B" />
 
-      {/* ── 7. STORES SHOWCASE ── */}
+      {/* ── 6. STORES SHOWCASE ── */}
       <StoreShowcase />
 
-      {/* ── 8. DYNAMIC SECTIONS (admin-managed) ── */}
+      {/* ── 7. DYNAMIC SECTIONS (admin-managed) ── */}
       <DynamicSectionsRenderer />
 
       {/* ── 8. TRUST SIGNALS ── */}

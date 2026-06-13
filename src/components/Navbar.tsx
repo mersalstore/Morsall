@@ -16,11 +16,14 @@ export default function Navbar() {
   const { cartCount } = useCart();
   const { favorites, compareList } = useWishlist();
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showCategories, setShowCategories] = useState(false);
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [expandedCat, setExpandedCat] = useState<string | null>(null);
+  const [allCategories, setAllCategories] = useState<any[]>([]);
+  const [drillCategory, setDrillCategory] = useState<any | null>(null);
   const [isScrolled, setIsScrolled] = useState(false);
   const [userCity, setUserCity] = useState("جاري التحديد...");
   const [availableCities, setAvailableCities] = useState<string[]>(["الخرطوم", "أم درمان", "بحري", "شندي", "مدني", "بورتسودان", "عطبرة", "كسلا", "الأبيض"]);
@@ -42,6 +45,8 @@ export default function Navbar() {
         if (Array.isArray(data)) {
           const filtered = data.filter((c: any) => c.showInNavbar);
           setNavCategories(filtered);
+          // Keep the full list (root categories only) for the drill-down browser
+          setAllCategories(data.filter((c: any) => !c.parentId));
         }
       })
       .catch(err => console.error("Nav Categories Fetch Error:", err));
@@ -99,7 +104,13 @@ export default function Navbar() {
     e?.preventDefault();
     if (searchQuery.trim()) {
       setSuggestions([]);
-      router.push(`/shop?q=${encodeURIComponent(searchQuery.trim())}`);
+      const catParam = selectedCategory !== "all" ? `&category=${selectedCategory}` : "";
+      router.push(`/shop?q=${encodeURIComponent(searchQuery.trim())}${catParam}`);
+    } else if (selectedCategory !== "all") {
+      setSuggestions([]);
+      router.push(`/shop?category=${selectedCategory}`);
+    } else {
+      router.push(`/shop`);
     }
   };
 
@@ -241,7 +252,11 @@ export default function Navbar() {
               onSubmit={handleSearch}
               className="flex items-stretch h-10 bg-white rounded-md border-0 focus-within:ring-2 focus-within:ring-[#f90] transition-all overflow-hidden"
             >
-              <select className="hidden md:block bg-[#f3f3f3] text-gray-700 text-xs px-3 hover:bg-[#d4d4d4] outline-none cursor-pointer border-l border-gray-300">
+              <select
+                value={selectedCategory}
+                onChange={e => setSelectedCategory(e.target.value)}
+                className="hidden md:block bg-[#f3f3f3] text-gray-700 text-xs px-3 hover:bg-[#d4d4d4] outline-none cursor-pointer border-l border-gray-300"
+              >
                 <option value="all">كل الأقسام</option>
                 {navCategories.map(c => (
                   <option key={c.id} value={c.id}>{c.name}</option>
@@ -380,16 +395,22 @@ export default function Navbar() {
                           </Link>
                         )}
 
-                        {(session?.user as any)?.role === 'ADMIN' && (
-                          <Link href="/admin/dashboard" className="flex items-center justify-between px-4 py-3 rounded-xl bg-[#C5A021]/10 hover:bg-[#C5A021]/20 text-xs font-black text-[#C5A021] transition-all group/item border border-[#C5A021]/10">
-                            لوحة الإدارة
-                            <span className="material-symbols-rounded text-lg group-hover/item:scale-110 transition-transform">admin_panel_settings</span>
-                          </Link>
-                        )}
+                        {(() => {
+                          // Staff roles + custom permissions also get the admin-dashboard link,
+                          // not just full ADMINs — otherwise employees can't get back in.
+                          const u = session?.user as any;
+                          const STAFF_ROLES = ["ADMIN", "PACKING", "SHIPPING", "CUSTOMER_SERVICE", "INVENTORY", "DRIVER"];
+                          const hasPerms = Array.isArray(u?.permissions) && u.permissions.length > 0;
+                          const isStaff = STAFF_ROLES.includes(u?.role) || hasPerms;
+                          return isStaff ? (
+                            <Link href="/admin/dashboard" className="flex items-center justify-between px-4 py-3 rounded-xl bg-[#C5A021]/10 hover:bg-[#C5A021]/20 text-xs font-black text-[#C5A021] transition-all group/item border border-[#C5A021]/10">
+                              {u?.role === "ADMIN" ? "لوحة الإدارة" : "لوحة العمل"}
+                              <span className="material-symbols-rounded text-lg group-hover/item:scale-110 transition-transform">admin_panel_settings</span>
+                            </Link>
+                          ) : null;
+                        })()}
 
-                        {(session?.user as any)?.isVendor || (session?.user as any)?.role === 'ADMIN' ? (
-                          <div className="h-px bg-white/5 my-2 mx-2" />
-                        ) : null}
+                        <div className="h-px bg-white/5 my-2 mx-2" />
 
                         <button
                           onClick={() => signOut()}
@@ -498,7 +519,7 @@ export default function Navbar() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[-1]"
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100]"
               onClick={() => setShowCategories(false)}
             />
             <motion.div
@@ -508,67 +529,149 @@ export default function Navbar() {
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
               className="absolute top-0 right-0 w-80 h-screen bg-[#020D10] shadow-[0_0_50px_rgba(0,0,0,0.5)] z-[101] p-6 text-white border-l border-white/10"
             >
+              {/* Header: shows back button when drilled into a category */}
               <div className="flex items-center justify-between mb-8">
-                <h3 className="text-xl font-black">أقسام مرسال</h3>
-                <button onClick={() => setShowCategories(false)} className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10">
+                <div className="flex items-center gap-2 min-w-0">
+                  {drillCategory && (
+                    <button
+                      onClick={() => setDrillCategory(null)}
+                      className="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 shrink-0"
+                      title="رجوع للأقسام الرئيسية"
+                    >
+                      <span className="material-symbols-rounded">arrow_forward</span>
+                    </button>
+                  )}
+                  <h3 className="text-xl font-black truncate">{drillCategory ? drillCategory.name : "أقسام مرسال"}</h3>
+                </div>
+                <button onClick={() => { setShowCategories(false); setDrillCategory(null); }} className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 shrink-0">
                   <span className="material-symbols-rounded">close</span>
                 </button>
               </div>
-              <div className="space-y-2 overflow-y-auto max-h-[calc(100vh-120px)] scrollbar-none">
-                {ALL_NAV_LINKS.map(link => {
-                  const hasChildren = (link as any).children && (link as any).children.length > 0;
-                  const isExpanded = expandedCat === link.label;
 
-                  return (
-                    <div key={link.href} className="space-y-1">
+              <div className="space-y-2 overflow-y-auto max-h-[calc(100vh-120px)] scrollbar-none">
+                <AnimatePresence mode="wait">
+                  {!drillCategory ? (
+                    // ─── LEVEL 1: Root categories ───
+                    <motion.div
+                      key="root"
+                      initial={{ opacity: 0, x: 30 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 30 }}
+                      transition={{ duration: 0.2 }}
+                      className="space-y-2"
+                    >
+                      {/* كل المنتجات */}
                       <div
-                        className="flex items-center justify-between px-4 py-4 rounded-2xl hover:bg-white/5 border border-white/5 transition-all group cursor-pointer"
-                        onClick={() => {
-                          if (hasChildren) {
-                            setExpandedCat(isExpanded ? null : link.label);
-                          } else {
-                            router.push(link.href);
-                            setShowCategories(false);
-                          }
-                        }}
+                        className="flex items-center justify-between px-4 py-4 rounded-2xl hover:bg-white/5 border border-[#F29124]/20 bg-[#F29124]/5 transition-all group cursor-pointer mb-4"
+                        onClick={() => { router.push("/shop"); setShowCategories(false); }}
                       >
                         <div className="flex items-center gap-4">
-                          <span className="material-symbols-rounded text-[#F29124] group-hover:scale-110 transition-transform">{link.icon}</span>
-                          <span className="font-bold text-sm">{link.label}</span>
+                          <span className="material-symbols-rounded text-[#F29124] group-hover:scale-110 transition-transform">storefront</span>
+                          <span className="font-bold text-sm text-[#F29124]">كل المنتجات</span>
                         </div>
-                        {hasChildren ? (
-                          <span className={cn("material-symbols-rounded text-sm transition-transform duration-300", isExpanded ? "rotate-180" : "rotate-0")}>expand_more</span>
-                        ) : (
-                          <span className="material-symbols-rounded text-sm opacity-20">chevron_left</span>
-                        )}
+                        <span className="material-symbols-rounded text-sm opacity-40">chevron_left</span>
                       </div>
 
-                      {/* Subcategories */}
-                      <AnimatePresence>
-                        {hasChildren && isExpanded && (
-                          <motion.div
-                            initial={{ height: 0, opacity: 0 }}
-                            animate={{ height: "auto", opacity: 1 }}
-                            exit={{ height: 0, opacity: 0 }}
-                            className="overflow-hidden bg-white/5 rounded-2xl mr-4"
+                      {allCategories.map((cat: any) => {
+                        const hasChildren = cat.children && cat.children.length > 0;
+                        return (
+                          <div
+                            key={cat.id}
+                            className="flex items-center justify-between px-4 py-4 rounded-2xl hover:bg-white/5 border border-white/5 transition-all group cursor-pointer"
+                            onClick={() => {
+                              if (hasChildren) {
+                                setDrillCategory(cat);
+                              } else {
+                                router.push(`/category/${cat.id}`);
+                                setShowCategories(false);
+                              }
+                            }}
                           >
-                            {(link as any).children.map((child: any) => (
-                              <Link
-                                key={child.id}
-                                href={`/category/${child.id}`}
-                                onClick={() => setShowCategories(false)}
-                                className="flex items-center gap-3 px-6 py-3 text-xs text-white/60 hover:text-white hover:bg-white/5 transition-all"
-                              >
-                                <span className="w-1.5 h-1.5 rounded-full bg-[#F29124]/40" />
-                                {child.name}
-                              </Link>
-                            ))}
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </div>
-                  );
-                })}
+                            <div className="flex items-center gap-4">
+                              <span className="material-symbols-rounded text-[#F29124] group-hover:scale-110 transition-transform">{cat.icon && !cat.icon.startsWith("http") && cat.icon.length <= 2 ? "category" : cat.icon || "category"}</span>
+                              <span className="font-bold text-sm">{cat.name}</span>
+                            </div>
+                            {hasChildren ? (
+                              <span className="material-symbols-rounded text-sm text-white/40">chevron_left</span>
+                            ) : (
+                              <span className="material-symbols-rounded text-sm opacity-20">chevron_left</span>
+                            )}
+                          </div>
+                        );
+                      })}
+
+                      {/* العروض */}
+                      <div
+                        className="flex items-center justify-between px-4 py-4 rounded-2xl hover:bg-white/5 border border-white/5 transition-all group cursor-pointer mt-2"
+                        onClick={() => { router.push("/offers"); setShowCategories(false); }}
+                      >
+                        <div className="flex items-center gap-4">
+                          <span className="material-symbols-rounded text-[#F29124] group-hover:scale-110 transition-transform">local_offer</span>
+                          <span className="font-bold text-sm">العروض 🔥</span>
+                        </div>
+                        <span className="material-symbols-rounded text-sm opacity-20">chevron_left</span>
+                      </div>
+                    </motion.div>
+                  ) : (
+                    // ─── LEVEL 2: Subcategories of the selected category ───
+                    <motion.div
+                      key="children"
+                      initial={{ opacity: 0, x: -30 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -30 }}
+                      transition={{ duration: 0.2 }}
+                      className="space-y-2"
+                    >
+                      {/* عرض كل منتجات القسم الرئيسي */}
+                      <Link
+                        href={`/category/${drillCategory.id}`}
+                        onClick={() => { setShowCategories(false); setDrillCategory(null); }}
+                        className="flex items-center justify-between px-4 py-4 rounded-2xl hover:bg-white/5 border border-[#F29124]/20 bg-[#F29124]/5 transition-all group mb-3"
+                      >
+                        <div className="flex items-center gap-4">
+                          <span className="material-symbols-rounded text-[#F29124]">grid_view</span>
+                          <span className="font-bold text-sm text-[#F29124]">كل منتجات {drillCategory.name}</span>
+                        </div>
+                        <span className="material-symbols-rounded text-sm opacity-40">chevron_left</span>
+                      </Link>
+
+                      {(drillCategory.children || []).map((child: any) => {
+                        const hasGrand = child.children && child.children.length > 0;
+                        return (
+                          <div key={child.id}>
+                            <Link
+                              href={`/category/${child.id}`}
+                              onClick={() => { setShowCategories(false); setDrillCategory(null); }}
+                              className="flex items-center justify-between px-4 py-3.5 rounded-2xl hover:bg-white/5 border border-white/5 transition-all group"
+                            >
+                              <div className="flex items-center gap-3">
+                                <span className="w-1.5 h-1.5 rounded-full bg-[#F29124]/60" />
+                                <span className="font-bold text-sm text-white/80">{child.name}</span>
+                              </div>
+                              <span className="material-symbols-rounded text-sm opacity-20">chevron_left</span>
+                            </Link>
+                            {/* Third-level subcategories, if any */}
+                            {hasGrand && (
+                              <div className="mr-6 mt-1 space-y-1">
+                                {child.children.map((g: any) => (
+                                  <Link
+                                    key={g.id}
+                                    href={`/category/${g.id}`}
+                                    onClick={() => { setShowCategories(false); setDrillCategory(null); }}
+                                    className="flex items-center gap-2 px-4 py-2 text-xs text-white/50 hover:text-white hover:bg-white/5 rounded-xl transition-all"
+                                  >
+                                    <span className="w-1 h-1 rounded-full bg-white/30" />
+                                    {g.name}
+                                  </Link>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             </motion.div>
           </>

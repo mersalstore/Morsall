@@ -30,25 +30,54 @@ const HERO_SLIDES = [
 export default function HomeHeroSlider() {
   const [activeSlide, setActiveSlide] = useState(0);
   const [heroImagePosition, setHeroImagePosition] = useState("center");
+  // Slides come from the admin banner manager (HOME_HERO). Fall back to the
+  // built-in slides only when no banners are configured.
+  const [slides, setSlides] = useState<any[]>(HERO_SLIDES);
 
   useEffect(() => {
     fetch("/api/site-config?key=heroImagePosition")
       .then(r => r.json())
       .then(val => { if (val) setHeroImagePosition(val); })
       .catch(() => {});
+
+    // Load admin-managed banners and link them to the homepage hero
+    fetch("/api/admin/settings/appearance")
+      .then(r => r.json())
+      .then(data => {
+        const banners = Array.isArray(data?.banners) ? data.banners : [];
+        const heroBanners = banners
+          .filter((b: any) => (!b.type || b.type === "HOME_HERO") && b.isActive !== false && b.imageUrl)
+          .sort((a: any, b: any) => (a.order ?? 0) - (b.order ?? 0))
+          .map((b: any) => ({
+            title: b.title || "",
+            subtitle: b.subtitle || "",
+            desc: b.subtitle || "",
+            tag: "مرسال",
+            img: b.imageUrl,
+            badge: b.title || "عرض مميز",
+            cta: "تسوق الآن",
+            ctaLink: b.link || "/shop",
+          }));
+        if (heroBanners.length > 0) {
+          setSlides(heroBanners);
+          setActiveSlide(0);
+        }
+      })
+      .catch(() => {});
   }, []);
 
   useEffect(() => {
+    if (slides.length <= 1) return;
     const interval = setInterval(() => {
-      setActiveSlide(p => (p + 1) % HERO_SLIDES.length);
+      setActiveSlide(p => (p + 1) % slides.length);
     }, 8000);
     return () => clearInterval(interval);
-  }, []);
+  }, [slides]);
 
   return (
     <section className="pt-28 md:pt-36 pb-6 px-4 lg:px-8 max-w-[1600px] mx-auto w-full">
       <div className="bg-[#0F172A] rounded-2xl overflow-hidden shadow-sm h-[380px] md:h-[430px] lg:h-[480px] relative">
-        {HERO_SLIDES.map((slide, idx) => {
+        {slides.map((slide, idx) => {
           const isActive = idx === activeSlide;
           return (
             <div 
@@ -104,7 +133,7 @@ export default function HomeHeroSlider() {
 
         {/* Slider Dots */}
         <div className="absolute bottom-5 left-5 z-20 flex gap-1.5">
-          {HERO_SLIDES.map((_, i) => (
+          {slides.map((_, i) => (
             <button 
               key={i} 
               onClick={() => setActiveSlide(i)}

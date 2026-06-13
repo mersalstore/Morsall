@@ -79,9 +79,11 @@ interface LogisticsTabProps {
   ORDER_STATUSES?: any;
   classes?: any;
   showToast?: (message: string, type?: "info" | "error" | "success") => void;
+  onPrint?: (order: any) => void;
+  onPrintBulk?: (orders: any[]) => void;
 }
 
-export default function LogisticsTab({ orders, users, vendors, fetchData: parentFetchData, ORDER_STATUSES, classes, showToast }: LogisticsTabProps = {}) {
+export default function LogisticsTab({ orders, users, vendors, fetchData: parentFetchData, ORDER_STATUSES, classes, showToast, onPrint, onPrintBulk }: LogisticsTabProps = {}) {
   const [activeSubTab, setActiveSubTab] = useState<"fleet" | "financials" | "branches" | "dispatch">("fleet");
   const [loading, setLoading] = useState(false);
   const [drivers, setDrivers] = useState<Driver[]>([]);
@@ -124,6 +126,12 @@ export default function LogisticsTab({ orders, users, vendors, fetchData: parent
   const [newBranchLocation, setNewBranchLocation] = useState("");
   const [newBranchPhone, setNewBranchPhone] = useState("");
   const [submittingBranch, setSubmittingBranch] = useState(false);
+
+  // Custom assignment modal states
+  const [assignModalOpen, setAssignModalOpen] = useState(false);
+  const [assignTargetOrderIds, setAssignTargetOrderIds] = useState<string[]>([]);
+  const [assignSearchQuery, setAssignSearchQuery] = useState("");
+  const [assignActiveTab, setAssignActiveTab] = useState<"DRIVER" | "BRANCH">("DRIVER");
 
   useEffect(() => {
     fetchData();
@@ -330,7 +338,6 @@ export default function LogisticsTab({ orders, users, vendors, fetchData: parent
       if (res.ok) {
         if (parentFetchData) await parentFetchData();
         await fetchData();
-        alert("تم تحديث توجيه الشحنة بنجاح!");
       } else {
         alert("فشل تحديث توجيه الشحنة");
       }
@@ -939,24 +946,31 @@ export default function LogisticsTab({ orders, users, vendors, fetchData: parent
                       تم تحديد {selectedShipmentIds.size} شحنة للإسناد الجماعي
                     </span>
                     <div className="flex items-center gap-2">
-                      <select
-                        value=""
+                      {onPrintBulk && (
+                        <button
+                          onClick={() => {
+                            const selectedOrders = (orders || []).filter(o => selectedShipmentIds.has(o.id));
+                            onPrintBulk(selectedOrders);
+                          }}
+                          className="bg-[#C5A021] text-white rounded-xl px-3 py-2 text-[11px] font-black hover:brightness-110 transition-all flex items-center gap-1.5"
+                        >
+                          <span className="material-symbols-rounded text-sm">print</span>
+                          طباعة البوالص ({selectedShipmentIds.size})
+                        </button>
+                      )}
+                      <button
                         disabled={bulkAssigning}
-                        onChange={(e) => handleBulkAssign(e.target.value)}
-                        className="bg-white text-slate-800 rounded-xl px-3 py-2 text-[11px] font-black outline-none disabled:opacity-60"
+                        onClick={() => {
+                          setAssignTargetOrderIds(Array.from(selectedShipmentIds));
+                          setAssignActiveTab("DRIVER");
+                          setAssignSearchQuery("");
+                          setAssignModalOpen(true);
+                        }}
+                        className="bg-white text-slate-800 rounded-xl px-3 py-2 text-[11px] font-black border border-slate-200 hover:bg-slate-50 transition-all flex items-center gap-1.5 disabled:opacity-60"
                       >
-                        <option value="">إسناد المحدد إلى...</option>
-                        <optgroup label="المناديب">
-                          {drivers.map(d => (
-                            <option key={d.id} value={`drv_${d.id}`}>🚗 {d.name}</option>
-                          ))}
-                        </optgroup>
-                        <optgroup label="الفروع">
-                          {branches.map(b => (
-                            <option key={b.id} value={`br_${b.id}`}>🏢 {b.name}</option>
-                          ))}
-                        </optgroup>
-                      </select>
+                        <span className="material-symbols-rounded text-sm">person_add</span>
+                        إسناد المحدد إلى...
+                      </button>
                       {bulkAssigning && <Loader2 size={14} className="animate-spin text-white" />}
                       <button
                         onClick={() => setSelectedShipmentIds(new Set())}
@@ -980,33 +994,50 @@ export default function LogisticsTab({ orders, users, vendors, fetchData: parent
                             className="w-4 h-4 rounded border-gray-300 accent-[#C5A021] cursor-pointer"
                           />
                         </th>
-                        <th className="p-4">رقم الشحنة / الباركود</th>
-                        <th className="p-4">المستلم</th>
-                        <th className="p-4">الوجهة</th>
-                        <th className="p-4">محتوى الطرد / الكمية</th>
-                        <th className="p-4">قيمة الشحنة</th>
-                        <th className="p-4">التوصيل / الوزن</th>
-                        <th className="p-4">الدفع</th>
-                        <th className="p-4">الحالة</th>
-                        <th className="p-4">المندوب / الفرع</th>
-                        <th className="p-4">إسناد إلى</th>
+                        <th className="p-4 font-black text-[#0F172A]">باركود الشحنة</th>
+                        <th className="p-4 font-black text-[#0F172A]">مصدر الطرد</th>
+                        <th className="p-4 font-black text-[#0F172A]">اسم المستلم</th>
+                        <th className="p-4 font-black text-[#0F172A]">هاتف المستلم</th>
+                        <th className="p-4 font-black text-[#0F172A]">المدينة</th>
+                        <th className="p-4 font-black text-[#0F172A]">الحي</th>
+                        <th className="p-4 font-black text-[#0F172A]">الشارع</th>
+                        <th className="p-4 font-black text-[#0F172A]">تاريخ الانشاء</th>
+                        <th className="p-4 font-black text-[#0F172A]">السعر (سعر التوصيل)</th>
+                        <th className="p-4 font-black text-[#0F172A]">رسوم أخرى</th>
+                        <th className="p-4 font-black text-[#0F172A]">قيمة الشحنة</th>
+                        <th className="p-4 font-black text-[#0F172A]">رقم الإرسالية</th>
+                        <th className="p-4 font-black text-[#0F172A]">الملاحظات</th>
+                        <th className="p-4 font-black text-[#0F172A]">طريقة الدفع</th>
+                        <th className="p-4 font-black text-[#0F172A]">الحالة</th>
+                        <th className="p-4 font-black text-[#0F172A]">محتوى الطرد</th>
+                        <th className="p-4 font-black text-[#0F172A]">الكمية</th>
+                        <th className="p-4 font-black text-[#0F172A]">إسم المرسل (المورد)</th>
+                        <th className="p-4 font-black text-[#0F172A]">الوزن</th>
+                        <th className="p-4 font-black text-[#0F172A]">رقم ارسالية المزود</th>
+                        <th className="p-4 font-black text-[#0F172A]">رقم المرجع للعميل</th>
+                        <th className="p-4 font-black text-[#0F172A]">عدد محاولات العالق</th>
+                        <th className="p-4 font-black text-[#0F172A]">نوع الشحنة</th>
+                        <th className="p-4 font-black text-[#0F172A]">رسوم إضافية</th>
+                        <th className="p-4 font-black text-[#0F172A]">المندوب / الفرع</th>
+                        <th className="p-4 font-black text-[#0F172A]">إسناد إلى</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
                       {activeShipments.length === 0 ? (
                         <tr>
-                          <td colSpan={11} className="p-12 text-center text-gray-400 font-bold">لا توجد شحنات نشطة حالياً</td>
+                          <td colSpan={27} className="p-12 text-center text-gray-400 font-bold">لا توجد شحنات نشطة حالياً</td>
                         </tr>
                       ) : (
                         activeShipments.map((o: any) => {
-                          const qty = (o.items?.reduce((s: number, i: any) => s + (i.quantity || 0), 0)) || 0;
+                          const qty = (o.items?.reduce((s: number, i: any) => s + (i.quantity || 0), 0)) || o.quantity || 0;
                           const content = o.packageContent
                             || (o.items?.map((i: any) => i.product?.title).filter(Boolean).join("، "))
                             || "—";
                           const isSelected = selectedShipmentIds.has(o.id);
                           const currentBranch = branches.find(b => b.id === o.branchId)?.name;
+                          const senderName = o.items?.[0]?.vendor?.storeName || o.createdBy || "—";
                           return (
-                          <tr key={o.id} className={cn("hover:bg-slate-50/50 transition-all text-[11px] font-black align-top", isSelected && "bg-[#C5A021]/5")}>
+                          <tr key={o.id} className={cn("hover:bg-slate-50/50 transition-all text-[11px] font-black align-top whitespace-nowrap", isSelected && "bg-[#C5A021]/5")}>
                             <td className="p-4">
                               <input
                                 type="checkbox"
@@ -1015,32 +1046,59 @@ export default function LogisticsTab({ orders, users, vendors, fetchData: parent
                                 className="w-4 h-4 rounded border-gray-300 accent-[#C5A021] cursor-pointer"
                               />
                             </td>
-                            <td className="p-4">
-                              <span className="text-slate-800 font-mono">{o.trackingNumber || o.consignmentNumber || `#${o.id.slice(-8).toUpperCase()}`}</span>
-                              {o.source && o.source !== "STORE" && (
-                                <div className="text-[9px] text-[#C5A021] mt-1">{o.source}</div>
-                              )}
+                            {/* 1. باركود الشحنة */}
+                            <td className="p-4 font-mono text-slate-800">
+                              {o.trackingNumber || `#${o.id.slice(-8).toUpperCase()}`}
                             </td>
-                            <td className="p-4">
-                              <div className="text-slate-800">{o.customerName || o.customer?.name || "عميل"}</div>
-                              <div className="text-[10px] text-gray-400 mt-1 font-mono" dir="ltr">{o.phone || o.customer?.phone || "—"}</div>
+                            {/* 2. مصدر الطرد */}
+                            <td className="p-4 text-slate-700">
+                              {o.source || "—"}
                             </td>
-                            <td className="p-4 max-w-[180px]">
-                              <div className="text-slate-700">{o.city || "—"}{o.district ? ` - ${o.district}` : ""}</div>
-                              {o.street && <div className="text-[10px] text-gray-400 mt-1 truncate" title={o.street}>{o.street}</div>}
+                            {/* 3. اسم المستلم */}
+                            <td className="p-4 text-slate-800">
+                              {o.customerName || o.customer?.name || "—"}
                             </td>
-                            <td className="p-4 max-w-[160px]">
-                              <div className="text-slate-700 truncate" title={content}>{content}</div>
-                              {qty > 0 && <div className="text-[10px] text-gray-400 mt-1">الكمية: {qty}</div>}
+                            {/* 4. هاتف المستلم */}
+                            <td className="p-4 font-mono text-slate-700" dir="ltr">
+                              {o.phone || o.customer?.phone || "—"}
                             </td>
-                            <td className="p-4">
-                              <div className="text-slate-800">{(o.totalAmount || 0).toLocaleString()} <span className="text-[9px] text-gray-400">ج.س</span></div>
-                              {o.shipmentType && <div className="text-[9px] text-gray-400 mt-1">{o.shipmentType}</div>}
+                            {/* 5. المدينة */}
+                            <td className="p-4 text-slate-700">
+                              {o.city || "—"}
                             </td>
-                            <td className="p-4">
-                              <div className="text-slate-700">{(o.shippingCost || 0).toLocaleString()} <span className="text-[9px] text-gray-400">ج.س</span></div>
-                              <div className="text-[10px] text-gray-400 mt-1">{o.weight ? `${o.weight} كجم` : "—"}</div>
+                            {/* 6. الحي */}
+                            <td className="p-4 text-slate-700">
+                              {o.district || "—"}
                             </td>
+                            {/* 7. الشارع */}
+                            <td className="p-4 text-slate-700 max-w-[200px] truncate" title={o.street}>
+                              {o.street || "—"}
+                            </td>
+                            {/* 8. تاريخ الانشاء */}
+                            <td className="p-4 text-gray-500 font-bold">
+                              {new Date(o.createdAt).toLocaleDateString("ar-EG")} {new Date(o.createdAt).toLocaleTimeString("ar-EG", { hour: '2-digit', minute: '2-digit' })}
+                            </td>
+                            {/* 9. السعر (سعر التوصيل) */}
+                            <td className="p-4 text-slate-700">
+                              {(o.shippingCost || 0).toLocaleString()} <span className="text-[9px] text-gray-400">ج.س</span>
+                            </td>
+                            {/* 10. رسوم أخرى */}
+                            <td className="p-4 text-slate-700">
+                              {(o.otherFees || 0).toLocaleString()} <span className="text-[9px] text-gray-400">ج.س</span>
+                            </td>
+                            {/* 11. قيمة الشحنة */}
+                            <td className="p-4 text-slate-800">
+                              {(o.totalAmount || 0).toLocaleString()} <span className="text-[9px] text-gray-400">ج.س</span>
+                            </td>
+                            {/* 12. رقم الإرسالية */}
+                            <td className="p-4 font-mono text-slate-700">
+                              {o.consignmentNumber || "—"}
+                            </td>
+                            {/* 13. الملاحظات */}
+                            <td className="p-4 text-slate-600 max-w-[200px] truncate" title={o.notes}>
+                              {o.notes || "—"}
+                            </td>
+                            {/* 14. طريقة الدفع */}
                             <td className="p-4">
                               {(() => {
                                 const pay = paymentDisplay(o.paymentMethod, o.paymentVerified, o.shipmentType);
@@ -1057,6 +1115,7 @@ export default function LogisticsTab({ orders, users, vendors, fetchData: parent
                                 );
                               })()}
                             </td>
+                            {/* 15. الحالة */}
                             <td className="p-4">
                               <span className={cn(
                                 "px-3 py-1 rounded-full text-[10px] whitespace-nowrap border block text-center w-24",
@@ -1071,36 +1130,70 @@ export default function LogisticsTab({ orders, users, vendors, fetchData: parent
                                 {ORDER_STATUSES[o.status]?.label || o.status}
                               </span>
                             </td>
+                            {/* 16. محتوى الطرد */}
+                            <td className="p-4 text-slate-700 max-w-[200px] truncate" title={content}>
+                              {content}
+                            </td>
+                            {/* 17. الكمية */}
+                            <td className="p-4 text-slate-700">
+                              {qty}
+                            </td>
+                            {/* 18. إسم المرسل (المورد) */}
+                            <td className="p-4 text-teal-600">
+                              {senderName}
+                            </td>
+                            {/* 19. الوزن */}
+                            <td className="p-4 text-slate-700">
+                              {o.weight ? `${o.weight} كجم` : "—"}
+                            </td>
+                            {/* 20. رقم ارسالية المزود */}
+                            <td className="p-4 font-mono text-slate-700">
+                              {o.providerConsignmentNumber || "—"}
+                            </td>
+                            {/* 21. رقم المرجع للعميل */}
+                            <td className="p-4 font-mono text-slate-700">
+                              {o.customerReference || "—"}
+                            </td>
+                            {/* 22. عدد محاولات العالق */}
+                            <td className="p-4 text-slate-700 text-center">
+                              {o.pendingAttempts || 0}
+                            </td>
+                            {/* 23. نوع الشحنة */}
+                            <td className="p-4 text-slate-700">
+                              {o.shipmentType || "—"}
+                            </td>
+                            {/* 24. رسوم إضافية */}
+                            <td className="p-4 text-slate-700">
+                              {(o.additionalFees || 0).toLocaleString()} <span className="text-[9px] text-gray-400">ج.س</span>
+                            </td>
+                            {/* 25. المندوب / الفرع */}
                             <td className="p-4 text-gray-500 whitespace-nowrap">
                               {o.driver?.name ? `🚗 ${o.driver.name}` : currentBranch ? `🏢 ${currentBranch}` : "—"}
                             </td>
+                            {/* 26. إسناد إلى */}
                             <td className="p-4">
                               <div className="flex gap-2 items-center">
-                                <select
-                                  value=""
-                                  onChange={async (e) => {
-                                    const val = e.target.value;
-                                    if (!val) return;
-                                    if (val.startsWith("drv_")) {
-                                      await handleRouteOrder(o.id, "DRIVER", val.replace("drv_", ""));
-                                    } else if (val.startsWith("br_")) {
-                                      await handleRouteOrder(o.id, "BRANCH", val.replace("br_", ""));
-                                    }
+                                <button
+                                  onClick={() => {
+                                    setAssignTargetOrderIds([o.id]);
+                                    setAssignActiveTab(o.branchId ? "BRANCH" : "DRIVER");
+                                    setAssignSearchQuery("");
+                                    setAssignModalOpen(true);
                                   }}
-                                  className="bg-slate-50 border border-slate-200 rounded-xl px-2 py-1 outline-none text-[10px]"
+                                  className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 outline-none text-[10px] hover:bg-slate-100 transition-all flex items-center gap-1"
                                 >
-                                  <option value="">إسناد إلى...</option>
-                                  <optgroup label="المناديب">
-                                    {drivers.map(d => (
-                                      <option key={d.id} value={`drv_${d.id}`}>{d.name}</option>
-                                    ))}
-                                  </optgroup>
-                                  <optgroup label="الفروع">
-                                    {branches.map(b => (
-                                      <option key={b.id} value={`br_${b.id}`}>{b.name}</option>
-                                    ))}
-                                  </optgroup>
-                                </select>
+                                  <span className="material-symbols-rounded text-[12px]">person_add</span>
+                                  إسناد...
+                                </button>
+                                {onPrint && (
+                                  <button
+                                    onClick={() => onPrint(o)}
+                                    className="p-1 rounded-lg text-blue-500 hover:bg-blue-50 transition-colors"
+                                    title="طباعة البوليصة"
+                                  >
+                                    <span className="material-symbols-rounded text-base">print</span>
+                                  </button>
+                                )}
                                 {(o.driverId || o.branchId) && (
                                   <button
                                     onClick={() => handleRouteOrder(o.id, "CLEAR", "")}
@@ -1356,6 +1449,194 @@ export default function LogisticsTab({ orders, users, vendors, fetchData: parent
                   </button>
                 </div>
               </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Custom Assign Driver / Branch Modal */}
+      <AnimatePresence>
+        {assignModalOpen && (
+          <div className="fixed inset-0 z-[600] flex items-center justify-center p-4 font-black" dir="rtl">
+            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setAssignModalOpen(false)} />
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="relative w-full max-w-2xl bg-white rounded-[2.5rem] shadow-2xl flex flex-col z-10 border border-slate-100 overflow-hidden font-black text-right"
+            >
+              {/* Header */}
+              <div className="p-6 bg-[#0F172A] text-white flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-black">إسناد الشحنات المحددة ({assignTargetOrderIds.length})</h3>
+                  <p className="text-white/60 text-[10px] font-bold mt-1">اختر المندوب أو الفرع لإسناد الطلبيات وتعديل حالتها تلقائياً</p>
+                </div>
+                <button
+                  onClick={() => setAssignModalOpen(false)}
+                  className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center hover:bg-white/20 transition-all text-white"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              {/* Search & Tabs */}
+              <div className="p-6 border-b border-slate-100 space-y-4">
+                {/* Search */}
+                <div className="relative flex items-center bg-slate-50 border border-slate-200/60 rounded-2xl px-4 py-1">
+                  <Search size={16} className="text-gray-400 ml-2" />
+                  <input
+                    type="text"
+                    placeholder={assignActiveTab === "DRIVER" ? "البحث باسم المندوب أو الهاتف أو نوع المركبة..." : "البحث باسم الفرع أو العنوان..."}
+                    value={assignSearchQuery}
+                    onChange={(e) => setAssignSearchQuery(e.target.value)}
+                    className="w-full bg-transparent outline-none py-3 text-xs font-black text-slate-800 placeholder:text-slate-400"
+                  />
+                  {assignSearchQuery && (
+                    <button onClick={() => setAssignSearchQuery("")} className="p-1 hover:bg-slate-200 rounded-full mr-auto">
+                      <X size={14} className="text-gray-400" />
+                    </button>
+                  )}
+                </div>
+
+                {/* Tabs */}
+                <div className="flex bg-slate-100 p-1 rounded-2xl w-fit">
+                  <button
+                    onClick={() => { setAssignActiveTab("DRIVER"); setAssignSearchQuery(""); }}
+                    className={cn("px-6 py-2.5 rounded-xl text-xs font-black transition-all", assignActiveTab === "DRIVER" ? "bg-[#0F172A] text-white shadow-sm" : "text-gray-400 hover:text-slate-700")}
+                  >
+                    🚗 المناديب ({drivers.length})
+                  </button>
+                  <button
+                    onClick={() => { setAssignActiveTab("BRANCH"); setAssignSearchQuery(""); }}
+                    className={cn("px-6 py-2.5 rounded-xl text-xs font-black transition-all", assignActiveTab === "BRANCH" ? "bg-[#0F172A] text-white shadow-sm" : "text-gray-400 hover:text-slate-700")}
+                  >
+                    🏢 الفروع ({branches.length})
+                  </button>
+                </div>
+              </div>
+
+              {/* Items List */}
+              <div className="p-6 overflow-y-auto max-h-[350px] space-y-3 custom-scrollbar">
+                {assignActiveTab === "DRIVER" ? (
+                  // Drivers Grid
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {drivers.filter(d => 
+                      d.name.toLowerCase().includes(assignSearchQuery.toLowerCase()) ||
+                      d.phone.includes(assignSearchQuery) ||
+                      d.vehicleType.toLowerCase().includes(assignSearchQuery.toLowerCase())
+                    ).length === 0 ? (
+                      <p className="text-xs text-gray-400 text-center py-8 col-span-2">لا يوجد مناديب مطابقين للبحث</p>
+                    ) : (
+                      drivers.filter(d => 
+                        d.name.toLowerCase().includes(assignSearchQuery.toLowerCase()) ||
+                        d.phone.includes(assignSearchQuery) ||
+                        d.vehicleType.toLowerCase().includes(assignSearchQuery.toLowerCase())
+                      ).map(d => (
+                        <div
+                          key={d.id}
+                          onClick={async () => {
+                            setAssignModalOpen(false);
+                            setBulkAssigning(true);
+                            try {
+                              await Promise.all(
+                                assignTargetOrderIds.map(orderId => handleRouteOrder(orderId, "DRIVER", d.id))
+                              );
+                              setSelectedShipmentIds(new Set());
+                              if (showToast) showToast(`تم إسناد الشحنات بنجاح للمندوب: ${d.name}`, "success");
+                            } catch (err) {
+                              alert("فشل الإسناد للمندوب");
+                            } finally {
+                              setBulkAssigning(false);
+                            }
+                          }}
+                          className="border border-slate-100 hover:border-[#C5A021] bg-white rounded-3xl p-4 flex items-center gap-4 cursor-pointer hover:shadow-lg transition-all"
+                        >
+                          {/* Driver Avatar */}
+                          <div className={cn(
+                            "w-12 h-12 rounded-2xl flex items-center justify-center text-white font-black text-lg shrink-0",
+                            d.isOnline ? "bg-green-500 animate-pulse" : "bg-slate-100 text-[#C5A021]"
+                          )}>
+                            {d.name[0]}
+                          </div>
+                          <div className="flex-grow min-w-0">
+                            <p className="text-xs font-black text-[#0F172A] truncate">{d.name}</p>
+                            <p className="text-[9px] text-gray-400 mt-1">{d.vehicleType} • {d.phone}</p>
+                          </div>
+                          <div className="text-left shrink-0">
+                            <span className={cn(
+                              "w-2.5 h-2.5 rounded-full inline-block",
+                              d.isOnline ? "bg-green-500" : "bg-gray-300"
+                            )} />
+                            <p className="text-[9px] text-[#C5A021] font-black mt-1">{(d.balance).toLocaleString()} ج.س</p>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                ) : (
+                  // Branches Grid
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {branches.filter(b => 
+                      b.name.toLowerCase().includes(assignSearchQuery.toLowerCase()) ||
+                      b.location.toLowerCase().includes(assignSearchQuery.toLowerCase())
+                    ).length === 0 ? (
+                      <p className="text-xs text-gray-400 text-center py-8 col-span-2">لا توجد فروع مطابقة للبحث</p>
+                    ) : (
+                      branches.filter(b => 
+                        b.name.toLowerCase().includes(assignSearchQuery.toLowerCase()) ||
+                        b.location.toLowerCase().includes(assignSearchQuery.toLowerCase())
+                      ).map(b => (
+                        <div
+                          key={b.id}
+                          onClick={async () => {
+                            setAssignModalOpen(false);
+                            setBulkAssigning(true);
+                            try {
+                              await Promise.all(
+                                assignTargetOrderIds.map(orderId => handleRouteOrder(orderId, "BRANCH", b.id))
+                              );
+                              setSelectedShipmentIds(new Set());
+                              if (showToast) showToast(`تم توجيه الشحنات بنجاح للفرع: ${b.name}`, "success");
+                            } catch (err) {
+                              alert("فشل التوجيه للفرع");
+                            } finally {
+                              setBulkAssigning(false);
+                            }
+                          }}
+                          className="border border-slate-100 hover:border-[#C5A021] bg-white rounded-3xl p-4 flex items-center gap-4 cursor-pointer hover:shadow-lg transition-all"
+                        >
+                          <div className="w-12 h-12 rounded-2xl bg-slate-900 text-white flex items-center justify-center shrink-0">
+                            <Building2 size={20} />
+                          </div>
+                          <div className="flex-grow min-w-0">
+                            <p className="text-xs font-black text-[#0F172A] truncate">{b.name}</p>
+                            <p className="text-[9px] text-gray-400 mt-1">{b.location}</p>
+                          </div>
+                          <div className="shrink-0">
+                            <span className={cn(
+                              "px-2 py-0.5 rounded-full text-[8px] font-black",
+                              b.isActive ? "bg-green-50 text-green-600" : "bg-gray-50 text-gray-400"
+                            )}>
+                              {b.isActive ? "نشط" : "معطل"}
+                            </span>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Footer */}
+              <div className="p-6 border-t bg-slate-50 flex items-center justify-end shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setAssignModalOpen(false)}
+                  className="px-6 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl text-xs"
+                >
+                  إغلاق
+                </button>
+              </div>
             </motion.div>
           </div>
         )}

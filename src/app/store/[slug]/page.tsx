@@ -27,7 +27,33 @@ export default async function VendorStorePage({ params }: { params: Promise<{ sl
   const isSuspended = vendor.status === 'SUSPENDED';
   const isExpired = vendor.subscriptionEndsAt ? new Date(vendor.subscriptionEndsAt) < new Date() : false;
   const isClosed = isSuspended || isExpired;
-  
+
+  // ── Custom Vixcell-built site (Custom Design tier only) ──
+  // If the Vixcell team enabled a custom site for this vendor, render that HTML/CSS
+  // in place of the default storefront.
+  let customSite: { html?: string; css?: string } | null = null;
+  if ((vendor as any).tier === "CUSTOM_DESIGN" && (vendor as any).storeDesign) {
+    try {
+      const parsed = JSON.parse((vendor as any).storeDesign);
+      if (parsed?.customSite?.enabled && parsed.customSite.html) {
+        customSite = { html: parsed.customSite.html, css: parsed.customSite.css };
+      }
+    } catch {}
+  }
+
+  if (customSite && !isClosed) {
+    return (
+      <div className="min-h-screen bg-white flex flex-col" dir="rtl">
+        <Navbar />
+        {customSite.css ? <style dangerouslySetInnerHTML={{ __html: customSite.css }} /> : null}
+        <main className="flex-grow">
+          <div dangerouslySetInnerHTML={{ __html: customSite.html || "" }} />
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
   // Custom Styles from Vendor
   const primaryColor = vendor.primaryColor || "#0F1629";
   const secondaryColor = vendor.secondaryColor || "#3B82F6";

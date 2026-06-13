@@ -71,6 +71,31 @@ export async function POST(req: Request) {
       create: { name, email: lowerEmail, role, permissions: permissions || null },
     });
 
+    // 4. إشعار ترحيب للموظف الجديد بصلاحياته وتعليمات الدخول
+    try {
+      const ROLE_LABELS: Record<string, string> = {
+        ADMIN: "مدير النظام",
+        PACKING: "مسؤول التجهيز",
+        SHIPPING: "مسؤول الشحن",
+        CUSTOMER_SERVICE: "خدمة العملاء",
+        INVENTORY: "مسؤول المخزن",
+        DRIVER: "مندوب توصيل",
+      };
+      const targetUser = await db.user.findUnique({ where: { email: lowerEmail }, select: { id: true } });
+      if (targetUser) {
+        const { createNotification } = await import("@/lib/notification");
+        await createNotification({
+          userId: targetUser.id,
+          title: `🎉 مرحباً بك في فريق مرسال`,
+          message: `تم منحك صلاحية "${ROLE_LABELS[role] || role}". سجّل الدخول من /login ثم افتح لوحة الإدارة من قائمة الحساب.`,
+          type: "system",
+          link: "/admin/dashboard",
+        });
+      }
+    } catch (e) {
+      console.error("welcome notification failed:", e);
+    }
+
     return NextResponse.json({
       ...employee,
       // أظهر كلمة المرور لو الحساب جديد أو لو الأدمن حدّد كلمة مرور جديدة

@@ -26,6 +26,10 @@ export default function EditOrderModal({
   const [editingAddress, setEditingAddress] = useState(false);
   const [addressData, setAddressData] = useState({ street: "", district: "", city: "" });
   const [copied, setCopied] = useState(false);
+  // Payment (bank transfer) review state
+  const [paymentVerified, setPaymentVerified] = useState<boolean | null>(null);
+  const [paymentNote, setPaymentNote] = useState("");
+  const [payActionLoading, setPayActionLoading] = useState(false);
 
   useEffect(() => {
     if (order) {
@@ -38,8 +42,44 @@ export default function EditOrderModal({
         city: order.city || "",
       });
       setEditingAddress(false);
+      setPaymentVerified(order.paymentVerified ?? null);
+      setPaymentNote(order.paymentNote || "");
     }
   }, [order]);
+
+  // Approve or reject the attached bank-transfer payment
+  const handlePaymentDecision = async (verified: boolean) => {
+    if (!verified && !paymentNote.trim()) {
+      if (showToast) showToast("اكتب سبب رفض الإيصال أولاً", "error");
+      else alert("اكتب سبب رفض الإيصال أولاً");
+      return;
+    }
+    setPayActionLoading(true);
+    try {
+      const res = await fetch(`/api/admin/orders`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: order.id,
+          paymentVerified: verified,
+          paymentNote: verified ? (paymentNote || "تم تأكيد التحويل") : paymentNote,
+          // On approval move the order forward; on rejection keep it pending review
+          status: verified ? (order.status === "PENDING_APPROVAL" ? "CONFIRMED" : order.status) : "PENDING_APPROVAL",
+        }),
+      });
+      if (res.ok) {
+        setPaymentVerified(verified);
+        if (showToast) showToast(verified ? "✅ تم تأكيد التحويل وقبول الطلب" : "❌ تم رفض الإيصال وإبلاغ العميل", "success");
+        onSuccess();
+      } else {
+        const d = await res.json().catch(() => ({}));
+        if (showToast) showToast(`فشل: ${d.error || res.status}`, "error");
+      }
+    } catch (e: any) {
+      if (showToast) showToast(`خطأ: ${e?.message || "تعذّر الاتصال"}`, "error");
+    }
+    setPayActionLoading(false);
+  };
 
   if (!isOpen || !order) return null;
 
@@ -304,6 +344,47 @@ export default function EditOrderModal({
                       <span className="material-symbols-rounded text-2xl">no_photography</span>
                     </div>
                     <p className="text-xs font-black text-orange-600">لم يتم إرفاق إيصال!</p>
+                  </div>
+                )}
+
+                {/* ── Payment review: approve / reject the transfer ── */}
+                {!restrictedMode && pm === "bank_transfer" && (
+                  <div className="pt-2 border-t border-orange-100 space-y-3">
+                    {paymentVerified === true ? (
+                      <div className="bg-green-50 border border-green-200 rounded-2xl p-3 text-center">
+                        <span className="text-xs font-black text-green-700">✓ تم تأكيد هذا التحويل</span>
+                      </div>
+                    ) : (
+                      <>
+                        <input
+                          type="text"
+                          value={paymentNote}
+                          onChange={(e) => setPaymentNote(e.target.value)}
+                          placeholder="ملاحظة (سبب الرفض / مرجع التحويل)..."
+                          className="w-full bg-white border border-orange-200 rounded-xl px-3 py-2 text-xs font-bold outline-none focus:border-orange-400"
+                        />
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            disabled={payActionLoading}
+                            onClick={() => handlePaymentDecision(true)}
+                            className="flex-1 bg-green-500 hover:bg-green-600 text-white py-2.5 rounded-xl font-black text-xs transition-all disabled:opacity-50 flex items-center justify-center gap-1.5"
+                          >
+                            <span className="material-symbols-rounded text-sm">check_circle</span>
+                            تأكيد التحويل وقبول الطلب
+                          </button>
+                          <button
+                            type="button"
+                            disabled={payActionLoading}
+                            onClick={() => handlePaymentDecision(false)}
+                            className="flex-1 bg-red-500 hover:bg-red-600 text-white py-2.5 rounded-xl font-black text-xs transition-all disabled:opacity-50 flex items-center justify-center gap-1.5"
+                          >
+                            <span className="material-symbols-rounded text-sm">cancel</span>
+                            رفض الإيصال
+                          </button>
+                        </div>
+                      </>
+                    )}
                   </div>
                 )}
               </div>

@@ -24,7 +24,8 @@ export default function ShopFilters({ brands = [] }: { brands?: string[] }) {
   const brandList = brands.length ? brands : FALLBACK_BRANDS;
   const hasActiveFilters = !!(
     currentCategory || currentMinPrice || currentMaxPrice ||
-    currentBrands.length || currentRating || nextDay || includeOutOfStock
+    currentBrands.length || currentRating || nextDay || includeOutOfStock ||
+    searchParams.get("sort")
   );
 
   useEffect(() => {
@@ -74,6 +75,38 @@ export default function ShopFilters({ brands = [] }: { brands?: string[] }) {
 
   return (
     <div className="flex flex-col gap-5 text-[#0F172A] text-sm pb-10">
+
+      {/* ── ترتيب المنتجات ── */}
+      <div className="space-y-2">
+        <h4 className="font-bold mb-2 text-[#0F172A]">ترتيب المنتجات</h4>
+        <div className="flex flex-col gap-2">
+          {[
+            { value: "",          label: "مميز (الافتراضي)" },
+            { value: "new",       label: "الأحدث وصولاً" },
+            { value: "price_asc", label: "السعر: من الأقل" },
+            { value: "price_desc",label: "السعر: من الأعلى" },
+            { value: "rated",     label: "الأعلى تقييماً" },
+          ].map(opt => {
+            const currentSort = searchParams.get("sort") || "";
+            const isActive = currentSort === opt.value;
+            return (
+              <label key={opt.value} className="flex items-center gap-2 cursor-pointer group">
+                <input
+                  type="radio"
+                  name="sort"
+                  checked={isActive}
+                  onChange={() => updateFilters("sort", opt.value || null)}
+                  className="w-4 h-4 accent-[#e77600] cursor-pointer"
+                />
+                <span className={cn("text-sm transition-colors group-hover:text-[#C7511F]", isActive ? "font-bold text-[#e77600]" : "text-gray-800")}>{opt.label}</span>
+              </label>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="h-px bg-gray-200" />
+
       {/* Delivery */}
       <div className="space-y-2">
          <h4 className="font-bold mb-2 text-[#0F172A]">الشحن والتوصيل</h4>

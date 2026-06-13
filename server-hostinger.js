@@ -6,15 +6,15 @@ const fs = require('fs');
 // ── Logging ──────────────────────────────────────────────────
 const logFile = fs.createWriteStream(path.join(__dirname, 'server.log'), { flags: 'a' });
 const log = (...args) => {
-  const line = `[${new Date().toISOString()}] ${args.join(' ')}\n`;
+  const line = `[${new Date().toISOString()}] ${args.join(' ')}
+`;
   process.stdout.write(line);
   logFile.write(line);
 };
 
-log('=== MORSALL SERVER v2 STARTING ===');
+log('=== MORSALL SERVER v3 (ASYNC PREP) STARTING ===');
 
 // ── Hostinger Node Modules ────────────────────────────────────
-// Search for node_modules in common Hostinger locations
 const searchPaths = [
   path.join(__dirname, 'node_modules'),
   '/home/u754458241/nodeapp/node_modules'
@@ -39,10 +39,9 @@ if (nodeModulesPath) {
 // ── Environment ───────────────────────────────────────────────
 process.env.NODE_ENV = 'production';
 process.env.PRISMA_CLIENT_ENGINE_TYPE = 'library';
-process.env.TOKIO_WORKER_THREADS = '1';
-process.env.UV_THREADPOOL_SIZE = '1';
+process.env.TOKIO_WORKER_THREADS = '2';
+process.env.UV_THREADPOOL_SIZE = '4';
 
-// Load .env.production if dotenv available
 try {
   require('dotenv').config({ path: path.join(__dirname, '.env.production') });
   log('Loaded .env.production');
@@ -81,7 +80,19 @@ if (!fs.existsSync(uploadsDir)) {
 // ── Start Next.js ─────────────────────────────────────────────
 const next = require('next');
 const app = next({ dev: false, dir: __dirname });
-const handle = app.getRequestHandler();
+
+let isReady = false;
+let handle = null;
+
+app.prepare().then(() => {
+  handle = app.getRequestHandler();
+  isReady = true;
+  log('Next.js preparation complete. Server fully operational!');
+}).catch(err => {
+  log('PREPARE_ERROR:', err.message);
+  log(err.stack);
+  process.exit(1);
+});
 
 const MIME_TYPES = {
   '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png',
@@ -89,75 +100,79 @@ const MIME_TYPES = {
   '.ico': 'image/x-icon',
 };
 
-app.prepare().then(() => {
-  createServer(async (req, res) => {
-    try {
-      const parsedUrl = parse(req.url, true);
-      const { pathname } = parsedUrl;
+// ── Start HTTP Listener Immediately ───────────────────────────
+const server = createServer(async (req, res) => {
+  const parsedUrl = parse(req.url, true);
+  const { pathname } = parsedUrl;
 
-      // ── No-cache for HTML pages & API routes ─────────────────
-      const isApi = pathname && pathname.startsWith('/api/');
-      const isPage = !pathname || (!pathname.startsWith('/_next/') && !pathname.startsWith('/uploads/') && !pathname.match(/\.(png|jpg|jpeg|gif|svg|ico|webp|js|css|woff|woff2)$/));
-      if (isApi || isPage) {
-        res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
-        res.setHeader('Pragma', 'no-cache');
-        res.setHeader('Expires', '0');
-        res.setHeader('Surrogate-Control', 'no-store');
-      }
+  // 1. Health check & Diagnostics (Always responsive, even during boot)
+  if (pathname === '/health' || pathname === '/diag') {
+    res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify({
+      status: isReady ? 'ok' : 'starting',
+      time: new Date().toISOString(),
+      env: process.env.NODE_ENV,
+      db: process.env.DATABASE_URL ? 'configured' : 'MISSING',
+      uploadsExists: fs.existsSync(uploadsDir),
+    }));
+    return;
+  }
 
-      // ── Health check ──────────────────────────────────────
-      if (pathname === '/health' || pathname === '/diag') {
-        res.setHeader('Content-Type', 'application/json');
-        res.end(JSON.stringify({
-          status: 'ok',
-          time: new Date().toISOString(),
-          env: process.env.NODE_ENV,
-          db: process.env.DATABASE_URL ? 'configured' : 'MISSING',
-          uploadsDir,
-          uploadsExists: fs.existsSync(uploadsDir),
-        }));
+  // 2. Return 503 if Next.js is not prepared yet
+  if (!isReady) {
+    res.statusCode = 503;
+    res.setHeader('Retry-After', '3');
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.end('<h3>الموقع قيد التشغيل والتهيئة الآن... يرجى إعادة تحميل الصفحة بعد ثوانٍ قليلة.</h3><p>Server is starting up and preparing Next.js. Please refresh in a few seconds...</p>');
+    return;
+  }
+
+  try {
+    // ── No-cache for HTML pages & API routes ─────────────────
+    const isApi = pathname && pathname.startsWith('/api/');
+    const isPage = !pathname || (!pathname.startsWith('/_next/') && !pathname.startsWith('/uploads/') && !pathname.match(/\.(png|jpg|jpeg|gif|svg|ico|webp|js|css|woff|woff2)$/));
+    if (isApi || isPage) {
+      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
+      res.setHeader('Surrogate-Control', 'no-store');
+    }
+
+    // ── Serve uploaded files directly ─────────────────────
+    if (pathname && pathname.startsWith('/uploads/')) {
+      const fileName = pathname.replace('/uploads/', '');
+      if (!fileName || fileName.includes('..') || fileName.includes('/')) {
+        res.statusCode = 400;
+        res.end('Bad Request');
         return;
       }
 
-      // ── Serve uploaded files directly ─────────────────────
-      // Handles: /uploads/filename.jpg
-      if (pathname && pathname.startsWith('/uploads/')) {
-        const fileName = pathname.replace('/uploads/', '');
-        // Safety: no path traversal
-        if (!fileName || fileName.includes('..') || fileName.includes('/')) {
-          res.statusCode = 400;
-          res.end('Bad Request');
-          return;
-        }
-
-        const filePath = path.join(uploadsDir, fileName);
-        if (fs.existsSync(filePath)) {
-          const ext = path.extname(fileName).toLowerCase();
-          const mime = MIME_TYPES[ext] || 'application/octet-stream';
-          res.setHeader('Content-Type', mime);
-          res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
-          fs.createReadStream(filePath).pipe(res);
-          return;
-        } else {
-          res.statusCode = 404;
-          res.end('Image not found');
-          return;
-        }
+      const filePath = path.join(uploadsDir, fileName);
+      if (fs.existsSync(filePath)) {
+        const ext = path.extname(fileName).toLowerCase();
+        const mime = MIME_TYPES[ext] || 'application/octet-stream';
+        res.setHeader('Content-Type', mime);
+        res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+        fs.createReadStream(filePath).pipe(res);
+        return;
+      } else {
+        res.statusCode = 404;
+        res.end('Image not found');
+        return;
       }
-
-      // ── Handle all Next.js requests ───────────────────────
-      await handle(req, res, parsedUrl);
-    } catch (err) {
-      log('SERVER_ERROR:', err.message);
-      res.statusCode = 500;
-      res.end('Internal Server Error');
     }
-  }).listen(process.env.PORT || 3000, () => {
-    log(`Server running on port ${process.env.PORT || 3000}`);
-    log('Uploads served from:', uploadsDir);
-  });
-}).catch(err => {
-  log('PREPARE_ERROR:', err.message);
-  log(err.stack);
-  process.exit(1);
+
+    // ── Handle all Next.js requests ───────────────────────
+    await handle(req, res, parsedUrl);
+  } catch (err) {
+    log('SERVER_ERROR:', err.message);
+    res.statusCode = 500;
+    res.end('Internal Server Error');
+  }
+});
+
+// Bind to port or socket immediately
+const listenPort = process.env.PORT || 3000;
+server.listen(listenPort, () => {
+  log(`HTTP server listening on ${listenPort}`);
 });

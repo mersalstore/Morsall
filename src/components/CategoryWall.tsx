@@ -13,7 +13,8 @@ export default function CategoryWall() {
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) {
-          setCategories(data);
+          // عرض الأقسام الرئيسية فقط (بدون subcategories)
+          setCategories(data.filter((c: any) => !c.parentId));
         }
       })
       .catch(console.error);

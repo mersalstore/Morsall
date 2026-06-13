@@ -94,7 +94,11 @@ export default function ProductTabHub({ filter }: { filter?: "new" | "best" }) {
       id: p.id,
       title: p.title,
       price: p.price,
+      discountPrice: p.discountPrice ?? undefined,
+      discount: p.discount ?? undefined,
+      stock: p.stock,
       vendor: p.vendor?.storeName,
+      vendorId: p.vendorId,
       vendorLocation: p.vendor?.location || "السودان",
       image: (p.images && p.images.trim().length > 0) 
         ? p.images.split(",")[0].trim() 
@@ -105,7 +109,11 @@ export default function ProductTabHub({ filter }: { filter?: "new" | "best" }) {
       id: p.id,
       title: p.title,
       price: p.price,
+      discountPrice: p.discountPrice ?? undefined,
+      discount: p.discount ?? undefined,
+      stock: p.stock,
       vendor: p.vendor?.storeName,
+      vendorId: p.vendorId,
       vendorLocation: p.vendor?.location || "السودان",
       image: (p.images && p.images.trim().length > 0) 
         ? p.images.split(",")[0].trim() 

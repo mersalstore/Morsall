@@ -8,18 +8,36 @@ export async function GET(req: Request) {
     const id = searchParams.get("id");
 
     if (id) {
-      // جلب قسم واحد مع منتجاته
+      // جلب قسم واحد مع منتجاته ومنتجات أقسامه الفرعية
       const category = await prisma.category.findUnique({
         where: { id },
         include: {
           products: {
             include: { vendor: { select: { storeName: true, location: true } } },
-            where: { status: "APPROVED" },
+            where: { status: "APPROVED", vendor: { status: "APPROVED" } },
             orderBy: { createdAt: "desc" },
+          },
+          children: {
+            include: {
+              products: {
+                include: { vendor: { select: { storeName: true, location: true } } },
+                where: { status: "APPROVED", vendor: { status: "APPROVED" } },
+                orderBy: { createdAt: "desc" },
+              },
+            },
           },
         },
       });
-      return NextResponse.json(category);
+
+      if (!category) {
+        return NextResponse.json(null, { status: 404 });
+      }
+
+      // دمج منتجات الأقسام الفرعية مع منتجات القسم الرئيسي
+      const childProducts = (category as any).children?.flatMap((c: any) => c.products || []) || [];
+      const allProducts = [...(category as any).products, ...childProducts];
+
+      return NextResponse.json({ ...category, products: allProducts });
     }
 
     const categories = await prisma.category.findMany({

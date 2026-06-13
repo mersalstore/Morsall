@@ -169,39 +169,19 @@ export default function OrdersTable({
     );
 
     if (matchedOrder) {
+      // المسح يعلّم على الطلب فقط (يضيفه للتحديد) — بدون تعيين فوري أو فتح الطلب.
+      // التعيين يتم بضغطة واحدة على زر "تعيين المحدد" بعد مسح كل الطلبات.
+      const shortId = matchedOrder.id.slice(-6).toUpperCase();
       const next = new Set(selectedIds);
-      next.add(matchedOrder.id);
-      setSelectedIds(next);
-
-      if (routingMode === "DRIVER") {
-        if (activeQuickDriverId && onAssignDriver) {
-          setAssigningLoading(true);
-          try {
-            await onAssignDriver(matchedOrder.id, activeQuickDriverId);
-            showToast?.(`تم تعيين الطلب #${matchedOrder.id.slice(-6).toUpperCase()} للسائق بنجاح! خ`, "success");
-          } catch (err) {
-            showToast?.("حدث خطأ أثناء التعيين", "error");
-          }
-          setAssigningLoading(false);
-        } else {
-          showToast?.(`تم تحديد الطلب #${matchedOrder.id.slice(-6).toUpperCase()} للطباعة خ`, "info");
-        }
+      if (next.has(matchedOrder.id)) {
+        showToast?.(`الطلب #${shortId} معلّم بالفعل (${next.size})`, "info");
       } else {
-        if (activeQuickBranchId && onAssignBranch) {
-          setAssigningLoading(true);
-          try {
-            await onAssignBranch(matchedOrder.id, activeQuickBranchId);
-            showToast?.(`تم توجيه الطلب #${matchedOrder.id.slice(-6).toUpperCase()} للفرع بنجاح! خ`, "success");
-          } catch (err) {
-            showToast?.("حدث خطأ أثناء التوجيه للفرع", "error");
-          }
-          setAssigningLoading(false);
-        } else {
-          showToast?.(`تم تحديد الطلب #${matchedOrder.id.slice(-6).toUpperCase()} للطباعة خ`, "info");
-        }
+        next.add(matchedOrder.id);
+        setSelectedIds(next);
+        showToast?.(`✓ تم تعليم الطلب #${shortId} (${next.size} محدد)`, "success");
       }
     } else {
-      showToast?.("لم يتم العثور على طلب أو سائق أو فرع بهذا الباركود خ", "error");
+      showToast?.("لم يتم العثور على طلب أو سائق أو فرع بهذا الباركود", "error");
     }
   };
 
@@ -747,8 +727,12 @@ export default function OrdersTable({
                       </span>
                     </div>
                     <span className={cn(
-                      "px-3 py-1 rounded-xl text-[9px] font-black uppercase tracking-widest",
-                      ORDER_STATUSES[order.status]?.cls === "badge-active" ? "bg-green-50 text-green-600 border-green-100" : "bg-orange-50 text-orange-500 border border-orange-100"
+                      "px-3 py-1 rounded-xl text-[9px] font-black uppercase tracking-widest border",
+                      order.status === "DELIVERED" ? "bg-green-50 text-green-600 border-green-100" :
+                      order.status === "CANCELLED" ? "bg-red-50 text-red-600 border-red-100 font-black" :
+                      order.status === "RETURNED" ? "bg-rose-50 text-rose-600 border-rose-100 font-black" :
+                      ORDER_STATUSES[order.status]?.cls === "badge-active" ? "bg-green-50 text-green-600 border-green-100" : 
+                      "bg-orange-50 text-orange-500 border border-orange-100"
                     )}>
                       {ORDER_STATUSES[order.status]?.label || order.status}
                     </span>
@@ -894,7 +878,11 @@ export default function OrdersTable({
                               <td className="px-4 py-4">
                                 <span className={cn(
                                   "px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest border block text-center w-28",
-                                  ORDER_STATUSES[order.status]?.cls === "badge-active" ? "bg-green-50 text-green-600 border-green-100" : "bg-orange-50 text-orange-500 border border-orange-100"
+                                  order.status === "DELIVERED" ? "bg-green-50 text-green-600 border-green-100" :
+                                  order.status === "CANCELLED" ? "bg-red-50 text-red-600 border-red-100 font-black" :
+                                  order.status === "RETURNED" ? "bg-rose-50 text-rose-600 border-rose-100 font-black" :
+                                  ORDER_STATUSES[order.status]?.cls === "badge-active" ? "bg-green-50 text-green-600 border-green-100" : 
+                                  "bg-orange-50 text-orange-500 border border-orange-100"
                                 )}>
                                   {ORDER_STATUSES[order.status]?.label || order.status}
                                 </span>
@@ -1001,7 +989,11 @@ export default function OrdersTable({
                       <td className="px-4 py-8">
                         <span className={cn(
                           "px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest border block text-center w-28",
-                          ORDER_STATUSES[order.status]?.cls === "badge-active" ? "bg-green-50 text-green-600 border-green-100" : "bg-orange-50 text-orange-500 border border-orange-100"
+                          order.status === "DELIVERED" ? "bg-green-50 text-green-600 border-green-100" :
+                          order.status === "CANCELLED" ? "bg-red-50 text-red-600 border-red-100 font-black" :
+                          order.status === "RETURNED" ? "bg-rose-50 text-rose-600 border-rose-100 font-black" :
+                          ORDER_STATUSES[order.status]?.cls === "badge-active" ? "bg-green-50 text-green-600 border-green-100" : 
+                          "bg-orange-50 text-orange-500 border border-orange-100"
                         )}>
                           {ORDER_STATUSES[order.status]?.label || order.status}
                         </span>

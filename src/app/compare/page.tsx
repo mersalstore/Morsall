@@ -1,8 +1,8 @@
 "use client"
 
-import { useWishlist } from "@/lib/WishlistContext";
+import { useWishlist } from "../../lib/WishlistContext";
 import Link from "next/link";
-import { useCart } from "@/lib/CartContext";
+import { useCart } from "../../lib/CartContext";
 import { useEffect, useState } from "react";
 
 export default function ComparePage() {

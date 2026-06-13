@@ -120,10 +120,43 @@ export const authOptions: NextAuthOptions = {
             throw new Error('هذا الحساب مسجل عبر جوجل، يرجى استخدامه للدخول');
           }
 
-          console.log("[AUTH] Verifying password...");
-          const isPasswordCorrect = await bcrypt.compare(credentials.password, user.password);
+          console.log("[AUTH] Verifying password/code...");
+          let isPasswordCorrect = false;
+          let isCodeLogin = false;
+
+          // Check if the password provided is a 6-digit OTP code
+          if (/^\d{6}$/.test(credentials.password)) {
+            const tokenRecord = await prisma.verificationToken.findFirst({
+              where: {
+                identifier: emailLower,
+                token: credentials.password,
+              },
+            });
+            if (tokenRecord && new Date() <= tokenRecord.expires) {
+              isPasswordCorrect = true;
+              isCodeLogin = true;
+
+              // Clean up the token immediately
+              await prisma.verificationToken.deleteMany({
+                where: { identifier: emailLower },
+              });
+
+              // Mark email as verified if not already
+              if (!user.emailVerified) {
+                await prisma.user.update({
+                  where: { id: user.id },
+                  data: { emailVerified: new Date() },
+                });
+              }
+            }
+          }
+
+          if (!isCodeLogin) {
+            isPasswordCorrect = await bcrypt.compare(credentials.password, user.password);
+          }
+
           if (!isPasswordCorrect) {
-            console.log("[AUTH] Invalid password for:", emailLower);
+            console.log("[AUTH] Invalid credentials for:", emailLower);
             logSecurity({
               type: "LOGIN_FAIL",
               severity: "ALERT",
@@ -133,13 +166,13 @@ export const authOptions: NextAuthOptions = {
               userEmail: emailLower,
               endpoint: "/api/auth/callback/credentials",
               method: "POST",
-              message: "Wrong password",
+              message: "Wrong password or code",
             });
             autoBlockIfAbusive(clientIp, "LOGIN_FAIL");
-            throw new Error('كلمة المرور غير صحيحة');
+            throw new Error('كلمة المرور أو رمز التحقق غير صحيح');
           }
 
-          if (!user.emailVerified) {
+          if (!isCodeLogin && !user.emailVerified) {
             console.log("[AUTH] User email is not verified:", emailLower);
             throw new Error('EMAIL_NOT_VERIFIED:الرجاء تفعيل الحساب أولاً. لقد تم إرسال رمز التحقق إلى بريدك الإلكتروني.');
           }

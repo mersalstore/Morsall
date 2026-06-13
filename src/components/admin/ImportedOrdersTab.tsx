@@ -31,20 +31,110 @@ export default function ImportedOrdersTab({ classes, vendors, showToast, fetchDa
     }
   };
 
-  const handleDrop = (e: React.DragEvent) => {
+  const handleDrop = async (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
+    if (!selectedVendorId) {
+      setImportStatus("error");
+      setMessage("يرجى اختيار المورد/التاجر أولاً قبل إسقاط الملف!");
+      return;
+    }
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      setFile(e.dataTransfer.files[0]);
-      setMessage(`تم اختيار الملف: ${e.dataTransfer.files[0].name}`);
+      const selectedFile = e.dataTransfer.files[0];
+      setFile(selectedFile);
+      setMessage(`تم اختيار الملف: ${selectedFile.name}`);
+      try {
+        const rows = await importFromExcel(selectedFile, { raw: false, defval: "" });
+        const parsed: any[] = [];
+        for (const row of rows) {
+          if (!row || Object.values(row).every((v) => String(v ?? "").trim() === "")) continue;
+          const mapped = buildPayloadFromExcelRow(row);
+          parsed.push({
+            id: `excel-${Date.now()}-${Math.random()}`,
+            customerName: mapped.name,
+            phone: mapped.phone,
+            city: mapped.city,
+            district: mapped.district,
+            street: mapped.street,
+            productName: mapped.packageContent,
+            quantity: mapped.quantity,
+            price: mapped.totalAmount,
+            shippingCost: mapped.shippingCost,
+            otherFees: mapped.otherFees,
+            additionalFees: mapped.additionalFees,
+            paymentMethod: mapped.paymentMethod,
+            status: mapped.status,
+            weight: mapped.weight,
+            trackingNumber: mapped.trackingNumber,
+            consignmentNumber: mapped.consignmentNumber,
+            providerConsignmentNumber: mapped.providerConsignmentNumber,
+            customerReference: mapped.customerReference,
+            pendingAttempts: mapped.pendingAttempts,
+            shipmentType: mapped.shipmentType,
+            notes: mapped.notes
+          });
+        }
+        setManualOrders(prev => [...prev, ...parsed]);
+        setFile(null);
+        setImportStatus("success");
+        setMessage(`تم استخراج ${parsed.length} شحنة من الملف وهي معروضة بالجدول أدناه للمراجعة والتعديل قبل الإدراج.`);
+      } catch (err: any) {
+        setImportStatus("error");
+        setMessage("حدث خطأ أثناء قراءة ملف الـ Excel: " + err.message);
+      }
     }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!selectedVendorId) {
+      setImportStatus("error");
+      setMessage("يرجى اختيار المورد/التاجر أولاً قبل تحديد الملف!");
+      return;
+    }
     if (e.target.files && e.target.files[0]) {
-      setFile(e.target.files[0]);
-      setMessage(`تم اختيار الملف: ${e.target.files[0].name}`);
+      const selectedFile = e.target.files[0];
+      setFile(selectedFile);
+      setMessage(`تم اختيار الملف: ${selectedFile.name}`);
+      try {
+        const rows = await importFromExcel(selectedFile, { raw: false, defval: "" });
+        const parsed: any[] = [];
+        for (const row of rows) {
+          if (!row || Object.values(row).every((v) => String(v ?? "").trim() === "")) continue;
+          const mapped = buildPayloadFromExcelRow(row);
+          parsed.push({
+            id: `excel-${Date.now()}-${Math.random()}`,
+            customerName: mapped.name,
+            phone: mapped.phone,
+            city: mapped.city,
+            district: mapped.district,
+            street: mapped.street,
+            productName: mapped.packageContent,
+            quantity: mapped.quantity,
+            price: mapped.totalAmount,
+            shippingCost: mapped.shippingCost,
+            otherFees: mapped.otherFees,
+            additionalFees: mapped.additionalFees,
+            paymentMethod: mapped.paymentMethod,
+            status: mapped.status,
+            weight: mapped.weight,
+            trackingNumber: mapped.trackingNumber,
+            consignmentNumber: mapped.consignmentNumber,
+            providerConsignmentNumber: mapped.providerConsignmentNumber,
+            customerReference: mapped.customerReference,
+            pendingAttempts: mapped.pendingAttempts,
+            shipmentType: mapped.shipmentType,
+            notes: mapped.notes
+          });
+        }
+        setManualOrders(prev => [...prev, ...parsed]);
+        setFile(null);
+        setImportStatus("success");
+        setMessage(`تم استخراج ${parsed.length} شحنة من الملف وهي معروضة بالجدول أدناه للمراجعة والتعديل قبل الإدراج.`);
+      } catch (err: any) {
+        setImportStatus("error");
+        setMessage("حدث خطأ أثناء قراءة ملف الـ Excel: " + err.message);
+      }
     }
   };
 
@@ -56,9 +146,23 @@ export default function ImportedOrdersTab({ classes, vendors, showToast, fetchDa
         customerName: "",
         phone: "",
         city: "",
+        district: "",
+        street: "",
         productName: "",
         quantity: 1,
         price: 0,
+        shippingCost: 0,
+        otherFees: 0,
+        additionalFees: 0,
+        paymentMethod: "COD",
+        status: "AWAITING_PICKUP",
+        weight: 0,
+        trackingNumber: "",
+        consignmentNumber: "",
+        providerConsignmentNumber: "",
+        customerReference: "",
+        pendingAttempts: 0,
+        shipmentType: "",
         notes: "",
       },
     ]);
@@ -177,7 +281,7 @@ export default function ImportedOrdersTab({ classes, vendors, showToast, fetchDa
       setMessage("يرجى اختيار المورد/التاجر أولاً قبل الاستيراد!");
       return;
     }
-    if (!file && manualOrders.length === 0) {
+    if (manualOrders.length === 0) {
       setImportStatus("error");
       setMessage("يرجى رفع ملف الاستيراد أو إدخال طلبات يدوية!");
       return;
@@ -191,22 +295,32 @@ export default function ImportedOrdersTab({ classes, vendors, showToast, fetchDa
     try {
       const payloads: any[] = [];
 
-      if (file) {
-        const rows = await importFromExcel(file, { raw: false, defval: "" });
-        for (const row of rows) {
-          // Skip completely empty rows
-          if (!row || Object.values(row).every((v) => String(v ?? "").trim() === "")) continue;
-          payloads.push(buildPayloadFromExcelRow(row));
-        }
-      }
       for (const row of manualOrders) {
-        payloads.push(buildPayloadFromManualRow(row));
-      }
-
-      if (payloads.length === 0) {
-        setImportStatus("error");
-        setMessage("الملف لا يحتوي على صفوف صالحة للاستيراد.");
-        return;
+        payloads.push({
+          source: "EXTERNAL_IMPORT",
+          vendorId: selectedVendorId,
+          name: row.customerName || "عميل مستورد",
+          phone: row.phone || "0000000000",
+          city: row.city || "غير محدد",
+          district: row.district || row.city || "غير محدد",
+          street: row.street || row.city || "غير محدد",
+          totalAmount: parseNum(row.price),
+          shippingCost: parseNum(row.shippingCost || 0),
+          otherFees: parseNum(row.otherFees || 0),
+          additionalFees: parseNum(row.additionalFees || 0),
+          paymentMethod: row.paymentMethod || "COD",
+          status: row.status || "AWAITING_PICKUP",
+          packageContent: row.productName || "",
+          quantity: parseInt(row.quantity) || 1,
+          weight: parseNum(row.weight || 0),
+          trackingNumber: row.trackingNumber || null,
+          consignmentNumber: row.consignmentNumber || null,
+          providerConsignmentNumber: row.providerConsignmentNumber || null,
+          customerReference: row.customerReference || null,
+          pendingAttempts: parseInt(row.pendingAttempts) || 0,
+          shipmentType: row.shipmentType || null,
+          notes: row.notes || null,
+        });
       }
 
       setProgress({ done: 0, total: payloads.length, failed: 0 });
@@ -251,7 +365,7 @@ export default function ImportedOrdersTab({ classes, vendors, showToast, fetchDa
     } catch (err: any) {
       console.error("Import error:", err);
       setImportStatus("error");
-      setMessage("حدث خطأ أثناء قراءة الملف أو الاستيراد: " + (err?.message || "خطأ غير معروف"));
+      setMessage("حدث خطأ أثناء الاستيراد: " + (err?.message || "خطأ غير معروف"));
     } finally {
       setImporting(false);
     }
@@ -386,16 +500,19 @@ export default function ImportedOrdersTab({ classes, vendors, showToast, fetchDa
             <p className="text-xs font-black text-slate-400">لا توجد طلبات مدخلة يدوياً حالياً. اضغط على زر إضافة سطر لتسجيل شحنات يدوية سريعة.</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-right border-collapse">
+            <table className="w-full text-right border-collapse min-w-[1200px]">
               <thead>
                 <tr className="bg-slate-50 border-b border-slate-100 text-slate-400 font-black text-[10px] uppercase tracking-wider">
                   <th className="px-4 py-3.5">اسم العميل</th>
                   <th className="px-4 py-3.5">رقم الهاتف</th>
                   <th className="px-4 py-3.5">المدينة</th>
-                  <th className="px-4 py-3.5">اسم المنتج</th>
-                  <th className="px-4 py-3.5 w-24">الكمية</th>
-                  <th className="px-4 py-3.5 w-32">السعر (ج.س)</th>
+                  <th className="px-4 py-3.5">الحي</th>
+                  <th className="px-4 py-3.5">الشارع</th>
+                  <th className="px-4 py-3.5">محتوى الطرد</th>
+                  <th className="px-4 py-3.5 w-20">الكمية</th>
+                  <th className="px-4 py-3.5 w-28">القيمة (ج.س)</th>
+                  <th className="px-4 py-3.5 w-28">التوصيل (ج.س)</th>
+                  <th className="px-4 py-3.5">الباركود</th>
                   <th className="px-4 py-3.5">ملاحظات</th>
                   <th className="px-4 py-3.5 w-12 text-center">حذف</th>
                 </tr>
@@ -433,6 +550,24 @@ export default function ImportedOrdersTab({ classes, vendors, showToast, fetchDa
                     <td className="px-4 py-3">
                       <input
                         type="text"
+                        value={row.district || ""}
+                        onChange={(e) => updateManualRow(row.id, "district", e.target.value)}
+                        placeholder="الرياض"
+                        className="w-full bg-slate-50 border border-slate-100 rounded-lg px-3 py-2 text-xs font-bold outline-none focus:border-[#C5A021] text-slate-800"
+                      />
+                    </td>
+                    <td className="px-4 py-3">
+                      <input
+                        type="text"
+                        value={row.street || ""}
+                        onChange={(e) => updateManualRow(row.id, "street", e.target.value)}
+                        placeholder="شارع المشتل"
+                        className="w-full bg-slate-50 border border-slate-100 rounded-lg px-3 py-2 text-xs font-bold outline-none focus:border-[#C5A021] text-slate-800"
+                      />
+                    </td>
+                    <td className="px-4 py-3">
+                      <input
+                        type="text"
                         value={row.productName}
                         onChange={(e) => updateManualRow(row.id, "productName", e.target.value)}
                         placeholder="ساعة ذكية"
@@ -457,6 +592,23 @@ export default function ImportedOrdersTab({ classes, vendors, showToast, fetchDa
                     </td>
                     <td className="px-4 py-3">
                       <input
+                        type="number"
+                        value={row.shippingCost || 0}
+                        onChange={(e) => updateManualRow(row.id, "shippingCost", parseFloat(e.target.value) || 0)}
+                        className="w-full bg-slate-50 border border-slate-100 rounded-lg px-3 py-2 text-xs font-bold outline-none focus:border-[#C5A021] text-slate-800"
+                      />
+                    </td>
+                    <td className="px-4 py-3">
+                      <input
+                        type="text"
+                        value={row.trackingNumber || ""}
+                        onChange={(e) => updateManualRow(row.id, "trackingNumber", e.target.value)}
+                        placeholder="TRACK-001"
+                        className="w-full bg-slate-50 border border-slate-100 rounded-lg px-3 py-2 text-xs font-bold outline-none focus:border-[#C5A021] text-slate-800"
+                      />
+                    </td>
+                    <td className="px-4 py-3">
+                      <input
                         type="text"
                         value={row.notes}
                         onChange={(e) => updateManualRow(row.id, "notes", e.target.value)}
@@ -476,7 +628,6 @@ export default function ImportedOrdersTab({ classes, vendors, showToast, fetchDa
                 ))}
               </tbody>
             </table>
-          </div>
         )}
       </div>
 

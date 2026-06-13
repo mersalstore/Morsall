@@ -73,19 +73,25 @@ function buildProxiedClient(): PrismaClient {
           const method = (modelTarget as any)[methodProp];
           if (typeof methodProp === "string" && RETRYABLE_METHODS.has(methodProp) && typeof method === "function") {
             return async (...args: any[]) => {
-              try {
-                const live: any = globalThis.prismaGlobal ?? client;
-                return await live[modelProp as any][methodProp](...args);
-              } catch (err) {
-                if (!isRecoverablePrismaPanic(err)) throw err;
-                // Recreate client + retry once
-                try { await (globalThis.prismaGlobal as any)?.$disconnect?.(); } catch {}
-                await new Promise((r) => setTimeout(r, 200));
-                const fresh = createClient();
-                globalThis.prismaGlobal = fresh;
-                client = fresh;
-                return await (fresh as any)[modelProp as any][methodProp](...args);
+              let lastErr: any;
+              // Up to 4 attempts: on "timer has gone away" panic, drop the engine
+              // (fire-and-forget disconnect so it can't hang) and spin a fresh client.
+              for (let attempt = 0; attempt < 4; attempt++) {
+                try {
+                  const live: any = globalThis.prismaGlobal ?? client;
+                  return await live[modelProp as any][methodProp](...args);
+                } catch (err) {
+                  lastErr = err;
+                  if (!isRecoverablePrismaPanic(err)) throw err;
+                  // Don't await — a panicked engine's $disconnect can hang.
+                  try { (globalThis.prismaGlobal as any)?.$disconnect?.().catch(() => {}); } catch {}
+                  await new Promise((r) => setTimeout(r, 150 + attempt * 250));
+                  const fresh = createClient();
+                  globalThis.prismaGlobal = fresh;
+                  client = fresh;
+                }
               }
+              throw lastErr;
             };
           }
           return typeof method === "function" ? method.bind(modelTarget) : method;
