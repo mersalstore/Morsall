@@ -73,6 +73,42 @@ export default function AddProductModal({
   // Unified Image State
   const [previews, setPreviews] = useState<{ url: string; file?: File }[]>([]);
 
+  // Tabular specifications
+  const [specs, setSpecs] = useState<{ key: string; values: string[] }[]>([]);
+
+  const addSpec = () => setSpecs(prev => [...prev, { key: "", values: [""] }]);
+  const removeSpec = (idx: number) => setSpecs(prev => prev.filter((_, i) => i !== idx));
+  const updateSpecKey = (idx: number, keyVal: string) => {
+    setSpecs(prev => prev.map((s, i) => i === idx ? { ...s, key: keyVal } : s));
+  };
+  const updateSpecValue = (rowIdx: number, valIdx: number, val: string) => {
+    setSpecs(prev => prev.map((s, i) => {
+      if (i === rowIdx) {
+        const newVals = [...s.values];
+        newVals[valIdx] = val;
+        return { ...s, values: newVals };
+      }
+      return s;
+    }));
+  };
+  const addSpecValue = (rowIdx: number) => {
+    setSpecs(prev => prev.map((s, i) => {
+      if (i === rowIdx) {
+        return { ...s, values: [...s.values, ""] };
+      }
+      return s;
+    }));
+  };
+  const removeSpecValue = (rowIdx: number, valIdx: number) => {
+    setSpecs(prev => prev.map((s, i) => {
+      if (i === rowIdx) {
+        const newVals = s.values.filter((_, vi) => vi !== valIdx);
+        return { ...s, values: newVals.length > 0 ? newVals : [""] };
+      }
+      return s;
+    }));
+  };
+
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -121,6 +157,32 @@ export default function AddProductModal({
                 image: v.image || ""
               })) || []);
 
+              // Parse specifications
+              if (data.specifications) {
+                try {
+                  const parsed = typeof data.specifications === 'string' ? JSON.parse(data.specifications) : data.specifications;
+                  if (Array.isArray(parsed)) {
+                    const normalized = parsed.map((s: any) => {
+                      if (Array.isArray(s.values)) {
+                        return { key: s.key, values: s.values };
+                      } else if (s.value !== undefined) {
+                        return { key: s.key, values: [String(s.value)] };
+                      }
+                      return { key: s.key || "", values: [""] };
+                    });
+                    setSpecs(normalized);
+                  } else if (typeof parsed === 'object') {
+                    setSpecs(Object.entries(parsed).map(([k, v]) => ({ key: k, values: [String(v)] })));
+                  } else {
+                    setSpecs([{ key: "", values: [""] }]);
+                  }
+                } catch {
+                  setSpecs([{ key: "", values: [""] }]);
+                }
+              } else {
+                setSpecs([{ key: "", values: [""] }]);
+              }
+
               if (Array.isArray(data.images)) {
                 setPreviews(data.images.map((url: string) => ({ url })));
               } else if (typeof data.images === "string" && data.images.trim()) {
@@ -156,6 +218,7 @@ export default function AddProductModal({
         setSelectedAttributes([]);
         setVariations([]);
         setPreviews([]);
+        setSpecs([{ key: "", values: [""] }]);
       }
     } else {
       document.body.style.overflow = '';
@@ -258,6 +321,7 @@ export default function AddProductModal({
         productAttributes: selectedAttributes,
         variations: variations,
         bundleData: formData.type === 'BUNDLE' ? JSON.stringify(bundleItems) : null,
+        specifications: specs,
         status: "APPROVED"
       };
 
@@ -396,6 +460,82 @@ export default function AddProductModal({
                         placeholder="اكتب مواصفات المنتج الكاملة هنا..."
                         className="w-full bg-white px-4 py-3 outline-none min-h-[150px] text-sm text-gray-900 resize-y"
                       />
+                    </div>
+                  </div>
+
+                  {/* Tabular Specifications */}
+                  <div className="border-t border-gray-100 pt-6 mt-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <div>
+                        <h4 className="text-sm font-bold text-gray-900">المواصفات الفنية الديناميكية</h4>
+                        <p className="text-[11px] text-gray-500 font-medium mt-0.5">أضف الخصائص الفنية للمنتج وقيمها المتعددة (مثل: اللون، الذاكرة...)</p>
+                      </div>
+                      <button 
+                        type="button"
+                        onClick={addSpec} 
+                        className="px-3.5 py-1.5 bg-[#C5A021] text-white hover:bg-[#b08e1c] rounded-lg font-bold text-xs transition-all flex items-center gap-1 shadow-sm"
+                      >
+                        <Plus size={14} />
+                        إضافة صف جديد
+                      </button>
+                    </div>
+
+                    <div className="space-y-3">
+                      {specs.map((spec, rowIdx) => (
+                        <div key={rowIdx} className="bg-gray-50 p-4 rounded-lg border border-gray-200 shadow-sm space-y-3">
+                          <div className="flex gap-3 items-center">
+                            <input
+                              type="text"
+                              value={spec.key}
+                              onChange={e => updateSpecKey(rowIdx, e.target.value)}
+                              placeholder="اسم الصفة (مثلاً: اللون أو الذاكرة)"
+                              className="w-1/3 bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm font-bold outline-none focus:border-[#C5A021] focus:ring-1 focus:ring-[#C5A021] outline-none transition-all text-gray-900"
+                            />
+                            <div className="flex-1 flex flex-wrap gap-2 items-center">
+                              {spec.values.map((val, valIdx) => (
+                                <div key={valIdx} className="flex items-center gap-1.5 bg-white rounded-lg px-2 py-1 border border-gray-300 shadow-sm">
+                                  <input
+                                    type="text"
+                                    value={val}
+                                    onChange={e => updateSpecValue(rowIdx, valIdx, e.target.value)}
+                                    placeholder="القيمة"
+                                    className="bg-transparent border-none outline-none text-xs font-bold w-20 focus:ring-0 text-gray-900"
+                                  />
+                                  {spec.values.length > 1 && (
+                                    <button
+                                      type="button"
+                                      onClick={() => removeSpecValue(rowIdx, valIdx)}
+                                      className="text-red-400 hover:text-red-600 transition-colors shrink-0"
+                                    >
+                                      <X size={12} />
+                                    </button>
+                                  )}
+                                </div>
+                              ))}
+                              <button
+                                type="button"
+                                onClick={() => addSpecValue(rowIdx)}
+                                className="w-7 h-7 rounded-lg bg-gray-200 text-gray-600 flex items-center justify-center hover:bg-gray-300 transition-all shrink-0"
+                                title="إضافة قيمة فرعية أفقياً"
+                              >
+                                <Plus size={14} />
+                              </button>
+                            </div>
+                            <button 
+                              type="button"
+                              onClick={() => removeSpec(rowIdx)} 
+                              className="w-9 h-9 bg-red-50 text-red-500 rounded-lg flex items-center justify-center hover:bg-red-100 transition-all shrink-0 border border-red-100"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                      {specs.length === 0 && (
+                        <p className="text-center text-xs text-gray-400 py-6 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+                          لا توجد مواصفات فنية ديناميكية. اضغط "إضافة صف جديد" للبدء.
+                        </p>
+                      )}
                     </div>
                   </div>
                 </div>

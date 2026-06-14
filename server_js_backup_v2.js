@@ -1,0 +1,163 @@
+const { createServer } = require('http');
+const { parse } = require('url');
+const path = require('path');
+const fs = require('fs');
+
+// ── Logging ──────────────────────────────────────────────────
+const logFile = fs.createWriteStream(path.join(__dirname, 'server.log'), { flags: 'a' });
+const log = (...args) => {
+  const line = `[${new Date().toISOString()}] ${args.join(' ')}\n`;
+  process.stdout.write(line);
+  logFile.write(line);
+};
+
+log('=== MORSALL SERVER v2 STARTING ===');
+
+// ── Hostinger Node Modules ────────────────────────────────────
+// Search for node_modules in common Hostinger locations
+const searchPaths = [
+  path.join(__dirname, 'node_modules'),
+  '/home/u754458241/nodeapp/node_modules'
+];
+
+let nodeModulesPath = '';
+for (const p of searchPaths) {
+  if (fs.existsSync(p)) {
+    log('Found node_modules at:', p);
+    nodeModulesPath = p;
+    break;
+  }
+}
+
+if (nodeModulesPath) {
+  process.env.NODE_PATH = nodeModulesPath;
+  require('module').Module._initPaths();
+} else {
+  log('WARNING: node_modules NOT FOUND');
+}
+
+// ── Environment ───────────────────────────────────────────────
+process.env.NODE_ENV = 'production';
+process.env.PRISMA_CLIENT_ENGINE_TYPE = 'library';
+process.env.TOKIO_WORKER_THREADS = '1';
+process.env.UV_THREADPOOL_SIZE = '1';
+
+// Load .env.production if dotenv available
+try {
+  require('dotenv').config({ path: path.join(__dirname, '.env.production') });
+  log('Loaded .env.production');
+} catch (e) {
+  log('dotenv not available, using system env');
+}
+
+log('DATABASE_URL set:', !!process.env.DATABASE_URL);
+log('NEXTAUTH_URL:', process.env.NEXTAUTH_URL);
+log('UPLOAD_DIR:', process.env.UPLOAD_DIR);
+
+// ── Ensure uploads directory exists ──────────────────────────
+const uploadsDir = process.env.UPLOAD_DIR || path.join(__dirname, 'public', 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+  try {
+    fs.mkdirSync(uploadsDir, { recursive: true, mode: 0o755 });
+    log('Created uploads dir:', uploadsDir);
+  } catch (e) {
+    log('WARNING: Could not create uploads dir:', e.message);
+  }
+}
+
+// ── Startup DB Check ─────────────────────────────────────────────
+(async () => {
+  try {
+    const { PrismaClient } = require('@prisma/client');
+    const db = new PrismaClient();
+    const settings = await db.settings.findUnique({ where: { id: 'global' } });
+    log('Current logo in DB:', settings?.logo || 'NOT SET');
+    await db.$disconnect();
+  } catch (e) {
+    log('WARNING: Startup DB check failed:', e.message);
+  }
+})();
+
+// ── Start Next.js ─────────────────────────────────────────────
+const next = require('next');
+const app = next({ dev: false, dir: __dirname });
+const handle = app.getRequestHandler();
+
+const MIME_TYPES = {
+  '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png',
+  '.gif': 'image/gif', '.webp': 'image/webp', '.svg': 'image/svg+xml',
+  '.ico': 'image/x-icon',
+};
+
+app.prepare().then(() => {
+  createServer(async (req, res) => {
+    try {
+      const parsedUrl = parse(req.url, true);
+      const { pathname } = parsedUrl;
+
+      // ── No-cache for HTML pages & API routes ─────────────────
+      const isApi = pathname && pathname.startsWith('/api/');
+      const isPage = !pathname || (!pathname.startsWith('/_next/') && !pathname.startsWith('/uploads/') && !pathname.match(/\.(png|jpg|jpeg|gif|svg|ico|webp|js|css|woff|woff2)$/));
+      if (isApi || isPage) {
+        res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+        res.setHeader('Pragma', 'no-cache');
+        res.setHeader('Expires', '0');
+        res.setHeader('Surrogate-Control', 'no-store');
+      }
+
+      // ── Health check ──────────────────────────────────────
+      if (pathname === '/health' || pathname === '/diag') {
+        res.setHeader('Content-Type', 'application/json');
+        res.end(JSON.stringify({
+          status: 'ok',
+          time: new Date().toISOString(),
+          env: process.env.NODE_ENV,
+          db: process.env.DATABASE_URL ? 'configured' : 'MISSING',
+          uploadsDir,
+          uploadsExists: fs.existsSync(uploadsDir),
+        }));
+        return;
+      }
+
+      // ── Serve uploaded files directly ─────────────────────
+      // Handles: /uploads/filename.jpg
+      if (pathname && pathname.startsWith('/uploads/')) {
+        const fileName = pathname.replace('/uploads/', '');
+        // Safety: no path traversal
+        if (!fileName || fileName.includes('..') || fileName.includes('/')) {
+          res.statusCode = 400;
+          res.end('Bad Request');
+          return;
+        }
+
+        const filePath = path.join(uploadsDir, fileName);
+        if (fs.existsSync(filePath)) {
+          const ext = path.extname(fileName).toLowerCase();
+          const mime = MIME_TYPES[ext] || 'application/octet-stream';
+          res.setHeader('Content-Type', mime);
+          res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+          fs.createReadStream(filePath).pipe(res);
+          return;
+        } else {
+          res.statusCode = 404;
+          res.end('Image not found');
+          return;
+        }
+      }
+
+      // ── Handle all Next.js requests ───────────────────────
+      await handle(req, res, parsedUrl);
+    } catch (err) {
+      log('SERVER_ERROR:', err.message);
+      res.statusCode = 500;
+      res.end('Internal Server Error');
+    }
+  }).listen(process.env.PORT || 3000, () => {
+    log(`Server running on port ${process.env.PORT || 3000}`);
+    log('Uploads served from:', uploadsDir);
+  });
+}).catch(err => {
+  log('PREPARE_ERROR:', err.message);
+  log(err.stack);
+  process.exit(1);
+});

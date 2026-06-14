@@ -1,0 +1,17 @@
+Found 16 lines with [AUTH] or [next-auth][error]. Showing last 50:
+Line 11: [AUTH] Error during authorize: Error: كلمة المرور غير صحيحة
+Line 19: [AUTH] Error during authorize: Error: كلمة المرور غير صحيحة
+Line 27: [AUTH] Error during authorize: Error: كلمة المرور غير صحيحة
+Line 38: [AUTH] Error during authorize: Error: كلمة المرور غير صحيحة
+Line 52: [AUTH] Error during authorize: Error: كلمة المرور غير صحيحة
+Line 60: [AUTH] Error during authorize: Error: كلمة المرور غير صحيحة
+Line 68: [AUTH] Error during authorize: Error: كلمة المرور غير صحيحة
+Line 76: [AUTH] Error during authorize: Error: كلمة المرور غير صحيحة
+Line 87: [AUTH] Error during authorize: Error: البريد الإلكتروني غير مسجل لدينا
+Line 150: [AUTH] Error during authorize: Error: كلمة المرور غير صحيحة
+Line 158: [AUTH] Error during authorize: Error: كلمة المرور غير صحيحة
+Line 166: [AUTH] Error during authorize: Error: كلمة المرور غير صحيحة
+Line 174: [AUTH] Error during authorize: Error: كلمة المرور غير صحيحة
+Line 182: [AUTH] Error during authorize: Error: كلمة المرور غير صحيحة
+Line 190: [AUTH] Error during authorize: Error: كلمة المرور غير صحيحة
+Line 6357: [AUTH] Error during authorize: Error: البريد الإلكتروني غير مسجل لدينا

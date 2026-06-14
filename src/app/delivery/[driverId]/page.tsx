@@ -15,6 +15,7 @@ export default function DriverPortal() {
   const [activeOrderId, setActiveOrderId] = useState<string | null>(null);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
   const [isOnline, setIsOnline] = useState(false);
+  const [sendingMsgId, setSendingMsgId] = useState<string | null>(null);
   
   const timerRef = useRef<any>(null);
 
@@ -48,6 +49,27 @@ export default function DriverPortal() {
     } catch (err) {}
   };
 
+  const sendCannedMessage = async (orderId: string, messageKey: "way" | "near") => {
+    try {
+      setSendingMsgId(`${orderId}-${messageKey}`);
+      const res = await fetch("/api/delivery/notify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId, messageKey })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        alert(`تم إرسال الإشعار بنجاح! الوقت المقدر: ${data.eta}`);
+      } else {
+        alert(data.error || "فشل إرسال الإشعار");
+      }
+    } catch (err) {
+      alert("خطأ في الاتصال بالسيرفر");
+    } finally {
+      setSendingMsgId(null);
+    }
+  };
+
   // ── GPS Tracking & Delivery Handling ──
   const startTracking = (orderId: string) => {
     if (activeOrderId === orderId) {
@@ -72,9 +94,9 @@ export default function DriverPortal() {
             const { latitude, longitude } = position.coords;
             try {
               const res = await fetch("/api/delivery/tracking", {
-                method: "PATCH",
+                method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ orderId, lat: latitude, lng: longitude })
+                body: JSON.stringify({ driverId, lat: latitude, lng: longitude })
               });
               if (res.ok) {
                 setLastUpdate(new Date());
@@ -93,9 +115,9 @@ export default function DriverPortal() {
       }
     };
 
-    // Run immediately and then every 10 seconds
+    // Run immediately and then every 30 seconds
     updateLocation();
-    timerRef.current = setInterval(updateLocation, 10000);
+    timerRef.current = setInterval(updateLocation, 30000);
   };
 
   useEffect(() => {
@@ -241,6 +263,28 @@ export default function DriverPortal() {
                          <a href={`tel:${order.phone}`} className="text-xs text-[#C5A021] font-black underline">{order.phone}</a>
                       </div>
                    </div>
+                </div>
+
+                {/* Canned Notifications Quick Actions */}
+                <div className="flex gap-2 pt-2 border-t border-gray-100">
+                   <button
+                     type="button"
+                     onClick={() => sendCannedMessage(order.id, "way")}
+                     disabled={sendingMsgId !== null}
+                     className="flex-1 py-2.5 px-3 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-xl text-[10px] font-bold transition-all disabled:opacity-50 flex items-center justify-center gap-1.5"
+                   >
+                     <span className="material-symbols-rounded text-sm">directions_car</span>
+                     أنا في الطريق إليك
+                   </button>
+                   <button
+                     type="button"
+                     onClick={() => sendCannedMessage(order.id, "near")}
+                     disabled={sendingMsgId !== null}
+                     className="flex-1 py-2.5 px-3 bg-green-50 text-green-600 hover:bg-green-100 rounded-xl text-[10px] font-bold transition-all disabled:opacity-50 flex items-center justify-center gap-1.5"
+                   >
+                     <span className="material-symbols-rounded text-sm">notifications_active</span>
+                     اقتربت من موقعك
+                   </button>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3 pt-2">

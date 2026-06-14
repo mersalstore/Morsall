@@ -19,12 +19,14 @@ export default async function ShopPage(props: {
     minRating?: string;
     includeOutOfStock?: string;
     nextDay?: string;
+    vendor?: string;
   }>;
 }) {
   const sp = await props.searchParams;
   const query     = sp.q;
   const category  = sp.category;
   const sort      = sp.sort;
+  const vendorId  = sp.vendor;
   const minRating = sp.minRating ? parseFloat(sp.minRating) : 0;
 
   const orderBy: any = sort === "price_asc"
@@ -49,6 +51,7 @@ export default async function ShopPage(props: {
   }
 
   if (category) where.categoryId = category;
+  if (vendorId)  where.vendorId   = vendorId;
 
   const selectedBrands = (sp.brand || "").split(",").map((b) => b.trim()).filter(Boolean);
   if (selectedBrands.length) where.brand = { in: selectedBrands };
@@ -82,6 +85,15 @@ export default async function ShopPage(props: {
   const brands = brandRows
     .map((b: any) => b.brand)
     .filter((b: string | null): b is string => !!b && b.trim().length > 0);
+
+  // Distinct approved vendors for the sidebar vendor filter
+  const vendorRows = await prisma.vendor.findMany({
+    where: { status: "APPROVED" },
+    select: { id: true, storeName: true },
+    orderBy: { storeName: "asc" },
+    take: 60,
+  });
+  const vendors = vendorRows.filter((v: any) => v.storeName);
 
   let mapped = dbProducts.map((p: any) => ({
     id: p.id,
@@ -121,7 +133,7 @@ export default async function ShopPage(props: {
         {/* Sidebar */}
         <aside className="hidden md:block">
           <div className="sticky top-28">
-            <ShopFilters brands={brands} />
+            <ShopFilters brands={brands} vendors={vendors} />
           </div>
         </aside>
 

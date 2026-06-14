@@ -6,10 +6,11 @@ import { useEffect, useState } from "react";
 
 const FALLBACK_BRANDS = ["Vixcell", "Mersal Official", "Samsung", "Apple"];
 
-export default function ShopFilters({ brands = [] }: { brands?: string[] }) {
+export default function ShopFilters({ brands = [], vendors = [] }: { brands?: string[]; vendors?: { id: string; storeName: string }[] }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const currentCategory = searchParams.get("category");
+  const currentVendor = searchParams.get("vendor");
   const currentMinPrice = searchParams.get("minPrice") || "";
   const currentMaxPrice = searchParams.get("maxPrice") || "";
   const currentBrands = (searchParams.get("brand") || "").split(",").map(b => b.trim()).filter(Boolean);
@@ -25,7 +26,7 @@ export default function ShopFilters({ brands = [] }: { brands?: string[] }) {
   const hasActiveFilters = !!(
     currentCategory || currentMinPrice || currentMaxPrice ||
     currentBrands.length || currentRating || nextDay || includeOutOfStock ||
-    searchParams.get("sort")
+    searchParams.get("sort") || currentVendor
   );
 
   useEffect(() => {
@@ -168,6 +169,29 @@ export default function ShopFilters({ brands = [] }: { brands?: string[] }) {
            })}
          </div>
       </div>
+
+      {/* Vendor Filter */}
+      {vendors.length > 0 && (
+        <div className="space-y-2">
+          <h4 className="font-bold mb-2 text-[#0F172A]">المتاجر والبائعون</h4>
+          <div className="flex flex-col gap-2 max-h-52 overflow-y-auto pr-1">
+            {vendors.map(v => {
+              const isChecked = currentVendor === v.id;
+              return (
+                <label key={v.id} className="flex items-center gap-2 cursor-pointer group">
+                  <input
+                    type="checkbox"
+                    checked={isChecked}
+                    onChange={() => updateFilters("vendor", isChecked ? null : v.id)}
+                    className="w-4 h-4 rounded border-gray-400 accent-[#e77600] cursor-pointer"
+                  />
+                  <span className={cn("text-sm transition-colors group-hover:text-[#C7511F] truncate", isChecked ? "font-bold text-[#e77600]" : "text-gray-800")}>{v.storeName}</span>
+                </label>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Brands */}
       <div className="space-y-2">

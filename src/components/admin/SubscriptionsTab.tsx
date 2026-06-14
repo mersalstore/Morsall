@@ -14,7 +14,10 @@ export default function SubscriptionsTab({ showToast }: { showToast?: (message: 
     name: "",
     price: 0,
     durationDays: 30,
-    isTrial: false
+    isTrial: false,
+    billingCycle: "MONTHLY",
+    accountType: "FIXED",
+    maxProducts: 0
   });
 
   useEffect(() => {
@@ -42,11 +45,22 @@ export default function SubscriptionsTab({ showToast }: { showToast?: (message: 
         name: plan.name,
         price: plan.price,
         durationDays: plan.durationDays,
-        isTrial: plan.isTrial
+        isTrial: plan.isTrial,
+        billingCycle: plan.billingCycle || "MONTHLY",
+        accountType: plan.accountType || "FIXED",
+        maxProducts: plan.maxProducts || 0
       });
     } else {
       setEditingPlan(null);
-      setFormData({ name: "", price: 0, durationDays: 30, isTrial: false });
+      setFormData({ 
+        name: "", 
+        price: 0, 
+        durationDays: 30, 
+        isTrial: false,
+        billingCycle: "MONTHLY",
+        accountType: "FIXED",
+        maxProducts: 0
+      });
     }
     setIsModalOpen(true);
   };
@@ -153,6 +167,42 @@ export default function SubscriptionsTab({ showToast }: { showToast?: (message: 
                 <label className="block text-sm font-bold text-gray-700 mb-1">المدة (أيام)</label>
                 <input required type="number" min="1" value={formData.durationDays} onChange={e => setFormData({...formData, durationDays: Number(e.target.value)})} className="w-full border rounded-xl px-4 py-2 outline-none focus:border-[#C5A021]" />
               </div>
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-1">دورة الفوترة</label>
+                <select 
+                  value={formData.billingCycle} 
+                  onChange={e => setFormData({...formData, billingCycle: e.target.value})} 
+                  className="w-full border rounded-xl px-4 py-2 outline-none focus:border-[#C5A021]"
+                >
+                  <option value="MONTHLY">شهري (Monthly)</option>
+                  <option value="YEARLY">سنوي (Annually)</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-1">نوع الحساب / الاحتساب</label>
+                <select 
+                  value={formData.accountType} 
+                  onChange={e => setFormData({...formData, accountType: e.target.value})} 
+                  className="w-full border rounded-xl px-4 py-2 outline-none focus:border-[#C5A021]"
+                >
+                  <option value="FIXED">قيمة ثابتة (Fixed value)</option>
+                  <option value="SALES_PERCENTAGE">نسبة من مبيعات التاجر (Percentage of sales)</option>
+                  <option value="PRODUCT_LIMIT">محدود بعدد منتجات أقصى (Product threshold limit)</option>
+                </select>
+              </div>
+              {formData.accountType === "PRODUCT_LIMIT" && (
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-1">الحد الأقصى للمنتجات</label>
+                  <input 
+                    required 
+                    type="number" 
+                    min="1" 
+                    value={formData.maxProducts} 
+                    onChange={e => setFormData({...formData, maxProducts: Number(e.target.value)})} 
+                    className="w-full border rounded-xl px-4 py-2 outline-none focus:border-[#C5A021]" 
+                  />
+                </div>
+              )}
               <div className="flex items-center gap-2 pt-2">
                 <input type="checkbox" id="isTrial" checked={formData.isTrial} onChange={e => setFormData({...formData, isTrial: e.target.checked})} className="w-5 h-5 accent-[#C5A021]" />
                 <label htmlFor="isTrial" className="text-sm font-bold text-gray-700 cursor-pointer">هذه باقة تجريبية مجانية</label>

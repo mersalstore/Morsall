@@ -1,0 +1,7 @@
+=== DIAG INFO ===
+getcwd(): /home/u754458241/domains/morsall.com/public_html
+realpath('.'): /home/u754458241/domains/morsall.com/public_html
+PHP version: 8.3.30
+app_new exists: NO
+app_new/app.js exists: NO
+app_new/.next exists: NO

@@ -188,26 +188,108 @@ export default function AdminDashboard() {
     return "";
   });
 
-  const [statusFilter, setStatusFilterState] = useState<string | null>(() => {
+  // Orders Scoped Filters
+  const [ordersDateRange, setOrdersDateRangeState] = useState<string>(() => {
     if (typeof window !== "undefined") {
       const searchParams = new URLSearchParams(window.location.search);
-      const status = searchParams.get("status");
-      if (status) return status;
+      const range = searchParams.get("o_range");
+      if (range) return range;
+      try {
+        const cached = localStorage.getItem("mersal_admin_orders_date_range");
+        if (cached) return cached;
+      } catch {}
     }
-    return null;
+    return "all";
   });
-  const setStatusFilter = (val: string | null) => {
-    setStatusFilterState(val);
+  const setOrdersDateRange = (val: string) => {
+    setOrdersDateRangeState(val);
+    try { localStorage.setItem("mersal_admin_orders_date_range", val); } catch {}
     if (typeof window !== "undefined") {
       const url = new URL(window.location.href);
-      if (val) {
-        url.searchParams.set("status", val);
-      } else {
-        url.searchParams.delete("status");
+      url.searchParams.set("o_range", val);
+      if (val !== "custom") {
+        url.searchParams.delete("o_from");
+        url.searchParams.delete("o_to");
       }
       window.history.replaceState({}, "", url.toString());
     }
   };
+
+  const [ordersCustomFrom, setOrdersCustomFrom] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      const searchParams = new URLSearchParams(window.location.search);
+      return searchParams.get("o_from") || "";
+    }
+    return "";
+  });
+
+  const [ordersCustomTo, setOrdersCustomTo] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      const searchParams = new URLSearchParams(window.location.search);
+      return searchParams.get("o_to") || "";
+    }
+    return "";
+  });
+
+  const [ordersStatusFilter, setOrdersStatusFilterState] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      const searchParams = new URLSearchParams(window.location.search);
+      const status = searchParams.get("o_status");
+      if (status) return status;
+    }
+    return "الكل";
+  });
+  const setOrdersStatusFilter = (val: string) => {
+    setOrdersStatusFilterState(val);
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      url.searchParams.set("o_status", val);
+      window.history.replaceState({}, "", url.toString());
+    }
+  };
+
+  // Logistics Scoped Filters
+  const [logisticsDateRange, setLogisticsDateRangeState] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      const searchParams = new URLSearchParams(window.location.search);
+      const range = searchParams.get("l_range");
+      if (range) return range;
+      try {
+        const cached = localStorage.getItem("mersal_admin_logistics_date_range");
+        if (cached) return cached;
+      } catch {}
+    }
+    return "all";
+  });
+  const setLogisticsDateRange = (val: string) => {
+    setLogisticsDateRangeState(val);
+    try { localStorage.setItem("mersal_admin_logistics_date_range", val); } catch {}
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      url.searchParams.set("l_range", val);
+      if (val !== "custom") {
+        url.searchParams.delete("l_from");
+        url.searchParams.delete("l_to");
+      }
+      window.history.replaceState({}, "", url.toString());
+    }
+  };
+
+  const [logisticsCustomFrom, setLogisticsCustomFrom] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      const searchParams = new URLSearchParams(window.location.search);
+      return searchParams.get("l_from") || "";
+    }
+    return "";
+  });
+
+  const [logisticsCustomTo, setLogisticsCustomTo] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      const searchParams = new URLSearchParams(window.location.search);
+      return searchParams.get("l_to") || "";
+    }
+    return "";
+  });
 
   const handleCustomDateApply = () => {
     if (typeof window !== "undefined") {
@@ -218,6 +300,28 @@ export default function AdminDashboard() {
       window.history.replaceState({}, "", url.toString());
     }
     fetchData("custom", customFrom, customTo);
+  };
+
+  const handleOrdersCustomDateApply = () => {
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      url.searchParams.set("o_range", "custom");
+      url.searchParams.set("o_from", ordersCustomFrom);
+      url.searchParams.set("o_to", ordersCustomTo);
+      window.history.replaceState({}, "", url.toString());
+    }
+    fetchData(undefined, undefined, undefined, "custom", ordersCustomFrom, ordersCustomTo);
+  };
+
+  const handleLogisticsCustomDateApply = () => {
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      url.searchParams.set("l_range", "custom");
+      url.searchParams.set("l_from", logisticsCustomFrom);
+      url.searchParams.set("l_to", logisticsCustomTo);
+      window.history.replaceState({}, "", url.toString());
+    }
+    fetchData(undefined, undefined, undefined, undefined, undefined, undefined, undefined, "custom", logisticsCustomFrom, logisticsCustomTo);
   };
 
   // Print Policy variables
@@ -298,20 +402,56 @@ export default function AdminDashboard() {
     }, 30000); // 30 seconds
     
     return () => clearInterval(interval);
-  }, [status, dateRange, customFrom, customTo]);
+  }, [
+    status, 
+    dateRange, customFrom, customTo, 
+    ordersDateRange, ordersCustomFrom, ordersCustomTo, ordersStatusFilter,
+    logisticsDateRange, logisticsCustomFrom, logisticsCustomTo
+  ]);
 
-  const fetchData = async (range?: string, from?: string, to?: string) => {
+  const fetchData = async (
+    range?: string, from?: string, to?: string,
+    oRangeVal?: string, oFromVal?: string, oToVal?: string, oStatusVal?: string,
+    lRangeVal?: string, lFromVal?: string, lToVal?: string
+  ) => {
     if (!initialLoaded) {
       setLoading(true);
     }
     try {
+      // Overview stats URL
       const r = range || dateRange;
       let statsUrl = `/api/admin/stats?range=${r}`;
-      if (r === "custom" && from && to) statsUrl += `&from=${from}&to=${to}`;
+      if (r === "custom") {
+        const f = from || customFrom;
+        const t = to || customTo;
+        if (f && t) statsUrl += `&from=${f}&to=${t}`;
+      }
+
+      // Orders URL
+      const oR = oRangeVal || ordersDateRange;
+      let ordersUrl = `/api/admin/orders?range=${oR}`;
+      if (oR === "custom") {
+        const oF = oFromVal || ordersCustomFrom;
+        const oT = oToVal || ordersCustomTo;
+        if (oF && oT) ordersUrl += `&from=${oF}&to=${oT}`;
+      }
+      const oS = oStatusVal || ordersStatusFilter;
+      if (oS && oS !== "الكل" && oS !== "ALL") {
+        ordersUrl += `&status=${oS}`;
+      }
+
+      // Logistics URL
+      const lR = lRangeVal || logisticsDateRange;
+      let logisticsUrl = `/api/admin/orders?logistics=1&range=${lR}`;
+      if (lR === "custom") {
+        const lF = lFromVal || logisticsCustomFrom;
+        const lT = lToVal || logisticsCustomTo;
+        if (lF && lT) logisticsUrl += `&from=${lF}&to=${lT}`;
+      }
 
       const [resOrders, resLogisticsOrders, resProducts, resStats, resPending, resUsers, resVendors, resDrivers, resBranches] = await Promise.all([
-        fetch("/api/admin/orders"),                          // طلبات عادية (تخفي AWAITING_PICKUP)
-        fetch("/api/admin/orders?logistics=1"),              // كل الطلبات للوجستيات
+        fetch(ordersUrl),
+        fetch(logisticsUrl),
         fetch("/api/admin/inventory"),
         fetch(statsUrl),
         fetch("/api/admin/approvals"),
@@ -572,13 +712,13 @@ export default function AdminDashboard() {
                   <h3 className="text-lg font-black text-[#0F172A] mb-4 flex items-center gap-3">
                     <span className="w-8 h-1.5 bg-[#F29124] rounded-full"/>
                     حالات الطلبات
-                    <button onClick={() => { setStatusFilter(null); handleTabChange("orders"); }} className="text-[10px] font-black text-[#C5A021] bg-[#C5A021]/10 px-3 py-1 rounded-xl mr-2">عرض الكل</button>
+                    <button onClick={() => { setOrdersStatusFilter("الكل"); handleTabChange("orders"); }} className="text-[10px] font-black text-[#C5A021] bg-[#C5A021]/10 px-3 py-1 rounded-xl mr-2">عرض الكل</button>
                   </h3>
                   <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
                     {Object.entries(ORDER_STATUSES).map(([key, s]: any) => (
                       <button
                         key={key}
-                        onClick={() => { setStatusFilter(key); handleTabChange("orders"); }}
+                        onClick={() => { setOrdersStatusFilter(key); handleTabChange("orders"); }}
                         className="bg-white rounded-[1.5rem] p-4 border border-slate-100 shadow-md hover:shadow-xl hover:border-[#C5A021]/30 transition-all text-center group"
                       >
                         <div className={cn("w-10 h-10 rounded-2xl bg-gradient-to-br flex items-center justify-center text-white mx-auto mb-3 group-hover:scale-110 transition-transform", s.color)}>
@@ -653,7 +793,16 @@ export default function AdminDashboard() {
                   }}
                   classes={classes} 
                   ORDER_STATUSES={ORDER_STATUSES}
-                  defaultStatusFilter={statusFilter}
+                  defaultStatusFilter={ordersStatusFilter}
+                  ordersDateRange={ordersDateRange}
+                  setOrdersDateRange={setOrdersDateRange}
+                  ordersCustomFrom={ordersCustomFrom}
+                  setOrdersCustomFrom={setOrdersCustomFrom}
+                  ordersCustomTo={ordersCustomTo}
+                  setOrdersCustomTo={setOrdersCustomTo}
+                  ordersStatusFilter={ordersStatusFilter}
+                  setOrdersStatusFilter={setOrdersStatusFilter}
+                  onCustomDateApply={handleOrdersCustomDateApply}
                   onRefresh={fetchData}
                   onAssignDriver={async (orderId, driverId) => {
                     try {
@@ -750,6 +899,13 @@ export default function AdminDashboard() {
                 ORDER_STATUSES={ORDER_STATUSES} 
                 classes={classes} 
                 showToast={showToast} 
+                logisticsDateRange={logisticsDateRange}
+                setLogisticsDateRange={setLogisticsDateRange}
+                logisticsCustomFrom={logisticsCustomFrom}
+                setLogisticsCustomFrom={setLogisticsCustomFrom}
+                logisticsCustomTo={logisticsCustomTo}
+                setLogisticsCustomTo={setLogisticsCustomTo}
+                onCustomDateApply={handleLogisticsCustomDateApply}
                 onPrint={(order) => {
                   setPrintingOrders([order]);
                   setIsPolicyModalOpen(true);

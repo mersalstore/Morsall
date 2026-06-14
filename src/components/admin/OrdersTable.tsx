@@ -18,15 +18,38 @@ interface OrdersTableProps {
   onAssignBranch?: (orderId: string, branchId: string) => Promise<void>;
   showToast?: (message: string, type?: "success" | "error" | "info") => void;
   onRefresh?: () => void;
+
+  ordersDateRange?: string;
+  setOrdersDateRange?: (val: string) => void;
+  ordersCustomFrom?: string;
+  setOrdersCustomFrom?: (val: string) => void;
+  ordersCustomTo?: string;
+  setOrdersCustomTo?: (val: string) => void;
+  ordersStatusFilter?: string;
+  setOrdersStatusFilter?: (val: string) => void;
+  onCustomDateApply?: () => void;
 }
 
 export default function OrdersTable({
   orders, onEdit, onPrint, onPrintBulk, classes, ORDER_STATUSES, defaultStatusFilter,
-  drivers = [], onAssignDriver, branches = [], onAssignBranch, showToast, onRefresh
+  drivers = [], onAssignDriver, branches = [], onAssignBranch, showToast, onRefresh,
+  ordersDateRange, setOrdersDateRange, ordersCustomFrom, setOrdersCustomFrom,
+  ordersCustomTo, setOrdersCustomTo, ordersStatusFilter, setOrdersStatusFilter, onCustomDateApply
 }: OrdersTableProps) {
 
   const [orderSearch, setOrderSearch] = useState("");
-  const [oStatusFilter, setOStatusFilter] = useState(defaultStatusFilter || "الكل");
+  const [localStatusFilter, setLocalStatusFilter] = useState("الكل");
+  const oStatusFilter = ordersStatusFilter !== undefined ? ordersStatusFilter : localStatusFilter;
+  const setOStatusFilter = (val: string) => {
+    if (setOrdersStatusFilter) {
+      setOrdersStatusFilter(val);
+      if (onRefresh) {
+        setTimeout(() => onRefresh(), 50);
+      }
+    } else {
+      setLocalStatusFilter(val);
+    }
+  };
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [routingMode, setRoutingMode] = useState<"DRIVER" | "BRANCH">("DRIVER");
   const [activeQuickDriverId, setActiveQuickDriverId] = useState<string>("");
@@ -253,6 +276,32 @@ export default function OrdersTable({
     }
   };
 
+  const handleBulkStatusChange = async (newStatus: string) => {
+    if (!newStatus) return;
+    setAssigningLoading(true);
+    try {
+      const updates = Array.from(selectedIds).map(id => ({ id, status: newStatus }));
+      const res = await fetch("/api/admin/orders/bulk-update", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ updates })
+      });
+      if (res.ok) {
+        const statusLabel = ORDER_STATUSES[newStatus]?.label || newStatus;
+        showToast?.(`✅ تم تحديث حالة ${selectedIds.size} طلب إلى "${statusLabel}" بنجاح`, "success");
+        setSelectedIds(new Set());
+        onRefresh?.();
+      } else {
+        const err = await res.json().catch(() => ({}));
+        showToast?.(`فشل تغيير الحالة الجماعي: ${err.error || "خطأ غير معروف"}`, "error");
+      }
+    } catch (error: any) {
+      showToast?.(`خطأ في الاتصال: ${error.message}`, "error");
+    } finally {
+      setAssigningLoading(false);
+    }
+  };
+
   const handleBulkAssignBranch = async (branchId: string) => {
     setAssigningLoading(true);
     try {
@@ -356,6 +405,56 @@ export default function OrdersTable({
             />
             <span className="material-symbols-rounded text-slate-400 ml-4 cursor-pointer hover:text-slate-600">settings</span>
           </div>
+        </div>
+        {/* Date Filter */}
+        <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100 flex flex-wrap gap-3 items-center">
+          <span className="text-xs font-black text-slate-400 uppercase tracking-widest ml-2">الفترة:</span>
+          {[
+            { key: "today", label: "اليوم" },
+            { key: "week",  label: "آخر 7 أيام" },
+            { key: "month", label: "آخر 30 يوم" },
+            { key: "all",   label: "الكل" },
+            { key: "custom", label: "مخصص" },
+          ].map(r => (
+            <button
+              key={r.key}
+              onClick={() => {
+                if (setOrdersDateRange) {
+                  setOrdersDateRange(r.key);
+                  if (r.key !== "custom" && onRefresh) {
+                    setTimeout(() => onRefresh(), 50);
+                  }
+                }
+              }}
+              className={cn(
+                "px-4 py-2 rounded-2xl text-xs font-black transition-all",
+                ordersDateRange === r.key ? "bg-[#C5A021] text-white" : "bg-white text-slate-400 hover:bg-slate-100 border border-slate-200/50"
+              )}
+            >{r.label}</button>
+          ))}
+          {ordersDateRange === "custom" && (
+            <div className="flex items-center gap-2 mr-2">
+              <input
+                type="date"
+                value={ordersCustomFrom || ""}
+                onChange={e => setOrdersCustomFrom && setOrdersCustomFrom(e.target.value)}
+                className="bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold outline-none"
+              />
+              <span className="text-slate-400">←</span>
+              <input
+                type="date"
+                value={ordersCustomTo || ""}
+                onChange={e => setOrdersCustomTo && setOrdersCustomTo(e.target.value)}
+                className="bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold outline-none"
+              />
+              <button
+                onClick={() => onCustomDateApply && onCustomDateApply()}
+                className="bg-[#C5A021] text-white px-4 py-2 rounded-xl text-xs font-black"
+              >
+                تطبيق
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Filter Controls & Actions Bar */}
@@ -683,6 +782,26 @@ export default function OrdersTable({
                   >
                     <option value="">🏢 تحويل فرع للمحددة...</option>
                     {branches.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
+                  </select>
+
+                  {/* Bulk Status Change */}
+                  <select
+                    disabled={assigningLoading}
+                    onChange={async (e) => {
+                      const newStatus = e.target.value;
+                      if (!newStatus) return;
+                      const statusLabel = ORDER_STATUSES[newStatus]?.label || newStatus;
+                      if (confirm(`هل أنت متأكد من تغيير حالة ${selectedIds.size} طلب إلى "${statusLabel}"؟`)) {
+                        await handleBulkStatusChange(newStatus);
+                      }
+                      e.target.value = "";
+                    }}
+                    className="bg-[#C5A021]/10 border border-[#C5A021]/30 rounded-xl px-2.5 py-1.5 text-[10px] font-black outline-none text-[#0F172A] focus:border-[#C5A021] cursor-pointer"
+                  >
+                    <option value="">🔄 تغيير الحالة الجماعي...</option>
+                    {Object.keys(ORDER_STATUSES).map(key => (
+                      <option key={key} value={key}>{ORDER_STATUSES[key].label}</option>
+                    ))}
                   </select>
                 </div>
 

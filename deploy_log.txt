@@ -1,0 +1,41 @@
+﻿Zipping...
+Created fast_update.zip
+Uploading...
+Connecting to 82.198.228.182...
+Login successful!
+Initial PWD: /public_html
+Warning: could not change directory to public_html: 550 domains/morsall.com/public_html: No such file or directory
+Target PWD: /public_html
+Uploading fast_update.zip (17.84 MB)...
+
+Progress: 5.61%
+Progress: 11.21%
+Progress: 16.82%
+Progress: 22.43%
+Progress: 28.03%
+Progress: 33.64%
+Progress: 39.25%
+Progress: 44.85%
+Progress: 50.46%
+Progress: 56.07%
+Progress: 61.67%
+Progress: 67.28%
+Progress: 72.89%
+Progress: 78.49%
+Progress: 84.10%
+Progress: 89.71%
+Progress: 95.31%
+Progress: 100.00%
+Successfully uploaded fast_update.zip
+Uploading emergency_deploy.php...
+Successfully uploaded emergency_deploy.php
+Extracting...
+.\do_fast_deploy.bat : Access denied
+At line:1 char:1
++ .\do_fast_deploy.bat 2>&1 | Out-File -Encoding utf8 deploy_log.txt; " ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Access denied:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+FATAL ERROR: Configured password was not accepted
+DONE

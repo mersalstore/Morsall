@@ -32,6 +32,7 @@ model User {
   sessions      Session[]
   vendorProfile Vendor?
   vendorReviews VendorReview[]
+  deliveryDriverProfile DeliveryDriver?
 }
 
 model Account {
@@ -102,6 +103,7 @@ model Vendor {
   storeDesign        String?           @db.Text
   tier               VendorPlan         @default(FREEMIUM)
   stripeCustomerId   String?
+  customSubscriptionFee Float?
   paymentTransactions  PaymentTransaction[]
   customDesignRequests CustomDesignRequest[]
   coupons            Coupon[]
@@ -133,6 +135,8 @@ model SubscriptionPlan {
   maxProducts       Int                @default(0)
   maxBlocks         Int                @default(0)
   stripePriceId     String?            @unique
+  billingCycle      String             @default("MONTHLY")
+  accountType       String             @default("FIXED")
   features          Json?              // ["رفع المنتجات", "منشئ المواقع", ...]
   createdAt         DateTime           @default(now())
   vendors           Vendor[]
@@ -260,6 +264,7 @@ model Category {
   name         String     @unique
   icon         String?    @db.Text
   image        String?    @db.Text
+  imageUrl     String?    @db.Text
   parentId     String?
   showInNavbar Boolean    @default(false)
   parent       Category?  @relation("SubCategories", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
@@ -299,6 +304,10 @@ model Order {
   branchId          String?
   source            String          @default("STORE")
   createdBy         String?
+  couponCode        String?
+  discountAmount    Float           @default(0)
+  attemptCounter    Int             @default(0)
+  failureReason     String?         @db.Text
 
   // Logistics tracking fields
   packageContent            String?         @db.Text
@@ -419,13 +428,17 @@ model ShippingProvider {
 
 model DeliveryDriver {
   id                String                    @id @default(cuid())
+  userId            String?                   @unique
   name              String
   phone             String                    @unique
   vehicleType       String
   isActive          Boolean                   @default(true)
   isOnline          Boolean                   @default(false)
   balance           Float                     @default(0)
+  lat               Float?
+  lng               Float?
   createdAt         DateTime                  @default(now())
+  user              User?                     @relation(fields: [userId], references: [id], onDelete: Cascade)
   orders            Order[]
   walletTransactions DriverWalletTransaction[]
 }
@@ -481,9 +494,11 @@ model Coupon {
   maxDiscount    Float?    @default(0)
   expiryDate     DateTime?
   isActive       Boolean   @default(true)
-  vendorId       String
+  vendorId       String?
+  scope          String    @default("ALL")
+  targetIds      String?   @db.Text
   createdAt      DateTime  @default(now())
-  vendor         Vendor    @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  vendor         Vendor?   @relation(fields: [vendorId], references: [id], onDelete: Cascade)
 }
 
 model SupplyRequest {
@@ -661,4 +676,14 @@ model ImportedOrder {
   processedAt   DateTime?
 
   @@index([supplierId])
+}
+
+model ShippingRegion {
+  id           String   @id @default(cuid())
+  state        String
+  city         String
+  shippingRate Float    @default(0.0)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }

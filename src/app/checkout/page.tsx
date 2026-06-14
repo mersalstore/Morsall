@@ -14,6 +14,32 @@ export default function CheckoutPage() {
   const { data: session } = useSession();
   const router = useRouter();
 
+  // Coupon states
+  const [couponCode, setCouponCode] = useState("");
+  const [discountAmount, setDiscountAmount] = useState(0);
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [couponError, setCouponError] = useState<string | null>(null);
+  const [appliedCouponCode, setAppliedCouponCode] = useState<string | null>(null);
+
+  // Shipping regions state (Sudan matrix)
+  const [shippingRegions, setShippingRegions] = useState<any[]>([]);
+
+  // Load active shipping regions
+  useEffect(() => {
+    fetch("/api/shipping-regions")
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          const active = data.filter(r => r.isActive !== false);
+          setShippingRegions(active);
+          if (active.length > 0) {
+            setForm(prev => ({ ...prev, city: active[0].city }));
+          }
+        }
+      })
+      .catch(err => console.error("Error loading shipping regions:", err));
+  }, []);
+
   const [form, setForm] = useState({
     name: session?.user?.name || "",
     phone: "",
@@ -31,9 +57,54 @@ export default function CheckoutPage() {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const shippingCost = 5000;
+  // Dynamic shipping cost based on Sudan shipping region rate
+  const selectedRegion = shippingRegions.find(r => r.city === form.city);
+  let shippingCost = selectedRegion ? selectedRegion.shippingRate : 5000;
+
+  // Programmatic Free Shipping: If Total > 50,000 SDG -> Shipping = 0 (Module 6)
+  if (subtotal > 50000) {
+    shippingCost = 0;
+  }
+
   const codFee = (form.paymentMethod === "COD" && settings?.codExtraFee) ? settings.codExtraFee : 0;
-  const total = subtotal + shippingCost + codFee;
+  const total = Math.max(0, subtotal + shippingCost + codFee - discountAmount);
+
+  // Apply Coupon Function
+  async function handleApplyCoupon() {
+    if (!couponCode.trim()) return;
+    setCouponLoading(true);
+    setCouponError(null);
+    try {
+      const res = await fetch("/api/coupons/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          code: couponCode,
+          subtotal,
+          items: cart.map(item => ({
+            productId: item.id,
+            vendorId: item.vendorId || "unknown",
+            quantity: item.quantity,
+            price: item.price,
+          })),
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setDiscountAmount(data.discountAmount || 0);
+        setAppliedCouponCode(data.code);
+        setCouponError(null);
+      } else {
+        setCouponError(data.error || "فشل تطبيق الكوبون");
+        setDiscountAmount(0);
+        setAppliedCouponCode(null);
+      }
+    } catch (err) {
+      setCouponError("خطأ في الاتصال بالسيرفر");
+    } finally {
+      setCouponLoading(false);
+    }
+  }
 
   useEffect(() => {
     // Fetch Settings
@@ -147,6 +218,8 @@ export default function CheckoutPage() {
           paymentScreenshot: form.paymentScreenshot,
           subtotal,
           shippingCost,
+          couponCode: appliedCouponCode || null,
+          discountAmount: discountAmount || 0,
           items: cart.map(item => ({
             productId: item.id,
             variationId: item.variationId || null,
@@ -302,7 +375,11 @@ export default function CheckoutPage() {
                   <label className="text-xs font-bold text-gray-500 block mb-1">المدينة *</label>
                   <select name="city" value={form.city} onChange={handleChange}
                     className="w-full border border-gray-300 rounded px-3 py-2.5 text-sm font-bold text-right outline-none focus:border-[#C5A021] transition-all bg-white">
-                    {CITIES.map(c => <option key={c} value={c}>{c}</option>)}
+                    {shippingRegions.length > 0 ? (
+                      shippingRegions.map(r => <option key={r.id} value={r.city}>{r.city}</option>)
+                    ) : (
+                      CITIES.map(c => <option key={c} value={c}>{c}</option>)
+                    )}
                   </select>
                 </div>
                 <div>
@@ -411,12 +488,24 @@ export default function CheckoutPage() {
                                   </div>
                                 )}
                               </div>
-                              {acc.qrCode && (
+                              {acc.accountNumber && (
                                 <div className="flex flex-col items-center gap-2 flex-shrink-0">
-                                  <p className="text-[10px] font-black text-gray-400">امسح للدفع الفوري</p>
+                                  <p className="text-[10px] font-black text-gray-400">امسح للدفع الفوري (بنكك)</p>
                                   <div className="w-28 h-28 border-2 border-[#C5A021]/30 rounded-xl overflow-hidden bg-white">
-                                    <Image src={acc.qrCode} alt="QR" width={112} height={112} className="w-full h-full object-contain p-1" />
+                                    <img 
+                                      src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(`bok://transfer?account=${acc.accountNumber}&amount=${total}&name=${encodeURIComponent(acc.accountName || "")}`)}`} 
+                                      alt="QR الدفع" 
+                                      width={112} 
+                                      height={112} 
+                                      className="w-full h-full object-contain p-1" 
+                                    />
                                   </div>
+                                  <a 
+                                    href={`bok://transfer?account=${acc.accountNumber}&amount=${total}&name=${encodeURIComponent(acc.accountName || "")}`}
+                                    className="text-[9px] text-blue-500 font-bold underline hover:text-[#C5A021]"
+                                  >
+                                    فتح تطبيق بنكك مباشر 📱
+                                  </a>
                                 </div>
                               )}
                             </div>
@@ -511,12 +600,57 @@ export default function CheckoutPage() {
                 )}
               </div>
               <div className="border-t border-gray-100 p-4 space-y-3 text-sm">
+                {/* Coupon Field */}
+                <div className="p-4 border-t border-gray-100 space-y-2 text-right" dir="rtl">
+                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block">هل لديك كوبون خصم؟</label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="أدخل رمز الكوبون"
+                      value={couponCode}
+                      onChange={(e) => setCouponCode(e.target.value)}
+                      className="flex-1 bg-gray-50 border border-gray-100 rounded-xl px-4 py-2 text-xs font-bold outline-none focus:border-[#C5A021]"
+                      disabled={!!appliedCouponCode}
+                    />
+                    {appliedCouponCode ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setAppliedCouponCode(null);
+                          setDiscountAmount(0);
+                          setCouponCode("");
+                        }}
+                        className="px-4 py-2 bg-red-100 text-red-600 rounded-xl text-xs font-bold hover:bg-red-200 transition-all"
+                      >
+                        إلغاء
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={handleApplyCoupon}
+                        className="px-4 py-2 bg-[#0F172A] text-white rounded-xl text-xs font-bold hover:bg-[#C5A021] transition-all disabled:opacity-60"
+                        disabled={couponLoading}
+                      >
+                        {couponLoading ? "جاري التطبيق..." : "تطبيق"}
+                      </button>
+                    )}
+                  </div>
+                  {couponError && <p className="text-[10px] text-red-500 font-bold">{couponError}</p>}
+                  {appliedCouponCode && <p className="text-[10px] text-green-600 font-bold">تم تطبيق الكوبون بنجاح خصم {discountAmount.toLocaleString()} ج.س</p>}
+                </div>
+
                 <div className="flex justify-between text-gray-500">
                   <span className="font-bold">{subtotal.toLocaleString()} ج.س</span>
                   <span>المنتجات</span>
                 </div>
+                {discountAmount > 0 && (
+                  <div className="flex justify-between text-green-600 animate-in slide-in-from-right-4 duration-300">
+                    <span className="font-bold">-{discountAmount.toLocaleString()} ج.س</span>
+                    <span>الخصم</span>
+                  </div>
+                )}
                 <div className="flex justify-between text-gray-500">
-                  <span className="font-bold">{shippingCost.toLocaleString()} ج.س</span>
+                  <span className="font-bold">{shippingCost === 0 ? "مجاني" : `${shippingCost.toLocaleString()} ج.س`}</span>
                   <span>الشحن</span>
                 </div>
                 {codFee > 0 && (

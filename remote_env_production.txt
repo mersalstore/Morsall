@@ -1,0 +1,8 @@
+DATABASE_URL="mysql://u754458241_Kanan:Code2252@127.0.0.1/u754458241_Kanan?connection_limit=1"
+GOOGLE_CLIENT_ID="949180865508-uc3av4gfh0he5u7dqub8es9g9crgrduu.apps.googleusercontent.com"
+GOOGLE_CLIENT_SECRET="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"
+NEXTAUTH_URL="https://morsall.com"
+NEXTAUTH_SECRET="MersalEliteSecret2026"
+PRISMA_CLIENT_ENGINE_TYPE=binary
+UPLOAD_INLINE_FALLBACK=0
+MAX_UPLOAD_SIZE_MB=10

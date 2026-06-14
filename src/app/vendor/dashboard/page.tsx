@@ -104,6 +104,54 @@ export default function VendorDashboard() {
       window.history.replaceState({}, "", url.toString());
     }
   };
+
+  const [orderDateRange, setOrderDateRangeState] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      const searchParams = new URLSearchParams(window.location.search);
+      const val = searchParams.get("o_range");
+      if (val) return val;
+    }
+    return "all";
+  });
+
+  const setOrderDateRange = (val: string) => {
+    setOrderDateRangeState(val);
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      url.searchParams.set("o_range", val);
+      if (val !== "custom") {
+        url.searchParams.delete("o_from");
+        url.searchParams.delete("o_to");
+      }
+      window.history.replaceState({}, "", url.toString());
+    }
+  };
+
+  const [orderCustomFrom, setOrderCustomFrom] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      const searchParams = new URLSearchParams(window.location.search);
+      return searchParams.get("o_from") || "";
+    }
+    return "";
+  });
+
+  const [orderCustomTo, setOrderCustomTo] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      const searchParams = new URLSearchParams(window.location.search);
+      return searchParams.get("o_to") || "";
+    }
+    return "";
+  });
+
+  const handleOrderCustomDateApply = () => {
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      url.searchParams.set("o_range", "custom");
+      url.searchParams.set("o_from", orderCustomFrom);
+      url.searchParams.set("o_to", orderCustomTo);
+      window.history.replaceState({}, "", url.toString());
+    }
+  };
   const [selectedProducts, setSelectedProducts] = useState<Set<string>>(new Set());
   const [selectedOrders, setSelectedOrders] = useState<Set<string>>(new Set());
   const [withdrawals, setWithdrawals] = useState<any[]>([]);
@@ -346,13 +394,36 @@ export default function VendorDashboard() {
                          (productStatusFilter === "published" && p.status === "APPROVED") ||
                          (productStatusFilter === "pending" && p.status === "PENDING");
     return matchesSearch && matchesStatus;
-  });
-
-  const filteredOrders = orders.filter(o => {
+  });  const filteredOrders = orders.filter(o => {
     const matchesSearch = o.customerName.toLowerCase().includes(orderSearch.toLowerCase()) || 
-                         o.id.toLowerCase().includes(orderSearch.toLowerCase());
+                          o.id.toLowerCase().includes(orderSearch.toLowerCase());
     const matchesStatus = orderStatusFilter === "all" || o.status === orderStatusFilter;
-    return matchesSearch && matchesStatus;
+
+    const matchesDate = (() => {
+      const createdAt = new Date(o.createdAt);
+      const now = new Date();
+      if (orderDateRange === "today") {
+        const start = new Date(now); start.setHours(0,0,0,0);
+        const end = new Date(now); end.setHours(23,59,59,999);
+        return createdAt >= start && createdAt <= end;
+      }
+      if (orderDateRange === "week") {
+        const start = new Date(now); start.setDate(now.getDate() - 7);
+        return createdAt >= start;
+      }
+      if (orderDateRange === "month") {
+        const start = new Date(now); start.setDate(now.getDate() - 30);
+        return createdAt >= start;
+      }
+      if (orderDateRange === "custom" && orderCustomFrom && orderCustomTo) {
+        const start = new Date(orderCustomFrom);
+        const end = new Date(orderCustomTo + "T23:59:59");
+        return createdAt >= start && createdAt <= end;
+      }
+      return true;
+    })();
+
+    return matchesSearch && matchesStatus && matchesDate;
   });
 
   const stats = [
@@ -781,6 +852,50 @@ export default function VendorDashboard() {
                          طباعة البوليصات {selectedOrders.size > 0 && `(${selectedOrders.size})`}
                       </button>
                   </div>
+               </div>
+
+               {/* Date Filter */}
+               <div className="bg-white rounded-2xl md:rounded-3xl p-4 border border-border shadow-sm flex flex-wrap gap-3 items-center">
+                  <span className="text-xs font-black text-gray-400 uppercase tracking-widest ml-2">الفترة:</span>
+                  {[
+                    { key: "today", label: "اليوم" },
+                    { key: "week",  label: "آخر 7 أيام" },
+                    { key: "month", label: "آخر 30 يوم" },
+                    { key: "all",   label: "الكل" },
+                    { key: "custom", label: "مخصص" },
+                  ].map(r => (
+                    <button
+                      key={r.key}
+                      onClick={() => setOrderDateRange(r.key)}
+                      className={cn(
+                        "px-4 py-2 rounded-xl text-xs font-black transition-all",
+                        orderDateRange === r.key ? "bg-[#C5A021] text-white shadow-md" : "bg-gray-50 text-gray-400 hover:bg-gray-100"
+                      )}
+                    >{r.label}</button>
+                  ))}
+                  {orderDateRange === "custom" && (
+                    <div className="flex items-center gap-2 mr-2">
+                      <input
+                        type="date"
+                        value={orderCustomFrom}
+                        onChange={e => setOrderCustomFrom(e.target.value)}
+                        className="bg-gray-50 border border-gray-100 rounded-xl px-3 py-2 text-xs font-bold outline-none"
+                      />
+                      <span className="text-gray-400">←</span>
+                      <input
+                        type="date"
+                        value={orderCustomTo}
+                        onChange={e => setOrderCustomTo(e.target.value)}
+                        className="bg-gray-50 border border-gray-100 rounded-xl px-3 py-2 text-xs font-bold outline-none"
+                      />
+                      <button
+                        onClick={handleOrderCustomDateApply}
+                        className="bg-[#C5A021] text-white px-4 py-2 rounded-xl text-xs font-black"
+                      >
+                        تطبيق
+                      </button>
+                    </div>
+                  )}
                </div>
 
                {/* Order Status Tabs & Search */}

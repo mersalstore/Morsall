@@ -1,0 +1,44 @@
+﻿
+> matger2@0.1.0 prebuild
+> node scripts/fix-perms.js
+
+Running on Windows, skipping permission fix.
+
+> matger2@0.1.0 build
+> prisma generate && cross-env NODE_OPTIONS=--max-old-space-size=4096 NEXT_DISABLE_SENTRY=1 next build
+
+Environment variables loaded from .env
+Prisma schema loaded from prisma\schema.prisma
+
+✔ Generated Prisma Client (v6.2.1) to .\node_modules\@prisma\client in 410ms
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+Tip: Interested in query caching in just a few lines of code? Try Accelerate today! https://pris.ly/tip-3-accelerate
+
+   ▲ Next.js 15.5.15
+   - Environments: .env.production, .env
+   - Experiments (use with caution):
+     · cpus: 1
+     ⨯ webpackBuildWorker
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 8.1s
+   Skipping validation of types
+   Skipping linting
+   Collecting page data ...
+node.exe : [Error: Cannot find module 'D:\New-folder\matger2\node_modules\@prisma\client\runtime\library.js'] {
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Users\hazem\AppData\Roaming\ ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ([Error: Cannot ...\library.js'] {:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  code: 'MODULE_NOT_FOUND',
+  path: 'D:\\New-folder\\matger2\\node_modules\\@prisma\\client'
+}
+
+> Build error occurred
+[Error: Failed to collect page data for /api/admin/approvals] {
+  type: 'Error'
+}

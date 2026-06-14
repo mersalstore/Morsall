@@ -208,7 +208,8 @@ export async function PUT(req: Request) {
     const body = await req.json();
     const { 
       id, storeName, ownerName, ownerEmail, ownerPassword, phone, location,
-      commissionType, commissionRate, fixedFee, subscriptionFee, subscriptionEndsAt 
+      commissionType, commissionRate, fixedFee, subscriptionFee, subscriptionEndsAt,
+      customSubscriptionFee
     } = body;
 
     if (!id) return NextResponse.json({ error: "Missing Vendor ID" }, { status: 400 });
@@ -225,6 +226,9 @@ export async function PUT(req: Request) {
     if (fixedFee !== undefined) updateData.fixedFee = fixedFee;
     if (subscriptionFee !== undefined) updateData.subscriptionFee = subscriptionFee;
     if (subscriptionEndsAt !== undefined) updateData.subscriptionEndsAt = subscriptionEndsAt;
+    if (customSubscriptionFee !== undefined) {
+      updateData.customSubscriptionFee = customSubscriptionFee === "" || customSubscriptionFee === null ? null : parseFloat(customSubscriptionFee);
+    }
 
     const userUpdateData: any = {};
     if (ownerName) userUpdateData.name = ownerName;

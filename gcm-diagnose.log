@@ -1,0 +1,210 @@
+﻿Diagnose log at 2026-05-27T06:30:33Z
+
+AppPath: C:\Program Files\Git\mingw64\bin\git-credential-manager.exe
+InstallDir: C:\Program Files\Git\mingw64\bin\
+Version: 2.7.3+5fa7116896c82164996a609accd1c5ad90fe730a
+
+------------
+Diagnostic: Environment
+Skipped: False
+Success: True
+Exception: None
+Log:
+OSType: Windows
+OSVersion: 10.0 (build 26200)
+Reading environment variables... OK
+ Variables:
+USERDOMAIN_ROAMINGPROFILE=HAZEM
+ProgramFiles(x86)=C:\Program Files (x86)
+MSYSTEM=MINGW64
+NODE_USE_SYSTEM_CA=1
+EXEPATH=C:\Program Files\Git\bin
+ChocolateyInstall=C:\ProgramData\chocolatey
+PROCESSOR_IDENTIFIER=Intel64 Family 6 Model 141 Stepping 1, GenuineIntel
+TMP=C:\Users\hazem\AppData\Local\Temp
+PROCESSOR_ARCHITECTURE=AMD64
+DriverData=C:\Windows\System32\Drivers\DriverData
+PATHEXT=.COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC;.PY;.PYW
+BAGGAGE=sentry-environment=production,sentry-release=Claude%401.9255.2,sentry-public_key=2f98127cbffe4740b1f767a2de77d23b,sentry-trace_id=2c7039bb6ff548c78fbd914e758eeeac,sentry-org_id=1158394
+PUBLIC=C:\Users\Public
+ANTHROPIC_BASE_URL=https://api.anthropic.com
+SENTRY-TRACE=2c7039bb6ff548c78fbd914e758eeeac-bb10cff72a659503
+PWD=D:/New-folder/matger2
+USERDOMAIN=HAZEM
+PROCESSOR_REVISION=8d01
+CLAUDE_CODE_EXECPATH=C:\Users\hazem\AppData\Roaming\Claude\claude-code\2.1.149\claude.exe
+ChocolateyLastPathUpdate=134188349417243557
+USERPROFILE=C:\Users\hazem
+GIT_TRACE2_PARENT_SID=f7a34bac-30f9-4715-be83-ae8f91e9fb21
+LOGONSERVER=\\HAZEM
+TEMP=C:\Users\hazem\AppData\Local\Temp
+USERNAME=hazem
+CLAUDE_CODE_ENABLE_ASK_USER_QUESTION_TOOL=true
+CHROME_CRASHPAD_PIPE_NAME=\\.\pipe\crashpad_11012_OCCSOXFVBNJESTUT
+GIT_EXEC_PATH=C:/Program Files/Git/mingw64/libexec/git-core
+PLINK_PROTOCOL=ssh
+COMMONPROGRAMFILES=C:\Program Files\Common Files
+_=C:/Program Files/Git/mingw64/bin/git
+NUMBER_OF_PROCESSORS=12
+OneDrive=C:\Users\hazem\OneDrive
+LOCALAPPDATA=C:\Users\hazem\AppData\Local
+PATH=C:/Program Files/Git/mingw64/libexec/git-core;C:\Users\hazem\bin;C:\Program Files\Git\mingw64\bin;C:\Program Files\Git\usr\local\bin;C:\Program Files\Git\usr\bin;C:\Program Files\Git\usr\bin;C:\Program Files\Git\mingw64\bin;C:\Program Files\Git\usr\bin;C:\Users\hazem\bin;C:\Program Files\Python314\Scripts;C:\Program Files\Python314;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0;C:\WINDOWS\System32\OpenSSH;C:\Program Files\Microsoft VS Code\bin;C:\Program Files\dotnet;C:\ProgramData\chocolatey\bin;C:\Program Files\nodejs;C:\Program Files\Git\cmd;C:\Users\hazem\AppData\Local\agy\bin;C:\Users\hazem\AppData\Local\Microsoft\WindowsApps;C:\Users\hazem\AppData\Local\Programs\Antigravity\bin;C:\Users\hazem\AppData\Local\PowerToys\DSCModules;C:\dart-sdk\bin;C:\flutter\bin;C:\Users\hazem\AppData\Roaming\npm;C:\Users\hazem\.local\bin;C:\Users\hazem\AppData\Local\Programs\Ollama;D:\hazem\cursor\resources\app\bin;C:\Program Files\nodejs;C:\Program Files\Python314;C:\Program Files\Git\mingw64\bin;C:\Program Files\Git\usr\bin\vendor_perl;C:\Program Files\Git\usr\bin\core_perl;C:\Users\hazem\AppData\Roaming\Claude\local-agent-mode-sessions\skills-plugin\e891b2b4-bea3-4fdf-ab24-a65861525f76\6d055415-cba3-4bf9-8ebe-9d9071ab99cb\bin
+USE_STAGING_OAUTH=
+CLAUDE_CODE_SDK_HAS_OAUTH_REFRESH=1
+PROCESSOR_LEVEL=6
+ProgramW6432=C:\Program Files
+API_TIMEOUT_MS=900000
+LC_CTYPE=C.UTF-8
+HOMEPATH=\Users\hazem
+SYSTEMROOT=C:\WINDOWS
+WINDIR=C:\WINDOWS
+CLAUDE_CODE_EMIT_TOOL_USE_SUMMARIES=false
+CLAUDE_EFFORT=max
+ALLUSERSPROFILE=C:\ProgramData
+CommonProgramW6432=C:\Program Files\Common Files
+MCP_CONNECTION_NONBLOCKING=true
+SHELL=C:\Program Files\Git\bin\bash.exe
+GIT_EDITOR=true
+TERM=xterm-256color
+COREPACK_ENABLE_AUTO_PIN=0
+PROGRAMFILES=C:\Program Files
+SHLVL=1
+CommonProgramFiles(x86)=C:\Program Files (x86)\Common Files
+HOMEDRIVE=C:
+CLAUDE_CODE_DISABLE_CRON=
+AI_AGENT=claude-code_2-1-149_agent
+ANTHROPIC_API_KEY=
+CLAUDE_CODE_ENTRYPOINT=claude-desktop
+OS=Windows_NT
+__COMPAT_LAYER=DetectorsAppHealth
+NoDefaultCurrentDirectoryInExePath=1
+CLAUDE_CODE_SDK_HAS_HOST_AUTH_REFRESH=1
+HOME=C:\Users\hazem
+CLAUDE_AGENT_SDK_VERSION=0.3.149
+PSModulePath=C:\Program Files\WindowsPowerShell\Modules;C:\WINDOWS\system32\WindowsPowerShell\v1.0\Modules
+TMPDIR=C:\Users\hazem\AppData\Local\Temp
+APPDATA=C:\Users\hazem\AppData\Roaming
+SYSTEMDRIVE=C:
+COMPUTERNAME=HAZEM
+asl.log=Destination=file
+COMSPEC=C:\WINDOWS\system32\cmd.exe
+CLAUDE_CODE_SESSION_ID=8f98eb26-33e1-40b2-8ac9-925e06f30dc3
+CLAUDECODE=1
+DISABLE_MICROCOMPACT=1
+USE_LOCAL_OAUTH=
+ProgramData=C:\ProgramData
+DISABLE_AUTOUPDATER=1
+
+
+------------
+Diagnostic: File system
+Skipped: False
+Success: True
+Exception: None
+Log:
+Temporary directory is 'C:\Users\hazem\AppData\Local\Temp\'...
+Checking basic file I/O...
+Writing to temporary file 'C:\Users\hazem\AppData\Local\Temp\ef5d4d0ebcb8db1427963a68'... OK
+Reading from temporary file 'C:\Users\hazem\AppData\Local\Temp\ef5d4d0ebcb8db1427963a68'... OK
+Deleting temporary file 'C:\Users\hazem\AppData\Local\Temp\ef5d4d0ebcb8db1427963a68'... OK
+Testing IFileSystem instance...
+UserHomePath: C:\Users\hazem
+UserDataDirectoryPath: C:\Users\hazem\.gcm
+GetCurrentDirectory(): D:\New-folder\matger2
+
+------------
+Diagnostic: Networking
+Skipped: False
+Success: True
+Exception: None
+Log:
+Checking networking and HTTP stack...
+Creating HTTP client... OK
+IsNetworkAvailable: True
+Sending HEAD request to http://example.com...Sending HEAD request to https://example.com... OK
+ OK
+Acquiring free TCP port... OK
+Testing local HTTP loopback connections...
+Creating new HTTP listener for http://localhost:63393/... OK
+Waiting for loopback connection... OK
+Writing response... OK
+Waiting for response data... OK
+Loopback connection data OK
+
+------------
+Diagnostic: Git
+Skipped: False
+Success: True
+Exception: None
+Log:
+Getting Git version... OK
+Git version is '2.53.0.windows.2'
+Locating current repository...Git repository at 'D:/New-folder/matger2/.git'
+ OK
+Listing all Git configuration... OK
+Git configuration:
+file:C:/Program Files/Git/etc/gitconfig	diff.astextplain.textconv=astextplain
+file:C:/Program Files/Git/etc/gitconfig	filter.lfs.clean=git-lfs clean -- %f
+file:C:/Program Files/Git/etc/gitconfig	filter.lfs.smudge=git-lfs smudge -- %f
+file:C:/Program Files/Git/etc/gitconfig	filter.lfs.process=git-lfs filter-process
+file:C:/Program Files/Git/etc/gitconfig	filter.lfs.required=true
+file:C:/Program Files/Git/etc/gitconfig	http.sslbackend=schannel
+file:C:/Program Files/Git/etc/gitconfig	core.autocrlf=true
+file:C:/Program Files/Git/etc/gitconfig	core.fscache=true
+file:C:/Program Files/Git/etc/gitconfig	core.symlinks=false
+file:C:/Program Files/Git/etc/gitconfig	pull.rebase=false
+file:C:/Program Files/Git/etc/gitconfig	credential.helper=manager
+file:C:/Program Files/Git/etc/gitconfig	credential.https://dev.azure.com.usehttppath=true
+file:C:/Program Files/Git/etc/gitconfig	init.defaultbranch=master
+file:C:/Users/hazem/.gitconfig	credential.helper=
+file:C:/Users/hazem/.gitconfig	credential.helper=C:/Program\ Files/Git/mingw64/bin/git-credential-manager.exe
+file:.git/config	core.repositoryformatversion=0
+file:.git/config	core.filemode=false
+file:.git/config	core.bare=false
+file:.git/config	core.logallrefupdates=true
+file:.git/config	core.symlinks=false
+file:.git/config	core.ignorecase=true
+file:.git/config	user.email=hazem@mersal.com
+file:.git/config	user.name=Hazem
+file:.git/config	remote.origin.url=https://github.com/mersalstore/Morsall.git
+file:.git/config	remote.origin.fetch=+refs/heads/*:refs/remotes/origin/*
+file:.git/config	branch.main.remote=origin
+file:.git/config	branch.main.merge=refs/heads/main
+file:.git/config	branch.main.vscode-merge-base=origin/main
+
+
+------------
+Diagnostic: Credential storage
+Skipped: False
+Success: True
+Exception: None
+Log:
+ICredentialStore instance is of type: CredentialStore
+Writing test credential... OK
+Reading test credential... OK
+Deleting test credential... OK
+
+------------
+Diagnostic: Microsoft authentication (AAD/MSA)
+Skipped: False
+Success: True
+Exception: None
+Log:
+Broker is not enabled.
+Flow type is: Auto
+Gathering MSAL token cache data... OK
+CacheDirectory: C:\Users\hazem\AppData\Local\.IdentityService
+CacheFileName: msal.cache
+CacheFilePath: C:\Users\hazem\AppData\Local\.IdentityService\msal.cache
+Creating cache helper... OK
+Verifying MSAL token cache persistence... OK
+
+------------
+Diagnostic: GitHub API
+Skipped: False
+Success: True
+Exception: None
+Log:
+Using 'https://github.com/' as API target.
+Querying '/meta' endpoint... OK
+

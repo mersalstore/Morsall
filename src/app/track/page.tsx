@@ -1,35 +1,53 @@
-"use client"
+"use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import PageHeader from "@/components/PageHeader";
 
 export default function TrackOrderPage() {
   const [orderId, setOrderId] = useState("");
   const [trackingResult, setTrackingResult] = useState<any>(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleTrack = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleTrack = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     if (!orderId) return;
     setLoading(true);
-    
-    // Simulate API call for now
-    setTimeout(() => {
-      setTrackingResult({
-        id: orderId,
-        status: "SHIPPED",
-        statusLabel: "جاري التوصيل",
-        lastUpdate: "منذ ساعتين - الخرطوم، حي المعمورة",
-        estimatedArrival: "اليوم قبل الساعة 6 مساءً",
-        history: [
-          { time: "09:00 AM", event: "خرجت الشحنة للتوصيل مع المندوب" },
-          { time: "الأمس 04:30 PM", event: "وصلت الشحنة إلى مركز توزيع الخرطوم" },
-          { time: "05 May 10:00 AM", event: "تم استلام الطلب وتجهيزه" },
-        ]
-      });
+    setError("");
+
+    try {
+      const res = await fetch(`/api/orders/track?id=${orderId.trim()}`);
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "فشل جلب بيانات التتبع");
+      }
+      setTrackingResult(data);
+    } catch (err: any) {
+      setError(err.message || "حدث خطأ أثناء البحث");
+      setTrackingResult(null);
+    } finally {
       setLoading(false);
-    }, 1500);
+    }
   };
+
+  // Poll for live GPS tracking updates
+  useEffect(() => {
+    if (!trackingResult || (trackingResult.status !== "SHIPPED" && trackingResult.status !== "PACKING")) return;
+
+    const interval = setInterval(async () => {
+      try {
+        const res = await fetch(`/api/orders/track?id=${trackingResult.id}`);
+        if (res.ok) {
+          const data = await res.json();
+          setTrackingResult(data);
+        }
+      } catch (e) {
+        console.error("Polled tracking update failed", e);
+      }
+    }, 15000); // 15 seconds poll
+
+    return () => clearInterval(interval);
+  }, [trackingResult]);
 
   return (
     <div className="min-h-screen bg-white">
@@ -61,6 +79,9 @@ export default function TrackOrderPage() {
                       <span className="material-symbols-rounded text-3xl">qr_code_scanner</span>
                    </div>
                 </div>
+                {error && (
+                  <p className="text-center text-xs font-bold text-red-500">{error}</p>
+                )}
                 <button 
                    type="submit" 
                    disabled={loading}
@@ -73,8 +94,8 @@ export default function TrackOrderPage() {
 
           {/* Results Display */}
           {trackingResult && (
-            <div className="animate-in fade-in slide-in-from-bottom-12 duration-700">
-               <div className="bg-[#0F172A] text-white p-12 rounded-[3rem] border border-white/5 relative overflow-hidden mb-8">
+            <div className="animate-in fade-in slide-in-from-bottom-12 duration-700 space-y-8">
+               <div className="bg-[#0F172A] text-white p-12 rounded-[3rem] border border-white/5 relative overflow-hidden">
                   <div className="absolute top-0 right-0 w-64 h-64 bg-accent/10 blur-[100px] rounded-full" />
                   <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-8">
                      <div className="text-center md:text-right">
@@ -88,6 +109,51 @@ export default function TrackOrderPage() {
                      </div>
                   </div>
                </div>
+
+               {/* Live Map Tracking */}
+               {trackingResult.trackingLat && trackingResult.trackingLng && (
+                 <div className="bg-muted p-8 rounded-[3rem] border border-border/10 shadow-elite space-y-6">
+                   <div className="flex items-center justify-between">
+                     <div>
+                       <h4 className="text-lg font-black text-primary">الموقع المباشر للمندوب</h4>
+                       <p className="text-[11px] text-[#C5A021] font-bold uppercase tracking-widest mt-0.5">تتبع المندوب على الخريطة في الوقت الفعلي</p>
+                     </div>
+                     <span className="bg-green-500/10 text-green-600 px-3 py-1 rounded-full text-[10px] font-black animate-pulse">
+                       بث مباشر نشط
+                     </span>
+                   </div>
+                   
+                   <div className="w-full h-80 rounded-[2rem] overflow-hidden border-2 border-border/15 shadow-inner relative">
+                     <iframe
+                       src={`https://maps.google.com/maps?q=${trackingResult.trackingLat},${trackingResult.trackingLng}&t=&z=15&ie=UTF8&iwloc=&output=embed`}
+                       className="w-full h-full border-none"
+                       allowFullScreen
+                       loading="lazy"
+                     />
+                   </div>
+
+                   {trackingResult.driver && (
+                     <div className="bg-white p-6 rounded-2xl border border-border/10 flex flex-col md:flex-row gap-4 items-center justify-between" dir="rtl">
+                       <div className="flex items-center gap-4 w-full md:w-auto">
+                         <div className="w-12 h-12 rounded-xl bg-[#0F172A] text-white flex items-center justify-center font-black text-lg">
+                           {trackingResult.driver.name[0]}
+                         </div>
+                         <div>
+                           <h5 className="font-bold text-sm text-primary">{trackingResult.driver.name}</h5>
+                           <p className="text-[10px] text-primary/40 mt-0.5">{trackingResult.driver.vehicleType}</p>
+                         </div>
+                       </div>
+                       <a
+                         href={`tel:${trackingResult.driver.phone}`}
+                         className="w-full md:w-auto text-center px-4 py-2.5 bg-[#C5A021] text-white hover:bg-[#b08e1c] rounded-xl font-bold text-xs shadow-sm transition-all flex items-center justify-center gap-1.5"
+                       >
+                         <span className="material-symbols-rounded text-sm">phone_enabled</span>
+                         اتصال بالمندوب
+                       </a>
+                     </div>
+                   )}
+                 </div>
+               )}
 
                <div className="space-y-8 px-8">
                   <h4 className="text-sm font-black text-primary uppercase tracking-widest flex items-center gap-3">

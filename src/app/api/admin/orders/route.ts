@@ -15,9 +15,35 @@ export async function GET(req: Request) {
     const search = searchParams.get("search");
     // وضع اللوجستيات: يجلب طلبات AWAITING_PICKUP أيضاً
     const logistics = searchParams.get("logistics");
+    const range = searchParams.get("range") || "all";
+    const from = searchParams.get("from");
+    const to = searchParams.get("to");
 
-    const where: Record<string, any> = {};
-    if (status && status !== "ALL") where.status = status;
+    // Build date filter
+    let dateFilter: any = {};
+    const now = new Date();
+    if (range === "today") {
+      const start = new Date(now); start.setHours(0,0,0,0);
+      const end = new Date(now); end.setHours(23,59,59,999);
+      dateFilter = { createdAt: { gte: start, lte: end } };
+    } else if (range === "week") {
+      const start = new Date(now); start.setDate(now.getDate() - 7);
+      dateFilter = { createdAt: { gte: start } };
+    } else if (range === "month") {
+      const start = new Date(now); start.setDate(now.getDate() - 30);
+      dateFilter = { createdAt: { gte: start } };
+    } else if (range === "custom" && from && to) {
+      dateFilter = { createdAt: { gte: new Date(from), lte: new Date(to + "T23:59:59") } };
+    }
+
+    const where: Record<string, any> = {
+      ...dateFilter
+    };
+
+    if (status && status !== "ALL" && status !== "all" && status !== "الكل") {
+      where.status = status;
+    }
+
     if (search) {
       where.OR = [
         { customerName: { contains: search } },

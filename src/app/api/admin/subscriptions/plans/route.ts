@@ -23,7 +23,7 @@ export async function POST(req: Request) {
     const session = await getAdminSession();
     if (!session) return adminOnlyResponse();
 
-    const { name, price, durationDays, isTrial } = await req.json();
+    const { name, price, durationDays, isTrial, billingCycle, accountType, maxProducts } = await req.json();
 
     const plan = await prisma.subscriptionPlan.create({
       data: {
@@ -31,7 +31,10 @@ export async function POST(req: Request) {
         name,
         price: parseFloat(price),
         durationDays: parseInt(durationDays),
-        isTrial: !!isTrial
+        isTrial: !!isTrial,
+        billingCycle: billingCycle || "MONTHLY",
+        accountType: accountType || "FIXED",
+        maxProducts: maxProducts ? parseInt(maxProducts) : 0
       }
     });
 
@@ -47,7 +50,7 @@ export async function PATCH(req: Request) {
     const session = await getAdminSession();
     if (!session) return adminOnlyResponse();
 
-    const { id, name, price, durationDays, isTrial } = await req.json();
+    const { id, name, price, durationDays, isTrial, billingCycle, accountType, maxProducts } = await req.json();
 
     const plan = await prisma.subscriptionPlan.update({
       where: { id },
@@ -55,7 +58,10 @@ export async function PATCH(req: Request) {
         name,
         price: parseFloat(price),
         durationDays: parseInt(durationDays),
-        isTrial: !!isTrial
+        isTrial: !!isTrial,
+        billingCycle: billingCycle || "MONTHLY",
+        accountType: accountType || "FIXED",
+        maxProducts: maxProducts ? parseInt(maxProducts) : 0
       }
     });
 

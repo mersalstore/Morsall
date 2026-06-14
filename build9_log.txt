@@ -1,0 +1,164 @@
+﻿
+> matger2@0.1.0 prebuild
+> node scripts/fix-perms.js
+
+Running on Windows, skipping permission fix.
+
+> matger2@0.1.0 build
+> prisma generate && cross-env NODE_OPTIONS=--max-old-space-size=4096 NEXT_DISABLE_SENTRY=1 next build
+
+Environment variables loaded from .env
+Prisma schema loaded from prisma\schema.prisma
+
+✔ Generated Prisma Client (v6.2.1) to .\node_modules\@prisma\client in 332ms
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+Tip: Interested in query caching in just a few lines of code? Try Accelerate today! https://pris.ly/tip-3-accelerate
+
+   ▲ Next.js 15.5.15
+   - Environments: .env.production, .env
+   - Experiments (use with caution):
+     · cpus: 1
+     ⨯ webpackBuildWorker
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 6.9s
+   Skipping validation of types
+   Skipping linting
+   Collecting page data ...
+   Generating static pages (0/100) ...
+   Generating static pages (25/100) 
+   Generating static pages (50/100) 
+   Generating static pages (75/100) 
+ ✓ Generating static pages (100/100)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                  Size  First Load JS
+┌ ƒ /                                     7.52 kB         167 kB
+├ ○ /_not-found                             339 B         102 kB
+├ ○ /about                                  339 B         102 kB
+├ ƒ /admin/dashboard                       103 kB         275 kB
+├ ƒ /api/admin/approvals                    339 B         102 kB
+├ ƒ /api/admin/attributes                   339 B         102 kB
+├ ƒ /api/admin/audit-logs                   339 B         102 kB
+├ ƒ /api/admin/banners                      339 B         102 kB
+├ ƒ /api/admin/branches                     339 B         102 kB
+├ ƒ /api/admin/categories                   339 B         102 kB
+├ ƒ /api/admin/delivery-zones               339 B         102 kB
+├ ƒ /api/admin/design-requests              339 B         102 kB
+├ ƒ /api/admin/diagnostics                  339 B         102 kB
+├ ƒ /api/admin/drivers                      339 B         102 kB
+├ ƒ /api/admin/employees                    339 B         102 kB
+├ ƒ /api/admin/inventory                    339 B         102 kB
+├ ƒ /api/admin/orders                       339 B         102 kB
+├ ƒ /api/admin/orders/bulk-update           339 B         102 kB
+├ ƒ /api/admin/payment-methods              339 B         102 kB
+├ ƒ /api/admin/products                     339 B         102 kB
+├ ƒ /api/admin/reports/excel                339 B         102 kB
+├ ƒ /api/admin/reports/products             339 B         102 kB
+├ ƒ /api/admin/settings                     339 B         102 kB
+├ ƒ /api/admin/settings/appearance          339 B         102 kB
+├ ƒ /api/admin/settlements                  339 B         102 kB
+├ ƒ /api/admin/shipping-provider            339 B         102 kB
+├ ƒ /api/admin/site-sections                339 B         102 kB
+├ ƒ /api/admin/stats                        339 B         102 kB
+├ ƒ /api/admin/subscription-transactions    339 B         102 kB
+├ ƒ /api/admin/subscriptions/plans          339 B         102 kB
+├ ƒ /api/admin/supply-requests              339 B         102 kB
+├ ƒ /api/admin/users                        339 B         102 kB
+├ ƒ /api/admin/vendors                      339 B         102 kB
+├ ƒ /api/admin/vendors/[id]                 339 B         102 kB
+├ ƒ /api/admin/vendors/subscription         339 B         102 kB
+├ ƒ /api/admin/verify-payment               339 B         102 kB
+├ ƒ /api/admin/withdrawals                  339 B         102 kB
+├ ƒ /api/attributes                         339 B         102 kB
+├ ƒ /api/auth/[...nextauth]                 339 B         102 kB
+├ ƒ /api/auth/register                      339 B         102 kB
+├ ƒ /api/categories                         339 B         102 kB
+├ ƒ /api/delivery-zones                     339 B         102 kB
+├ ƒ /api/delivery/assign-barcode            339 B         102 kB
+├ ƒ /api/delivery/driver/[driverId]         339 B         102 kB
+├ ƒ /api/delivery/orders                    339 B         102 kB
+├ ƒ /api/delivery/tracking                  339 B         102 kB
+├ ƒ /api/env                                339 B         102 kB
+├ ƒ /api/inspect                            339 B         102 kB
+├ ƒ /api/notifications                      339 B         102 kB
+├ ƒ /api/orders                             339 B         102 kB
+├ ƒ /api/products                           339 B         102 kB
+├ ƒ /api/products/[id]                      339 B         102 kB
+├ ƒ /api/saved-address                      339 B         102 kB
+├ ƒ /api/search/semantic                    339 B         102 kB
+├ ƒ /api/settings                           339 B         102 kB
+├ ƒ /api/site-config                        339 B         102 kB
+├ ƒ /api/site-sections                      339 B         102 kB
+├ ƒ /api/stripe/webhook                     339 B         102 kB
+├ ƒ /api/test-db                            339 B         102 kB
+├ ƒ /api/test-prisma                        339 B         102 kB
+├ ƒ /api/upload                             339 B         102 kB
+├ ƒ /api/user/delete                        339 B         102 kB
+├ ƒ /api/user/super-secret-admin            339 B         102 kB
+├ ƒ /api/user/track                         339 B         102 kB
+├ ƒ /api/user/update                        339 B         102 kB
+├ ƒ /api/vendor-review                      339 B         102 kB
+├ ƒ /api/vendor/coupons                     339 B         102 kB
+├ ƒ /api/vendor/design                      339 B         102 kB
+├ ƒ /api/vendor/design-requests             339 B         102 kB
+├ ƒ /api/vendor/orders                      339 B         102 kB
+├ ƒ /api/vendor/plan                        339 B         102 kB
+├ ƒ /api/vendor/plans                       339 B         102 kB
+├ ƒ /api/vendor/products                    339 B         102 kB
+├ ƒ /api/vendor/products/[id]               339 B         102 kB
+├ ƒ /api/vendor/products/bulk               339 B         102 kB
+├ ƒ /api/vendor/register                    339 B         102 kB
+├ ƒ /api/vendor/reviews                     339 B         102 kB
+├ ƒ /api/vendor/settings                    339 B         102 kB
+├ ƒ /api/vendor/stats                       339 B         102 kB
+├ ƒ /api/vendor/subscribe                   339 B         102 kB
+├ ƒ /api/vendor/subscribe-bank              339 B         102 kB
+├ ƒ /api/vendor/supply-requests             339 B         102 kB
+├ ƒ /api/vendor/withdrawals                 339 B         102 kB
+├ ○ /cart                                 2.68 kB         113 kB
+├ ○ /categories                           2.04 kB         153 kB
+├ ƒ /category/[id]                         3.7 kB         114 kB
+├ ○ /checkout                              6.1 kB         126 kB
+├ ○ /compare                               2.9 kB         108 kB
+├ ○ /contact                                339 B         102 kB
+├ ○ /cookies                                339 B         102 kB
+├ ○ /debug-session                          425 B         111 kB
+├ ○ /delivery                             1.18 kB         112 kB
+├ ƒ /delivery/[driverId]                  3.27 kB         154 kB
+├ ○ /faq                                    339 B         102 kB
+├ ○ /login                                5.39 kB         166 kB
+├ ○ /maintenance                            166 B         105 kB
+├ ○ /morsall-premium                      11.2 kB         166 kB
+├ ○ /offers                               4.98 kB         116 kB
+├ ○ /onboarding                           2.58 kB         130 kB
+├ ○ /orders                               2.93 kB         138 kB
+├ ○ /privacy                                339 B         102 kB
+├ ƒ /product/[id]                         12.5 kB         176 kB
+├ ○ /profile                              7.17 kB         134 kB
+├ ○ /returns                                339 B         102 kB
+├ ƒ /shop                                 6.38 kB         166 kB
+├ ƒ /store/[slug]                         2.81 kB         181 kB
+├ ○ /terms                                  339 B         102 kB
+├ ○ /top-vendors                          2.93 kB         154 kB
+├ ○ /track                                2.06 kB         104 kB
+├ ○ /vendor/dashboard                     44.4 kB         219 kB
+├ ○ /vendor/register                      9.15 kB         132 kB
+└ ○ /wishlist                             1.07 kB         116 kB
++ First Load JS shared by all              102 kB
+  ├ chunks/1255-47f39d486ee86e84.js       45.5 kB
+  ├ chunks/4bd1b696-182b6b13bdad92e3.js   54.2 kB
+  └ other shared chunks (total)           2.02 kB
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
+
+> matger2@0.1.0 postbuild
+> node scripts/copy-next-static.js
+
+[copy-next-static] OK: D:\New-folder\matger2\_next\static

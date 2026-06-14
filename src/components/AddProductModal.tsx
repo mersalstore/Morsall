@@ -51,7 +51,7 @@ export default function AddProductModal({ isOpen, onClose, editingProduct }: Add
   const [previews, setPreviews] = useState<string[]>([]);
 
   // Tabular specifications
-  const [specs, setSpecs] = useState<{ key: string; value: string }[]>([]);
+  const [specs, setSpecs] = useState<{ key: string; values: string[] }[]>([]);
 
   // Variant pricing mode: "absolute" | "adjustment"
   const [variantPricingMode, setVariantPricingMode] = useState<"absolute" | "adjustment">("absolute");
@@ -112,10 +112,26 @@ export default function AddProductModal({ isOpen, onClose, editingProduct }: Add
               if (data.specifications) {
                 try {
                   const parsed = typeof data.specifications === 'string' ? JSON.parse(data.specifications) : data.specifications;
-                  if (Array.isArray(parsed)) setSpecs(parsed);
-                  else if (typeof parsed === 'object') setSpecs(Object.entries(parsed).map(([k, v]) => ({ key: k, value: String(v) })));
-                  else setSpecs([]);
-                } catch { setSpecs([]); }
+                  if (Array.isArray(parsed)) {
+                    const normalized = parsed.map((s: any) => {
+                      if (Array.isArray(s.values)) {
+                        return { key: s.key, values: s.values };
+                      } else if (s.value !== undefined) {
+                        return { key: s.key, values: [String(s.value)] };
+                      }
+                      return { key: s.key || "", values: [""] };
+                    });
+                    setSpecs(normalized);
+                  } else if (typeof parsed === 'object') {
+                    setSpecs(Object.entries(parsed).map(([k, v]) => ({ key: k, values: [String(v)] })));
+                  } else {
+                    setSpecs([{ key: "", values: [""] }]);
+                  }
+                } catch {
+                  setSpecs([{ key: "", values: [""] }]);
+                }
+              } else {
+                setSpecs([{ key: "", values: [""] }]);
               }
 
               if (Array.isArray(data.images)) {
@@ -147,7 +163,7 @@ export default function AddProductModal({ isOpen, onClose, editingProduct }: Add
     setSelectedAttributes([]);
     setVariations([]);
     setPreviews([]);
-    setSpecs([]);
+    setSpecs([{ key: "", values: [""] }]);
     setVariantPricingMode("absolute");
     setStep(1);
   };
@@ -200,10 +216,37 @@ export default function AddProductModal({ isOpen, onClose, editingProduct }: Add
     setPreviews(prev => prev.filter((_, i) => i !== index));
   };
 
-  const addSpec = () => setSpecs(prev => [...prev, { key: "", value: "" }]);
+  const addSpec = () => setSpecs(prev => [...prev, { key: "", values: [""] }]);
   const removeSpec = (idx: number) => setSpecs(prev => prev.filter((_, i) => i !== idx));
-  const updateSpec = (idx: number, field: "key" | "value", val: string) => {
-    setSpecs(prev => prev.map((s, i) => i === idx ? { ...s, [field]: val } : s));
+  const updateSpecKey = (idx: number, keyVal: string) => {
+    setSpecs(prev => prev.map((s, i) => i === idx ? { ...s, key: keyVal } : s));
+  };
+  const updateSpecValue = (rowIdx: number, valIdx: number, val: string) => {
+    setSpecs(prev => prev.map((s, i) => {
+      if (i === rowIdx) {
+        const newVals = [...s.values];
+        newVals[valIdx] = val;
+        return { ...s, values: newVals };
+      }
+      return s;
+    }));
+  };
+  const addSpecValue = (rowIdx: number) => {
+    setSpecs(prev => prev.map((s, i) => {
+      if (i === rowIdx) {
+        return { ...s, values: [...s.values, ""] };
+      }
+      return s;
+    }));
+  };
+  const removeSpecValue = (rowIdx: number, valIdx: number) => {
+    setSpecs(prev => prev.map((s, i) => {
+      if (i === rowIdx) {
+        const newVals = s.values.filter((_, vi) => vi !== valIdx);
+        return { ...s, values: newVals.length > 0 ? newVals : [""] };
+      }
+      return s;
+    }));
   };
 
   const handleSubmit = async () => {
@@ -439,46 +482,81 @@ export default function AddProductModal({ isOpen, onClose, editingProduct }: Add
                   </div>
 
                   {/* Tabular Specifications */}
-                  <div className="space-y-4 p-8 bg-blue-50/30 rounded-[2.5rem] border-2 border-dashed border-blue-200">
+                  <div className="space-y-6 p-8 bg-blue-50/30 rounded-[2.5rem] border-2 border-dashed border-blue-200" dir="rtl">
                     <div className="flex items-center justify-between">
                       <div>
-                        <h4 className="font-black text-[#0F172A]">المواصفات الفنية (جدول)</h4>
-                        <p className="text-[10px] text-gray-400 font-bold mt-1">أضف مواصفات المنتج كأزواج (مفتاح / قيمة)</p>
+                        <h4 className="font-black text-[#0F172A]">المواصفات الفنية للمنتج</h4>
+                        <p className="text-[10px] text-gray-400 font-bold mt-1">أضف صفات المنتج وقيمها المتعددة أفقياً وعمودياً</p>
                       </div>
-                      <button onClick={addSpec} className="px-4 py-2 bg-blue-500 text-white rounded-xl font-black text-[10px] hover:bg-blue-600 transition-all">+ إضافة صف</button>
+                      <button 
+                        type="button"
+                        onClick={addSpec} 
+                        className="px-5 py-2.5 bg-blue-600 text-white rounded-xl font-black text-xs hover:bg-blue-700 transition-all flex items-center gap-1.5 shadow-sm"
+                      >
+                        إضافة صف جديد (+)
+                      </button>
                     </div>
-                    <div className="space-y-3">
-                      {specs.map((spec, idx) => (
-                        <div key={idx} className="flex gap-3 items-center">
-                          <input
-                            type="text"
-                            value={spec.key}
-                            onChange={e => updateSpec(idx, "key", e.target.value)}
-                            placeholder="المفتاح (مثلاً: المعالج)"
-                            className="flex-1 bg-white border-2 border-gray-200 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-blue-400 transition-all"
-                          />
-                          <input
-                            type="text"
-                            value={spec.value}
-                            onChange={e => updateSpec(idx, "value", e.target.value)}
-                            placeholder="القيمة (مثلاً: Snapdragon 8 Gen 2)"
-                            className="flex-1 bg-white border-2 border-gray-200 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-blue-400 transition-all"
-                          />
-                          <button onClick={() => removeSpec(idx)} className="w-10 h-10 bg-red-50 text-red-400 rounded-xl flex items-center justify-center hover:bg-red-100 transition-all shrink-0">
-                            <span className="material-symbols-rounded text-sm">close</span>
-                          </button>
+                    <div className="space-y-4">
+                      {specs.map((spec, rowIdx) => (
+                        <div key={rowIdx} className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm space-y-3">
+                          <div className="flex gap-3 items-center">
+                            <input
+                              type="text"
+                              value={spec.key}
+                              onChange={e => updateSpecKey(rowIdx, e.target.value)}
+                              placeholder="اسم الصفة (مثلاً: اللون أو الذاكرة)"
+                              className="w-1/3 bg-gray-50 border-2 border-transparent rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-[#C5A021] focus:bg-white transition-all"
+                            />
+                            <div className="flex-1 flex flex-wrap gap-2 items-center">
+                              {spec.values.map((val, valIdx) => (
+                                <div key={valIdx} className="flex items-center gap-1.5 bg-gray-50 rounded-xl px-2.5 py-1.5 border border-gray-200">
+                                  <input
+                                    type="text"
+                                    value={val}
+                                    onChange={e => updateSpecValue(rowIdx, valIdx, e.target.value)}
+                                    placeholder="القيمة"
+                                    className="bg-transparent border-none outline-none text-xs font-bold w-24 focus:ring-0"
+                                  />
+                                  {spec.values.length > 1 && (
+                                    <button
+                                      type="button"
+                                      onClick={() => removeSpecValue(rowIdx, valIdx)}
+                                      className="text-red-400 hover:text-red-600 shrink-0"
+                                    >
+                                      <span className="material-symbols-rounded text-xs">close</span>
+                                    </button>
+                                  )}
+                                </div>
+                              ))}
+                              <button
+                                type="button"
+                                onClick={() => addSpecValue(rowIdx)}
+                                className="w-8 h-8 rounded-lg bg-blue-50 text-blue-500 flex items-center justify-center hover:bg-blue-100 transition-all shrink-0"
+                                title="إضافة قيمة فرعية أفقياً"
+                              >
+                                <span className="material-symbols-rounded text-sm">add</span>
+                              </button>
+                            </div>
+                            <button 
+                              type="button"
+                              onClick={() => removeSpec(rowIdx)} 
+                              className="w-10 h-10 bg-red-50 text-red-400 rounded-xl flex items-center justify-center hover:bg-red-100 transition-all shrink-0"
+                            >
+                              <span className="material-symbols-rounded text-sm">delete</span>
+                            </button>
+                          </div>
                         </div>
                       ))}
                       {specs.length === 0 && (
                         <p className="text-center text-xs text-gray-400 py-6 bg-white rounded-2xl border-2 border-dashed border-gray-200">
-                          لم تضف أي مواصفات بعد. اضغط "إضافة صف" لإضافة مواصفات المنتج.
+                          لا توجد مواصفات. اضغط "إضافة صف جديد" للبدء.
                         </p>
                       )}
                     </div>
-                    {specs.length > 1 && (
-                      <p className="text-[10px] text-green-600 font-bold">✓ سيتم عرض المواصفات كجدول في صفحة المنتج</p>
-                    )}
                   </div>
+                  {specs.length > 0 && (
+                    <p className="text-[10px] text-green-600 font-bold">✓ سيتم عرض المواصفات كجدول في صفحة المنتج</p>
+                  )}
 
                   {/* Attributes & Variations Manager */}
                   {formData.type === "VARIABLE" && (

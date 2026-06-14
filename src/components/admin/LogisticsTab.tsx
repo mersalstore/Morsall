@@ -81,9 +81,21 @@ interface LogisticsTabProps {
   showToast?: (message: string, type?: "info" | "error" | "success") => void;
   onPrint?: (order: any) => void;
   onPrintBulk?: (orders: any[]) => void;
+
+  logisticsDateRange?: string;
+  setLogisticsDateRange?: (val: string) => void;
+  logisticsCustomFrom?: string;
+  setLogisticsCustomFrom?: (val: string) => void;
+  logisticsCustomTo?: string;
+  setLogisticsCustomTo?: (val: string) => void;
+  onCustomDateApply?: () => void;
 }
 
-export default function LogisticsTab({ orders, users, vendors, fetchData: parentFetchData, ORDER_STATUSES, classes, showToast, onPrint, onPrintBulk }: LogisticsTabProps = {}) {
+export default function LogisticsTab({
+  orders, users, vendors, fetchData: parentFetchData, ORDER_STATUSES, classes, showToast, onPrint, onPrintBulk,
+  logisticsDateRange, setLogisticsDateRange, logisticsCustomFrom, setLogisticsCustomFrom,
+  logisticsCustomTo, setLogisticsCustomTo, onCustomDateApply
+}: LogisticsTabProps = {}) {
   const [activeSubTab, setActiveSubTab] = useState<"fleet" | "financials" | "branches" | "dispatch">("fleet");
   const [loading, setLoading] = useState(false);
   const [drivers, setDrivers] = useState<Driver[]>([]);
@@ -489,6 +501,57 @@ export default function LogisticsTab({ orders, users, vendors, fetchData: parent
              {tab.label}
            </button>
          ))}
+      </div>
+
+      {/* Date Filter */}
+      <div className="bg-white rounded-[2rem] p-4 border border-slate-100 shadow-[0_8px_30px_rgba(15,23,42,0.02)] flex flex-wrap gap-3 items-center max-w-4xl mx-auto">
+        <span className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-2">الفترة:</span>
+        {[
+          { key: "today", label: "اليوم" },
+          { key: "week",  label: "آخر 7 أيام" },
+          { key: "month", label: "آخر 30 يوم" },
+          { key: "all",   label: "الكل" },
+          { key: "custom", label: "مخصص" },
+        ].map(r => (
+          <button
+            key={r.key}
+            onClick={() => {
+              if (setLogisticsDateRange) {
+                setLogisticsDateRange(r.key);
+                if (r.key !== "custom" && parentFetchData) {
+                  setTimeout(() => parentFetchData(), 50);
+                }
+              }
+            }}
+            className={cn(
+              "px-4 py-2 rounded-2xl text-xs font-bold transition-all",
+              logisticsDateRange === r.key ? "bg-[#C5A021] text-white" : "bg-slate-50 text-slate-400 hover:bg-slate-100 border border-slate-200/50"
+            )}
+          >{r.label}</button>
+        ))}
+        {logisticsDateRange === "custom" && (
+          <div className="flex items-center gap-2 mr-2">
+            <input
+              type="date"
+              value={logisticsCustomFrom || ""}
+              onChange={e => setLogisticsCustomFrom && setLogisticsCustomFrom(e.target.value)}
+              className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold outline-none"
+            />
+            <span className="text-slate-400">←</span>
+            <input
+              type="date"
+              value={logisticsCustomTo || ""}
+              onChange={e => setLogisticsCustomTo && setLogisticsCustomTo(e.target.value)}
+              className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold outline-none"
+            />
+            <button
+              onClick={() => onCustomDateApply && onCustomDateApply()}
+              className="bg-[#C5A021] text-white px-4 py-2 rounded-xl text-xs font-bold"
+            >
+              تطبيق
+            </button>
+          </div>
+        )}
       </div>
 
       <AnimatePresence mode="wait">

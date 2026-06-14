@@ -1,0 +1,52 @@
+﻿
+> matger2@0.1.0 prebuild
+> node scripts/fix-perms.js
+
+Running on Windows, skipping permission fix.
+
+> matger2@0.1.0 build
+> prisma generate && node scripts/patch-prisma-binary.js && cross-env NODE_OPTIONS=--max-old-space-size=4096 NEXT_DISABLE_SENTRY=1 next build
+
+Environment variables loaded from .env
+Prisma schema loaded from prisma\schema.prisma
+
+✔ Generated Prisma Client (v6.2.1) to .\node_modules\@prisma\client in 293ms
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+Tip: Need your database queries to be 1000x faster? Accelerate offers you that and more: https://pris.ly/tip-2-accelerate
+
+[patch-prisma-binary] Patched 3 reference(s) library → binary in D:\New-folder\matger2\node_modules\.prisma\client\index.js
+   ▲ Next.js 15.5.15
+   - Environments: .env.production, .env
+   - Experiments (use with caution):
+     · cpus: 1
+     ⨯ webpackBuildWorker
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 6.9s
+   Skipping validation of types
+   Skipping linting
+   Collecting page data ...
+node.exe : Error [PrismaClientValidationError]: Invalid client engine type, please use `library` or `binary`
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Users\hazem\AppData\Roaming\ ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Error [PrismaCl...ry` or `binary`:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+    at 35552 (D:\New-folder\matger2\.next\server\app\api\admin\approvals\route.js:1:816)
+    at c (D:\New-folder\matger2\.next\server\webpack-runtime.js:1:128)
+    at 93545 (D:\New-folder\matger2\.next\server\app\api\admin\approvals\route.js:1:8086)
+    at c (D:\New-folder\matger2\.next\server\webpack-runtime.js:1:128)
+    at <unknown> (D:\New-folder\matger2\.next\server\app\api\admin\approvals\route.js:1:14077)
+    at c.X (D:\New-folder\matger2\.next\server\webpack-runtime.js:1:1206)
+    at <unknown> (D:\New-folder\matger2\.next\server\app\api\admin\approvals\route.js:1:14047)
+    at Object.<anonymous> (D:\New-folder\matger2\.next\server\app\api\admin\approvals\route.js:1:14109) {
+  clientVersion: '6.2.1'
+}
+
+> Build error occurred
+[Error: Failed to collect page data for /api/admin/approvals] {
+  type: 'Error'
+}

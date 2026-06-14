@@ -72,7 +72,7 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const { title, description, price, stock, images, categoryId, vendorId, sizes, colors, action, id, brand, range, discountPrice, discountType } = body;
+    const { title, description, price, stock, images, categoryId, vendorId, sizes, colors, action, id, brand, range, discountPrice, discountType, specifications } = body;
 
     // لو عندنا action (موافقة/رفض)
     if (action && id) {
@@ -119,6 +119,7 @@ export async function POST(req: Request) {
         bundleData: body.bundleData || null,
         discountPrice: toNum(discountPrice),
         discountType: discountType || null,
+        specifications: specifications ? (typeof specifications === 'string' ? specifications : JSON.stringify(specifications)) : null,
         status: "APPROVED", 
       } as any,
     });
@@ -142,7 +143,7 @@ export async function PATCH(req: Request) {
     }
 
     const body = await req.json();
-    const { id, title, description, price, stock, images, categoryId, vendorId, status, brand, range, type, sku, shortDescription, weight, length, width, height, ram, storage, screenSize, bundleData, discountPrice, discountType } = body;
+    const { id, title, description, price, stock, images, categoryId, vendorId, status, brand, range, type, sku, shortDescription, weight, length, width, height, ram, storage, screenSize, bundleData, discountPrice, discountType, specifications } = body;
 
     if (!id) return NextResponse.json({ error: "id مطلوب" }, { status: 400 });
 
@@ -172,6 +173,7 @@ export async function PATCH(req: Request) {
         ...(bundleData !== undefined && { bundleData: bundleData || null }),
         ...(discountPrice !== undefined && { discountPrice: toNum(discountPrice) }),
         ...(discountType !== undefined && { discountType: discountType || null }),
+        ...(specifications !== undefined && { specifications: specifications ? (typeof specifications === 'string' ? specifications : JSON.stringify(specifications)) : null }),
       } as any,
     });
 

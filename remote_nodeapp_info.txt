@@ -1,0 +1,2 @@
+Real path of /home/u754458241/nodeapp: 
+Is dir: NO

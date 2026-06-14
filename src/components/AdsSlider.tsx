@@ -75,7 +75,7 @@ export default function AdsSlider({ set = "A" }: { set?: "A" | "B" }) {
             >
               {/* Background image overlay */}
               <div className="absolute inset-0 z-0">
-                <Image src={ad.img} alt={ad.title} fill className="object-cover opacity-20 mix-blend-overlay" />
+                <Image src={ad.img} alt={ad.title} fill className="object-cover opacity-30" />
               </div>
 
               {/* Content */}

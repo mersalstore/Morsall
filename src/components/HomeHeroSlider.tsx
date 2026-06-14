@@ -90,11 +90,11 @@ export default function HomeHeroSlider() {
                   src={slide.img} 
                   alt={slide.title}
                   fill 
-                  className="object-cover brightness-[0.24]" 
+                  className="object-cover" 
                   style={{ objectPosition: heroImagePosition }}
                   priority
                 />
-                <div className="absolute inset-0 bg-gradient-to-r from-slate-950/70 via-transparent to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-r from-slate-950/60 via-slate-950/20 to-transparent" />
               </div>
 
               {/* Text Panel */}

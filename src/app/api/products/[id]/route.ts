@@ -30,6 +30,9 @@ export async function GET(
       },
     });
 
+    const settings = await prisma.settings.findUnique({ where: { id: "global" } });
+    const rate = settings?.exchangeRate || 1.0;
+
     if (!product) {
       return NextResponse.json({ error: "Product not found" }, { status: 404 });
     }
@@ -39,7 +42,7 @@ export async function GET(
     const mappedProduct = {
       id: p.id,
       title: p.title,
-      price: p.price,
+      price: p.price * rate,
       description: p.description,
       stock: p.stock,
       image: p.images ? p.images.split(",")[0] : "",
@@ -52,7 +55,30 @@ export async function GET(
       vendorId: p.vendorId,
       rating: 4.5, // Default for now
       reviews: 12, // Default for now
-      specs: {}, // Can be expanded if stored in JSON
+      specs: (() => {
+        if (!p.specifications) return {};
+        try {
+          const parsed = typeof p.specifications === 'string' ? JSON.parse(p.specifications) : p.specifications;
+          if (Array.isArray(parsed)) {
+            const obj: Record<string, string> = {};
+            parsed.forEach((s: any) => {
+              if (s && s.key) {
+                if (Array.isArray(s.values)) {
+                  obj[s.key] = s.values.filter(Boolean).join(", ");
+                } else if (s.value !== undefined) {
+                  obj[s.key] = String(s.value);
+                }
+              }
+            });
+            return obj;
+          } else if (typeof parsed === 'object') {
+            return parsed;
+          }
+          return {};
+        } catch (e) {
+          return {};
+        }
+      })(),
       colors: p.colors ? p.colors.split(",").map((c: any) => ({ name: c, hex: "#ccc" })) : [],
       sizes: p.sizes ? p.sizes.split(",") : [],
       brand: p.brand || undefined,
@@ -77,6 +103,7 @@ export async function GET(
       type: p.type || "SIMPLE",
       variations: p.variations?.map((v: any) => ({
         ...v,
+        price: v.price ? v.price * rate : null,
         combination: JSON.parse(v.combination)
       })) || [],
       productAttributes: p.attributes || []

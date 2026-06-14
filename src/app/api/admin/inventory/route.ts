@@ -53,7 +53,7 @@ export async function POST(req: Request) {
         title, description, price, stock, categoryId, vendorId, images, sku,
         brand, range, type, weight, length, width, height,
         bundleData, discountPrice, discountType, status,
-        productAttributes, variations
+        productAttributes, variations, specifications
       } = body;
       
       const numPrice = parseFloat(price);
@@ -93,6 +93,7 @@ export async function POST(req: Request) {
             discountPrice: numDiscountPrice,
             discountType: discountType || null,
             bundleData: bundleData || null,
+            specifications: specifications ? (typeof specifications === 'string' ? specifications : JSON.stringify(specifications)) : null,
             status: status || "APPROVED"
           }
         });
@@ -195,7 +196,7 @@ export async function PATCH(req: Request) {
     const { 
       id, title, description, price, stock, categoryId, vendorId, images, sku, 
       shortDescription, discountPrice, discountType, status,
-      brand, range, type, weight, length, width, height, bundleData
+      brand, range, type, weight, length, width, height, bundleData, specifications
     } = body;
 
     if (!id) return NextResponse.json({ error: "id مطلوب" }, { status: 400 });
@@ -223,7 +224,8 @@ export async function PATCH(req: Request) {
           ...(discountPrice !== undefined && { discountPrice: discountPrice ? parseFloat(discountPrice) : null }),
           ...(discountType !== undefined && { discountType }),
           ...(status !== undefined && { status }),
-          ...(bundleData !== undefined && { bundleData })
+          ...(bundleData !== undefined && { bundleData }),
+          ...(specifications !== undefined && { specifications: specifications ? (typeof specifications === 'string' ? specifications : JSON.stringify(specifications)) : null })
         }
       });
 

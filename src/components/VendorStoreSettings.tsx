@@ -167,6 +167,7 @@ export default function VendorStoreSettings() {
                     <span className="text-xs font-bold text-gray-400">اختر صورة الشعار (الغلاف)...</span>
                     <span className="material-symbols-rounded text-[#C5A021]">upload_file</span>
                   </label>
+                  <p className="text-[10px] text-gray-400 font-bold mt-1 px-1">📐 الأبعاد المثالية: <span className="text-[#C5A021]">1920 × 1080 بكسل</span> (نسبة 16:9)</p>
                 </div>
               </div>
               <div className="space-y-1.5">
@@ -186,6 +187,7 @@ export default function VendorStoreSettings() {
                     <span className="text-xs font-bold text-gray-400">اختر أيقونة المتجر...</span>
                     <span className="material-symbols-rounded text-[#C5A021]">cloud_upload</span>
                   </label>
+                  <p className="text-[10px] text-gray-400 font-bold mt-1 px-1">📐 الأبعاد المثالية: <span className="text-[#C5A021]">500 × 500 بكسل</span> (مربع)</p>
                 </div>
               </div>
             </div>

@@ -97,6 +97,8 @@ export async function POST(req: Request) {
       items,
       subtotal,
       shippingCost,
+      couponCode,
+      discountAmount = 0,
       source = "STORE",
       status = "PENDING_APPROVAL",
       vendorId
@@ -118,22 +120,26 @@ export async function POST(req: Request) {
 
     const isExternalImport = source === "EXTERNAL_IMPORT";
     let finalItems: any[] = [];
-    const totalAmount = isExternalImport ? (parseFloat(body.totalAmount) || 0) : ((subtotal || 0) + (shippingCost || 0));
+    
+    // Fetch global exchangeRate
+    const settings = await prisma.settings.findUnique({ where: { id: "global" } });
+    const rate = settings?.exchangeRate || 1.0;
+
+    let calculatedSubtotal = 0;
+    let finalShippingCost = parseFloat(shippingCost) || 0;
 
     if (isExternalImport) {
-      // For external imports, we dynamically find or generate a product to link
+      const totalAmount = parseFloat(body.totalAmount) || 0;
       let selectedProduct = await prisma.product.findFirst({
         where: vendorId ? { vendorId } : {},
         select: { id: true, vendorId: true }
       });
 
       if (!selectedProduct) {
-        // Fallback to any vendor product
         selectedProduct = await prisma.product.findFirst({ select: { id: true, vendorId: true } });
       }
 
       if (!selectedProduct) {
-        // If absolutely no product exists, find a vendor to create one
         let targetVendorId = vendorId;
         if (!targetVendorId) {
           const firstVendor = await prisma.vendor.findFirst({ select: { id: true } });
@@ -178,7 +184,7 @@ export async function POST(req: Request) {
         );
       }
 
-      // ── Validate & enrich items from DB ──────────────────
+      // ── Validate & enrich items from DB using actual USD rates translated to local currency ──
       const productIds = items.map((i: any) => i.productId).filter(Boolean);
       const dbProducts = productIds.length > 0
         ? await prisma.product.findMany({
@@ -188,43 +194,20 @@ export async function POST(req: Request) {
         : [];
 
       const productMap = Object.fromEntries(dbProducts.map((p: any) => [p.id, p]));
-      let fallbackProduct = await prisma.product.findFirst({ select: { id: true, vendorId: true } });
-
-      if (!fallbackProduct) {
-        const someVendor = await prisma.vendor.findFirst({ select: { id: true } });
-        if (someVendor) {
-          fallbackProduct = await prisma.product.create({
-            data: {
-              title: "منتج تجريبي للطلبات",
-              description: "تم إنشاؤه تلقائياً لدعم الطلبات التجريبية",
-              price: items?.[0]?.price || 15000,
-              stock: 999,
-              vendorId: someVendor.id,
-              status: "APPROVED"
-            },
-            select: { id: true, vendorId: true }
-          });
-        }
-      }
 
       finalItems = items.map((item: any) => {
         const dbProduct = productMap[item.productId];
-        if (!dbProduct && fallbackProduct) {
-          return {
-            productId: fallbackProduct.id,
-            vendorId: fallbackProduct.vendorId,
-            quantity: Math.max(1, parseInt(item.quantity) || 1),
-            priceAtTime: item.price || 0,
-            size: item.size || null,
-            color: item.color || null,
-          };
-        }
-        if (!dbProduct && !fallbackProduct) return null;
+        if (!dbProduct) return null;
+        
+        // Secure price calculation server-side
+        const localPrice = dbProduct.price * rate;
+        calculatedSubtotal += localPrice * (parseInt(item.quantity) || 1);
+
         return {
-          productId: dbProduct!.id,
-          vendorId: dbProduct!.vendorId,
+          productId: dbProduct.id,
+          vendorId: dbProduct.vendorId,
           quantity: Math.max(1, parseInt(item.quantity) || 1),
-          priceAtTime: dbProduct!.price || item.price || 0,
+          priceAtTime: localPrice,
           size: item.size || null,
           color: item.color || null,
         };
@@ -237,6 +220,68 @@ export async function POST(req: Request) {
         { status: 422 }
       );
     }
+
+    // ── Server-side Coupon validation & recalculation ──
+    let validatedDiscount = 0;
+    if (couponCode && !isExternalImport) {
+      const coupon = await prisma.coupon.findUnique({
+        where: { code: couponCode.trim().toUpperCase() }
+      });
+      if (coupon && coupon.isActive && (!coupon.expiryDate || new Date(coupon.expiryDate) >= new Date())) {
+        if (calculatedSubtotal >= (coupon.minOrderAmount || 0)) {
+          let targets: string[] = [];
+          if (coupon.targetIds) {
+            try {
+              const parsed = JSON.parse(coupon.targetIds);
+              targets = Array.isArray(parsed) ? parsed : [coupon.targetIds];
+            } catch {
+              targets = coupon.targetIds.split(",").map(t => t.trim()).filter(Boolean);
+            }
+          }
+
+          let matchingSubtotal = 0;
+          const scope = coupon.scope || "ALL";
+
+          for (const item of finalItems) {
+            let isMatch = false;
+            if (scope === "ALL") {
+              isMatch = true;
+            } else if (scope === "PRODUCTS") {
+              isMatch = targets.includes(item.productId);
+            } else if (scope === "VENDORS") {
+              isMatch = targets.includes(item.vendorId) || !!(coupon.vendorId && coupon.vendorId === item.vendorId);
+            }
+
+            if (isMatch) {
+              matchingSubtotal += item.priceAtTime * item.quantity;
+            }
+          }
+
+          if (matchingSubtotal > 0) {
+            if (coupon.discountType === "PERCENTAGE") {
+              validatedDiscount = matchingSubtotal * (coupon.discountValue / 100);
+              const maxDiscount = coupon.maxDiscount || 0;
+              if (maxDiscount > 0 && validatedDiscount > maxDiscount) {
+                validatedDiscount = maxDiscount;
+              }
+            } else {
+              validatedDiscount = Math.min(coupon.discountValue, matchingSubtotal);
+            }
+          }
+        }
+      }
+    }
+
+    // Programmatic Free Shipping: If Total > 50,000 SDG -> Shipping = 0 (Module 6)
+    if (!isExternalImport) {
+      if (calculatedSubtotal > 50000) {
+        finalShippingCost = 0;
+      }
+    }
+
+    const codFee = (paymentMethod === "COD" && settings?.codExtraFee) ? settings.codExtraFee : 0;
+    const finalSubtotal = isExternalImport ? (parseFloat(subtotal) || 0) : calculatedSubtotal;
+    const totalAmount = isExternalImport ? (parseFloat(body.totalAmount) || 0) : Math.max(0, finalSubtotal + finalShippingCost + codFee - validatedDiscount);
 
     // ── Create the order ─────────────────────────────────
     const order = await (prisma.order as any).create({
@@ -252,7 +297,9 @@ export async function POST(req: Request) {
         paymentMethod,
         paymentScreenshot: paymentScreenshot || null,
         totalAmount,
-        shippingCost: shippingCost ? (parseFloat(shippingCost) || 0) : 0,
+        shippingCost: finalShippingCost,
+        couponCode: couponCode || null,
+        discountAmount: validatedDiscount,
         status: isExternalImport ? status : "PENDING_APPROVAL",
         source,
         // Logistics fields carried over from an external (e.g. far-mile) import

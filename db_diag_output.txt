@@ -1,0 +1,46 @@
+[2026-05-26T12:02:24.665Z] === DB DIAGNOSTICS STARTING ===
+[2026-05-26T12:02:24.665Z] Set TOKIO_WORKER_THREADS=1 and UV_THREADPOOL_SIZE=1
+[2026-05-26T12:02:24.665Z] Current process PID: 1783348
+[2026-05-26T12:02:24.674Z] Found other running node processes: 
+[2026-05-26T12:02:24.674Z] Running prisma generate...
+[2026-05-26T12:02:26.297Z] Prisma generate success:
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+
+✔ Generated Prisma Client (v6.2.1) to ./node_modules/@prisma/client in 465ms
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+Tip: Curious about the SQL queries Prisma ORM generates? Optimize helps you enhance your visibility: https://pris.ly/tip-2-optimize
+
+
+[2026-05-26T12:02:26.298Z] Connecting to Database to fix SubscriptionPlan slugs...
+[2026-05-26T12:02:26.691Z] Existing plans: [{"id":"plan_annual","name":"الباقة السنوية","slug":"-"},{"id":"plan_basic","name":"الباقة الأساسية","slug":null},{"id":"plan_custom","name":"تصميم مخصص","slug":"custom-design"},{"id":"plan_freemium","name":"مجاني","slug":"freemium"},{"id":"plan_premium","name":"منشئ المتاجر","slug":"premium-builder"},{"id":"plan_pro","name":"الباقة الشهرية","slug":null},{"id":"plan_trial","name":"تجربة مجانية","slug":null}]
+[2026-05-26T12:02:26.692Z] Updating plan id=plan_basic name="الباقة الأساسية" with slug="--1"
+[2026-05-26T12:02:26.694Z] Updating plan id=plan_pro name="الباقة الشهرية" with slug="--5"
+[2026-05-26T12:02:26.694Z] Updating plan id=plan_trial name="تجربة مجانية" with slug="--6"
+[2026-05-26T12:02:26.707Z] SubscriptionPlan slugs fixed successfully!
+[2026-05-26T12:02:26.708Z] Running prisma db push...
+[2026-05-26T12:02:29.409Z] Prisma db push success:
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": MySQL database "u754458241_Kanan" at "127.0.0.1"
+
+⚠️  There might be data loss when applying the changes:
+
+  • You are about to alter the column `tier` on the `Vendor` table, which contains 3 non-null values. The data in that column will be cast from `VarChar(50)` to `Enum(EnumId(0))`.
+
+  • A unique constraint covering the columns `[stripeSessionId]` on the table `PaymentTransaction` will be added. If there are existing duplicate values, this will fail.
+
+  • A unique constraint covering the columns `[stripePriceId]` on the table `SubscriptionPlan` will be added. If there are existing duplicate values, this will fail.
+
+
+
+🚀  Your database is now in sync with your Prisma schema. Done in 1.10s
+
+Running generate... (Use --skip-generate to skip the generators)
+[2K[1A[2K[GRunning generate... - Prisma Client
+[2K[1A[2K[G✔ Generated Prisma Client (v6.2.1) to ./node_modules/@prisma/client in 452ms
+
+
+[2026-05-26T12:02:29.410Z] === DB DIAGNOSTICS COMPLETE ===

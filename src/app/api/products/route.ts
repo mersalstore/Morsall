@@ -15,6 +15,9 @@ export async function GET(req: Request) {
   const attributes = searchParams.get("attributes");
 
   try {
+    const settings = await prisma.settings.findUnique({ where: { id: "global" } });
+    const rate = settings?.exchangeRate || 1.0;
+
     let orderBy: any = { createdAt: "desc" };
     if (sort === "best") orderBy = { purchaseCount: "desc" };
     if (sort === "price_asc") orderBy = { price: "asc" };
@@ -42,8 +45,8 @@ export async function GET(req: Request) {
     
     if (minPrice || maxPrice) {
       where.price = {};
-      if (minPrice) where.price.gte = parseFloat(minPrice);
-      if (maxPrice) where.price.lte = parseFloat(maxPrice);
+      if (minPrice) where.price.gte = parseFloat(minPrice) / rate;
+      if (maxPrice) where.price.lte = parseFloat(maxPrice) / rate;
     }
     
     if (attributes) {
@@ -86,7 +89,17 @@ export async function GET(req: Request) {
       take: 40
     });
 
-    return NextResponse.json(products);
+    const mappedProducts = products.map((p: any) => ({
+      ...p,
+      price: p.price * rate,
+      discountPrice: p.discountPrice ? p.discountPrice * rate : null,
+      vendor: p.vendor?.storeName || p.vendor,
+      vendorSlug: p.vendor?.slug || null,
+      vendorLocation: p.vendor?.location || "السودان",
+      category: p.category?.name || "غير مصنف"
+    }));
+
+    return NextResponse.json(mappedProducts);
   } catch (error: any) {
     console.error("Products API Error:", error);
     return NextResponse.json({ error: "Internal Server Error", details: error?.message }, { status: 500 });
