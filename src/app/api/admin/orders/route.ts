@@ -51,9 +51,13 @@ export async function GET(req: Request) {
         { id: { contains: search } },
       ];
     }
-    // الباب الأول: الطلبات العادية لا تُظهر AWAITING_PICKUP (مقفول للوجستيات)
+    // V2 §1.2: الطلبات في عهدة اللوجستيات (PENDING_PICKUP, AT_BRANCH, SHIPPED) تختفي تماماً من شاشة الإدارة العامة للطلبات.
     if (!logistics && !status) {
-      where.NOT = { status: "AWAITING_PICKUP" };
+      where.NOT = {
+        status: {
+          in: ["AWAITING_PICKUP", "PENDING_PICKUP", "AT_BRANCH", "SHIPPED"]
+        }
+      };
     }
 
     const orders = await db.order.findMany({
@@ -105,6 +109,8 @@ export async function PATCH(req: Request) {
       street, district, city,
       // مراجعة الدفع بالتحويل البنكي
       paymentVerified, paymentNote,
+      // V2 §2.1/§2.2: استلام الرجيع من المندوب وتحويل العهدة للفرع + عدّاد المحاولات
+      receiveReturn, failureReason,
     } = body;
 
     if (!id) {
@@ -145,6 +151,82 @@ export async function PATCH(req: Request) {
     if (district !== undefined) updateData.district = district;
     if (city !== undefined) updateData.city = city;
 
+    // V2 §4: تسجيل بصمة تتبع تلقائية عند التعديل اللوجستي
+    const stamp = new Date().toLocaleString("ar-EG", { timeZone: "Asia/Khartoum" });
+    let trackingNote = "";
+
+    // If driver is being assigned, fetch driver name
+    let driverName = "";
+    if (driverId && driverId !== existingOrder.driverId) {
+      const drv = await db.deliveryDriver.findUnique({ where: { id: driverId } });
+      if (drv) driverName = drv.name;
+    }
+
+    // If branch is being assigned, fetch branch name
+    let branchName = "";
+    const currentBranchId = branchId !== undefined ? branchId : existingOrder.branchId;
+    if (currentBranchId) {
+      const br = await db.branch.findUnique({ where: { id: currentBranchId } });
+      if (br) branchName = br.name;
+    }
+
+    const adminName = (session?.user as any)?.name || "موظف الإدارة";
+
+    // 1. Branch assignment
+    if (branchId && branchId !== existingOrder.branchId) {
+      trackingNote += `\n[استلام في الفرع - ${stamp}]: تم استلام الشحنة في الفرع (${branchName || branchId}) بواسطة الموظف (${adminName}).`;
+    }
+
+    // 2. Driver assignment
+    if (driverId && driverId !== existingOrder.driverId) {
+      trackingNote += `\n[تعيين السائق - ${stamp}]: تم تعيين المندوب (${driverName || driverId}) لتسليم الشحنة.`;
+    }
+
+    // 3. Status changes
+    const newStatus = status || existingOrder.status;
+    if (newStatus !== existingOrder.status) {
+      if (newStatus === "AT_BRANCH") {
+        trackingNote += `\n[استلام في الفرع - ${stamp}]: تم استلام الشحنة وتفريغها في الفرع (${branchName || "المستودع"}).`;
+      } else if (newStatus === "SHIPPED") {
+        const targetDriverId = driverId !== undefined ? driverId : existingOrder.driverId;
+        let targetDriverName = driverName;
+        if (!targetDriverName && targetDriverId) {
+          const drv = await db.deliveryDriver.findUnique({ where: { id: targetDriverId } });
+          if (drv) targetDriverName = drv.name;
+        }
+        trackingNote += `\n[الاستلام من السائق - ${stamp}]: بدء محاولة خروج الشحنة للتوصيل مع المندوب (${targetDriverName || "المندوب المعين"}).`;
+      } else if (newStatus === "DELIVERED") {
+        trackingNote += `\n[تسليم الشحنة - ${stamp}]: تم تسليم الشحنة بنجاح وإغلاق الدورة والتحصيل المالي.`;
+      }
+    }
+
+    if (trackingNote) {
+      updateData.notes = (updateData.notes ?? existingOrder.notes ?? "") + trackingNote;
+    }
+
+    // V2 §2.1/§2.2: آلية استلام الرجيع اللوجستية + أتمتة عدّاد محاولات التوصيل
+    // عند استلام الشحنة الراجعة من المندوب: يجب تحديد الفرع، تُحوَّل العهدة
+    // (المالية والفيزيائية) من المندوب إلى الفرع، وتُحتسب محاولة توصيل جديدة تلقائياً.
+    let returnAttempt = 0;
+    if (receiveReturn) {
+      const targetBranchId = branchId || existingOrder.branchId;
+      if (!targetBranchId) {
+        return NextResponse.json(
+          { error: "يجب تحديد الفرع (المستودع المستهدف) لاستلام الرجيع" },
+          { status: 400 }
+        );
+      }
+      returnAttempt = (existingOrder.attemptCounter || 0) + 1;
+      updateData.status = "AT_BRANCH"; // راجعة للمستودع / في الفرع
+      updateData.branchId = targetBranchId;
+      updateData.driverId = null; // تحويل العهدة من المندوب إلى الفرع
+      updateData.attemptCounter = returnAttempt;
+      if (failureReason) updateData.failureReason = failureReason;
+      const stamp = new Date().toLocaleString("ar-EG");
+      const note = `\n[استلام رجيع - ${stamp}]: تم استلام الشحنة من المندوب وتحويل العهدة إلى الفرع — محاولة التوصيل رقم ${returnAttempt}.${failureReason ? " السبب: " + failureReason : ""}`;
+      updateData.notes = (updateData.notes ?? existingOrder.notes ?? "") + note;
+    }
+
     // Check if the address was modified and we have a trackingNumber (AWB)
     const isAddressModified = street !== undefined || district !== undefined || city !== undefined;
     if (isAddressModified && existingOrder.trackingNumber) {
@@ -176,6 +258,9 @@ export async function PATCH(req: Request) {
     const logs: string[] = [];
     if (status && status !== existingOrder.status) {
       logs.push(`تغيير الحالة إلى ${status}`);
+    }
+    if (receiveReturn) {
+      logs.push(`استلام رجيع من المندوب وتحويل العهدة للفرع — محاولة #${returnAttempt}`);
     }
     if (street !== undefined && street !== existingOrder.street) {
       logs.push(`تعديل الشارع إلى: ${street}`);

@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import Barcode from "react-barcode";
+import JsBarcode from "jsbarcode";
 
 interface ShippingLabelData {
   tracking_number: string;
@@ -147,6 +147,47 @@ const normalizePayment = (order: any) => {
   }
   return { type: rawPayment && rawPayment !== "COD" ? rawPayment : "بدون تحصيل", isCod: false, amount: 0 };
 };
+
+// Barcode rendered to a self-contained data-URL PNG (via jsbarcode).
+// react-barcode's inline <svg> does NOT survive the print window's
+// document.write(innerHTML), so the barcode came out blank on printed
+// waybills. A data: <img> serializes and prints reliably (like the QR).
+function BarcodeImg({
+  value,
+  height = 40,
+  width = 1.3,
+  fontSize = 9,
+  displayValue = true,
+}: {
+  value: string;
+  height?: number;
+  width?: number;
+  fontSize?: number;
+  displayValue?: boolean;
+}) {
+  const [src, setSrc] = React.useState<string>("");
+  React.useEffect(() => {
+    try {
+      const canvas = document.createElement("canvas");
+      JsBarcode(canvas, value || "MORSALL", {
+        format: "CODE128",
+        height,
+        width,
+        fontSize,
+        displayValue,
+        margin: 0,
+        textAlign: "center",
+        background: "#ffffff",
+        lineColor: "#000000",
+      });
+      setSrc(canvas.toDataURL("image/png"));
+    } catch {
+      setSrc("");
+    }
+  }, [value, height, width, fontSize, displayValue]);
+  if (!src) return null;
+  return <img src={src} alt={value} style={{ display: "block", maxWidth: "100%", height: "auto" }} />;
+}
 
 // QR Code using external API - no library needed, works anywhere
 function QRImg({ value, size }: { value: string; size: number }) {
@@ -327,7 +368,7 @@ export function ShippingLabel({ data, copies = 1 }: ShippingLabelProps) {
               <div style={{ fontSize: "6px", color: "#555", fontWeight: "bold", alignSelf: "flex-end", marginBottom: "1px" }}>
                 رقم الطلب
               </div>
-              <Barcode value={mainBarcodeValue} format="CODE128" height={40} width={1.3} displayValue={true} fontSize={9} margin={0} textAlign="center" />
+              <BarcodeImg value={mainBarcodeValue} height={40} width={1.3} displayValue={true} fontSize={9} />
             </div>
             <div style={{ flex: "0 0 42%", padding: "4px 6px", display: "flex", alignItems: "center", justifyContent: "center" }}>
               <img src="/footer-logo.png?v=9" alt="مرسال" style={{ width: "100%", maxWidth: "88px", objectFit: "contain" }} />
@@ -415,7 +456,7 @@ export function ShippingLabel({ data, copies = 1 }: ShippingLabelProps) {
                 labelRight="نوع الخدمة:"
                 valueRight={data.package_details.service_type || "Standard"}
                 labelLeft="الطرود:"
-                valueLeft={data.package_details.packages_count}
+                valueLeft={copies > 1 ? `${copyIdx + 1} من ${copies}` : data.package_details.packages_count}
               />
 
               {/* Row 9: volumetric weight | actual weight */}
@@ -468,7 +509,7 @@ export function ShippingLabel({ data, copies = 1 }: ShippingLabelProps) {
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "2px" }}>
               <div style={{ fontSize: "6px", color: "#555", fontWeight: "bold" }}>{"الرقم المرجعي"}</div>
               {hasReferenceBarcode ? (
-                <Barcode value={referenceBarcodeValue} format="CODE128" height={28} width={0.8} displayValue={true} fontSize={7} margin={0} />
+                <BarcodeImg value={referenceBarcodeValue} height={28} width={0.8} displayValue={true} fontSize={7} />
               ) : (
                 <div style={{ fontSize: "8px", fontFamily: "monospace", direction: "ltr" }}>{data.tracking_number}</div>
               )}
@@ -476,8 +517,8 @@ export function ShippingLabel({ data, copies = 1 }: ShippingLabelProps) {
           </div>
 
           {copies > 1 && (
-            <div style={{ position: "absolute", top: "3px", left: "3px", fontSize: "7px", background: "#eee", padding: "1px 4px", borderRadius: "2px", color: "#666" }}>
-              {"نسخة"} {copyIdx + 1} / {copies}
+            <div style={{ position: "absolute", top: "3px", left: "3px", fontSize: "8px", fontWeight: "bold", background: "#0F172A", padding: "2px 6px", borderRadius: "3px", color: "#fff" }}>
+              {copyIdx + 1} من {copies}
             </div>
           )}
         </div>

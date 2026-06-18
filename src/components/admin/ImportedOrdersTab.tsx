@@ -178,6 +178,32 @@ export default function ImportedOrdersTab({ classes, vendors, showToast, fetchDa
     setManualOrders(manualOrders.filter((row) => row.id !== id));
   };
 
+  // ── Inline Error Editing (V2) — validate each row before insertion ──
+  const isBlank = (v: any) => String(v ?? "").trim() === "";
+  const validateRow = (row: any): Record<string, string> => {
+    const errs: Record<string, string> = {};
+    if (isBlank(row.customerName)) errs.customerName = "اسم المستلم مطلوب";
+    const digits = String(row.phone ?? "").replace(/\D/g, "");
+    if (isBlank(row.phone)) errs.phone = "رقم الهاتف مطلوب";
+    else if (digits.length < 7) errs.phone = "رقم هاتف غير صحيح";
+    if (isBlank(row.city)) errs.city = "المدينة مطلوبة";
+    const price = Number(String(row.price ?? "").replace(/[^\d.\-]/g, ""));
+    if (isBlank(row.price) || isNaN(price)) errs.price = "قيمة مالية غير صحيحة";
+    else if (price < 0) errs.price = "القيمة لا يمكن أن تكون سالبة";
+    const ship = Number(String(row.shippingCost ?? 0).replace(/[^\d.\-]/g, ""));
+    if (isNaN(ship) || ship < 0) errs.shippingCost = "قيمة توصيل غير صحيحة";
+    const qty = parseInt(String(row.quantity));
+    if (isNaN(qty) || qty < 1) errs.quantity = "الكمية يجب أن تكون 1 أو أكثر";
+    return errs;
+  };
+  // Red highlight for cells that contain a programmatic error (Inline Error Editing)
+  const cellClass = (hasErr: boolean) =>
+    `w-full rounded-lg px-3 py-2 text-xs font-bold outline-none text-slate-800 border ${
+      hasErr
+        ? "border-red-400 bg-red-50 focus:border-red-500"
+        : "bg-slate-50 border-slate-100 focus:border-[#C5A021]"
+    }`;
+
   const downloadTemplate = () => {
     // Generate a simple CSV template and download it
     const headers = "باركود الشحنة,اسم المستلم,هاتف المستلم,المدينة,الحي,الشارع,قيمة الشحنة,السعر (سعر التوصيل),طريقة الدفع,الحالة,محتوى الطرد,الكمية,الوزن,نوع الشحنة,الملاحظات\n";
@@ -287,6 +313,20 @@ export default function ImportedOrdersTab({ classes, vendors, showToast, fetchDa
       return;
     }
 
+    // Inline Error Editing gate: block insertion while any row has errors
+    const errorRows = manualOrders
+      .map((r) => ({ id: r.id, errs: validateRow(r) }))
+      .filter((r) => Object.keys(r.errs).length > 0);
+    if (errorRows.length > 0) {
+      const total = errorRows.reduce((s, r) => s + Object.keys(r.errs).length, 0);
+      setImportStatus("error");
+      setMessage(
+        `يوجد ${total} حقل يحتوي على خطأ في ${errorRows.length} شحنة (مظللة بالأحمر). يرجى تصحيحها مباشرة في الجدول ثم الضغط على "معالجة وإدراج".`
+      );
+      showToast?.(`صحّح ${total} حقل قبل الإدراج`, "error");
+      return;
+    }
+
     setImporting(true);
     setImportStatus("idle");
     setMessage("");
@@ -370,6 +410,18 @@ export default function ImportedOrdersTab({ classes, vendors, showToast, fetchDa
       setImporting(false);
     }
   };
+
+  // Per-row validation errors recomputed each render (Inline Error Editing)
+  const rowErrors: Record<string, Record<string, string>> = {};
+  let totalErrorCount = 0;
+  let rowsWithErrors = 0;
+  manualOrders.forEach((r) => {
+    const e = validateRow(r);
+    rowErrors[r.id] = e;
+    const n = Object.keys(e).length;
+    totalErrorCount += n;
+    if (n > 0) rowsWithErrors++;
+  });
 
   return (
     <div className="space-y-8">
@@ -494,6 +546,23 @@ export default function ImportedOrdersTab({ classes, vendors, showToast, fetchDa
           </button>
         </div>
 
+        {/* Inline Error Editing — validation summary */}
+        {manualOrders.length > 0 && (
+          totalErrorCount > 0 ? (
+            <div className="mb-5 p-4 rounded-xl flex items-start gap-3 border bg-rose-50 border-rose-200 text-rose-800">
+              <AlertCircle className="shrink-0 mt-0.5 text-rose-600" size={16} />
+              <p className="text-xs font-black">
+                يوجد {totalErrorCount} حقل يحتاج تصحيح في {rowsWithErrors} شحنة. الخلايا المظللة بالأحمر تحتوي على أخطاء — عدّلها مباشرة هنا ثم اضغط «معالجة وإدراج».
+              </p>
+            </div>
+          ) : (
+            <div className="mb-5 p-4 rounded-xl flex items-start gap-3 border bg-emerald-50 border-emerald-200 text-emerald-800">
+              <CheckCircle2 className="shrink-0 mt-0.5 text-emerald-600" size={16} />
+              <p className="text-xs font-black">كل الحقول صحيحة — الشحنات ({manualOrders.length}) جاهزة للإدراج.</p>
+            </div>
+          )
+        )}
+
         {manualOrders.length === 0 ? (
           <div className="py-16 text-center text-slate-300">
             <AlertCircle size={48} className="mx-auto opacity-20 mb-3" />
@@ -526,8 +595,11 @@ export default function ImportedOrdersTab({ classes, vendors, showToast, fetchDa
                         value={row.customerName}
                         onChange={(e) => updateManualRow(row.id, "customerName", e.target.value)}
                         placeholder="أحمد علي"
-                        className="w-full bg-slate-50 border border-slate-100 rounded-lg px-3 py-2 text-xs font-bold outline-none focus:border-[#C5A021] text-slate-800"
+                        className={cellClass(!!rowErrors[row.id]?.customerName)}
                       />
+                      {rowErrors[row.id]?.customerName && (
+                        <p className="text-[9px] font-black text-red-500 mt-1">{rowErrors[row.id].customerName}</p>
+                      )}
                     </td>
                     <td className="px-4 py-3">
                       <input
@@ -535,8 +607,11 @@ export default function ImportedOrdersTab({ classes, vendors, showToast, fetchDa
                         value={row.phone}
                         onChange={(e) => updateManualRow(row.id, "phone", e.target.value)}
                         placeholder="0912345678"
-                        className="w-full bg-slate-50 border border-slate-100 rounded-lg px-3 py-2 text-xs font-bold outline-none focus:border-[#C5A021] text-slate-800"
+                        className={cellClass(!!rowErrors[row.id]?.phone)}
                       />
+                      {rowErrors[row.id]?.phone && (
+                        <p className="text-[9px] font-black text-red-500 mt-1">{rowErrors[row.id].phone}</p>
+                      )}
                     </td>
                     <td className="px-4 py-3">
                       <input
@@ -544,8 +619,11 @@ export default function ImportedOrdersTab({ classes, vendors, showToast, fetchDa
                         value={row.city}
                         onChange={(e) => updateManualRow(row.id, "city", e.target.value)}
                         placeholder="الخرطوم"
-                        className="w-full bg-slate-50 border border-slate-100 rounded-lg px-3 py-2 text-xs font-bold outline-none focus:border-[#C5A021] text-slate-800"
+                        className={cellClass(!!rowErrors[row.id]?.city)}
                       />
+                      {rowErrors[row.id]?.city && (
+                        <p className="text-[9px] font-black text-red-500 mt-1">{rowErrors[row.id].city}</p>
+                      )}
                     </td>
                     <td className="px-4 py-3">
                       <input
@@ -579,24 +657,33 @@ export default function ImportedOrdersTab({ classes, vendors, showToast, fetchDa
                         type="number"
                         value={row.quantity}
                         onChange={(e) => updateManualRow(row.id, "quantity", parseInt(e.target.value) || 1)}
-                        className="w-full bg-slate-50 border border-slate-100 rounded-lg px-3 py-2 text-xs font-bold outline-none focus:border-[#C5A021] text-slate-800 text-center"
+                        className={cellClass(!!rowErrors[row.id]?.quantity) + " text-center"}
                       />
+                      {rowErrors[row.id]?.quantity && (
+                        <p className="text-[9px] font-black text-red-500 mt-1">{rowErrors[row.id].quantity}</p>
+                      )}
                     </td>
                     <td className="px-4 py-3">
                       <input
                         type="number"
                         value={row.price}
                         onChange={(e) => updateManualRow(row.id, "price", parseFloat(e.target.value) || 0)}
-                        className="w-full bg-slate-50 border border-slate-100 rounded-lg px-3 py-2 text-xs font-bold outline-none focus:border-[#C5A021] text-slate-800"
+                        className={cellClass(!!rowErrors[row.id]?.price)}
                       />
+                      {rowErrors[row.id]?.price && (
+                        <p className="text-[9px] font-black text-red-500 mt-1">{rowErrors[row.id].price}</p>
+                      )}
                     </td>
                     <td className="px-4 py-3">
                       <input
                         type="number"
                         value={row.shippingCost || 0}
                         onChange={(e) => updateManualRow(row.id, "shippingCost", parseFloat(e.target.value) || 0)}
-                        className="w-full bg-slate-50 border border-slate-100 rounded-lg px-3 py-2 text-xs font-bold outline-none focus:border-[#C5A021] text-slate-800"
+                        className={cellClass(!!rowErrors[row.id]?.shippingCost)}
                       />
+                      {rowErrors[row.id]?.shippingCost && (
+                        <p className="text-[9px] font-black text-red-500 mt-1">{rowErrors[row.id].shippingCost}</p>
+                      )}
                     </td>
                     <td className="px-4 py-3">
                       <input
@@ -635,13 +722,16 @@ export default function ImportedOrdersTab({ classes, vendors, showToast, fetchDa
       <div className="flex justify-end gap-4">
         <button
           onClick={handleProcessImport}
-          disabled={importing}
+          disabled={importing || totalErrorCount > 0}
+          title={totalErrorCount > 0 ? `صحّح ${totalErrorCount} حقل قبل الإدراج` : undefined}
           className="bg-gradient-to-r from-[#C5A021] to-[#A9841B] text-white px-8 py-4 rounded-2xl font-black text-sm transition-all duration-500 shadow-xl shadow-[#C5A021]/10 hover:brightness-105 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2"
         >
           {importing && <Loader2 size={16} className="animate-spin" />}
           {importing
             ? (progress ? `جاري الاستيراد... ${progress.done}/${progress.total}` : "جاري المعالجة...")
-            : "معالجة وإدراج الطلبات المستوردة"}
+            : totalErrorCount > 0
+              ? `معالجة وإدراج (${totalErrorCount} خطأ يحتاج تصحيح)`
+              : "معالجة وإدراج الطلبات المستوردة"}
         </button>
       </div>
     </div>

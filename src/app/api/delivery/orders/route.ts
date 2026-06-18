@@ -56,6 +56,7 @@ export async function PATCH(req: Request) {
     }
 
     if (status === "DELIVERED") {
+      const stamp = new Date().toLocaleString("ar-EG", { timeZone: "Asia/Khartoum" });
       const updatedOrder = await prisma.$transaction(async (tx) => {
         // 1. Update order status and set delivered timestamp
         const ord = await tx.order.update({
@@ -63,6 +64,7 @@ export async function PATCH(req: Request) {
           data: {
             status: "DELIVERED",
             deliveredAt: new Date(),
+            notes: (order.notes || "") + `\n[تسليم الشحنة - ${stamp}]: تم تسليم الشحنة بنجاح وإغلاق دورة الحياة والتحصيل المالي.`
           }
         });
 
@@ -93,12 +95,14 @@ export async function PATCH(req: Request) {
     }
 
     if (status === "FAILED") {
+      const stamp = new Date().toLocaleString("ar-EG", { timeZone: "Asia/Khartoum" });
       const updated = await prisma.order.update({
         where: { id: orderId },
         data: {
           status: "FAILED",
           attemptCounter: { increment: 1 },
-          failureReason: failureReason || "فشل محاولة التوصيل"
+          failureReason: failureReason || "فشل محاولة التوصيل",
+          notes: (order.notes || "") + `\n[الاستلام من السائق - ${stamp}]: فشلت محاولة التوصيل. السبب: ${failureReason || "فشل محاولة التوصيل"}.`
         }
       });
       return NextResponse.json({ success: true, order: updated });
