@@ -21,30 +21,44 @@ const ADS = [
 ];
 
 const ADS_SET_B = [
-  { 
-     href: "/shop", 
-     img: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&q=80&w=1200" 
+  {
+     href: "/shop",
+     img: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&q=80&w=1200"
   },
-  { 
-     href: "/shop", 
+  {
+     href: "/shop",
      img: "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&q=80&w=1200"
   },
-  { 
-     href: "/shop", 
+  {
+     href: "/shop",
      img: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&q=80&w=1200"
   },
 ];
 
-export default function AdsSlider({ set = "A" }: { set?: "A" | "B" }) {
+const ADS_SET_C = [
+  {
+     href: "/shop",
+     img: "https://images.unsplash.com/photo-1607082349566-187342175e2f?auto=format&fit=crop&q=80&w=1200"
+  },
+  {
+     href: "/shop",
+     img: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&q=80&w=1200"
+  },
+];
+
+const FALLBACKS: Record<string, any[]> = { A: ADS, B: ADS_SET_B, C: ADS_SET_C };
+const TYPE_FILTERS: Record<string, string> = { A: "HOME_AD_A", B: "HOME_AD_B", C: "HOME_AD_C" };
+
+export default function AdsSlider({ set = "A" }: { set?: "A" | "B" | "C" }) {
   const [active, setActive] = useState(0);
-  const [slides, setSlides] = useState<any[]>(set === "A" ? ADS : ADS_SET_B);
+  const [slides, setSlides] = useState<any[]>(FALLBACKS[set] || ADS);
 
   useEffect(() => {
     fetch("/api/admin/settings/appearance")
       .then(r => r.json())
       .then(data => {
         const banners = Array.isArray(data?.banners) ? data.banners : [];
-        const typeFilter = set === "A" ? "HOME_AD_A" : "HOME_AD_B";
+        const typeFilter = TYPE_FILTERS[set] || "HOME_AD_A";
         const filtered = banners
           .filter((b: any) => b.type === typeFilter && b.isActive !== false && b.imageUrl)
           .sort((a: any, b: any) => (a.order ?? 0) - (b.order ?? 0))

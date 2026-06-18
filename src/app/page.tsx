@@ -36,7 +36,7 @@ export default function Home() {
       <ProductTabHub filter="regular" />
 
       {/* ── 8. AD BANNER below the ads/products (بانر إعلاني تحت الإعلانات) ── */}
-      <AdsSlider set="A" />
+      <AdsSlider set="C" />
 
       {/* ── 9. REST AS-IS (الباقي زي ما هو) ── */}
       <StoreShowcase />

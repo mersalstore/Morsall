@@ -436,8 +436,9 @@ export default function AppearanceSettings({ showToast }: { showToast?: (msg: st
                                  className="w-full bg-white border border-gray-100 rounded-xl px-5 py-3 text-xs font-bold text-gray-700 outline-none focus:border-[#C5A021] shadow-sm mt-2"
                               >
                                  <option value="HOME_HERO">البانر العلوي الرئيسي (Hero Slider)</option>
-                                 <option value="HOME_AD_A">إعلانات المجموعة A (العلوية)</option>
-                                 <option value="HOME_AD_B">إعلانات المجموعة B (السفلية)</option>
+                                 <option value="HOME_AD_A">إعلانات المجموعة A (بعد الأكثر مبيعاً)</option>
+                                 <option value="HOME_AD_B">إعلانات المجموعة B (بعد الجديدة)</option>
+                                 <option value="HOME_AD_C">إعلانات المجموعة C (السفلية)</option>
                               </select>
                           </div>
                        </div>
