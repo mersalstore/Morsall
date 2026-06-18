@@ -55,6 +55,19 @@ export default function OffersAdsTab({ showToast }: { showToast?: (message: stri
   const [saved, setSaved] = useState(false);
   const [newLink, setNewLink] = useState({ label: "", href: "", color: "#C5A021", emoji: "link", isActive: true });
 
+  // ── Discount coupons (platform-level, created by admin) ──
+  const [coupons, setCoupons] = useState<any[]>([]);
+  const [allProducts, setAllProducts] = useState<any[]>([]);
+  const [couponForm, setCouponForm] = useState({ code: "", discountType: "PERCENTAGE", discountValue: "", minOrderAmount: "", expiryDate: "", scope: "ALL" });
+  const [couponTargets, setCouponTargets] = useState<string[]>([]);
+  const [productSearch, setProductSearch] = useState("");
+  const [couponMsg, setCouponMsg] = useState<{ text: string; ok: boolean } | null>(null);
+  const [couponBusy, setCouponBusy] = useState(false);
+
+  const loadCoupons = () => {
+    fetch("/api/admin/coupons").then(r => r.json()).then(d => { if (Array.isArray(d)) setCoupons(d); }).catch(() => {});
+  };
+
   useEffect(() => {
     // Load from database
     fetch("/api/site-config")
@@ -64,7 +77,58 @@ export default function OffersAdsTab({ showToast }: { showToast?: (message: stri
         if (data.ad_links) setAdLinks(data.ad_links);
       })
       .catch(err => console.error("Failed to load configs", err));
+
+    loadCoupons();
+    fetch("/api/products").then(r => r.json()).then(d => { if (Array.isArray(d)) setAllProducts(d); }).catch(() => {});
   }, []);
+
+  const createCoupon = async () => {
+    if (!couponForm.code.trim() || !couponForm.discountValue) {
+      setCouponMsg({ text: "اكتب كود الكوبون وقيمة الخصم", ok: false });
+      return;
+    }
+    if (couponForm.scope === "PRODUCTS" && couponTargets.length === 0) {
+      setCouponMsg({ text: "اختر منتجاً واحداً على الأقل للكوبون", ok: false });
+      return;
+    }
+    setCouponBusy(true);
+    setCouponMsg(null);
+    try {
+      const res = await fetch("/api/admin/coupons", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...couponForm, targetIds: couponForm.scope === "PRODUCTS" ? couponTargets : null }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setCouponMsg({ text: "تم إنشاء الكوبون ✓", ok: true });
+        setCouponForm({ code: "", discountType: "PERCENTAGE", discountValue: "", minOrderAmount: "", expiryDate: "", scope: "ALL" });
+        setCouponTargets([]);
+        setProductSearch("");
+        loadCoupons();
+      } else {
+        setCouponMsg({ text: data.error || "فشل إنشاء الكوبون", ok: false });
+      }
+    } catch {
+      setCouponMsg({ text: "خطأ في الاتصال بالسيرفر", ok: false });
+    } finally {
+      setCouponBusy(false);
+    }
+  };
+
+  const toggleCoupon = async (id: string, isActive: boolean) => {
+    await fetch("/api/admin/coupons", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id, isActive: !isActive }) }).catch(() => {});
+    loadCoupons();
+  };
+
+  const deleteCoupon = async (id: string) => {
+    await fetch(`/api/admin/coupons?id=${id}`, { method: "DELETE" }).catch(() => {});
+    loadCoupons();
+  };
+
+  const toggleTarget = (id: string) => {
+    setCouponTargets(prev => prev.includes(id) ? prev.filter(p => p !== id) : [...prev, id]);
+  };
 
   const handleSave = async () => {
     setSaving(true);
@@ -360,6 +424,163 @@ export default function OffersAdsTab({ showToast }: { showToast?: (message: stri
             <span className="material-symbols-rounded text-lg">add_circle</span>
             إضافة الرابط
           </button>
+        </div>
+      </section>
+
+      {/* ===== SECTION 4: Discount Coupons ===== */}
+      <section className="bg-white rounded-[2.5rem] p-10 border border-gray-100 shadow-xl space-y-8">
+        <div className="flex items-center gap-4 border-b border-gray-100 pb-6">
+          <div className="w-14 h-14 rounded-[1.5rem] bg-green-500/10 text-green-600 flex items-center justify-center">
+            <span className="material-symbols-rounded text-2xl">sell</span>
+          </div>
+          <div>
+            <h3 className="text-lg font-black text-[#0F172A]">كوبونات الخصم</h3>
+            <p className="text-xs text-gray-400 font-bold">أنشئ كوبونات تنطبق على كل المنتجات أو منتجات محددة (نسبة % أو مبلغ ثابت)</p>
+          </div>
+        </div>
+
+        {/* Create form */}
+        <div className="border-2 border-dashed border-gray-200 rounded-2xl p-6 space-y-5">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">كود الكوبون</label>
+              <input
+                value={couponForm.code}
+                onChange={e => setCouponForm(c => ({ ...c, code: e.target.value }))}
+                placeholder="SUMMER20"
+                className="w-full bg-gray-50 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:ring-2 focus:ring-[#C5A021] uppercase"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">نوع الخصم</label>
+              <select
+                value={couponForm.discountType}
+                onChange={e => setCouponForm(c => ({ ...c, discountType: e.target.value }))}
+                className="w-full bg-gray-50 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:ring-2 focus:ring-[#C5A021]"
+              >
+                <option value="PERCENTAGE">نسبة مئوية (%)</option>
+                <option value="FIXED">مبلغ ثابت (ج.س)</option>
+              </select>
+            </div>
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">
+                {couponForm.discountType === "PERCENTAGE" ? "قيمة الخصم (%)" : "قيمة الخصم (ج.س)"}
+              </label>
+              <input
+                type="number" min={0}
+                value={couponForm.discountValue}
+                onChange={e => setCouponForm(c => ({ ...c, discountValue: e.target.value }))}
+                placeholder={couponForm.discountType === "PERCENTAGE" ? "20" : "5000"}
+                className="w-full bg-gray-50 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:ring-2 focus:ring-[#C5A021]"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">حد أدنى للطلب (اختياري)</label>
+              <input
+                type="number" min={0}
+                value={couponForm.minOrderAmount}
+                onChange={e => setCouponForm(c => ({ ...c, minOrderAmount: e.target.value }))}
+                placeholder="0"
+                className="w-full bg-gray-50 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:ring-2 focus:ring-[#C5A021]"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">تاريخ الانتهاء (اختياري)</label>
+              <input
+                type="date"
+                value={couponForm.expiryDate}
+                onChange={e => setCouponForm(c => ({ ...c, expiryDate: e.target.value }))}
+                className="w-full bg-gray-50 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:ring-2 focus:ring-[#C5A021]"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">يطبّق على</label>
+              <select
+                value={couponForm.scope}
+                onChange={e => setCouponForm(c => ({ ...c, scope: e.target.value }))}
+                className="w-full bg-gray-50 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:ring-2 focus:ring-[#C5A021]"
+              >
+                <option value="ALL">كل المنتجات</option>
+                <option value="PRODUCTS">منتجات محددة</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Product picker for PRODUCTS scope */}
+          {couponForm.scope === "PRODUCTS" && (
+            <div className="bg-gray-50 rounded-2xl p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-black text-gray-500">اختر المنتجات ({couponTargets.length} مختار)</p>
+                <input
+                  value={productSearch}
+                  onChange={e => setProductSearch(e.target.value)}
+                  placeholder="ابحث عن منتج..."
+                  className="bg-white rounded-xl px-3 py-2 text-xs font-bold outline-none focus:ring-2 focus:ring-[#C5A021] w-40"
+                />
+              </div>
+              <div className="max-h-52 overflow-y-auto space-y-1.5 pr-1">
+                {allProducts
+                  .filter(p => !productSearch || (p.title || "").toLowerCase().includes(productSearch.toLowerCase()))
+                  .slice(0, 100)
+                  .map(p => (
+                    <label key={p.id} className="flex items-center gap-3 bg-white rounded-xl px-3 py-2 cursor-pointer hover:bg-gray-100 transition-colors">
+                      <input type="checkbox" checked={couponTargets.includes(p.id)} onChange={() => toggleTarget(p.id)} className="w-4 h-4 accent-[#C5A021]" />
+                      <span className="text-xs font-bold text-[#0F172A] truncate">{p.title}</span>
+                      <span className="text-[10px] text-gray-400 mr-auto">{Number(p.price || 0).toLocaleString()} ج.س</span>
+                    </label>
+                  ))}
+                {allProducts.length === 0 && <p className="text-xs text-gray-400 font-bold text-center py-3">لا توجد منتجات</p>}
+              </div>
+            </div>
+          )}
+
+          {couponMsg && (
+            <p className={`text-xs font-black ${couponMsg.ok ? "text-green-600" : "text-red-500"}`}>{couponMsg.text}</p>
+          )}
+
+          <button
+            onClick={createCoupon}
+            disabled={couponBusy}
+            className="w-full py-3 bg-[#0F172A] text-white rounded-2xl font-black text-sm hover:bg-[#C5A021] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+          >
+            <span className="material-symbols-rounded text-lg">add_circle</span>
+            {couponBusy ? "جاري الإنشاء..." : "إنشاء الكوبون"}
+          </button>
+        </div>
+
+        {/* Existing coupons */}
+        <div className="space-y-3">
+          {coupons.length === 0 && (
+            <p className="text-xs text-gray-400 font-bold text-center py-4">لا توجد كوبونات بعد. أنشئ أول كوبون من الأعلى.</p>
+          )}
+          {coupons.map(c => (
+            <div key={c.id} className="flex items-center gap-4 bg-gray-50 rounded-2xl px-5 py-4">
+              <div className="w-10 h-10 rounded-xl bg-green-500/10 text-green-600 flex items-center justify-center shrink-0">
+                <span className="material-symbols-rounded text-lg">sell</span>
+              </div>
+              <div className="flex-grow min-w-0">
+                <p className="text-sm font-black text-[#0F172A] truncate">{c.code}</p>
+                <p className="text-[11px] text-gray-500 font-bold">
+                  {c.discountType === "PERCENTAGE" ? `خصم ${c.discountValue}%` : `خصم ${Number(c.discountValue).toLocaleString()} ج.س`}
+                  {" · "}
+                  {c.scope === "PRODUCTS" ? "منتجات محددة" : "كل المنتجات"}
+                  {c.expiryDate ? ` · ينتهي ${new Date(c.expiryDate).toLocaleDateString("ar-EG")}` : ""}
+                </p>
+              </div>
+              <button
+                onClick={() => toggleCoupon(c.id, c.isActive)}
+                className={`px-3 py-1.5 rounded-xl text-[10px] font-black transition-all ${c.isActive ? "bg-green-100 text-green-600" : "bg-gray-200 text-gray-400"}`}
+              >
+                {c.isActive ? "نشط" : "معطّل"}
+              </button>
+              <button
+                onClick={() => deleteCoupon(c.id)}
+                className="w-8 h-8 rounded-xl bg-red-50 text-red-400 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all"
+              >
+                <span className="material-symbols-rounded text-sm">delete</span>
+              </button>
+            </div>
+          ))}
         </div>
       </section>
 
