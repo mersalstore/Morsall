@@ -6,8 +6,9 @@ import Image from "next/image";
 import { useRef, useEffect, useState } from "react";
 
 const SECTIONS = [
-  { id: "new",    label: "وصل حديثاً", icon: "✨" },
-  { id: "best",   label: "الأكثر مبيعاً", icon: "⭐" },
+  { id: "new",     label: "وصل حديثاً", icon: "✨" },
+  { id: "best",    label: "الأكثر مبيعاً", icon: "⭐" },
+  { id: "regular", label: "منتجات", icon: "🛍️" },
 ];
 
 function ProductStrip({ title, products, icon }: { title: string, products: any[], icon: string }) {
@@ -69,9 +70,10 @@ function ProductStrip({ title, products, icon }: { title: string, products: any[
   );
 }
 
-export default function ProductTabHub({ filter }: { filter?: "new" | "best" }) {
+export default function ProductTabHub({ filter }: { filter?: "new" | "best" | "regular" }) {
   const [products, setProducts] = useState<any[]>([]);
   const [bestProducts, setBestProducts] = useState<any[]>([]);
+  const [regularProducts, setRegularProducts] = useState<any[]>([]);
 
   useEffect(() => {
     fetch("/api/products?sort=new")
@@ -80,11 +82,19 @@ export default function ProductTabHub({ filter }: { filter?: "new" | "best" }) {
         if (Array.isArray(data)) setProducts(data);
       })
       .catch(console.error);
-      
+
     fetch("/api/products?sort=best")
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) setBestProducts(data);
+      })
+      .catch(console.error);
+
+    // "Regular" products: the general product feed (default order)
+    fetch("/api/products")
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) setRegularProducts(data);
       })
       .catch(console.error);
   }, []);
@@ -119,6 +129,20 @@ export default function ProductTabHub({ filter }: { filter?: "new" | "best" }) {
         ? p.images.split(",")[0].trim() 
         : "https://placehold.co/800x1000/F3F4F6/1089A4?text=No+Image",
       badge: "الأكثر مبيعاً",
+    })),
+    regular: regularProducts.map(p => ({
+      id: p.id,
+      title: p.title,
+      price: p.price,
+      discountPrice: p.discountPrice ?? undefined,
+      discount: p.discount ?? undefined,
+      stock: p.stock,
+      vendor: p.vendor?.storeName,
+      vendorId: p.vendorId,
+      vendorLocation: p.vendor?.location || "السودان",
+      image: (p.images && p.images.trim().length > 0)
+        ? p.images.split(",")[0].trim()
+        : "https://placehold.co/800x1000/F3F4F6/1089A4?text=No+Image",
     }))
   };
 

@@ -14,28 +14,33 @@ export default function Home() {
   return (
     <div className="flex flex-col min-h-screen bg-[#F8FAFC]">
 
-      {/* ── 1. HERO CAROUSEL ── */}
+      {/* ── 1. HERO CAROUSEL (البانر العلوي) ── */}
       <HomeHeroSlider />
 
-      {/* ── 2. CATEGORIES WALL (أقسام رئيسية فقط) ── */}
+      {/* ── 2. CATEGORIES WALL (الأقسام) ── */}
       <CategoryWall />
 
-      {/* ── 3. ADS SLIDER A ── */}
-      <AdsSlider set="A" />
-
-      {/* ── 4. PRODUCT TAB HUB (best sellers) ── */}
+      {/* ── 3. BEST SELLERS (الأكثر مبيعاً) ── */}
       <ProductTabHub filter="best" />
 
-      {/* ── 5. ADS SLIDER B ── */}
+      {/* ── 4. SMALL AD BANNER (بانر إعلاني صغير) ── */}
+      <AdsSlider set="A" />
+
+      {/* ── 5. NEW ARRIVALS (منتجات جديدة) ── */}
+      <ProductTabHub filter="new" />
+
+      {/* ── 6. AD BANNER (بانر إعلاني) ── */}
       <AdsSlider set="B" />
 
-      {/* ── 6. STORES SHOWCASE ── */}
+      {/* ── 7. REGULAR PRODUCTS (منتجات عادية) ── */}
+      <ProductTabHub filter="regular" />
+
+      {/* ── 8. AD BANNER (بانر) ── */}
+      <AdsSlider set="A" />
+
+      {/* ── 9. REST AS-IS (الباقي زي ما هو) ── */}
       <StoreShowcase />
-
-      {/* ── 7. DYNAMIC SECTIONS (admin-managed) ── */}
       <DynamicSectionsRenderer />
-
-      {/* ── 8. TRUST SIGNALS ── */}
       <TrustSignals />
 
     </div>
