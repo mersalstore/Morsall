@@ -917,7 +917,7 @@ export default function LogisticsTab({
   return (
     <div className="space-y-8 pb-20 font-black" dir="rtl">
       {/* Sub-Navigation */}
-      <div className="flex gap-4 bg-white/50 backdrop-blur-md p-2 rounded-[2rem] border border-white w-fit mx-auto shadow-xl">
+      <div className="flex flex-wrap gap-2 md:gap-4 bg-white/50 backdrop-blur-md p-2 rounded-[2rem] border border-white w-full md:w-fit mx-auto shadow-xl justify-center">
          {[
            { id: "fleet", label: "الأسطول والتتبع", icon: <Truck size={16} /> },
            { id: "financials", label: "التسويات المالية", icon: <DollarSign size={16} /> },
@@ -928,7 +928,7 @@ export default function LogisticsTab({
              key={tab.id}
              onClick={() => setActiveSubTab(tab.id)}
              className={cn(
-               "flex items-center gap-2 px-8 py-3 rounded-2xl transition-all text-xs",
+               "flex items-center justify-center gap-2 px-3 py-2.5 md:px-8 md:py-3 rounded-xl md:rounded-2xl transition-all text-xs flex-1 md:flex-initial whitespace-nowrap",
                activeSubTab === tab.id 
                  ? "bg-[#0F172A] text-white shadow-lg" 
                  : "text-gray-400 hover:bg-white"
@@ -1021,14 +1021,14 @@ export default function LogisticsTab({
                     <div id="logistics-leaflet-map" className="absolute inset-0 w-full h-full z-0"></div>
                     
                     {/* Layered UI Headers */}
-                    <div className="absolute top-8 right-8 left-8 z-10 flex justify-between items-start pointer-events-none">
-                       <div className="bg-slate-950/85 backdrop-blur-md p-5 rounded-3xl border border-white/10 shadow-2xl pointer-events-auto">
-                          <h3 className="text-lg text-white font-black">مركز القيادة اللوجستي</h3>
+                    <div className="absolute top-4 right-4 left-4 z-10 flex flex-col sm:flex-row justify-between items-start gap-3 pointer-events-none">
+                       <div className="bg-slate-950/85 backdrop-blur-md p-4 sm:p-5 rounded-3xl border border-white/10 shadow-2xl pointer-events-auto w-full sm:w-auto">
+                          <h3 className="text-sm sm:text-lg text-white font-black">مركز القيادة اللوجستي</h3>
                           <p className="text-[#C5A021] text-[9px] uppercase tracking-[0.3em] mt-1 font-bold">Live Fleet & Staff Map</p>
                        </div>
-                       <div className="bg-slate-950/85 backdrop-blur-md px-6 py-3 rounded-2xl border border-white/10 flex items-center gap-3 pointer-events-auto shadow-2xl">
+                       <div className="bg-slate-950/85 backdrop-blur-md px-4 py-2.5 sm:px-6 sm:py-3 rounded-2xl border border-white/10 flex items-center gap-2.5 pointer-events-auto shadow-2xl w-full sm:w-auto justify-center sm:justify-start">
                           <span className={cn("w-2.5 h-2.5 rounded-full animate-pulse", drivers.some(d => d.isOnline) ? "bg-green-500" : "bg-orange-500")} />
-                          <span className="text-[10px] font-black text-white/80">
+                          <span className="text-[9px] sm:text-[10px] font-black text-white/80">
                             نشط حالياً: {drivers.filter(d => d.isOnline).length} مناديب • {employees.filter(e => e.isActive).length} موظفين
                           </span>
                        </div>
@@ -1387,16 +1387,16 @@ export default function LogisticsTab({
 
               {/* Active Logistics Shipments Table */}
               <div className="bg-white rounded-[3rem] border border-gray-100 shadow-xl overflow-hidden">
-                <div className="p-8 border-b border-gray-50 flex items-center justify-between">
+                <div className="p-4 md:p-8 border-b border-gray-50 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                   <div>
-                    <h3 className="text-lg font-black text-[#0F172A]">شحنات اللوجستيات</h3>
-                    <p className="text-xs text-gray-400 mt-1">استخدم الفلتر لعرض الشحنات النشطة أو كل الشحنات (بما فيها المستوردة والملغاة).</p>
+                    <h3 className="text-base md:text-lg font-black text-[#0F172A]">شحنات اللوجستيات</h3>
+                    <p className="text-[11px] md:text-xs text-gray-400 mt-1">استخدم الفلتر لعرض الشحنات النشطة أو كل الشحنات (بما فيها المستوردة والملغاة).</p>
                   </div>
-                  <div className="flex items-center gap-3 flex-wrap">
+                  <div className="flex flex-wrap items-center gap-2.5">
                     <select
                       value={dispatchStatusFilter}
                       onChange={(e) => { setDispatchStatusFilter(e.target.value); setSelectedShipmentIds(new Set()); }}
-                      className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-[11px] font-black outline-none text-slate-700"
+                      className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-[11px] font-black outline-none text-slate-700 w-full sm:w-auto"
                     >
                       <option value="ACTIVE">النشطة فقط</option>
                       <option value="ALL">كل الشحنات ({orders?.length || 0})</option>
@@ -1404,13 +1404,13 @@ export default function LogisticsTab({
                         <option key={key} value={key}>{s.label}</option>
                       ))}
                     </select>
-                    <span className="px-4 py-2 rounded-2xl bg-orange-50 text-orange-600 text-xs font-black">
+                    <span className="px-3 py-1.5 md:px-4 md:py-2 rounded-2xl bg-orange-50 text-orange-600 text-[10px] md:text-xs font-black">
                       بانتظار الاستلام: {orders?.filter(o => o.status === "PENDING_PICKUP").length || 0}
                     </span>
-                    <span className="px-4 py-2 rounded-2xl bg-purple-50 text-purple-600 text-xs font-black">
+                    <span className="px-3 py-1.5 md:px-4 md:py-2 rounded-2xl bg-purple-50 text-purple-600 text-[10px] md:text-xs font-black">
                       في الفرع: {orders?.filter(o => o.status === "AT_BRANCH").length || 0}
                     </span>
-                    <span className="px-4 py-2 rounded-2xl bg-blue-50 text-blue-600 text-xs font-black">
+                    <span className="px-3 py-1.5 md:px-4 md:py-2 rounded-2xl bg-blue-50 text-blue-600 text-[10px] md:text-xs font-black">
                       قيد التوصيل: {orders?.filter(o => o.status === "SHIPPED").length || 0}
                     </span>
                   </div>
