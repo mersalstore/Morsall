@@ -81,6 +81,7 @@ interface LogisticsTabProps {
   showToast?: (message: string, type?: "info" | "error" | "success") => void;
   onPrint?: (order: any) => void;
   onPrintBulk?: (orders: any[]) => void;
+  onEdit?: (order: any) => void;
 
   logisticsDateRange?: string;
   setLogisticsDateRange?: (val: string) => void;
@@ -92,7 +93,7 @@ interface LogisticsTabProps {
 }
 
 export default function LogisticsTab({
-  orders, users, vendors, fetchData: parentFetchData, ORDER_STATUSES, classes, showToast, onPrint, onPrintBulk,
+  orders, users, vendors, fetchData: parentFetchData, ORDER_STATUSES, classes, showToast, onPrint, onPrintBulk, onEdit,
   logisticsDateRange, setLogisticsDateRange, logisticsCustomFrom, setLogisticsCustomFrom,
   logisticsCustomTo, setLogisticsCustomTo, onCustomDateApply
 }: LogisticsTabProps = {}) {
@@ -1545,7 +1546,7 @@ export default function LogisticsTab({
                         <th className="p-4 font-black text-[#0F172A]">
                           <div className="flex items-center gap-1">الفرع {renderHeaderFilter("branch", branchOptions)}</div>
                         </th>
-                        <th className="p-4 font-black text-[#0F172A]">إسناد إلى</th>
+                        <th className="p-4 font-black text-[#0F172A]">الإجراءات</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
@@ -1742,6 +1743,15 @@ export default function LogisticsTab({
                                   <span className="material-symbols-rounded text-[12px]">person_add</span>
                                   إسناد...
                                 </button>
+                                {onEdit && (
+                                  <button
+                                    onClick={() => onEdit(o)}
+                                    className="p-1 rounded-lg text-amber-600 hover:bg-amber-50 transition-colors"
+                                    title="تعديل الشحنة"
+                                  >
+                                    <span className="material-symbols-rounded text-base">edit</span>
+                                  </button>
+                                )}
                                 {onPrint && (
                                   <button
                                     onClick={() => onPrint(o)}

@@ -842,24 +842,6 @@ export default function AdminDashboard() {
                   }}
                   showToast={showToast}
                 />
-                <EditOrderModal
-                  isOpen={!!editingOrder}
-                  order={editingOrder}
-                  onClose={() => setEditingOrder(null)}
-                  onSuccess={fetchData}
-                  ORDER_STATUSES={ORDER_STATUSES}
-                  showToast={showToast}
-                />
-                <PrintPolicyModal
-                  isOpen={isPolicyModalOpen}
-                  orders={printingOrders}
-                  onClose={() => setIsPolicyModalOpen(false)}
-                />
-                <PrintInvoiceModal
-                  isOpen={!!printingOrder}
-                  order={printingOrder}
-                  onClose={() => setPrintingOrder(null)}
-                />
               </>
             )}
             {activeTab === "inventory" && (
@@ -915,6 +897,7 @@ export default function AdminDashboard() {
                   setPrintingOrders(ords);
                   setIsPolicyModalOpen(true);
                 }}
+                onEdit={setEditingOrder}
               />
             )}
             {activeTab === "employees" && <PersonnelTab type="employees" showToast={showToast} />}
@@ -936,6 +919,25 @@ export default function AdminDashboard() {
             {activeTab === "customSites" && <VendorCustomSiteEditor showToast={showToast} />}
           </motion.div>
         </AnimatePresence>
+
+        <EditOrderModal
+          isOpen={!!editingOrder}
+          order={editingOrder}
+          onClose={() => setEditingOrder(null)}
+          onSuccess={fetchData}
+          ORDER_STATUSES={ORDER_STATUSES}
+          showToast={showToast}
+        />
+        <PrintPolicyModal
+          isOpen={isPolicyModalOpen}
+          orders={printingOrders}
+          onClose={() => setIsPolicyModalOpen(false)}
+        />
+        <PrintInvoiceModal
+          isOpen={!!printingOrder}
+          order={printingOrder}
+          onClose={() => setPrintingOrder(null)}
+        />
         </div>
       </main>
 
