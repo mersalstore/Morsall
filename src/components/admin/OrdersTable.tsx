@@ -995,16 +995,23 @@ export default function OrdersTable({
 
                               {/* Status Badge */}
                               <td className="px-4 py-4">
-                                <span className={cn(
-                                  "px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest border block text-center w-28",
-                                  order.status === "DELIVERED" ? "bg-green-50 text-green-600 border-green-100" :
-                                  order.status === "CANCELLED" ? "bg-red-50 text-red-600 border-red-100 font-black" :
-                                  order.status === "RETURNED" ? "bg-rose-50 text-rose-600 border-rose-100 font-black" :
-                                  ORDER_STATUSES[order.status]?.cls === "badge-active" ? "bg-green-50 text-green-600 border-green-100" : 
-                                  "bg-orange-50 text-orange-500 border border-orange-100"
-                                )}>
-                                  {ORDER_STATUSES[order.status]?.label || order.status}
-                                </span>
+                                <div className="flex flex-col items-center gap-1">
+                                  <span className={cn(
+                                    "px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest border block text-center w-28",
+                                    order.status === "DELIVERED" ? "bg-green-50 text-green-600 border-green-100" :
+                                    order.status === "CANCELLED" ? "bg-red-50 text-red-600 border-red-100 font-black" :
+                                    order.status === "RETURNED" ? "bg-rose-50 text-rose-600 border-rose-100 font-black" :
+                                    ORDER_STATUSES[order.status]?.cls === "badge-active" ? "bg-green-50 text-green-600 border-green-100" : 
+                                    "bg-orange-50 text-orange-500 border border-orange-100"
+                                  )}>
+                                    {ORDER_STATUSES[order.status]?.label || order.status}
+                                  </span>
+                                  {order.attemptCounter > 0 && (
+                                    <span className="text-[9px] font-black text-rose-500 bg-rose-50 px-2 py-0.5 rounded-md border border-rose-100">
+                                      المحاولات: {order.attemptCounter}
+                                    </span>
+                                  )}
+                                </div>
                               </td>
 
                               {/* Merchant Status */}
@@ -1106,16 +1113,23 @@ export default function OrdersTable({
 
                       {/* Status Badge */}
                       <td className="px-4 py-8">
-                        <span className={cn(
-                          "px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest border block text-center w-28",
-                          order.status === "DELIVERED" ? "bg-green-50 text-green-600 border-green-100" :
-                          order.status === "CANCELLED" ? "bg-red-50 text-red-600 border-red-100 font-black" :
-                          order.status === "RETURNED" ? "bg-rose-50 text-rose-600 border-rose-100 font-black" :
-                          ORDER_STATUSES[order.status]?.cls === "badge-active" ? "bg-green-50 text-green-600 border-green-100" : 
-                          "bg-orange-50 text-orange-500 border border-orange-100"
-                        )}>
-                          {ORDER_STATUSES[order.status]?.label || order.status}
-                        </span>
+                        <div className="flex flex-col items-center gap-1">
+                          <span className={cn(
+                            "px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest border block text-center w-28",
+                            order.status === "DELIVERED" ? "bg-green-50 text-green-600 border-green-100" :
+                            order.status === "CANCELLED" ? "bg-red-50 text-red-600 border-red-100 font-black" :
+                            order.status === "RETURNED" ? "bg-rose-50 text-rose-600 border-rose-100 font-black" :
+                            ORDER_STATUSES[order.status]?.cls === "badge-active" ? "bg-green-50 text-green-600 border-green-100" : 
+                            "bg-orange-50 text-orange-500 border border-orange-100"
+                          )}>
+                            {ORDER_STATUSES[order.status]?.label || order.status}
+                          </span>
+                          {order.attemptCounter > 0 && (
+                            <span className="text-[9px] font-black text-rose-500 bg-rose-50 px-2 py-0.5 rounded-md border border-rose-100">
+                              المحاولات: {order.attemptCounter}
+                            </span>
+                          )}
+                        </div>
                       </td>
 
                       {/* Merchant Status */}

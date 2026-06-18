@@ -109,7 +109,7 @@ export default function PrintPolicyModal({ isOpen, orders, onClose }: PrintPolic
           </div>
 
           {/* ── LABELS ── */}
-          <div id="morsall-print-area" className="p-6 print:p-0 bg-gray-50 print:bg-white space-y-8 print:space-y-0 print-area">
+          <div id="morsall-print-area" className="p-6 print:p-0 bg-gray-50 print:bg-white space-y-8 print:space-y-0 print-area flex flex-col items-center">
             {orders.map((order) => {
               const labelData = orderToShippingLabel(order);
               return <ShippingLabel key={order.id} data={labelData} />;

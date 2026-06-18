@@ -430,6 +430,15 @@ export default function AppearanceSettings({ showToast }: { showToast?: (msg: st
                                 onChange={e => handleUpdateBanner(banner.id, { subtitle: e.target.value })}
                                 className="w-full bg-white border border-gray-100 rounded-xl px-5 py-3 text-[10px] font-bold text-gray-400 outline-none focus:border-[#C5A021] shadow-sm"
                              />
+                             <select 
+                                 value={banner.type || "HOME_HERO"}
+                                 onChange={e => handleUpdateBanner(banner.id, { type: e.target.value })}
+                                 className="w-full bg-white border border-gray-100 rounded-xl px-5 py-3 text-xs font-bold text-gray-700 outline-none focus:border-[#C5A021] shadow-sm mt-2"
+                              >
+                                 <option value="HOME_HERO">البانر العلوي الرئيسي (Hero Slider)</option>
+                                 <option value="HOME_AD_A">إعلانات المجموعة A (العلوية)</option>
+                                 <option value="HOME_AD_B">إعلانات المجموعة B (السفلية)</option>
+                              </select>
                           </div>
                        </div>
                        

@@ -39,7 +39,8 @@ export async function GET(req: Request) {
 
 export async function PATCH(req: Request) {
   try {
-    const { orderId, status } = await req.json();
+    const body = await req.json();
+    const { orderId, status, failureReason } = body;
 
     if (!orderId || !status) {
       return NextResponse.json({ error: "بيانات ناقصة" }, { status: 400 });
@@ -89,6 +90,18 @@ export async function PATCH(req: Request) {
       });
 
       return NextResponse.json({ success: true, order: updatedOrder });
+    }
+
+    if (status === "FAILED") {
+      const updated = await prisma.order.update({
+        where: { id: orderId },
+        data: {
+          status: "FAILED",
+          attemptCounter: { increment: 1 },
+          failureReason: failureReason || "فشل محاولة التوصيل"
+        }
+      });
+      return NextResponse.json({ success: true, order: updated });
     }
 
     // Support other status updates if needed

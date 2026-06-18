@@ -222,6 +222,36 @@ export async function PATCH(req: Request) {
       },
     });
 
+    // Automatically create return record if status is RETURNED (المرتجع تلقائي)
+    if (updated.status === "RETURNED") {
+      try {
+        const existingReturn = await db.return.findFirst({
+          where: { orderId: updated.id }
+        });
+        if (!existingReturn) {
+          const firstItem = updated.items?.[0];
+          const vendorId = firstItem?.vendorId || null;
+          await db.return.create({
+            data: {
+              orderId: updated.id,
+              customerId: updated.customerId,
+              vendorId,
+              reason: "تغيير حالة الطلب إلى مرتجع تلقائياً",
+              status: "REQUESTED",
+              items: {
+                create: (updated.items || []).map((item: any) => ({
+                  productId: item.productId,
+                  quantity: item.quantity,
+                }))
+              }
+            }
+          });
+        }
+      } catch (err) {
+        console.error("Failed to auto-create Return record:", err);
+      }
+    }
+
     // إشعار العميل عند قبول/رفض إيصال التحويل البنكي
     if (paymentVerified !== undefined && existingOrder.customerId) {
       try {

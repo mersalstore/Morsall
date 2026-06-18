@@ -9,14 +9,13 @@ export default function TrackOrderPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleTrack = async (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    if (!orderId) return;
+  const fetchTrackingData = async (id: string) => {
+    if (!id) return;
     setLoading(true);
     setError("");
 
     try {
-      const res = await fetch(`/api/orders/track?id=${orderId.trim()}`);
+      const res = await fetch(`/api/orders/track?id=${id.trim()}`);
       const data = await res.json();
       if (!res.ok) {
         throw new Error(data.error || "فشل جلب بيانات التتبع");
@@ -29,6 +28,22 @@ export default function TrackOrderPage() {
       setLoading(false);
     }
   };
+
+  const handleTrack = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    await fetchTrackingData(orderId);
+  };
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get("id");
+      if (id) {
+        setOrderId(id);
+        fetchTrackingData(id);
+      }
+    }
+  }, []);
 
   // Poll for live GPS tracking updates
   useEffect(() => {
@@ -113,15 +128,24 @@ export default function TrackOrderPage() {
                {/* Live Map Tracking */}
                {trackingResult.trackingLat && trackingResult.trackingLng && (
                  <div className="bg-muted p-8 rounded-[3rem] border border-border/10 shadow-elite space-y-6">
-                   <div className="flex items-center justify-between">
-                     <div>
-                       <h4 className="text-lg font-black text-primary">الموقع المباشر للمندوب</h4>
-                       <p className="text-[11px] text-[#C5A021] font-bold uppercase tracking-widest mt-0.5">تتبع المندوب على الخريطة في الوقت الفعلي</p>
-                     </div>
-                     <span className="bg-green-500/10 text-green-600 px-3 py-1 rounded-full text-[10px] font-black animate-pulse">
-                       بث مباشر نشط
-                     </span>
-                   </div>
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-gray-100">
+                      <div>
+                        <h4 className="text-lg font-black text-primary">الموقع المباشر للمندوب</h4>
+                        <p className="text-[11px] text-[#C5A021] font-bold uppercase tracking-widest mt-0.5">تتبع المندوب على الخريطة في الوقت الفعلي</p>
+                      </div>
+                      
+                      <div className="flex flex-wrap gap-2 items-center">
+                        {trackingResult.distanceRemaining && (
+                          <div className="bg-[#F29124]/10 text-[#F29124] px-4 py-2 rounded-xl text-xs font-black">
+                            المسافة: {trackingResult.distanceRemaining}
+                          </div>
+                        )}
+                        <span className="bg-green-500/10 text-green-600 px-4 py-2 rounded-xl text-xs font-black animate-pulse flex items-center gap-1.5">
+                          <span className="w-2 h-2 bg-green-500 rounded-full animate-ping" />
+                          بث مباشر نشط
+                        </span>
+                      </div>
+                    </div>
                    
                    <div className="w-full h-80 rounded-[2rem] overflow-hidden border-2 border-border/15 shadow-inner relative">
                      <iframe

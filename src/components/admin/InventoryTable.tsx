@@ -2,6 +2,8 @@
 
 import React, { useState, useMemo } from "react";
 import { cn } from "@/lib/utils";
+import { importFromExcel } from "@/lib/excel";
+import { validateProductRow } from "@/lib/validation";
 
 interface InventoryTableProps {
   products: any[];
@@ -10,9 +12,18 @@ interface InventoryTableProps {
   classes: any;
   onRefresh: () => void;
   showToast?: (message: string, type?: "success" | "error" | "info") => void;
+  allVendors?: any[];
 }
 
-export default function InventoryTable({ products, onEdit, onAdd, classes, onRefresh, showToast }: InventoryTableProps) {
+export default function InventoryTable({ 
+  products, 
+  onEdit, 
+  onAdd, 
+  classes, 
+  onRefresh, 
+  showToast,
+  allVendors = []
+}: InventoryTableProps) {
   const [search, setSearch] = useState("");
   const [vendorFilter, setVendorFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
@@ -21,6 +32,9 @@ export default function InventoryTable({ products, onEdit, onAdd, classes, onRef
   
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [actionLoading, setActionLoading] = useState(false);
+  const [localActionLoading, setLocalActionLoading] = useState<string | null>(null);
+  const [importPreview, setImportPreview] = useState<{ data: any[], errors: any[] } | null>(null);
+  const [importVendorId, setImportVendorId] = useState("");
 
   // Extract unique vendors and categories
   const vendors = useMemo(() => Array.from(new Map(products.map(p => [p.vendorId, p.vendor || { id: p.vendorId, storeName: "بدون مورد" }])).values()), [products]);
@@ -131,6 +145,85 @@ export default function InventoryTable({ products, onEdit, onAdd, classes, onRef
     a.click();
   };
 
+  // Import Excel
+  const handleImportExcel = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setLocalActionLoading("import");
+    try {
+      const data = await importFromExcel(file);
+      
+      const formattedData: any[] = [];
+      const allErrors: any[] = [];
+
+      data.forEach((row: any, index: number) => {
+        const product = {
+          title: row["اسم المنتج"],
+          price: row["السعر"],
+          stock: row["المخزون"],
+          images: row["روابط الصور"] || row["images"],
+          sku: row["SKU"],
+          shortDescription: row["وصف مصغر"]
+        };
+
+        const errors = validateProductRow(product, index);
+        if (errors.length > 0) allErrors.push(...errors);
+        formattedData.push(product);
+      });
+
+      setImportPreview({ data: formattedData, errors: allErrors });
+      if (allVendors && allVendors.length > 0) {
+        setImportVendorId(allVendors[0].id);
+      }
+      setLocalActionLoading(null);
+    } catch (err) {
+      alert("فشل قراءة الملف.");
+      setLocalActionLoading(null);
+    }
+    e.target.value = '';
+  };
+
+  const confirmImport = async () => {
+    if (!importPreview) return;
+    if (!importVendorId) {
+      alert("يرجى اختيار التاجر أولاً.");
+      return;
+    }
+    const validData = importPreview.data.filter((_, idx) => 
+      !importPreview.errors.some(e => e.row === idx + 1)
+    );
+
+    if (validData.length === 0) return alert("لا توجد بيانات صالحة للاستيراد");
+
+    setLocalActionLoading("import_confirm");
+    try {
+      const res = await fetch("/api/vendor/products/bulk", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          products: validData,
+          adminOverrideVendorId: importVendorId
+        })
+      });
+
+      if (res.ok) {
+        if (showToast) {
+          showToast("تم استيراد المنتجات المعتمدة بنجاح! 🎉", "success");
+        } else {
+          alert("تم استيراد المنتجات المعتمدة بنجاح!");
+        }
+        setImportPreview(null);
+        onRefresh();
+      } else {
+        alert("حدث خطأ أثناء الاستيراد.");
+      }
+    } catch (err) {
+      alert("حدث خطأ أثناء الاتصال بالسيرفر.");
+    } finally {
+      setLocalActionLoading(null);
+    }
+  };
+
   return (
     <div className={cn(classes.card, "border-0 shadow-none")}>
       {/* Filters Toolbar */}
@@ -193,6 +286,11 @@ export default function InventoryTable({ products, onEdit, onAdd, classes, onRef
               <span className="material-symbols-rounded text-[14px]">download</span>
               تصدير
             </button>
+            <label className="flex items-center gap-1 bg-[#F29124] text-white px-4 py-2 rounded-xl font-black text-xs hover:scale-105 transition-all shadow-md cursor-pointer">
+              <span className="material-symbols-rounded text-[14px]">upload_file</span>
+              استيراد Excel
+              <input type="file" className="hidden" accept=".xlsx,.xls" onChange={handleImportExcel} disabled={localActionLoading === "import"} />
+            </label>
             <button onClick={onAdd} className="flex items-center gap-1 bg-[#C5A021] text-white px-4 py-2 rounded-xl font-black text-xs hover:bg-[#0F172A] transition-all shadow-md">
               <span className="material-symbols-rounded text-[14px]">add</span>
               منتج جديد
@@ -307,6 +405,98 @@ export default function InventoryTable({ products, onEdit, onAdd, classes, onRef
           </div>
         )}
       </div>
+
+      {/* ── Import Preview Modal ── */}
+      {importPreview && (
+        <div className="fixed inset-0 z-[600] flex items-center justify-center p-4" dir="rtl">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-md" onClick={() => setImportPreview(null)} />
+          <div className="relative bg-white rounded-[2rem] shadow-2xl w-full max-w-4xl z-10 max-h-[85vh] overflow-hidden flex flex-col">
+            <div className="bg-[#C5A021] text-white p-6 flex items-center justify-between shrink-0">
+               <div>
+                  <h3 className="text-xl font-black">معاينة استيراد المنتجات</h3>
+                  <p className="text-white/60 text-[10px] font-bold uppercase tracking-widest mt-1">تأكيد الاستيراد للتاجر المحدد</p>
+               </div>
+               <button onClick={() => setImportPreview(null)} className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center hover:bg-white/20 transition-all">
+                  <span className="material-symbols-rounded">close</span>
+               </button>
+            </div>
+
+            <div className="flex-grow overflow-y-auto p-6 space-y-6">
+               {/* Select Target Vendor */}
+               <div className="bg-slate-50 border border-slate-200/60 rounded-2xl p-5 space-y-3">
+                  <label className="text-xs font-black text-slate-700 block">اختر التاجر المستهدف للاستيراد لصالحه:</label>
+                  <select 
+                    value={importVendorId} 
+                    onChange={e => setImportVendorId(e.target.value)} 
+                    className="w-full bg-white border border-slate-200 rounded-xl py-3 px-4 text-xs font-bold outline-none focus:border-[#C5A021]"
+                  >
+                    {allVendors.map((v: any) => (
+                      <option key={v.id} value={v.id}>{v.storeName} ({v.user?.email || "بدون بريد"})</option>
+                    ))}
+                  </select>
+               </div>
+
+               {importPreview.errors.length > 0 && (
+                  <div className="bg-red-50 border border-red-100 rounded-xl p-4">
+                     <p className="text-red-600 font-black text-xs flex items-center gap-2 mb-3">
+                        <span className="material-symbols-rounded text-sm">warning</span>
+                        تنبيهات (سيتم تجاهل هذه الصفوف):
+                     </p>
+                     <div className="grid grid-cols-2 gap-2">
+                        {importPreview.errors.map((err, i) => (
+                           <div key={i} className="text-[10px] font-bold text-red-500 bg-white border border-red-50 p-2 rounded-lg">
+                              صف #{err.row}: {err.field} - {err.message}
+                           </div>
+                        ))}
+                     </div>
+                  </div>
+               )}
+
+               <div className="border rounded-xl overflow-hidden">
+                  <table className="w-full text-right text-xs">
+                     <thead className="bg-gray-50 border-b text-[10px] font-black text-gray-400">
+                        <tr>
+                           <th className="px-4 py-3">المنتج</th>
+                           <th className="px-4 py-3">السعر</th>
+                           <th className="px-4 py-3">المخزون</th>
+                           <th className="px-4 py-3 text-center">الحالة</th>
+                        </tr>
+                     </thead>
+                     <tbody className="divide-y">
+                        {importPreview.data.map((p, i) => {
+                           const hasError = importPreview.errors.some(e => e.row === i + 1);
+                           return (
+                              <tr key={i} className={cn(hasError ? "bg-red-50/50" : "")}>
+                                 <td className="px-4 py-3 font-bold">{p.title}</td>
+                                 <td className="px-4 py-3 font-black text-[#C5A021]">{p.price} ج.س</td>
+                                 <td className="px-4 py-3">{p.stock}</td>
+                                 <td className="px-4 py-3 text-center font-black text-[9px] uppercase">
+                                    {hasError ? <span className="text-red-500">مرفوض</span> : <span className="text-green-600">جاهز</span>}
+                                 </td>
+                              </tr>
+                           );
+                        })}
+                     </tbody>
+                  </table>
+               </div>
+            </div>
+
+            <div className="p-6 border-t bg-gray-50 flex items-center justify-between shrink-0">
+               <p className="text-xs font-bold text-gray-400">الصفوف الصالحة: <span className="text-[#C5A021]">{importPreview.data.length - importPreview.errors.length}</span></p>
+               <div className="flex gap-3">
+                  <button onClick={() => setImportPreview(null)} className="px-6 py-2.5 bg-white border border-gray-200 rounded-xl font-bold text-xs">إلغاء</button>
+                  <button 
+                    onClick={confirmImport} 
+                    disabled={localActionLoading === "import_confirm"} 
+                    className="px-8 py-2.5 bg-[#C5A021] text-white rounded-xl font-black text-xs shadow-lg shadow-[#C5A021]/20 disabled:opacity-50 flex items-center gap-2"
+                  >
+                     {localActionLoading === "import_confirm" ? "جاري الاستيراد..." : "✅ استيراد المنتجات الصالحة"}
+                  </button>
+               </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

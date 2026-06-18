@@ -63,7 +63,7 @@ export default function ProductCarousel({ title, products, subtitle }: ProductCa
             className="flex-shrink-0 w-[280px] sm:w-[320px] snap-start"
             whileHover={{ y: -5 }}
           >
-            <ProductCard {...product} />
+            <ProductCard {...product} forceVertical />
           </motion.div>
         ))}
       </div>

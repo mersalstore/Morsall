@@ -474,7 +474,10 @@ export default function CheckoutPage() {
                                     <div className="flex items-center gap-2">
                                       <p className="font-black text-sm text-[#C5A021] flex-1 truncate">{acc.accountNumber || "—"}</p>
                                       {acc.accountNumber && (
-                                        <button type="button" onClick={() => navigator.clipboard.writeText(acc.accountNumber)}
+                                        <button type="button" onClick={() => {
+                                          navigator.clipboard.writeText(acc.accountNumber);
+                                          alert("تم نسخ رقم الحساب بنجاح! 📋");
+                                        }}
                                           className="w-7 h-7 bg-gray-200 rounded flex items-center justify-center hover:bg-[#C5A021] hover:text-white transition-all flex-shrink-0">
                                           <span className="material-symbols-rounded text-sm">content_copy</span>
                                         </button>
@@ -482,6 +485,25 @@ export default function CheckoutPage() {
                                     </div>
                                   </div>
                                 </div>
+
+                                <div className="bg-[#F29124]/5 p-3 rounded-lg border border-[#F29124]/20 flex items-center justify-between">
+                                  <div>
+                                    <p className="text-[10px] font-bold text-[#F29124] mb-0.5">المبلغ المطلوب تحويله</p>
+                                    <p className="font-black text-base text-[#0F172A]">{total.toLocaleString()} ج.س</p>
+                                  </div>
+                                  <button 
+                                    type="button" 
+                                    onClick={() => {
+                                      navigator.clipboard.writeText(total.toString());
+                                      alert("تم نسخ المبلغ: " + total.toLocaleString() + " ج.س 📋");
+                                    }}
+                                    className="px-3 py-1.5 bg-[#F29124] text-white rounded-lg text-xs font-bold flex items-center gap-1 hover:bg-[#D97B10] transition-all animate-pulse"
+                                  >
+                                    <span className="material-symbols-rounded text-xs">content_copy</span>
+                                    نسخ المبلغ
+                                  </button>
+                                </div>
+
                                 {acc.instructions && (
                                   <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
                                     <p className="text-xs font-bold text-amber-700">ℹ️ {acc.instructions}</p>
@@ -489,22 +511,22 @@ export default function CheckoutPage() {
                                 )}
                               </div>
                               {acc.accountNumber && (
-                                <div className="flex flex-col items-center gap-2 flex-shrink-0">
-                                  <p className="text-[10px] font-black text-gray-400">امسح للدفع الفوري (بنكك)</p>
-                                  <div className="w-28 h-28 border-2 border-[#C5A021]/30 rounded-xl overflow-hidden bg-white">
+                                <div className="flex flex-col items-center gap-2 flex-shrink-0 bg-gray-50 p-3 rounded-xl border border-gray-100 min-w-[140px]">
+                                  <p className="text-[10px] font-black text-gray-500">امسح للدفع (بنكك)</p>
+                                  <div className="w-28 h-28 border border-[#C5A021]/30 rounded-xl overflow-hidden bg-white p-1">
                                     <img 
                                       src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(`bok://transfer?account=${acc.accountNumber}&amount=${total}&name=${encodeURIComponent(acc.accountName || "")}`)}`} 
                                       alt="QR الدفع" 
                                       width={112} 
                                       height={112} 
-                                      className="w-full h-full object-contain p-1" 
+                                      className="w-full h-full object-contain" 
                                     />
                                   </div>
                                   <a 
                                     href={`bok://transfer?account=${acc.accountNumber}&amount=${total}&name=${encodeURIComponent(acc.accountName || "")}`}
-                                    className="text-[9px] text-blue-500 font-bold underline hover:text-[#C5A021]"
+                                    className="w-full text-center py-2 bg-[#1089A4] hover:bg-[#0E778E] text-white font-black text-[10px] rounded-lg transition-all shadow-md shadow-[#1089A4]/10"
                                   >
-                                    فتح تطبيق بنكك مباشر 📱
+                                    فتح تطبيق بنكك 📱
                                   </a>
                                 </div>
                               )}

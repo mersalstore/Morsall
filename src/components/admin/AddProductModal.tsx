@@ -74,7 +74,7 @@ export default function AddProductModal({
   const [previews, setPreviews] = useState<{ url: string; file?: File }[]>([]);
 
   // Tabular specifications
-  const [specs, setSpecs] = useState<{ key: string; values: string[] }[]>([]);
+  const [specs, setSpecs] = useState<{ key: string; values: string[] }[]>([{ key: "", values: [""] }]);
 
   const addSpec = () => setSpecs(prev => [...prev, { key: "", values: [""] }]);
   const removeSpec = (idx: number) => setSpecs(prev => prev.filter((_, i) => i !== idx));
@@ -527,6 +527,23 @@ export default function AddProductModal({
                               className="w-9 h-9 bg-red-50 text-red-500 rounded-lg flex items-center justify-center hover:bg-red-100 transition-all shrink-0 border border-red-100"
                             >
                               <Trash2 size={14} />
+                            </button>
+                          </div>
+                          {/* Bottom plus button under each unit */}
+                          <div className="flex justify-end pt-1 border-t border-gray-200">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSpecs(prev => {
+                                  const next = [...prev];
+                                  next.splice(rowIdx + 1, 0, { key: "", values: [""] });
+                                  return next;
+                                });
+                              }}
+                              className="text-blue-600 hover:text-blue-800 text-xs font-bold flex items-center gap-1 transition-all"
+                            >
+                              <Plus size={12} />
+                              <span>إضافة صف مواصفات جديد بالأسفل</span>
                             </button>
                           </div>
                         </div>

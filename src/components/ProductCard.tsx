@@ -21,6 +21,9 @@ export interface ProductCardProps {
   sold?: number;
   vendorId?: string;
   stock?: number;
+  /** Force the vertical (image-on-top) layout on all breakpoints. Used inside
+   *  horizontal carousels where the side-by-side mobile layout looks cramped. */
+  forceVertical?: boolean;
 }
 
 // Star rating helper
@@ -37,7 +40,7 @@ function Stars({ rating = 4.3, count = 128 }: { rating?: number; count?: number 
   );
 }
 
-export default function ProductCard({ id, title, price, image, vendor, vendorLocation, discount, discountPrice, badge, vendorId, stock }: ProductCardProps) {
+export default function ProductCard({ id, title, price, image, vendor, vendorLocation, discount, discountPrice, badge, vendorId, stock, forceVertical }: ProductCardProps) {
   const [added, setAdded] = useState(false);
   const { addItem } = useCart();
   const { toggleFavorite, toggleCompare, isInFavorites, isInCompare } = useWishlist();
@@ -65,10 +68,10 @@ export default function ProductCard({ id, title, price, image, vendor, vendorLoc
   const fakeCount = getProductReviewCount(id);
 
   return (
-    <div className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:border-gray-300 transition-colors flex flex-row sm:flex-col h-full relative">
-      
+    <div className={`bg-white border border-gray-200 rounded-lg overflow-hidden hover:border-gray-300 transition-colors flex ${forceVertical ? "flex-col" : "flex-row sm:flex-col"} h-full relative`}>
+
       {/* Image Container */}
-      <div className="relative w-2/5 sm:w-full aspect-square sm:aspect-[4/3] bg-slate-50 shrink-0 flex items-center justify-center overflow-hidden">
+      <div className={`relative ${forceVertical ? "w-full aspect-[4/3]" : "w-2/5 sm:w-full aspect-square sm:aspect-[4/3]"} bg-slate-50 shrink-0 flex items-center justify-center overflow-hidden`}>
         <Link href={`/product/${id}`} className="block w-full h-full relative">
           <Image
             src={image}
@@ -89,7 +92,7 @@ export default function ProductCard({ id, title, price, image, vendor, vendorLoc
       </div>
 
       {/* Product Content */}
-      <div className="p-3 sm:p-4 flex flex-col flex-grow text-right border-r sm:border-r-0 border-gray-100">
+      <div className={`p-3 sm:p-4 flex flex-col flex-grow text-right ${forceVertical ? "" : "border-r sm:border-r-0 border-gray-100"}`}>
         <Link href={`/product/${id}`} className="block mb-1">
           <h3 className="text-sm font-normal text-[#007185] hover:text-[#C7511F] hover:underline line-clamp-2 leading-tight">
             {title}

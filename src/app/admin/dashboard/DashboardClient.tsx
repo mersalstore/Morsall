@@ -871,6 +871,7 @@ export default function AdminDashboard() {
                   classes={classes} 
                   onRefresh={fetchData}
                   showToast={showToast}
+                  allVendors={vendors}
                 />
                 <AddProductModal 
                   isOpen={isAddProductOpen || !!editingProduct} 

@@ -10,7 +10,8 @@ export async function PATCH(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
-    const { vendorId, planId, action } = await req.json();
+    const body = await req.json();
+    const { vendorId, planId, action } = body;
 
     const vendor = await prisma.vendor.findUnique({
       where: { id: vendorId }
@@ -33,11 +34,39 @@ export async function PATCH(req: Request) {
           isTrialUsed: plan.isTrial ? true : vendor.isTrialUsed
         }
       });
+    } else if (action === "update_subscription") {
+      const plan = planId ? await prisma.subscriptionPlan.findUnique({ where: { id: planId } }) : null;
+      
+      const updateData: any = {};
+      if (plan) {
+        updateData.planId = plan.id;
+        if (body.subscriptionEndsAt) {
+          updateData.subscriptionEndsAt = new Date(body.subscriptionEndsAt);
+        } else {
+          const newEndsAt = new Date();
+          newEndsAt.setDate(newEndsAt.getDate() + plan.durationDays);
+          updateData.subscriptionEndsAt = newEndsAt;
+        }
+      } else if (planId === null) {
+        updateData.planId = null;
+        updateData.subscriptionEndsAt = null;
+      }
+      
+      if (body.customSubscriptionFee !== undefined) {
+        updateData.customSubscriptionFee = body.customSubscriptionFee === null || body.customSubscriptionFee === "" 
+          ? null 
+          : parseFloat(body.customSubscriptionFee);
+      }
+      
+      await prisma.vendor.update({
+        where: { id: vendorId },
+        data: updateData
+      });
     } else if (action === "cancel") {
       await prisma.vendor.update({
         where: { id: vendorId },
         data: {
-          subscriptionEndsAt: new Date(), // End it now
+          subscriptionEndsAt: new Date(),
         }
       });
     }

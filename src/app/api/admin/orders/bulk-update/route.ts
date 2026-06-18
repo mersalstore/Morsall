@@ -39,6 +39,42 @@ export async function POST(req: Request) {
             include: { driver: true }
           });
 
+          // Automatically create return record if status is RETURNED (المرتجع تلقائي)
+          if (updated.status === "RETURNED") {
+            try {
+              const existingReturn = await prisma.return.findFirst({
+                where: { orderId: updated.id }
+              });
+              if (!existingReturn) {
+                const fullOrder = await prisma.order.findUnique({
+                  where: { id: updated.id },
+                  include: { items: true }
+                });
+                if (fullOrder) {
+                  const firstItem = fullOrder.items?.[0];
+                  const vendorId = firstItem?.vendorId || null;
+                  await prisma.return.create({
+                    data: {
+                      orderId: updated.id,
+                      customerId: fullOrder.customerId,
+                      vendorId,
+                      reason: "تغيير حالة الطلب إلى مرتجع تلقائياً عبر التحديث الجماعي",
+                      status: "REQUESTED",
+                      items: {
+                        create: (fullOrder.items || []).map((item: any) => ({
+                          productId: item.productId,
+                          quantity: item.quantity,
+                        }))
+                      }
+                    }
+                  });
+                }
+              }
+            } catch (err) {
+              console.error("Failed to auto-create Return record in bulk update:", err);
+            }
+          }
+
           // Log detailed Audit Trail entry
           const logs: string[] = [];
           if (u.status && u.status !== existingOrder.status) {

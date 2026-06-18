@@ -28,7 +28,7 @@ export async function POST(req: Request) {
   if (!vendor) return NextResponse.json({ error: "Vendor not found" }, { status: 404 });
 
   const body = await req.json();
-  const { code, discountType, discountValue, minOrderAmount, expiryDate } = body;
+  const { code, discountType, discountValue, minOrderAmount, expiryDate, scope, targetIds } = body;
 
   try {
     const coupon = await prisma.coupon.create({
@@ -38,7 +38,9 @@ export async function POST(req: Request) {
         discountValue: parseFloat(discountValue),
         minOrderAmount: minOrderAmount ? parseFloat(minOrderAmount) : 0,
         expiryDate: expiryDate ? new Date(expiryDate) : null,
-        vendorId: vendor.id
+        vendorId: vendor.id,
+        scope: scope || "ALL",
+        targetIds: targetIds || null
       }
     });
     return NextResponse.json(coupon);

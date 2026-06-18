@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Truck, 
@@ -139,6 +139,12 @@ export default function LogisticsTab({
   const [newBranchPhone, setNewBranchPhone] = useState("");
   const [submittingBranch, setSubmittingBranch] = useState(false);
 
+  // Leaflet Live Map states and refs
+  const [employees, setEmployees] = useState<any[]>([]);
+  const [leafletLoaded, setLeafletLoaded] = useState(false);
+  const mapRef = useRef<any>(null);
+  const markersRef = useRef<any[]>([]);
+
   // Custom assignment modal states
   const [assignModalOpen, setAssignModalOpen] = useState(false);
   const [assignTargetOrderIds, setAssignTargetOrderIds] = useState<string[]>([]);
@@ -147,7 +153,182 @@ export default function LogisticsTab({
 
   useEffect(() => {
     fetchData();
+  }, [orders]);
+
+  // Background polling for logistics data every 30 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchData();
+    }, 30000);
+    return () => clearInterval(interval);
   }, []);
+
+  // Cleanup Leaflet map instance when LogisticsTab unmounts
+  useEffect(() => {
+    return () => {
+      if (mapRef.current) {
+        try {
+          mapRef.current.remove();
+        } catch (e) {}
+        mapRef.current = null;
+      }
+    };
+  }, []);
+
+  // Inject Leaflet CSS & JS dynamically
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    if (!document.getElementById("leaflet-css")) {
+      const link = document.createElement("link");
+      link.id = "leaflet-css";
+      link.rel = "stylesheet";
+      link.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
+      document.head.appendChild(link);
+    }
+
+    if ((window as any).L) {
+      setLeafletLoaded(true);
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
+    script.async = true;
+    script.onload = () => {
+      setLeafletLoaded(true);
+    };
+    document.body.appendChild(script);
+  }, []);
+
+  // Leaflet map initialization and updates
+  useEffect(() => {
+    if (!leafletLoaded || typeof window === "undefined" || !(window as any).L) return;
+    const L = (window as any).L;
+
+    if (activeSubTab !== "fleet") {
+      if (mapRef.current) {
+        try {
+          mapRef.current.remove();
+        } catch (e) {}
+        mapRef.current = null;
+      }
+      return;
+    }
+
+    const mapContainer = document.getElementById("logistics-leaflet-map");
+    if (!mapContainer) return;
+
+    if (!mapRef.current) {
+      const map = L.map("logistics-leaflet-map", {
+        zoomControl: true,
+        attributionControl: false
+      }).setView([15.5007, 32.5599], 12);
+
+      // Render Google Maps styled Road Map tiles via Leaflet
+      L.tileLayer("https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}", {
+        maxZoom: 20,
+        subdomains: ["mt0", "mt1", "mt2", "mt3"]
+      }).addTo(map);
+
+      mapRef.current = map;
+    }
+
+    const mapInstance = mapRef.current;
+
+    // Clear old markers
+    markersRef.current.forEach(marker => marker.remove());
+    markersRef.current = [];
+
+    // Helper for stable offsets based on ID (deterministic)
+    const getStableCoords = (id: string, latBase = 15.5007, lngBase = 32.5599) => {
+      let hash = 0;
+      for (let i = 0; i < id.length; i++) {
+        hash = id.charCodeAt(i) + ((hash << 5) - hash);
+      }
+      const latOffset = ((hash % 100) / 1000) * 0.08 - 0.04;
+      const lngOffset = (((hash >> 8) % 100) / 1000) * 0.08 - 0.04;
+      return [latBase + latOffset, lngBase + lngOffset];
+    };
+
+    // Add Driver Markers (Online/Offline)
+    drivers.forEach(driver => {
+      const isOnline = driver.isOnline;
+      const coords = (driver as any).lat && (driver as any).lng 
+        ? [(driver as any).lat, (driver as any).lng]
+        : getStableCoords(driver.id);
+
+      const colorClass = isOnline ? "bg-green-500 shadow-[0_0_15px_#22c55e]" : "bg-gray-500 shadow-[0_0_10px_rgba(0,0,0,0.5)]";
+      const markerHtml = `
+        <div class="relative group">
+          <div class="w-9 h-9 rounded-2xl flex items-center justify-center text-white transition-all duration-300 scale-100 hover:scale-110 ${colorClass}">
+            🚗
+          </div>
+        </div>
+      `;
+
+      const customIcon = L.divIcon({
+        html: markerHtml,
+        className: "custom-leaflet-icon",
+        iconSize: [36, 36],
+        iconAnchor: [18, 18]
+      });
+
+      const popupHtml = `
+        <div class="text-right font-black text-xs space-y-1" dir="rtl">
+          <p class="font-extrabold text-[#0F172A]">${driver.name}</p>
+          <p class="text-gray-500 text-[10px]">${driver.vehicleType} • ${driver.phone}</p>
+          <p class="text-[9px] ${isOnline ? "text-green-500" : "text-gray-400"}">${isOnline ? "متصل الآن" : "غير متصل"}</p>
+        </div>
+      `;
+
+      const marker = L.marker(coords, { icon: customIcon })
+        .addTo(mapInstance)
+        .bindPopup(popupHtml);
+
+      markersRef.current.push(marker);
+    });
+
+    // Add Employee Markers (Workers)
+    employees.forEach(emp => {
+      const isActive = emp.isActive;
+      if (!isActive) return;
+
+      const coords = getStableCoords(emp.id, 15.5100, 32.5400); // slight shift
+
+      const colorClass = "bg-blue-600 shadow-[0_0_12px_#2563eb]";
+      const markerHtml = `
+        <div class="relative group">
+          <div class="w-8 h-8 rounded-full flex items-center justify-center text-white transition-all duration-300 scale-100 hover:scale-110 ${colorClass}">
+            👷
+          </div>
+        </div>
+      `;
+
+      const customIcon = L.divIcon({
+        html: markerHtml,
+        className: "custom-leaflet-icon",
+        iconSize: [32, 32],
+        iconAnchor: [16, 16]
+      });
+
+      const roleLabel = emp.role === "SHIPPING" ? "مشرف شحن" : emp.role === "PACKING" ? "مسؤول تجهيز" : "موظف";
+      const popupHtml = `
+        <div class="text-right font-black text-xs space-y-1" dir="rtl">
+          <p class="font-extrabold text-blue-600">${emp.name}</p>
+          <p class="text-gray-500 text-[10px]">${roleLabel} • ${emp.email}</p>
+          <p class="text-[9px] text-green-500">نشط في المقر</p>
+        </div>
+      `;
+
+      const marker = L.marker(coords, { icon: customIcon })
+        .addTo(mapInstance)
+        .bindPopup(popupHtml);
+
+      markersRef.current.push(marker);
+    });
+
+  }, [leafletLoaded, activeSubTab, drivers, employees]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -176,6 +357,16 @@ export default function LogisticsTab({
       const histRes = await fetch("/api/admin/settlements?history=true");
       if (histRes.ok) {
         setHistory(await histRes.json());
+      }
+
+      // Fetch employees/workers
+      try {
+        const empRes = await fetch("/api/admin/employees");
+        if (empRes.ok) {
+          setEmployees(await empRes.json());
+        }
+      } catch (err) {
+        console.error("Error fetching employees:", err);
       }
     } catch (err) {
       console.error("Error loading logistics data:", err);
@@ -298,16 +489,7 @@ export default function LogisticsTab({
     }
   };
 
-  // Generate premium map coords based on ID hashes to keep drivers distributed but stable
-  const getDriverCoords = (id: string) => {
-    let hash = 0;
-    for (let i = 0; i < id.length; i++) {
-      hash = id.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    const x = 15 + Math.abs((hash % 70)); // 15% to 85% width
-    const y = 25 + Math.abs(((hash >> 8) % 50)); // 25% to 75% height
-    return { x: `${x}%`, y: `${y}%` };
-  };
+
 
   // Calculate sum of COD debt
   const totalUnsettledCash = drivers.reduce((sum, d) => sum + d.unsettledCash, 0);
@@ -579,52 +761,30 @@ export default function LogisticsTab({
 
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Live Map Visualization */}
-                <div className="lg:col-span-2 bg-[#0F172A] rounded-[3rem] p-8 shadow-2xl relative overflow-hidden min-h-[500px]">
-                    <div className="absolute inset-0 opacity-10 pointer-events-none">
-                       <svg className="w-full h-full" viewBox="0 0 800 500">
-                          <path d="M50,50 L750,50 L750,450 L50,450 Z" fill="none" stroke="white" strokeWidth="0.5" />
-                          <path d="M50,150 L750,150 M50,300 L750,300 M250,50 L250,450 M500,50 L500,450" fill="none" stroke="white" strokeWidth="0.2" />
-                       </svg>
-                    </div>
-                    <div className="relative z-10 h-full flex flex-col justify-between">
-                       <div className="flex justify-between items-start mb-12">
-                          <div>
-                             <h3 className="text-2xl text-white">مركز القيادة اللوجستي</h3>
-                             <p className="text-[#C5A021] text-[10px] uppercase tracking-[0.3em] mt-1">Live Delivery Map</p>
-                          </div>
-                          <div className="bg-white/5 backdrop-blur-xl px-6 py-3 rounded-2xl border border-white/10 flex items-center gap-3">
-                             <span className={cn("w-2 h-2 rounded-full animate-ping", drivers.some(d => d.isOnline) ? "bg-green-500" : "bg-orange-500")} />
-                             <span className="text-[10px] text-white/60">بث حي لموقع {drivers.filter(d => d.isOnline).length} مندوب نشط</span>
-                          </div>
+                <div className="lg:col-span-2 bg-slate-900 rounded-[3rem] shadow-2xl relative overflow-hidden min-h-[500px]">
+                    {/* Leaflet Map Div */}
+                    <div id="logistics-leaflet-map" className="absolute inset-0 w-full h-full z-0"></div>
+                    
+                    {/* Layered UI Headers */}
+                    <div className="absolute top-8 right-8 left-8 z-10 flex justify-between items-start pointer-events-none">
+                       <div className="bg-slate-950/85 backdrop-blur-md p-5 rounded-3xl border border-white/10 shadow-2xl pointer-events-auto">
+                          <h3 className="text-lg text-white font-black">مركز القيادة اللوجستي</h3>
+                          <p className="text-[#C5A021] text-[9px] uppercase tracking-[0.3em] mt-1 font-bold">Live Fleet & Staff Map</p>
                        </div>
+                       <div className="bg-slate-950/85 backdrop-blur-md px-6 py-3 rounded-2xl border border-white/10 flex items-center gap-3 pointer-events-auto shadow-2xl">
+                          <span className={cn("w-2.5 h-2.5 rounded-full animate-pulse", drivers.some(d => d.isOnline) ? "bg-green-500" : "bg-orange-500")} />
+                          <span className="text-[10px] font-black text-white/80">
+                            نشط حالياً: {drivers.filter(d => d.isOnline).length} مناديب • {employees.filter(e => e.isActive).length} موظفين
+                          </span>
+                       </div>
+                    </div>
 
-                       {/* Map Markers */}
-                       <div className="relative flex-grow min-h-[300px]">
-                          {drivers.map((driver) => {
-                            const coords = getDriverCoords(driver.id);
-                            return (
-                              <div 
-                                key={driver.id} 
-                                style={{ top: coords.y, left: coords.x }} 
-                                className="absolute group cursor-pointer -translate-x-1/2 -translate-y-1/2"
-                              >
-                                 <div className={cn(
-                                   "w-10 h-10 rounded-2xl flex items-center justify-center text-white transition-all duration-300 scale-100 hover:scale-110",
-                                   driver.isOnline 
-                                     ? "bg-green-500 shadow-[0_0_15px_#22c55e]" 
-                                     : "bg-gray-600 shadow-[0_0_10px_rgba(0,0,0,0.5)]"
-                                 )}>
-                                    <Truck size={18} />
-                                 </div>
-                                 <div className="absolute top-12 left-1/2 -translate-x-1/2 bg-white px-3 py-1.5 rounded-xl text-[9px] text-[#0F172A] shadow-2xl whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-50">
-                                    <p className="font-black">{driver.name}</p>
-                                    <p className="text-gray-400 mt-0.5">{driver.vehicleType} • {driver.isOnline ? "متصل الآن" : "غير متصل"}</p>
-                                 </div>
-                              </div>
-                            );
-                          })}
-                       </div>
-                    </div>
+                    {!leafletLoaded && (
+                      <div className="absolute inset-0 bg-slate-950/70 backdrop-blur-sm z-20 flex items-center justify-center text-white gap-3 font-bold text-sm">
+                        <Loader2 className="animate-spin text-[#C5A021]" size={20} />
+                        <span>جاري تحميل خريطة جوجل...</span>
+                      </div>
+                    )}
                 </div>
 
                 {/* Fleet Performance Sidebar */}
@@ -1081,14 +1241,15 @@ export default function LogisticsTab({
                         <th className="p-4 font-black text-[#0F172A]">عدد محاولات العالق</th>
                         <th className="p-4 font-black text-[#0F172A]">نوع الشحنة</th>
                         <th className="p-4 font-black text-[#0F172A]">رسوم إضافية</th>
-                        <th className="p-4 font-black text-[#0F172A]">المندوب / الفرع</th>
+                        <th className="p-4 font-black text-[#0F172A]">المندوب</th>
+                        <th className="p-4 font-black text-[#0F172A]">الفرع</th>
                         <th className="p-4 font-black text-[#0F172A]">إسناد إلى</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
                       {activeShipments.length === 0 ? (
                         <tr>
-                          <td colSpan={27} className="p-12 text-center text-gray-400 font-bold">لا توجد شحنات نشطة حالياً</td>
+                          <td colSpan={28} className="p-12 text-center text-gray-400 font-bold">لا توجد شحنات نشطة حالياً</td>
                         </tr>
                       ) : (
                         activeShipments.map((o: any) => {
@@ -1229,9 +1390,13 @@ export default function LogisticsTab({
                             <td className="p-4 text-slate-700">
                               {(o.additionalFees || 0).toLocaleString()} <span className="text-[9px] text-gray-400">ج.س</span>
                             </td>
-                            {/* 25. المندوب / الفرع */}
+                            {/* 25. المندوب */}
                             <td className="p-4 text-gray-500 whitespace-nowrap">
-                              {o.driver?.name ? `🚗 ${o.driver.name}` : currentBranch ? `🏢 ${currentBranch}` : "—"}
+                              {o.driver?.name ? `🚗 ${o.driver.name}` : "—"}
+                            </td>
+                            {/* 25b. الفرع */}
+                            <td className="p-4 text-gray-500 whitespace-nowrap">
+                              {currentBranch ? `🏢 ${currentBranch}` : "—"}
                             </td>
                             {/* 26. إسناد إلى */}
                             <td className="p-4">

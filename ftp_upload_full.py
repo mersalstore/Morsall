@@ -57,10 +57,10 @@ def upload_tree(local_base, remote_base, label):
     return up, err
 
 print("=== 1/4 .next/server ===")
-upload_tree(os.path.join(".next", "server"), "/nodejs/.next/server", "server")
+upload_tree(os.path.join(".next", "server"), "/domains/morsall.com/nodejs/.next/server", "server")
 
-print("\n=== 2/4 .next/static -> /nodejs/.next/static ===")
-upload_tree(os.path.join(".next", "static"), "/nodejs/.next/static", "static-node")
+print("\n=== 2/4 .next/static -> /domains/morsall.com/nodejs/.next/static ===")
+upload_tree(os.path.join(".next", "static"), "/domains/morsall.com/nodejs/.next/static", "static-node")
 
 print("\n=== 3/4 .next/static -> /public_html/_next/static (browser) ===")
 upload_tree(os.path.join(".next", "static"), "/public_html/_next/static", "static-pub")
@@ -74,14 +74,14 @@ for fname in ["BUILD_ID", "prerender-manifest.json", "routes-manifest.json",
     if os.path.exists(lp):
         try:
             with open(lp, "rb") as f:
-                ftp.storbinary(f"STOR /nodejs/.next/{fname}", f)
+                ftp.storbinary(f"STOR /domains/morsall.com/nodejs/.next/{fname}", f)
             print(f"  {fname}")
         except Exception as e:
             print(f"  ERR {fname}: {e}")
 
 # restart
 try:
-    ftp.cwd("/nodejs/tmp")
+    ftp.cwd("/domains/morsall.com/nodejs/tmp")
     ftp.storbinary("STOR restart.txt", io.BytesIO(b""))
     print("\nTouched restart.txt")
 except Exception as e:

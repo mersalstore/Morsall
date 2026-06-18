@@ -313,6 +313,7 @@ export function ShippingLabel({ data, copies = 1 }: ShippingLabelProps) {
     border: BORDER,
     pageBreakAfter: "always",
     breakAfter: "page",
+    margin: "0 auto",
   };
 
   return (

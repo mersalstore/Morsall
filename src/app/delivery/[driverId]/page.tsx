@@ -164,6 +164,43 @@ export default function DriverPortal() {
     }
   };
 
+  const handleMarkFailed = async (orderId: string) => {
+    const reason = prompt("يرجى إدخال سبب فشل التوصيل (مثال: العميل لا يرد، مغلق، تأجيل):");
+    if (reason === null) return;
+    const cleanReason = reason.trim() || "العميل لا يرد";
+
+    try {
+      setLoading(true);
+      const res = await fetch("/api/delivery/orders", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId, status: "FAILED", failureReason: cleanReason })
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "فشل تحديث الحالة");
+      }
+
+      alert("تم تسجيل محاولة التوصيل الفاشلة بنجاح.");
+      
+      if (activeOrderId === orderId) {
+        if (timerRef.current) {
+          clearInterval(timerRef.current);
+          timerRef.current = null;
+        }
+        setActiveOrderId(null);
+        setIsTracking(false);
+      }
+
+      await fetchOrders();
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
 
   if (loading) return <div className="min-h-screen bg-[#0F172A] flex items-center justify-center font-bold text-[#C5A021]">جاري التحميل...</div>;
   if (error) return <div className="min-h-screen bg-[#0F172A] flex items-center justify-center font-bold text-red-500">{error}</div>;
@@ -287,27 +324,34 @@ export default function DriverPortal() {
                    </button>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3 pt-2">
-                   <button 
-                     onClick={() => startTracking(order.id)}
-                     className={cn(
-                       "flex flex-col items-center justify-center p-5 rounded-[1.5rem] border-2 transition-all",
-                       activeOrderId === order.id 
-                         ? "bg-[#F29124] border-[#F29124] text-white shadow-xl shadow-[#F29124]/20" 
-                         : "bg-gray-50 border-transparent text-gray-400"
-                     )}
-                   >
-                      <span className="material-symbols-rounded mb-1">{activeOrderId === order.id ? "share_location" : "near_me"}</span>
-                      <span className="text-[10px]">{activeOrderId === order.id ? "إيقاف البث" : "بدء الرحلة"}</span>
-                   </button>
-                   <button 
-                     onClick={() => handleMarkDelivered(order.id)}
-                     className="flex flex-col items-center justify-center p-5 bg-[#0F172A] text-white rounded-[1.5rem] shadow-xl shadow-[#0F172A]/10"
-                   >
-                      <span className="material-symbols-rounded mb-1">task_alt</span>
-                      <span className="text-[10px]">تأكيد التسليم</span>
-                   </button>
-                </div>
+                <div className="grid grid-cols-3 gap-2 pt-2">
+                    <button 
+                      onClick={() => startTracking(order.id)}
+                      className={cn(
+                        "flex flex-col items-center justify-center p-3.5 rounded-2xl border-2 transition-all",
+                        activeOrderId === order.id 
+                          ? "bg-[#F29124] border-[#F29124] text-white shadow-xl shadow-[#F29124]/20" 
+                          : "bg-gray-50 border-transparent text-gray-400"
+                      )}
+                    >
+                       <span className="material-symbols-rounded mb-0.5 text-lg">{activeOrderId === order.id ? "share_location" : "near_me"}</span>
+                       <span className="text-[9px] font-bold">{activeOrderId === order.id ? "إيقاف البث" : "بدء الرحلة"}</span>
+                    </button>
+                    <button 
+                      onClick={() => handleMarkFailed(order.id)}
+                      className="flex flex-col items-center justify-center p-3.5 bg-red-50 text-red-500 rounded-2xl shadow-sm border border-red-100 hover:bg-red-100 transition-colors"
+                    >
+                       <span className="material-symbols-rounded mb-0.5 text-lg">sms_failed</span>
+                       <span className="text-[9px] font-bold">محاولة فاشلة</span>
+                    </button>
+                    <button 
+                      onClick={() => handleMarkDelivered(order.id)}
+                      className="flex flex-col items-center justify-center p-3.5 bg-[#0F172A] text-white rounded-2xl shadow-xl shadow-[#0F172A]/10 hover:bg-[#1A3340] transition-colors"
+                    >
+                       <span className="material-symbols-rounded mb-0.5 text-lg">task_alt</span>
+                       <span className="text-[9px] font-bold">تأكيد التسليم</span>
+                    </button>
+                 </div>
 
                 <a 
                   href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${order.city} ${order.district} ${order.street}`)}`}

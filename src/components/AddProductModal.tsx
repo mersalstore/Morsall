@@ -51,7 +51,7 @@ export default function AddProductModal({ isOpen, onClose, editingProduct }: Add
   const [previews, setPreviews] = useState<string[]>([]);
 
   // Tabular specifications
-  const [specs, setSpecs] = useState<{ key: string; values: string[] }[]>([]);
+  const [specs, setSpecs] = useState<{ key: string; values: string[] }[]>([{ key: "", values: [""] }]);
 
   // Variant pricing mode: "absolute" | "adjustment"
   const [variantPricingMode, setVariantPricingMode] = useState<"absolute" | "adjustment">("absolute");
@@ -543,6 +543,23 @@ export default function AddProductModal({ isOpen, onClose, editingProduct }: Add
                               className="w-10 h-10 bg-red-50 text-red-400 rounded-xl flex items-center justify-center hover:bg-red-100 transition-all shrink-0"
                             >
                               <span className="material-symbols-rounded text-sm">delete</span>
+                            </button>
+                          </div>
+                          {/* Bottom plus button under each unit */}
+                          <div className="flex justify-end pt-1 border-t border-gray-50">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSpecs(prev => {
+                                  const next = [...prev];
+                                  next.splice(rowIdx + 1, 0, { key: "", values: [""] });
+                                  return next;
+                                });
+                              }}
+                              className="text-blue-600 hover:text-blue-800 text-xs font-bold flex items-center gap-1 transition-all"
+                            >
+                              <span className="material-symbols-rounded text-sm">add_circle</span>
+                              <span>إضافة صف مواصفات جديد بالأسفل</span>
                             </button>
                           </div>
                         </div>

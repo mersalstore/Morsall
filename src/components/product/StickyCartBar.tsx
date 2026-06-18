@@ -77,7 +77,18 @@ export default function StickyCartBar({ product }: { product: Product }) {
            </div>
            
            <button 
-             onClick={() => addItem({ id: product.id, title: product.title, price: discountedPrice, quantity: 1, vendor: product.vendor, image: product.image })}
+             onClick={() => {
+               const prod = product as any;
+               addItem({
+                 id: product.id,
+                 title: product.title,
+                 price: discountedPrice,
+                 quantity: 1,
+                 vendor: typeof prod.vendor === "string" ? prod.vendor : (prod.vendor?.name || ""),
+                 vendorId: prod.vendorId || (prod.vendor && typeof prod.vendor === "object" ? prod.vendor.id : undefined),
+                 image: product.image
+               });
+             }}
              className="bg-[#C5A021] text-white w-full md:w-auto px-8 lg:px-12 py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-[#C5A021]/20 hover:bg-[#0D708E] hover:-translate-y-0.5 active:scale-95 transition-all flex items-center justify-center gap-3 border-2 border-white/10"
            >
               <span className="material-symbols-rounded !text-lg">shopping_basket</span> أضف للسلة

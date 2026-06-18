@@ -189,7 +189,7 @@ export async function POST(req: Request) {
       const dbProducts = productIds.length > 0
         ? await prisma.product.findMany({
           where: { id: { in: productIds } },
-          select: { id: true, vendorId: true, price: true, title: true, stock: true },
+          select: { id: true, vendorId: true, price: true, discountPrice: true, title: true, stock: true },
         })
         : [];
 
@@ -199,8 +199,12 @@ export async function POST(req: Request) {
         const dbProduct = productMap[item.productId];
         if (!dbProduct) return null;
         
-        // Secure price calculation server-side
-        const localPrice = dbProduct.price * rate;
+        // Secure price calculation server-side (use discountPrice if smaller than price)
+        const basePrice = (dbProduct.discountPrice !== null && dbProduct.discountPrice !== undefined && dbProduct.discountPrice < dbProduct.price)
+          ? dbProduct.discountPrice
+          : dbProduct.price;
+
+        const localPrice = basePrice * rate;
         calculatedSubtotal += localPrice * (parseInt(item.quantity) || 1);
 
         return {

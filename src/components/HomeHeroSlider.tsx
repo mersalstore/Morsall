@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -72,61 +72,61 @@ export default function HomeHeroSlider() {
       setActiveSlide(p => (p + 1) % slides.length);
     }, 8000);
     return () => clearInterval(interval);
-  }, [slides]);
+    // Re-arm the timer whenever the slide changes (incl. manual swipe) so the
+    // user always gets the full interval after interacting.
+  }, [slides, activeSlide]);
+
+  const goToSlide = (i: number) => {
+    const len = slides.length;
+    if (len === 0) return;
+    setActiveSlide(((i % len) + len) % len);
+  };
+
+  // ── Touch swipe (mobile): drag left/right to change images ──
+  const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+  };
+
+  const onTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null || slides.length <= 1) return;
+    const dx = e.changedTouches[0].clientX - touchStartX.current;
+    const dy = e.changedTouches[0].clientY - (touchStartY.current ?? 0);
+    // Only treat as a horizontal swipe (ignore vertical scrolling / taps).
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) {
+      goToSlide(dx < 0 ? activeSlide + 1 : activeSlide - 1);
+    }
+    touchStartX.current = null;
+    touchStartY.current = null;
+  };
 
   return (
     <section className="pt-28 md:pt-36 pb-6 px-4 lg:px-8 max-w-[1600px] mx-auto w-full">
-      <div className="bg-[#0F172A] rounded-2xl overflow-hidden shadow-sm h-[380px] md:h-[430px] lg:h-[480px] relative">
+      <div
+        className="bg-[#0F172A] rounded-2xl overflow-hidden shadow-sm h-[300px] md:h-[430px] lg:h-[480px] relative touch-pan-y select-none"
+        onTouchStart={onTouchStart}
+        onTouchEnd={onTouchEnd}
+      >
         {slides.map((slide, idx) => {
           const isActive = idx === activeSlide;
           return (
             <div 
               key={idx}
-              className={`absolute inset-0 w-full h-full transition-opacity duration-1000 flex items-center ${isActive ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"}`}
+              className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ${isActive ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"}`}
             >
-              {/* Background Image */}
-              <div className="absolute inset-0 z-0">
+              <Link href={slide.ctaLink || "#"} className="block w-full h-full relative">
                 <Image 
                   src={slide.img} 
-                  alt={slide.title}
+                  alt={slide.title || "عرض"}
                   fill 
                   className="object-cover" 
                   style={{ objectPosition: heroImagePosition }}
                   priority
                 />
-                <div className="absolute inset-0 bg-gradient-to-r from-slate-950/60 via-slate-950/20 to-transparent" />
-              </div>
-
-              {/* Text Panel */}
-              <div className="relative z-10 max-w-2xl px-6 md:px-16 text-right space-y-4 text-white">
-                <span className="inline-block px-3 py-1 rounded bg-[#F29124] text-[10px] font-bold tracking-wider">
-                  {slide.badge}
-                </span>
-                <h1 className="text-2xl md:text-4xl lg:text-5xl font-black leading-tight">
-                  {slide.title}
-                </h1>
-                <h2 className="text-sm md:text-base font-bold text-slate-300">
-                  {slide.subtitle}
-                </h2>
-                <p className="text-xs md:text-sm text-slate-400 font-medium leading-relaxed max-w-lg">
-                  {slide.desc}
-                </p>
-                
-                <div className="flex gap-3 pt-2">
-                  <Link 
-                    href={slide.ctaLink}
-                    className="px-6 py-2.5 bg-[#F29124] hover:bg-[#d67b1b] text-white font-bold text-xs rounded transition-colors shadow-sm"
-                  >
-                    {slide.cta}
-                  </Link>
-                  <Link 
-                    href="#products"
-                    className="px-6 py-2.5 bg-white/10 hover:bg-white/20 text-white font-bold text-xs rounded border border-white/20 transition-colors"
-                  >
-                    تصفح السوق
-                  </Link>
-                </div>
-              </div>
+              </Link>
             </div>
           );
         })}

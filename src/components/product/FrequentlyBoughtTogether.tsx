@@ -23,6 +23,7 @@ export default function FrequentlyBoughtTogether({ mainProduct, upsellProducts }
         price: p.price || 0,
         quantity: 1,
         vendor: p.vendor,
+        vendorId: p.vendorId || p.vendor?.id,
         image: typeof p.images === "string" ? p.images.split(",")[0].trim() : (p.image || ""),
       });
     });

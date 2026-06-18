@@ -175,7 +175,7 @@ export default function OrdersPage() {
                         <div className="flex gap-4">
                            <button className="px-10 py-5 rounded-[2rem] border-4 border-gray-50 text-[10px] font-black text-gray-300 hover:border-[#C5A021] hover:text-[#C5A021] transition-all">تفاصيل المعاملة</button>
                            {activeTab === "current" && (
-                             <Link href={`/delivery?track=${order.id}`} className="px-12 py-5 rounded-[2rem] bg-[#C5A021] text-white text-[10px] font-black shadow-xl shadow-[#C5A021]/20 hover:bg-[#0F172A] transition-all flex items-center gap-3">
+                             <Link href={`/track?id=${order.id}`} className="px-12 py-5 rounded-[2rem] bg-[#C5A021] text-white text-[10px] font-black shadow-xl shadow-[#C5A021]/20 hover:bg-[#0F172A] transition-all flex items-center gap-3">
                                 تتبع الشحنة <span className="material-symbols-rounded text-sm">trending_flat</span>
                              </Link>
                            )}

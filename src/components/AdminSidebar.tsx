@@ -55,8 +55,7 @@ const NAV_ITEMS: { id: TabId; icon: any; label: string; group?: string }[] = [
   
   { id: "users",       icon: Users,            label: "العملاء", group: "الأعضاء" },
   { id: "vendors",     icon: Store,            label: "الموردون", group: "الأعضاء" },
-  { id: "employees",   icon: UsersRound,       label: "الموظفون", group: "الأعضاء" },
-  { id: "drivers",     icon: Truck,            label: "المناديب", group: "الأعضاء" },
+  { id: "employees",   icon: UsersRound,       label: "الموظفون والمناديب", group: "الأعضاء" },
   
   { id: "logistics",   icon: TrendingUp,        label: "النظام اللوجستي", group: "عمليات" },
   { id: "wms",         icon: Layers,           label: "إدارة المستودعات (WMS)", group: "عمليات" },

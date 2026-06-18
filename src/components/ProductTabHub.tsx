@@ -60,7 +60,7 @@ function ProductStrip({ title, products, icon }: { title: string, products: any[
         >
           {products.map(p => (
             <div key={p.id} className="min-w-[200px] sm:min-w-[240px] md:min-w-[280px] snap-center">
-              <ProductCard {...p} />
+              <ProductCard {...p} forceVertical />
             </div>
           ))}
         </div>

@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/lib/CartContext";
 import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface PurchaseBoxProps {
   product: any;
@@ -22,6 +23,7 @@ export default function PurchaseBox({
   const [quantity, setQuantity] = useState(1);
   const [timeLeft, setTimeLeft] = useState("");
   const { addItem } = useCart();
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "info" } | null>(null);
 
   const isVariable = product.type === "VARIABLE" && product.productAttributes?.length;
   // If variable, force strict checking of variation stock. Otherwise use product stock.
@@ -60,12 +62,14 @@ export default function PurchaseBox({
         (attr: any) => selectedOptions[attr.name]
       );
       if (!allSelected) {
-        alert("يرجى اختيار جميع المواصفات قبل الإضافة للعربة");
+        setToast({ message: "يرجى اختيار جميع المواصفات قبل الإضافة للعربة", type: "error" });
+        setTimeout(() => setToast(null), 3000);
         return;
       }
     }
     if (!inStock) {
-      alert("النسخة المحددة غير متوفرة حالياً في الفروع");
+      setToast({ message: "النسخة المحددة غير متوفرة حالياً في الفروع", type: "error" });
+      setTimeout(() => setToast(null), 3000);
       return;
     }
     addItem({
@@ -74,11 +78,13 @@ export default function PurchaseBox({
       price: displayPrice,
       quantity,
       vendor: product.vendor,
+      vendorId: product.vendorId || product.vendor?.id,
       image: currentVariation?.image || product.image,
       variationId: currentVariation?.id,
       selectedOptions,
     });
-    alert("✓ تمت الإضافة إلى عربة التسوق بنجاح");
+    setToast({ message: "✓ تمت إضافة المنتج إلى عربة التسوق بنجاح", type: "success" });
+    setTimeout(() => setToast(null), 3500);
   };
 
   // Delivery estimate
@@ -238,6 +244,36 @@ export default function PurchaseBox({
           </div>
         </div>
       </div>
+
+      {/* Floating Toast Notification */}
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            initial={{ opacity: 0, y: 50, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.95 }}
+            className={cn(
+              "fixed bottom-8 left-1/2 -translate-x-1/2 z-[300] px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border min-w-[320px] justify-between font-black text-xs",
+              toast.type === "success" 
+                ? "bg-emerald-500 border-emerald-400 text-white shadow-emerald-500/20" 
+                : toast.type === "error"
+                ? "bg-red-500 border-red-400 text-white shadow-red-500/20"
+                : "bg-blue-500 border-blue-400 text-white shadow-blue-500/20"
+            )}
+            dir="rtl"
+          >
+            <div className="flex items-center gap-2.5">
+              <span className="material-symbols-rounded text-lg">
+                {toast.type === "success" ? "check_circle" : toast.type === "error" ? "error" : "info"}
+              </span>
+              <span>{toast.message}</span>
+            </div>
+            <button onClick={() => setToast(null)} className="opacity-70 hover:opacity-100 transition-opacity">
+              <span className="material-symbols-rounded text-sm">close</span>
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
