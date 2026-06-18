@@ -32,10 +32,13 @@ export default function Home() {
       {/* ── 6. AD BANNER (بانر إعلاني) ── */}
       <AdsSlider set="B" />
 
-      {/* ── 7. REGULAR PRODUCTS (منتجات عادية فقط — تحت البانر الثالث) ── */}
+      {/* ── 7. REGULAR PRODUCTS (منتجات عادية) ── */}
       <ProductTabHub filter="regular" />
 
-      {/* ── 8. REST AS-IS (الباقي زي ما هو) ── */}
+      {/* ── 8. AD BANNER below the ads/products (بانر إعلاني تحت الإعلانات) ── */}
+      <AdsSlider set="A" />
+
+      {/* ── 9. REST AS-IS (الباقي زي ما هو) ── */}
       <StoreShowcase />
       <DynamicSectionsRenderer />
       <TrustSignals />
